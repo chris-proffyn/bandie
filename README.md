@@ -51,6 +51,20 @@ The web app runs at [http://localhost:5173](http://localhost:5173).
 npm run build
 ```
 
+### CI
+
+GitHub Actions runs lint and build on push/PR to `main` (`.github/workflows/ci.yml`).
+
+Netlify deploys from `main` using `netlify.toml`.
+
+### Supabase
+
+```bash
+supabase link --project-ref cjmgrsvbrcgozgjxbriz
+supabase db push
+npm run verify:supabase
+```
+
 ---
 
 ## Environment variables

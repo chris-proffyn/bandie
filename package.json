@@ -11,7 +11,8 @@
     "dev": "npm run dev --workspace=@bandie/web",
     "build": "npm run build --workspace=@bandie/web",
     "lint": "npm run lint --workspaces --if-present",
-    "test": "npm run test --workspaces --if-present"
+    "test": "npm run test --workspaces --if-present",
+    "verify:supabase": "node scripts/verify-supabase.mjs"
   },
   "engines": {
     "node": ">=20"

@@ -1,14 +1,22 @@
-# Supabase migrations
+# Migrations
 
-Schema changes for Bandie are applied via SQL migration files in this directory.
+SQL migrations for the shared Supabase instance (`proff-rsd-mt-1`).
 
-## Rules
+| Migration | Purpose |
+|---|---|
+| `20260608193847_early_access_requests.sql` | Pre-existing shared table (fetched from remote) |
+| `20260626180000_platform_core.sql` | Platform registry, memberships, profiles, audit log, helpers |
+| `20260626180001_bandie_bootstrap.sql` | Bandie app registration + initial Bandie schema |
 
-- All schema changes must be migration files — no manual production edits
-- Table names use the `bandie_` prefix (shared multi-app Supabase instance)
-- RLS must be enabled on all user-facing tables
-- See `docs/RSD_SUPABASE_MULTI_TENANT_DB.md` and `docs/RSD_DATA_MODELLING_GUIDE.md`
+Apply with:
 
-## App code
+```bash
+supabase link --project-ref cjmgrsvbrcgozgjxbriz
+supabase db push
+```
 
-`bandie`
+Verify:
+
+```bash
+npm run verify:supabase
+```

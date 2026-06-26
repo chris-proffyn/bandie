@@ -2,7 +2,7 @@
 
 **Document status:** Live project tracker  
 **Product:** Bandie  
-**Phase:** Phase 1 complete — homepage live  
+**Phase:** Phase 0 complete — ready for Phase 2 (auth)  
 **Last updated:** 26 June 2026
 
 ---
@@ -18,7 +18,7 @@
 | Web app scaffold (Vite + React + TypeScript) | Complete |
 | Bandie homepage (Phase 1) | Complete |
 | Mobile app | Not started (placeholder only) |
-| Supabase schema / migrations | Not started |
+| Supabase schema / migrations | Platform + Bandie bootstrap applied |
 
 ## Active constraints
 
@@ -58,9 +58,9 @@ None.
 - [x] 0.7 Supabase directory structure
 - [x] 0.8 Product requirements documents
 - [x] 0.9 Delivery task map
-- [ ] 0.10 CI/CD pipeline (GitHub Actions + Netlify)
-- [ ] 0.11 Supabase app registration on shared instance
-- [ ] 0.12 Initial platform schema migrations
+- [x] 0.10 CI/CD pipeline (GitHub Actions + Netlify)
+- [x] 0.11 Supabase app registration on shared instance
+- [x] 0.12 Initial platform schema migrations
 
 ### 1. Bandie Homepage
 
@@ -157,6 +157,12 @@ None.
 ---
 
 ## Session notes
+
+**26 June 2026 — Phase 0 foundations**
+- Added GitHub Actions CI (lint + build)
+- Applied platform core + Bandie bootstrap migrations to `proff-rsd-mt-1`
+- Registered `bandie` in `platform_apps`
+- Added `npm run verify:supabase` connectivity check
 
 **26 June 2026 — Homepage (Phase 1)**
 - Implemented marketing homepage at `/` matching mockup and spec
