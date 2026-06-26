@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bandie Calendar | Availability Planner</title>
+  <style>
+    :root {
+      --bg: #0b0c10;
+      --panel: #15171d;
+      --panel-2: #1e212a;
+      --paper: #f5f1e8;
+      --text: #f8f5ed;
+      --muted: #aaa69f;
+      --line: rgba(255,255,255,.12);
+      --green: #3bcf8e;
+      --amber: #ffbd4a;
+      --red: #ff5a6a;
+      --blue: #7cc7ff;
+      --purple: #b28cff;
+      --brand: #ff4b5c;
+      --brand-2: #ff7b39;
+      --shadow: 0 26px 90px rgba(0,0,0,.42);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top left, rgba(255,75,92,.18), transparent 34%),
+        radial-gradient(circle at 85% 0%, rgba(124,199,255,.12), transparent 30%),
+        linear-gradient(180deg, #0b0c10 0%, #11131a 52%, #090a0d 100%);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    .shell { width: min(1220px, calc(100% - 36px)); margin: 0 auto; }
+
+    header {
+      border-bottom: 1px solid var(--line);
+      background: rgba(11,12,16,.76);
+      backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+
+    .nav { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 950; letter-spacing: -.04em; font-size: 24px; }
+    .brand-mark { width: 40px; height: 40px; display: grid; place-items: center; background: linear-gradient(135deg, var(--brand), var(--brand-2)); border-radius: 14px; box-shadow: 0 14px 34px rgba(255,75,92,.26); }
+    .nav-pill { border: 1px solid var(--line); background: rgba(255,255,255,.05); color: var(--muted); padding: 9px 14px; border-radius: 999px; font-size: 13px; font-weight: 800; }
+
+    .hero { padding: 52px 0 26px; display: grid; grid-template-columns: 1fr 360px; gap: 32px; align-items: end; }
+    .eyebrow { color: var(--brand); text-transform: uppercase; font-weight: 950; letter-spacing: .18em; font-size: 12px; }
+    h1 { margin: 10px 0 14px; font-size: clamp(42px, 6vw, 76px); line-height: .9; letter-spacing: -.07em; max-width: 850px; }
+    .lead { margin: 0; color: var(--muted); font-size: 19px; max-width: 780px; }
+
+    .summary-card { background: rgba(255,255,255,.065); border: 1px solid var(--line); border-radius: 28px; padding: 22px; box-shadow: var(--shadow); }
+    .summary-card h3 { margin: 0 0 14px; font-size: 18px; }
+    .summary-grid { display: grid; gap: 10px; }
+    .summary-row { display: flex; justify-content: space-between; gap: 14px; border-bottom: 1px solid rgba(255,255,255,.08); padding-bottom: 10px; }
+    .summary-row:last-child { border-bottom: 0; padding-bottom: 0; }
+    .summary-row span { color: var(--muted); font-size: 13px; }
+    .summary-row strong { font-size: 18px; }
+
+    .mode-switcher { display: flex; gap: 10px; flex-wrap: wrap; margin: 24px 0; }
+    .mode-btn { border: 1px solid var(--line); background: rgba(255,255,255,.055); color: var(--text); padding: 12px 18px; border-radius: 999px; font-weight: 900; }
+    .mode-btn.active { background: linear-gradient(135deg, var(--brand), var(--brand-2)); border-color: transparent; }
+
+    .workspace { display: grid; grid-template-columns: 370px 1fr; gap: 24px; align-items: start; padding-bottom: 64px; }
+
+    .panel { background: rgba(255,255,255,.06); border: 1px solid var(--line); border-radius: 28px; box-shadow: var(--shadow); overflow: hidden; }
+    .panel-pad { padding: 24px; }
+    .panel-title { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+    .panel-title h2, .panel-title h3 { margin: 0; line-height: 1; }
+    .panel-title p { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 6px 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .12em; font-weight: 950; white-space: nowrap; }
+    .badge.rehearsal { background: rgba(124,199,255,.14); color: var(--blue); border: 1px solid rgba(124,199,255,.32); }
+    .badge.gig { background: rgba(255,75,92,.14); color: #ff9ba5; border: 1px solid rgba(255,75,92,.32); }
+    .badge.confirmed { background: rgba(59,207,142,.14); color: var(--green); border: 1px solid rgba(59,207,142,.35); }
+    .badge.provisional { background: rgba(255,189,74,.14); color: var(--amber); border: 1px solid rgba(255,189,74,.35); }
+    .badge.proposed { background: rgba(255,255,255,.08); color: var(--muted); border: 1px solid rgba(255,255,255,.14); }
+    .badge.blocked { background: rgba(255,90,106,.14); color: var(--red); border: 1px solid rgba(255,90,106,.35); }
+
+    .form-grid { display: grid; gap: 14px; }
+    .field { display: grid; gap: 7px; }
+    .field label { color: #fff; font-size: 12px; text-transform: uppercase; letter-spacing: .12em; font-weight: 950; }
+    .field input, .field select, .field textarea {
+      width: 100%; border: 1px solid rgba(255,255,255,.16); background: rgba(0,0,0,.28); color: var(--text); border-radius: 14px; padding: 12px 13px; outline: none;
+    }
+    .field textarea { min-height: 86px; resize: vertical; }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: rgba(255,75,92,.86); box-shadow: 0 0 0 4px rgba(255,75,92,.12); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .btn { border: 0; border-radius: 999px; min-height: 46px; padding: 0 18px; font-weight: 950; color: white; background: linear-gradient(135deg, var(--brand), var(--brand-2)); box-shadow: 0 14px 34px rgba(255,75,92,.22); }
+    .btn.secondary { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.14); box-shadow: none; }
+    .btn.small { min-height: 34px; padding: 0 12px; font-size: 13px; }
+
+    .mode-panel { display: none; }
+    .mode-panel.active { display: block; }
+
+    .calendar-card { padding: 22px; }
+    .calendar-head { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 20px; }
+    .calendar-head h2 { margin: 0; font-size: 30px; letter-spacing: -.04em; }
+    .legend { display: flex; flex-wrap: wrap; gap: 8px; color: var(--muted); font-size: 12px; }
+    .legend-item { display: inline-flex; align-items: center; gap: 6px; }
+    .dot { width: 9px; height: 9px; border-radius: 99px; display: inline-block; }
+    .dot.confirmed { background: var(--green); }
+    .dot.provisional { background: var(--amber); }
+    .dot.proposed { background: var(--blue); }
+    .dot.blocked { background: var(--red); }
+
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+    .day-name { color: var(--muted); font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: .12em; text-align: center; padding-bottom: 4px; }
+    .day { min-height: 104px; background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.08); border-radius: 18px; padding: 10px; position: relative; }
+    .day.muted { opacity: .34; }
+    .day-number { color: var(--muted); font-weight: 850; font-size: 13px; }
+    .day.has-event { background: rgba(255,255,255,.075); }
+    .event-pill { margin-top: 8px; border-radius: 10px; padding: 7px 8px; font-size: 12px; font-weight: 850; line-height: 1.15; border: 1px solid transparent; }
+    .event-pill.confirmed { background: rgba(59,207,142,.14); border-color: rgba(59,207,142,.32); color: #bcffdf; }
+    .event-pill.provisional { background: rgba(255,189,74,.14); border-color: rgba(255,189,74,.32); color: #ffe0a2; }
+    .event-pill.proposed { background: rgba(124,199,255,.13); border-color: rgba(124,199,255,.30); color: #c8ebff; }
+    .event-pill.blocked { background: rgba(255,90,106,.14); border-color: rgba(255,90,106,.32); color: #ffcbd0; }
+    .event-pill.rehearsal { background: rgba(178,140,255,.13); border-color: rgba(178,140,255,.30); color: #e2d4ff; }
+
+    .event-list { display: grid; gap: 14px; margin-top: 22px; }
+    .event-card { background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.1); border-radius: 22px; padding: 18px; display: grid; gap: 14px; }
+    .event-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+    .event-top h3 { margin: 0; font-size: 20px; }
+    .event-meta { display: flex; flex-wrap: wrap; gap: 8px; color: var(--muted); font-size: 13px; margin-top: 6px; }
+
+    .availability { display: grid; gap: 10px; }
+    .availability-head { display: flex; justify-content: space-between; gap: 14px; align-items: center; color: var(--muted); font-size: 13px; }
+    .member-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+    .member { background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.10); border-radius: 16px; padding: 10px; min-height: 92px; display: grid; gap: 8px; align-content: space-between; }
+    .member-name { font-weight: 900; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .member-role { color: var(--muted); font-size: 11px; }
+    .vote-select { width: 100%; border: 1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.26); color: white; border-radius: 10px; padding: 6px; font-size: 12px; }
+    .vote-chip { display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; padding: 5px 8px; font-size: 11px; font-weight: 950; text-transform: uppercase; letter-spacing: .06em; }
+    .vote-yes { background: rgba(59,207,142,.18); color: var(--green); }
+    .vote-maybe { background: rgba(255,189,74,.18); color: var(--amber); }
+    .vote-no { background: rgba(255,90,106,.18); color: var(--red); }
+    .vote-pending { background: rgba(255,255,255,.08); color: var(--muted); }
+
+    .progress { height: 10px; background: rgba(255,255,255,.08); border-radius: 999px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--brand), var(--amber), var(--green)); width: 0%; transition: width .2s ease; }
+
+    .rules { background: rgba(255,255,255,.045); border-top: 1px solid var(--line); padding: 18px 24px; color: var(--muted); font-size: 13px; }
+    .rules strong { color: white; }
+
+    .public-calendar-note { display: grid; grid-template-columns: 48px 1fr; gap: 14px; align-items: start; background: rgba(59,207,142,.1); border: 1px solid rgba(59,207,142,.22); border-radius: 22px; padding: 18px; margin-top: 18px; }
+    .public-calendar-note .icon { width: 48px; height: 48px; border-radius: 16px; background: rgba(59,207,142,.16); color: var(--green); display: grid; place-items: center; font-weight: 950; font-size: 22px; }
+    .public-calendar-note h3 { margin: 0 0 6px; }
+    .public-calendar-note p { margin: 0; color: var(--muted); }
+
+    @media (max-width: 1040px) {
+      .hero, .workspace { grid-template-columns: 1fr; }
+      .summary-card { max-width: none; }
+      .member-grid { grid-template-columns: repeat(3, 1fr); }
+      .calendar-grid { gap: 6px; }
+      .day { min-height: 88px; }
+    }
+
+    @media (max-width: 720px) {
+      .nav-pill { display: none; }
+      .workspace { gap: 16px; }
+      .form-row, .member-grid, .calendar-grid { grid-template-columns: 1fr; }
+      .day-name { display: none; }
+      .day { min-height: auto; }
+      .event-top { display: block; }
+      .calendar-head { display: block; }
+      .legend { margin-top: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="shell nav">
+      <div class="brand"><span class="brand-mark">B</span><span>Bandie Calendar</span></div>
+      <div class="nav-pill">Skin Condition availability workspace</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="shell hero">
+      <div>
+        <div class="eyebrow">Band availability planning</div>
+        <h1>Know when the band can rehearse. Know when the band can gig.</h1>
+        <p class="lead">Band leaders propose rehearsals and gig availability windows. Members vote availability. Bandie automatically moves dates to proposed, provisional or confirmed status.</p>
+      </div>
+      <aside class="summary-card" aria-label="Availability summary">
+        <h3>Current status</h3>
+        <div class="summary-grid">
+          <div class="summary-row"><span>Confirmed gig dates</span><strong id="summaryConfirmed">0</strong></div>
+          <div class="summary-row"><span>Provisional gig dates</span><strong id="summaryProvisional">0</strong></div>
+          <div class="summary-row"><span>Rehearsals proposed</span><strong id="summaryRehearsals">0</strong></div>
+          <div class="summary-row"><span>Members</span><strong>5</strong></div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="shell">
+      <div class="mode-switcher" role="tablist" aria-label="Calendar modes">
+        <button class="mode-btn active" data-mode="rehearsal" type="button">Rehearsal mode</button>
+        <button class="mode-btn" data-mode="gig" type="button">Gig mode</button>
+      </div>
+    </section>
+
+    <section class="shell workspace">
+      <aside class="panel">
+        <div class="mode-panel active" id="rehearsalFormPanel">
+          <div class="panel-pad">
+            <div class="panel-title">
+              <div>
+                <span class="badge rehearsal">Rehearsal planner</span>
+                <h2 style="margin-top:12px">Suggest rehearsals</h2>
+                <p>Propose a series of sessions. Members then confirm which ones they can make.</p>
+              </div>
+            </div>
+            <form id="rehearsalForm" class="form-grid">
+              <div class="field">
+                <label for="rehTitle">Series name</label>
+                <input id="rehTitle" value="Fortnightly Tuesday rehearsal" />
+              </div>
+              <div class="form-row">
+                <div class="field">
+                  <label for="rehStart">First date</label>
+                  <input id="rehStart" type="date" value="2026-03-03" />
+                </div>
+                <div class="field">
+                  <label for="rehTime">Time</label>
+                  <input id="rehTime" value="19:30–21:30" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="field">
+                  <label for="rehRepeat">Repeat</label>
+                  <select id="rehRepeat">
+                    <option value="14">Every other Tuesday</option>
+                    <option value="7">Every week</option>
+                    <option value="28">Every 4 weeks</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="rehCount">Sessions</label>
+                  <select id="rehCount">
+                    <option>4</option>
+                    <option selected>6</option>
+                    <option>8</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field">
+                <label for="rehLocation">Location</label>
+                <input id="rehLocation" value="Weybridge Community Studios" />
+              </div>
+              <div class="field">
+                <label for="rehNotes">Notes</label>
+                <textarea id="rehNotes">Focus on new setlist candidates, endings and backing vocals.</textarea>
+              </div>
+              <button class="btn" type="submit">Create rehearsal proposals</button>
+            </form>
+          </div>
+          <div class="rules"><strong>Rehearsal mode:</strong> used internally by the band. Rehearsal sessions do not appear on the public Bandie calendar.</div>
+        </div>
+
+        <div class="mode-panel" id="gigFormPanel">
+          <div class="panel-pad">
+            <div class="panel-title">
+              <div>
+                <span class="badge gig">Gig availability</span>
+                <h2 style="margin-top:12px">Propose gig dates</h2>
+                <p>Band leaders propose when the band could accept bookings. Members vote on each date.</p>
+              </div>
+            </div>
+            <form id="gigForm" class="form-grid">
+              <div class="field">
+                <label for="gigTitle">Availability block</label>
+                <input id="gigTitle" value="Spring pub gig availability" />
+              </div>
+              <div class="form-row">
+                <div class="field">
+                  <label for="gigDate">Date</label>
+                  <input id="gigDate" type="date" value="2026-03-14" />
+                </div>
+                <div class="field">
+                  <label for="gigTime">Time</label>
+                  <input id="gigTime" value="19:00–23:30" />
+                </div>
+              </div>
+              <div class="field">
+                <label for="gigArea">Area / travel radius</label>
+                <input id="gigArea" value="Surrey, Hounslow and nearby" />
+              </div>
+              <div class="field">
+                <label for="gigNotes">Notes for members</label>
+                <textarea id="gigNotes">Potential public gig slot. Confirm if you can commit before we publish availability.</textarea>
+              </div>
+              <button class="btn" type="submit">Propose gig date</button>
+            </form>
+          </div>
+          <div class="rules"><strong>Gig mode rule:</strong> 100% yes = confirmed. More than 50% yes = provisional. Less than or equal to 50% yes = proposed. Any confirmed or provisional date appears in the band’s public calendar in the full app.</div>
+        </div>
+      </aside>
+
+      <section class="panel calendar-card">
+        <div class="calendar-head">
+          <div>
+            <h2 id="calendarTitle">March 2026</h2>
+            <div class="legend" aria-label="Calendar legend">
+              <span class="legend-item"><span class="dot confirmed"></span>Confirmed</span>
+              <span class="legend-item"><span class="dot provisional"></span>Provisional</span>
+              <span class="legend-item"><span class="dot proposed"></span>Proposed</span>
+              <span class="legend-item"><span class="dot blocked"></span>Unavailable</span>
+            </div>
+          </div>
+          <button class="btn secondary small" id="resetVotes" type="button">Reset demo votes</button>
+        </div>
+        <div class="calendar-grid" id="calendarGrid" aria-label="March 2026 calendar"></div>
+        <div class="public-calendar-note" id="publicNote">
+          <div class="icon">✓</div>
+          <div>
+            <h3>Public calendar publishing</h3>
+            <p>In the full app, confirmed and provisional gig dates are published to the band’s public profile so event organisers can see when the band is bookable.</p>
+          </div>
+        </div>
+        <div class="event-list" id="eventList"></div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const members = [
+      { id: 'singer', name: 'Sarah', role: 'Singer' },
+      { id: 'lead', name: 'Tom', role: 'Lead Guitar' },
+      { id: 'rhythm', name: 'Chris', role: 'Rhythm Guitar' },
+      { id: 'bass', name: 'Nina', role: 'Bass' },
+      { id: 'drums', name: 'Mark', role: 'Drums' }
+    ];
+
+    let mode = 'rehearsal';
+    const demoVotes = {
+      'gig-1': { singer: 'yes', lead: 'yes', rhythm: 'yes', bass: 'yes', drums: 'yes' },
+      'gig-2': { singer: 'yes', lead: 'yes', rhythm: 'maybe', bass: 'yes', drums: 'pending' },
+      'gig-3': { singer: 'yes', lead: 'no', rhythm: 'maybe', bass: 'pending', drums: 'pending' },
+      'reh-1': { singer: 'yes', lead: 'yes', rhythm: 'yes', bass: 'maybe', drums: 'yes' },
+      'reh-2': { singer: 'yes', lead: 'maybe', rhythm: 'yes', bass: 'yes', drums: 'pending' }
+    };
+
+    let events = [
+      { id: 'gig-1', type: 'gig', title: 'Available for evening bookings', date: '2026-03-07', time: '19:00–23:30', location: 'Surrey / Hounslow', notes: 'All members available. Ready to publish as confirmed.', votes: {...demoVotes['gig-1']} },
+      { id: 'gig-2', type: 'gig', title: 'Potential pub gig slot', date: '2026-03-14', time: '19:00–23:30', location: 'Weybridge / Walton', notes: 'Good candidate for public calendar once remaining member responds.', votes: {...demoVotes['gig-2']} },
+      { id: 'gig-3', type: 'gig', title: 'Late March availability check', date: '2026-03-28', time: '18:00–23:30', location: 'Surrey and nearby', notes: 'Still gathering responses.', votes: {...demoVotes['gig-3']} },
+      { id: 'reh-1', type: 'rehearsal', title: 'Setlist rehearsal', date: '2026-03-03', time: '19:30–21:30', location: 'Weybridge Community Studios', notes: 'Run through first set and endings.', votes: {...demoVotes['reh-1']} },
+      { id: 'reh-2', type: 'rehearsal', title: 'Fortnightly Tuesday rehearsal', date: '2026-03-17', time: '19:30–21:30', location: 'Weybridge Community Studios', notes: 'Focus on new songs and harmonies.', votes: {...demoVotes['reh-2']} }
+    ];
+
+    const formatDate = (iso) => {
+      const d = new Date(iso + 'T12:00:00');
+      return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    };
+
+    function yesCount(event) { return members.filter(m => event.votes[m.id] === 'yes').length; }
+    function respondedCount(event) { return members.filter(m => event.votes[m.id] && event.votes[m.id] !== 'pending').length; }
+
+    function statusFor(event) {
+      if (event.type === 'rehearsal') return 'proposed';
+      const yes = yesCount(event);
+      if (yes === members.length) return 'confirmed';
+      if (yes > members.length / 2) return 'provisional';
+      return 'proposed';
+    }
+
+    function statusLabel(status) {
+      if (status === 'confirmed') return 'Confirmed';
+      if (status === 'provisional') return 'Provisional';
+      if (status === 'blocked') return 'Unavailable';
+      return 'Proposed';
+    }
+
+    function renderCalendar() {
+      const grid = document.getElementById('calendarGrid');
+      const names = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+      let html = names.map(n => `<div class="day-name">${n}</div>`).join('');
+      // March 2026 starts on Sunday. Add 6 blanks for Mon-Sat.
+      for (let i = 0; i < 6; i++) html += '<div class="day muted"></div>';
+      for (let day = 1; day <= 31; day++) {
+        const iso = `2026-03-${String(day).padStart(2,'0')}`;
+        const dayEvents = events.filter(e => e.date === iso && (mode === 'rehearsal' ? e.type === 'rehearsal' : e.type === 'gig'));
+        const pills = dayEvents.map(e => {
+          const status = statusFor(e);
+          const cls = e.type === 'rehearsal' ? 'rehearsal' : status;
+          return `<div class="event-pill ${cls}">${e.title}<br><small>${e.time}</small></div>`;
+        }).join('');
+        html += `<div class="day ${dayEvents.length ? 'has-event' : ''}"><div class="day-number">${day}</div>${pills}</div>`;
+      }
+      grid.innerHTML = html;
+    }
+
+    function renderEvents() {
+      const list = document.getElementById('eventList');
+      const visible = events
+        .filter(e => mode === 'rehearsal' ? e.type === 'rehearsal' : e.type === 'gig')
+        .sort((a,b) => a.date.localeCompare(b.date));
+
+      list.innerHTML = visible.map(e => {
+        const status = statusFor(e);
+        const yes = yesCount(e);
+        const responded = respondedCount(e);
+        const pct = Math.round((yes / members.length) * 100);
+        return `<article class="event-card" data-event-id="${e.id}">
+          <div class="event-top">
+            <div>
+              <h3>${e.title}</h3>
+              <div class="event-meta">
+                <span>${formatDate(e.date)}</span>
+                <span>•</span>
+                <span>${e.time}</span>
+                <span>•</span>
+                <span>${e.location}</span>
+              </div>
+            </div>
+            <span class="badge ${e.type === 'rehearsal' ? 'rehearsal' : status}">${e.type === 'rehearsal' ? 'Rehearsal' : statusLabel(status)}</span>
+          </div>
+          <p style="margin:0;color:var(--muted);">${e.notes}</p>
+          <div class="availability">
+            <div class="availability-head">
+              <span>${yes}/${members.length} available • ${responded}/${members.length} responded</span>
+              <span>${e.type === 'gig' ? (status === 'confirmed' ? 'Public: confirmed' : status === 'provisional' ? 'Public: provisional' : 'Internal only') : 'Internal rehearsal poll'}</span>
+            </div>
+            <div class="progress" aria-label="Availability progress"><div class="progress-fill" style="width:${pct}%"></div></div>
+            <div class="member-grid">
+              ${members.map(m => renderMemberVote(e, m)).join('')}
+            </div>
+          </div>
+        </article>`;
+      }).join('');
+
+      document.querySelectorAll('.vote-select').forEach(sel => {
+        sel.addEventListener('change', (ev) => {
+          const event = events.find(e => e.id === ev.target.dataset.eventId);
+          event.votes[ev.target.dataset.memberId] = ev.target.value;
+          renderAll();
+        });
+      });
+    }
+
+    function renderMemberVote(e, m) {
+      const vote = e.votes[m.id] || 'pending';
+      const chipClass = vote === 'yes' ? 'vote-yes' : vote === 'maybe' ? 'vote-maybe' : vote === 'no' ? 'vote-no' : 'vote-pending';
+      const label = vote === 'yes' ? 'Available' : vote === 'maybe' ? 'Maybe' : vote === 'no' ? 'No' : 'Pending';
+      return `<div class="member">
+        <div>
+          <div class="member-name">${m.name}</div>
+          <div class="member-role">${m.role}</div>
+        </div>
+        <span class="vote-chip ${chipClass}">${label}</span>
+        <select class="vote-select" data-event-id="${e.id}" data-member-id="${m.id}" aria-label="${m.name} availability for ${e.title}">
+          <option value="pending" ${vote === 'pending' ? 'selected' : ''}>Pending</option>
+          <option value="yes" ${vote === 'yes' ? 'selected' : ''}>Available</option>
+          <option value="maybe" ${vote === 'maybe' ? 'selected' : ''}>Maybe</option>
+          <option value="no" ${vote === 'no' ? 'selected' : ''}>No</option>
+        </select>
+      </div>`;
+    }
+
+    function updateSummary() {
+      const gigs = events.filter(e => e.type === 'gig');
+      document.getElementById('summaryConfirmed').textContent = gigs.filter(e => statusFor(e) === 'confirmed').length;
+      document.getElementById('summaryProvisional').textContent = gigs.filter(e => statusFor(e) === 'provisional').length;
+      document.getElementById('summaryRehearsals').textContent = events.filter(e => e.type === 'rehearsal').length;
+    }
+
+    function renderAll() {
+      renderCalendar();
+      renderEvents();
+      updateSummary();
+    }
+
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        mode = btn.dataset.mode;
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b === btn));
+        document.querySelectorAll('.mode-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById(mode === 'rehearsal' ? 'rehearsalFormPanel' : 'gigFormPanel').classList.add('active');
+        renderAll();
+      });
+    });
+
+    document.getElementById('rehearsalForm').addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      const start = new Date(document.getElementById('rehStart').value + 'T12:00:00');
+      const count = Number(document.getElementById('rehCount').value);
+      const step = Number(document.getElementById('rehRepeat').value);
+      const title = document.getElementById('rehTitle').value.trim() || 'Rehearsal';
+      const time = document.getElementById('rehTime').value.trim() || 'Time TBC';
+      const location = document.getElementById('rehLocation').value.trim() || 'Location TBC';
+      const notes = document.getElementById('rehNotes').value.trim() || 'Rehearsal proposal.';
+      for (let i = 0; i < count; i++) {
+        const d = new Date(start);
+        d.setDate(start.getDate() + (i * step));
+        const iso = d.toISOString().slice(0,10);
+        events.push({ id: 'reh-' + Date.now() + '-' + i, type: 'rehearsal', title, date: iso, time, location, notes, votes: { singer: 'pending', lead: 'pending', rhythm: 'pending', bass: 'pending', drums: 'pending' } });
+      }
+      renderAll();
+    });
+
+    document.getElementById('gigForm').addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      const title = document.getElementById('gigTitle').value.trim() || 'Gig availability';
+      const date = document.getElementById('gigDate').value;
+      const time = document.getElementById('gigTime').value.trim() || 'Time TBC';
+      const location = document.getElementById('gigArea').value.trim() || 'Area TBC';
+      const notes = document.getElementById('gigNotes').value.trim() || 'Gig availability proposal.';
+      events.push({ id: 'gig-' + Date.now(), type: 'gig', title, date, time, location, notes, votes: { singer: 'pending', lead: 'pending', rhythm: 'pending', bass: 'pending', drums: 'pending' } });
+      renderAll();
+    });
+
+    document.getElementById('resetVotes').addEventListener('click', () => {
+      events = events.map(e => ({ ...e, votes: demoVotes[e.id] ? { ...demoVotes[e.id] } : { singer: 'pending', lead: 'pending', rhythm: 'pending', bass: 'pending', drums: 'pending' } }));
+      renderAll();
+    });
+
+    renderAll();
+  </script>
+</body>
+</html>

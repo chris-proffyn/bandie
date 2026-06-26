@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bandie | Find a Band</title>
+  <meta name="description" content="Bandie band directory mockup for event organisers to search and book local bands by genre, location, price, rating and availability." />
+  <style>
+    :root {
+      --bg: #0b0d12;
+      --bg2: #11151e;
+      --panel: #171b25;
+      --panel2: #202636;
+      --card: #f7f2e9;
+      --text: #f8f4ec;
+      --muted: #b9b5ad;
+      --ink: #151515;
+      --red: #e23b45;
+      --amber: #ffc857;
+      --green: #58d68d;
+      --blue: #78a8ff;
+      --line: rgba(255,255,255,.13);
+      --shadow: 0 24px 80px rgba(0,0,0,.36);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 8% 0%, rgba(226,59,69,.26), transparent 32%),
+        radial-gradient(circle at 92% 0%, rgba(120,168,255,.13), transparent 32%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg2) 58%, #090a0e 100%);
+      line-height: 1.5;
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .055;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.75'/%3E%3C/svg%3E");
+      z-index: 20;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input, select { font: inherit; }
+
+    .shell { width: min(1240px, calc(100% - 36px)); margin: 0 auto; }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(18px);
+      background: rgba(11,13,18,.78);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .nav {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 950;
+      letter-spacing: -.03em;
+      font-size: 22px;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      background: var(--red);
+      color: white;
+      font-weight: 950;
+      clip-path: polygon(0 0, 84% 0, 100% 100%, 14% 100%);
+      box-shadow: 0 12px 32px rgba(226,59,69,.3);
+    }
+
+    .nav-links { display: flex; gap: 22px; align-items: center; color: var(--muted); font-weight: 750; font-size: 14px; }
+    .nav-links a:hover { color: white; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 0 18px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      font-weight: 900;
+      transition: transform .18s ease, background .18s ease, border .18s ease;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary { background: var(--red); color: white; box-shadow: 0 14px 32px rgba(226,59,69,.28); }
+    .btn-secondary { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.16); color: white; }
+    .btn-dark { background: #121319; color: white; }
+
+    .hero {
+      padding: 76px 0 34px;
+      display: grid;
+      grid-template-columns: 1fr .72fr;
+      gap: 48px;
+      align-items: end;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(226,59,69,.16);
+      border: 1px solid rgba(226,59,69,.42);
+      color: white;
+      border-radius: 999px;
+      padding: 8px 13px;
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    h1 {
+      font-size: clamp(48px, 7vw, 88px);
+      line-height: .88;
+      letter-spacing: -.075em;
+      margin: 18px 0 20px;
+      max-width: 840px;
+    }
+
+    .lead {
+      font-size: clamp(18px, 2vw, 23px);
+      color: rgba(255,255,255,.78);
+      max-width: 740px;
+      margin: 0;
+    }
+
+    .hero-panel {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 32px;
+      padding: 26px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .stat {
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 20px;
+      padding: 18px;
+    }
+    .stat strong { display: block; font-size: 30px; line-height: 1; }
+    .stat span { color: var(--muted); font-size: 13px; font-weight: 750; }
+
+    .directory-layout {
+      display: grid;
+      grid-template-columns: 330px 1fr;
+      gap: 28px;
+      align-items: start;
+      padding: 34px 0 72px;
+    }
+
+    .filters {
+      position: sticky;
+      top: 96px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 30px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .filters h2 { font-size: 25px; line-height: 1.05; margin: 0 0 8px; letter-spacing: -.03em; }
+    .filters p { margin: 0 0 20px; color: var(--muted); font-size: 14px; }
+
+    .filter-group { display: grid; gap: 8px; margin-bottom: 16px; }
+    .filter-group label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: white;
+      font-weight: 950;
+    }
+
+    .filter-group input,
+    .filter-group select {
+      width: 100%;
+      min-height: 46px;
+      border-radius: 15px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.28);
+      color: white;
+      padding: 0 13px;
+      outline: none;
+    }
+    .filter-group input:focus,
+    .filter-group select:focus { border-color: rgba(226,59,69,.9); box-shadow: 0 0 0 4px rgba(226,59,69,.14); }
+
+    .range-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .availability-options, .genre-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.07);
+      color: white;
+      border-radius: 999px;
+      padding: 8px 11px;
+      font-size: 12px;
+      font-weight: 850;
+      cursor: pointer;
+      user-select: none;
+    }
+    .chip.active { background: var(--red); border-color: var(--red); }
+
+    .filter-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+    .filter-actions .btn { min-height: 42px; padding: 0 15px; }
+
+    .results-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .results-head h2 { margin: 0; font-size: 30px; letter-spacing: -.04em; }
+    .results-head p { margin: 5px 0 0; color: var(--muted); }
+
+    .sort-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .sort-control select {
+      min-height: 42px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.07);
+      color: white;
+      padding: 0 12px;
+    }
+
+    .active-filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 0 0 18px;
+      min-height: 32px;
+    }
+    .filter-pill {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+      background: rgba(226,59,69,.18);
+      border: 1px solid rgba(226,59,69,.35);
+      color: white;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .band-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .band-card {
+      background: var(--card);
+      color: var(--ink);
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 20px 55px rgba(0,0,0,.26);
+      display: grid;
+      min-height: 100%;
+      border: 1px solid rgba(255,255,255,.12);
+    }
+
+    .band-hero {
+      min-height: 132px;
+      padding: 18px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      color: white;
+      overflow: hidden;
+    }
+    .band-hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 15% 15%, rgba(255,255,255,.22), transparent 28%), linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.32));
+      pointer-events: none;
+    }
+    .band-hero > * { position: relative; z-index: 1; }
+
+    .band-logo {
+      width: 54px;
+      height: 54px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      background: rgba(0,0,0,.36);
+      border: 1px solid rgba(255,255,255,.24);
+      font-weight: 950;
+      letter-spacing: -.08em;
+      font-size: 21px;
+      backdrop-filter: blur(8px);
+    }
+
+    .availability-badge {
+      align-self: flex-start;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,0,0,.42);
+      border: 1px solid rgba(255,255,255,.24);
+      backdrop-filter: blur(8px);
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 12px;
+      font-weight: 900;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 5px rgba(88,214,141,.14); }
+    .dot.limited { background: var(--amber); box-shadow: 0 0 0 5px rgba(255,200,87,.14); }
+    .dot.unavailable { background: #ff6b6b; box-shadow: 0 0 0 5px rgba(255,107,107,.14); }
+
+    .band-body { padding: 20px; }
+    .band-title-row { display: flex; justify-content: space-between; gap: 12px; align-items: start; }
+    .band-title-row h3 { margin: 0; font-size: 25px; line-height: 1.02; letter-spacing: -.045em; }
+    .rating { white-space: nowrap; color: #111; font-weight: 950; display: flex; align-items: center; gap: 4px; }
+    .rating span { color: #dd9900; }
+
+    .band-meta { margin: 8px 0 0; color: #5d5650; font-weight: 750; font-size: 14px; }
+    .band-desc { margin: 14px 0 16px; color: #292929; }
+
+    .tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .tag {
+      background: #e7ded1;
+      color: #222;
+      border-radius: 999px;
+      padding: 6px 9px;
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .band-footer {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 14px;
+      border-top: 1px solid rgba(0,0,0,.11);
+      padding-top: 16px;
+    }
+    .price { font-size: 13px; color: #5d5650; font-weight: 800; }
+    .price strong { display: block; color: #111; font-size: 20px; line-height: 1.1; }
+
+    .empty-state {
+      display: none;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 28px;
+      padding: 36px;
+      text-align: center;
+      color: var(--muted);
+    }
+    .empty-state strong { display: block; color: white; font-size: 24px; margin-bottom: 8px; }
+
+    footer { border-top: 1px solid var(--line); color: var(--muted); padding: 34px 0; }
+    .footer-row { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+    @media (max-width: 1060px) {
+      .hero, .directory-layout { grid-template-columns: 1fr; }
+      .filters { position: relative; top: auto; }
+    }
+    @media (max-width: 780px) {
+      .nav-links { display: none; }
+      .hero { padding-top: 48px; }
+      .band-grid { grid-template-columns: 1fr; }
+      .results-head { display: block; }
+      .sort-control { margin-top: 14px; }
+      .hero-stats { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="noise"></div>
+
+  <header>
+    <div class="shell nav">
+      <a class="brand" href="#top" aria-label="Bandie home">
+        <span class="brand-mark">B</span>
+        <span>Bandie</span>
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="#directory">Find a band</a>
+        <a href="#filters">Filters</a>
+        <a href="#results">Results</a>
+      </nav>
+      <a class="btn btn-primary" href="#directory">Search bands</a>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="shell hero">
+      <div>
+        <div class="eyebrow">Bandie directory for event organisers</div>
+        <h1>Find the right band for the right night.</h1>
+        <p class="lead">Search local bands by genre, location, price, rating and availability. Compare profiles, watch clips, check costs and send booking enquiries from one place.</p>
+      </div>
+      <aside class="hero-panel" aria-label="Directory summary">
+        <div class="hero-stats">
+          <div class="stat"><strong>20</strong><span>demo bands in this mockup</span></div>
+          <div class="stat"><strong>12</strong><span>genres and styles covered</span></div>
+          <div class="stat"><strong>£250+</strong><span>price ranges for local events</span></div>
+          <div class="stat"><strong>4.3+</strong><span>ratings shown for organisers</span></div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="shell directory-layout" id="directory">
+      <aside class="filters" id="filters">
+        <h2>Filter bands</h2>
+        <p>Use one or more filters to narrow the directory. This mockup filters instantly in the browser.</p>
+
+        <div class="filter-group">
+          <label for="nameFilter">Band name</label>
+          <input id="nameFilter" type="search" placeholder="e.g. Skin Condition" />
+        </div>
+
+        <div class="filter-group">
+          <label for="genreFilter">Genre</label>
+          <select id="genreFilter">
+            <option value="">Any genre</option>
+            <option>Pub & Post-Punk</option>
+            <option>Indie Rock</option>
+            <option>Classic Rock</option>
+            <option>Soul & Motown</option>
+            <option>Funk & Disco</option>
+            <option>Acoustic</option>
+            <option>Jazz</option>
+            <option>Folk</option>
+            <option>Britpop</option>
+            <option>Pop Covers</option>
+            <option>Punk</option>
+            <option>Country</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="locationFilter">Location / area served</label>
+          <input id="locationFilter" type="search" placeholder="e.g. Surrey, Hounslow, London" />
+        </div>
+
+        <div class="filter-group">
+          <label>Price range</label>
+          <div class="range-row">
+            <input id="minPriceFilter" type="number" min="0" step="50" placeholder="Min £" />
+            <input id="maxPriceFilter" type="number" min="0" step="50" placeholder="Max £" />
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <label for="ratingFilter">Minimum rating</label>
+          <select id="ratingFilter">
+            <option value="0">Any rating</option>
+            <option value="4">4.0+</option>
+            <option value="4.3">4.3+</option>
+            <option value="4.5">4.5+</option>
+            <option value="4.7">4.7+</option>
+            <option value="4.8">4.8+</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="availabilityFilter">Availability</label>
+          <select id="availabilityFilter">
+            <option value="">Any availability</option>
+            <option value="Available">Available</option>
+            <option value="Limited">Limited availability</option>
+            <option value="Unavailable">Unavailable</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>Quick genre picks</label>
+          <div class="genre-chips" id="genreChips">
+            <button class="chip" type="button" data-genre="Pub & Post-Punk">Post-punk</button>
+            <button class="chip" type="button" data-genre="Indie Rock">Indie</button>
+            <button class="chip" type="button" data-genre="Classic Rock">Classic rock</button>
+            <button class="chip" type="button" data-genre="Soul & Motown">Soul</button>
+            <button class="chip" type="button" data-genre="Funk & Disco">Funk</button>
+            <button class="chip" type="button" data-genre="Acoustic">Acoustic</button>
+          </div>
+        </div>
+
+        <div class="filter-actions">
+          <button class="btn btn-primary" id="applyBtn" type="button">Apply filters</button>
+          <button class="btn btn-secondary" id="resetBtn" type="button">Reset</button>
+        </div>
+      </aside>
+
+      <section id="results" aria-label="Band directory results">
+        <div class="results-head">
+          <div>
+            <h2>Available bands</h2>
+            <p id="resultCount">Showing 20 bands</p>
+          </div>
+          <div class="sort-control">
+            <label for="sortSelect">Sort</label>
+            <select id="sortSelect">
+              <option value="recommended">Recommended</option>
+              <option value="ratingDesc">Rating: high to low</option>
+              <option value="priceAsc">Price: low to high</option>
+              <option value="priceDesc">Price: high to low</option>
+              <option value="nameAsc">Name A–Z</option>
+            </select>
+          </div>
+        </div>
+        <div class="active-filters" id="activeFilters" aria-label="Active filters"></div>
+        <div class="empty-state" id="emptyState">
+          <strong>No bands found</strong>
+          Try broadening your location, price range or genre filters.
+        </div>
+        <div class="band-grid" id="bandGrid"></div>
+      </section>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell footer-row">
+      <div><strong>Bandie</strong> — band profiles, promotion, setlists, gigs and booking discovery.</div>
+      <div>Fictional directory mockup • 20 demo bands</div>
+    </div>
+  </footer>
+
+  <script>
+    const bands = [
+      { name: 'Skin Condition', genre: 'Pub & Post-Punk', location: 'Weybridge', area: 'Surrey, Hounslow, Kingston, West London', minPrice: 450, maxPrice: 750, rating: 4.8, availability: 'Available', initials: 'SC', colour: 'linear-gradient(135deg,#c5161d,#111)', desc: 'A tight five-piece playing pub favourites and post-punk classics with sharp guitars, big choruses and local crowd energy.', tags: ['5-piece', 'Pub gigs', 'Post-punk classics'] },
+      { name: 'The Southbank Saints', genre: 'Soul & Motown', location: 'Richmond', area: 'London, Surrey, Middlesex', minPrice: 900, maxPrice: 1600, rating: 4.9, availability: 'Limited', initials: 'SS', colour: 'linear-gradient(135deg,#7b2ff7,#f107a3)', desc: 'Polished soul, Motown and dancefloor classics for weddings, corporate parties and premium private events.', tags: ['Weddings', 'Brass option', 'Dancefloor'] },
+      { name: 'Neon Culprits', genre: 'Indie Rock', location: 'Guildford', area: 'Surrey, Hampshire, South London', minPrice: 600, maxPrice: 950, rating: 4.6, availability: 'Available', initials: 'NC', colour: 'linear-gradient(135deg,#00c6ff,#0072ff)', desc: 'Indie rock covers from the 90s to now, ideal for pubs, student nights and festival-style events.', tags: ['Indie anthems', 'Festival feel', '4-piece'] },
+      { name: 'Velvet Junction', genre: 'Funk & Disco', location: 'Hounslow', area: 'West London, Surrey, Berkshire', minPrice: 800, maxPrice: 1400, rating: 4.7, availability: 'Available', initials: 'VJ', colour: 'linear-gradient(135deg,#f7971e,#ffd200)', desc: 'Funk, disco and groove-led party songs with a slick rhythm section and crowd-friendly setlist.', tags: ['Party band', 'Disco', 'Funk classics'] },
+      { name: 'The Junction Jacks', genre: 'Classic Rock', location: 'Staines', area: 'Surrey, Berkshire, Middlesex', minPrice: 500, maxPrice: 900, rating: 4.5, availability: 'Available', initials: 'JJ', colour: 'linear-gradient(135deg,#232526,#414345)', desc: 'Classic rock crowd-pleasers from the Stones to Foo Fighters, built for pubs, bike nights and outdoor stages.', tags: ['Classic rock', 'Guitar-led', 'Loud'] },
+      { name: 'Golden Hour Duo', genre: 'Acoustic', location: 'Twickenham', area: 'London, Surrey, Hounslow', minPrice: 250, maxPrice: 500, rating: 4.8, availability: 'Limited', initials: 'GH', colour: 'linear-gradient(135deg,#d1913c,#ffd194)', desc: 'Warm acoustic covers for drinks receptions, garden parties, restaurants and relaxed early-evening events.', tags: ['Duo', 'Acoustic', 'Background set'] },
+      { name: 'Rivertown Revival', genre: 'Folk', location: 'Kingston', area: 'Surrey, South West London', minPrice: 450, maxPrice: 850, rating: 4.4, availability: 'Available', initials: 'RR', colour: 'linear-gradient(135deg,#11998e,#38ef7d)', desc: 'Folk, Americana and rootsy singalongs with harmonies, fiddle options and a friendly festival vibe.', tags: ['Folk', 'Americana', 'Harmonies'] },
+      { name: 'Chelsea Radio', genre: 'Britpop', location: 'Fulham', area: 'London, Surrey, Kent', minPrice: 700, maxPrice: 1200, rating: 4.6, availability: 'Available', initials: 'CR', colour: 'linear-gradient(135deg,#1f1c2c,#928dab)', desc: 'Britpop and 90s guitar anthems from Oasis, Blur, Pulp, Supergrass and more.', tags: ['Britpop', '90s', 'Singalong'] },
+      { name: 'The Brass Monkeys', genre: 'Funk & Disco', location: 'Woking', area: 'Surrey, Hampshire, Berkshire', minPrice: 1200, maxPrice: 2200, rating: 4.9, availability: 'Limited', initials: 'BM', colour: 'linear-gradient(135deg,#fc4a1a,#f7b733)', desc: 'Large-format party band with brass, vocals and floor-filling funk, pop and disco medleys.', tags: ['Brass', 'Premium', 'Party'] },
+      { name: 'Blue Note Neighbours', genre: 'Jazz', location: 'Ealing', area: 'West London, Middlesex, Surrey', minPrice: 550, maxPrice: 1100, rating: 4.7, availability: 'Available', initials: 'BN', colour: 'linear-gradient(135deg,#141e30,#243b55)', desc: 'Elegant jazz trio or quartet for restaurants, private dining, receptions and sophisticated background sets.', tags: ['Jazz', 'Trio option', 'Reception'] },
+      { name: 'Red Kite Riot', genre: 'Punk', location: 'Camberley', area: 'Surrey, Hampshire, Berkshire', minPrice: 400, maxPrice: 800, rating: 4.3, availability: 'Available', initials: 'RK', colour: 'linear-gradient(135deg,#8e0e00,#1f1c18)', desc: 'Fast, noisy and fun punk covers with short sets, big energy and zero faff.', tags: ['Punk', 'High energy', 'Short sets'] },
+      { name: 'The Main Stage Misfits', genre: 'Pop Covers', location: 'Croydon', area: 'South London, Surrey, Kent', minPrice: 650, maxPrice: 1150, rating: 4.5, availability: 'Unavailable', initials: 'MM', colour: 'linear-gradient(135deg,#ff6a00,#ee0979)', desc: 'Modern pop, rock and chart covers for community events, private parties and lively venue nights.', tags: ['Pop covers', 'Female vocals', 'Modern set'] },
+      { name: 'Country Mile', genre: 'Country', location: 'Leatherhead', area: 'Surrey, Sussex, Hampshire', minPrice: 500, maxPrice: 950, rating: 4.4, availability: 'Available', initials: 'CM', colour: 'linear-gradient(135deg,#b79891,#94716b)', desc: 'Country, Americana and southern rock covers with a warm sound and plenty of audience participation.', tags: ['Country', 'Americana', 'Line dance friendly'] },
+      { name: 'Midnight Arcade', genre: 'Pop Covers', location: 'Brentford', area: 'West London, Surrey, Berkshire', minPrice: 750, maxPrice: 1300, rating: 4.6, availability: 'Limited', initials: 'MA', colour: 'linear-gradient(135deg,#4b6cb7,#182848)', desc: 'Polished pop and rock covers with a bright, modern setlist designed for mixed-age crowds.', tags: ['Pop rock', 'Corporate', 'Mixed crowd'] },
+      { name: 'The Riff Doctors', genre: 'Classic Rock', location: 'Chertsey', area: 'Surrey, Hounslow, Berkshire', minPrice: 550, maxPrice: 1000, rating: 4.2, availability: 'Available', initials: 'RD', colour: 'linear-gradient(135deg,#000000,#434343)', desc: 'No-nonsense classic rock, blues-rock and pub anthems for loud Friday and Saturday nights.', tags: ['Blues rock', 'Pub anthems', 'Experienced'] },
+      { name: 'Paper Tigers', genre: 'Indie Rock', location: 'Sutton', area: 'Surrey, South London', minPrice: 450, maxPrice: 850, rating: 4.3, availability: 'Available', initials: 'PT', colour: 'linear-gradient(135deg,#ff512f,#dd2476)', desc: 'Indie bangers, alternative classics and guitar-pop favourites for informal parties and small venues.', tags: ['Indie', 'Alternative', '4-piece'] },
+      { name: 'Sunday Best', genre: 'Acoustic', location: 'Esher', area: 'Surrey, Kingston, Elmbridge', minPrice: 300, maxPrice: 650, rating: 4.7, availability: 'Available', initials: 'SB', colour: 'linear-gradient(135deg,#56ab2f,#a8e063)', desc: 'Acoustic trio with tasteful harmonies, ideal for afternoon events, pub gardens and family gatherings.', tags: ['Trio', 'Harmonies', 'Family friendly'] },
+      { name: 'The Mod Cons', genre: 'Pub & Post-Punk', location: 'Wimbledon', area: 'South West London, Surrey', minPrice: 600, maxPrice: 1050, rating: 4.5, availability: 'Limited', initials: 'MC', colour: 'linear-gradient(135deg,#bdc3c7,#2c3e50)', desc: 'Mod, new wave and post-punk covers with smart styling and a punchy two-set show.', tags: ['Mod', 'New wave', 'Post-punk'] },
+      { name: 'Electric Picnic', genre: 'Funk & Disco', location: 'Reading', area: 'Berkshire, Surrey, Oxfordshire', minPrice: 950, maxPrice: 1800, rating: 4.8, availability: 'Available', initials: 'EP', colour: 'linear-gradient(135deg,#12c2e9,#c471ed,#f64f59)', desc: 'Colourful funk, disco and party classics for festivals, big birthdays and summer events.', tags: ['Disco', 'Festival', 'Big party'] },
+      { name: 'Low Tide Club', genre: 'Jazz', location: 'Hampton', area: 'Hounslow, Richmond, Surrey', minPrice: 450, maxPrice: 900, rating: 4.6, availability: 'Available', initials: 'LT', colour: 'linear-gradient(135deg,#0f2027,#203a43,#2c5364)', desc: 'Relaxed jazz, swing and lounge arrangements for venues wanting atmosphere without overpowering the room.', tags: ['Jazz', 'Lounge', 'Low volume'] }
+    ];
+
+    const els = {
+      grid: document.getElementById('bandGrid'),
+      count: document.getElementById('resultCount'),
+      empty: document.getElementById('emptyState'),
+      active: document.getElementById('activeFilters'),
+      name: document.getElementById('nameFilter'),
+      genre: document.getElementById('genreFilter'),
+      location: document.getElementById('locationFilter'),
+      minPrice: document.getElementById('minPriceFilter'),
+      maxPrice: document.getElementById('maxPriceFilter'),
+      rating: document.getElementById('ratingFilter'),
+      availability: document.getElementById('availabilityFilter'),
+      sort: document.getElementById('sortSelect'),
+      reset: document.getElementById('resetBtn'),
+      apply: document.getElementById('applyBtn'),
+      chips: document.getElementById('genreChips')
+    };
+
+    function money(n) { return '£' + n.toLocaleString('en-GB'); }
+    function availabilityClass(value) {
+      if (value === 'Limited') return 'limited';
+      if (value === 'Unavailable') return 'unavailable';
+      return '';
+    }
+
+    function bandCard(band) {
+      return `
+        <article class="band-card" data-name="${band.name}">
+          <div class="band-hero" style="background:${band.colour}">
+            <div class="band-logo">${band.initials}</div>
+            <div class="availability-badge"><span class="dot ${availabilityClass(band.availability)}"></span>${band.availability}</div>
+          </div>
+          <div class="band-body">
+            <div class="band-title-row">
+              <h3>${band.name}</h3>
+              <div class="rating"><span>★</span>${band.rating.toFixed(1)}</div>
+            </div>
+            <p class="band-meta">${band.genre} • ${band.location} • ${band.area}</p>
+            <p class="band-desc">${band.desc}</p>
+            <div class="tag-row">${band.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}</div>
+            <div class="band-footer">
+              <div class="price"><strong>${money(band.minPrice)}–${money(band.maxPrice)}</strong>Typical event fee</div>
+              <a class="btn btn-dark" href="#">View profile</a>
+            </div>
+          </div>
+        </article>`;
+    }
+
+    function getFilters() {
+      return {
+        name: els.name.value.trim().toLowerCase(),
+        genre: els.genre.value,
+        location: els.location.value.trim().toLowerCase(),
+        minPrice: Number(els.minPrice.value || 0),
+        maxPrice: Number(els.maxPrice.value || Infinity),
+        rating: Number(els.rating.value || 0),
+        availability: els.availability.value,
+        sort: els.sort.value
+      };
+    }
+
+    function passes(band, filters) {
+      const searchableLocation = `${band.location} ${band.area}`.toLowerCase();
+      const priceOverlaps = band.maxPrice >= filters.minPrice && band.minPrice <= filters.maxPrice;
+      return (!filters.name || band.name.toLowerCase().includes(filters.name)) &&
+        (!filters.genre || band.genre === filters.genre) &&
+        (!filters.location || searchableLocation.includes(filters.location)) &&
+        priceOverlaps &&
+        band.rating >= filters.rating &&
+        (!filters.availability || band.availability === filters.availability);
+    }
+
+    function sortBands(list, sort) {
+      const sorted = [...list];
+      if (sort === 'ratingDesc') sorted.sort((a,b) => b.rating - a.rating || a.name.localeCompare(b.name));
+      if (sort === 'priceAsc') sorted.sort((a,b) => a.minPrice - b.minPrice || b.rating - a.rating);
+      if (sort === 'priceDesc') sorted.sort((a,b) => b.maxPrice - a.maxPrice || b.rating - a.rating);
+      if (sort === 'nameAsc') sorted.sort((a,b) => a.name.localeCompare(b.name));
+      if (sort === 'recommended') sorted.sort((a,b) => {
+        const av = { Available: 3, Limited: 2, Unavailable: 1 };
+        return (av[b.availability] - av[a.availability]) || (b.rating - a.rating) || (a.minPrice - b.minPrice);
+      });
+      return sorted;
+    }
+
+    function activeFilterPills(filters, count) {
+      const pills = [];
+      if (filters.name) pills.push(`Name: ${els.name.value.trim()}`);
+      if (filters.genre) pills.push(`Genre: ${filters.genre}`);
+      if (filters.location) pills.push(`Location: ${els.location.value.trim()}`);
+      if (Number.isFinite(filters.minPrice) && filters.minPrice > 0) pills.push(`Min: ${money(filters.minPrice)}`);
+      if (Number.isFinite(filters.maxPrice)) pills.push(`Max: ${money(filters.maxPrice)}`);
+      if (filters.rating > 0) pills.push(`Rating: ${filters.rating}+`);
+      if (filters.availability) pills.push(`Availability: ${filters.availability}`);
+      els.active.innerHTML = pills.map(p => `<span class="filter-pill">${p}</span>`).join('');
+      if (!pills.length) els.active.innerHTML = `<span class="filter-pill">Showing all ${count} bands</span>`;
+    }
+
+    function render() {
+      const filters = getFilters();
+      const filtered = sortBands(bands.filter(b => passes(b, filters)), filters.sort);
+      els.grid.innerHTML = filtered.map(bandCard).join('');
+      els.count.textContent = `Showing ${filtered.length} of ${bands.length} bands`;
+      els.empty.style.display = filtered.length ? 'none' : 'block';
+      els.grid.style.display = filtered.length ? 'grid' : 'none';
+      activeFilterPills(filters, filtered.length);
+      document.querySelectorAll('.chip').forEach(chip => chip.classList.toggle('active', chip.dataset.genre === filters.genre));
+    }
+
+    ['input', 'change'].forEach(evt => {
+      [els.name, els.genre, els.location, els.minPrice, els.maxPrice, els.rating, els.availability, els.sort].forEach(el => el.addEventListener(evt, render));
+    });
+
+    els.reset.addEventListener('click', () => {
+      els.name.value = '';
+      els.genre.value = '';
+      els.location.value = '';
+      els.minPrice.value = '';
+      els.maxPrice.value = '';
+      els.rating.value = '0';
+      els.availability.value = '';
+      els.sort.value = 'recommended';
+      render();
+    });
+
+    els.apply.addEventListener('click', render);
+    els.chips.addEventListener('click', (e) => {
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+      els.genre.value = els.genre.value === chip.dataset.genre ? '' : chip.dataset.genre;
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>

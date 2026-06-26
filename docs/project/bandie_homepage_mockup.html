@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bandie — The band hub for gigs, songs and bookings</title>
+  <style>
+    :root {
+      --bg: #101014;
+      --panel: #191922;
+      --panel-soft: #222230;
+      --text: #f6f3ea;
+      --muted: #bbb6aa;
+      --accent: #ffcc33;
+      --accent-2: #ff5e7e;
+      --accent-3: #61e3c2;
+      --line: rgba(255,255,255,0.12);
+      --shadow: 0 22px 80px rgba(0,0,0,0.45);
+      --radius-xl: 32px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --max: 1180px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 12% 10%, rgba(255, 204, 51, 0.20), transparent 28%),
+        radial-gradient(circle at 88% 8%, rgba(255, 94, 126, 0.18), transparent 30%),
+        radial-gradient(circle at 50% 105%, rgba(97, 227, 194, 0.14), transparent 32%),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page-shell {
+      overflow: hidden;
+    }
+
+    .nav {
+      width: min(var(--max), calc(100% - 40px));
+      margin: 0 auto;
+      padding: 28px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      font-size: 1.55rem;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: grid;
+      place-items: center;
+      color: #101014;
+      font-weight: 950;
+      box-shadow: 0 12px 28px rgba(255, 204, 51, 0.22);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 26px;
+      color: var(--muted);
+      font-weight: 650;
+      font-size: 0.96rem;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .hero {
+      width: min(var(--max), calc(100% - 40px));
+      margin: 34px auto 0;
+      display: grid;
+      grid-template-columns: 1.03fr 0.97fr;
+      gap: 54px;
+      align-items: center;
+      min-height: 650px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.06);
+      color: var(--accent);
+      padding: 9px 14px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 0.88rem;
+      margin-bottom: 24px;
+    }
+
+    .pulse {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--accent-3);
+      box-shadow: 0 0 0 6px rgba(97, 227, 194, 0.12);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(3.2rem, 7vw, 6.7rem);
+      line-height: 0.92;
+      letter-spacing: -0.085em;
+      max-width: 760px;
+    }
+
+    .highlight {
+      color: var(--accent);
+    }
+
+    .hero-copy {
+      max-width: 630px;
+      color: var(--muted);
+      font-size: 1.24rem;
+      margin: 28px 0 34px;
+    }
+
+    .hero-copy strong {
+      color: var(--text);
+    }
+
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 58px;
+      padding: 0 24px;
+      border-radius: 999px;
+      font-weight: 900;
+      border: 1px solid transparent;
+      transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+      cursor: pointer;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+    }
+
+    .button-primary {
+      background: var(--accent);
+      color: #121217;
+      box-shadow: 0 16px 40px rgba(255, 204, 51, 0.22);
+    }
+
+    .button-secondary {
+      background: rgba(255,255,255,0.07);
+      border-color: var(--line);
+      color: var(--text);
+    }
+
+    .trust-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 34px;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.92rem;
+    }
+
+    .trust-pill {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.045);
+      padding: 10px 14px;
+      border-radius: 999px;
+    }
+
+    .hero-card {
+      position: relative;
+      background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      transform: rotate(1deg);
+    }
+
+    .band-profile {
+      background: #f7f1e3;
+      color: #191922;
+      border-radius: 26px;
+      padding: 24px;
+      min-height: 540px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .band-profile:before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 170px;
+      background:
+        linear-gradient(135deg, rgba(255, 204, 51, 0.9), rgba(255, 94, 126, 0.82)),
+        repeating-linear-gradient(90deg, transparent 0 18px, rgba(0,0,0,0.08) 18px 20px);
+      opacity: 0.95;
+    }
+
+    .profile-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .profile-header {
+      min-height: 124px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .fake-logo {
+      width: 92px;
+      height: 92px;
+      border-radius: 26px;
+      background: #16161e;
+      color: var(--accent);
+      display: grid;
+      place-items: center;
+      font-size: 2rem;
+      font-weight: 950;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.22);
+    }
+
+    .status-chip {
+      background: rgba(22,22,30,0.90);
+      color: #fff;
+      padding: 10px 13px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 850;
+    }
+
+    .profile-title {
+      font-size: 2.15rem;
+      line-height: 1;
+      letter-spacing: -0.06em;
+      margin: 0 0 8px;
+    }
+
+    .profile-subtitle {
+      color: #565145;
+      font-weight: 750;
+      margin-bottom: 22px;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .mini-card {
+      background: rgba(255,255,255,0.70);
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 18px;
+      padding: 14px;
+      min-height: 90px;
+    }
+
+    .mini-label {
+      color: #706a5d;
+      font-size: 0.75rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .mini-value {
+      margin-top: 6px;
+      font-weight: 950;
+      font-size: 1.05rem;
+      line-height: 1.15;
+    }
+
+    .setlist-preview {
+      margin-top: 18px;
+      background: #191922;
+      color: #fff;
+      border-radius: 20px;
+      padding: 18px;
+    }
+
+    .setlist-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      font-weight: 800;
+    }
+
+    .setlist-row:last-child {
+      border-bottom: 0;
+    }
+
+    .vote {
+      color: var(--accent-3);
+      font-weight: 950;
+    }
+
+    section {
+      width: min(var(--max), calc(100% - 40px));
+      margin: 0 auto;
+      padding: 88px 0;
+    }
+
+    .section-header {
+      max-width: 760px;
+      margin-bottom: 34px;
+    }
+
+    .section-kicker {
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 950;
+      font-size: 0.82rem;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(2.1rem, 4vw, 4rem);
+      line-height: 0.98;
+      letter-spacing: -0.07em;
+    }
+
+    .section-text {
+      color: var(--muted);
+      font-size: 1.12rem;
+      margin-top: 18px;
+      max-width: 720px;
+    }
+
+    .cards-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .feature-card {
+      background: rgba(255,255,255,0.055);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 26px;
+      min-height: 255px;
+    }
+
+    .icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 15px;
+      background: rgba(255,255,255,0.08);
+      display: grid;
+      place-items: center;
+      font-size: 1.4rem;
+      margin-bottom: 20px;
+    }
+
+    .feature-card h3 {
+      margin: 0 0 10px;
+      font-size: 1.35rem;
+      letter-spacing: -0.04em;
+    }
+
+    .feature-card p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .audience-card {
+      border-radius: var(--radius-xl);
+      padding: 34px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.055);
+      min-height: 410px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .audience-card.bands {
+      background:
+        radial-gradient(circle at 85% 10%, rgba(255,204,51,0.20), transparent 30%),
+        rgba(255,255,255,0.055);
+    }
+
+    .audience-card.organisers {
+      background:
+        radial-gradient(circle at 85% 10%, rgba(97,227,194,0.18), transparent 30%),
+        rgba(255,255,255,0.055);
+    }
+
+    .audience-card h3 {
+      margin: 0 0 14px;
+      font-size: 2.15rem;
+      letter-spacing: -0.06em;
+      line-height: 1;
+    }
+
+    .audience-card p {
+      color: var(--muted);
+      font-size: 1.08rem;
+      margin: 0 0 24px;
+    }
+
+    .check-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 30px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .check-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .check-list li:before {
+      content: "✓";
+      color: #101014;
+      background: var(--accent-3);
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: inline-grid;
+      place-items: center;
+      flex: 0 0 auto;
+      font-size: 0.78rem;
+      font-weight: 950;
+      margin-top: 1px;
+    }
+
+    .workflow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      counter-reset: step;
+    }
+
+    .step-card {
+      counter-increment: step;
+      padding: 24px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.05);
+      min-height: 210px;
+    }
+
+    .step-card:before {
+      content: counter(step);
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 14px;
+      background: var(--accent);
+      color: #111;
+      font-weight: 950;
+      margin-bottom: 18px;
+    }
+
+    .step-card h3 {
+      margin: 0 0 10px;
+      letter-spacing: -0.04em;
+    }
+
+    .step-card p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .final-cta {
+      margin: 40px auto 80px;
+      width: min(var(--max), calc(100% - 40px));
+      border-radius: 38px;
+      padding: 54px;
+      background:
+        linear-gradient(135deg, rgba(255,204,51,0.18), rgba(255,94,126,0.14)),
+        rgba(255,255,255,0.065);
+      border: 1px solid var(--line);
+      text-align: center;
+    }
+
+    .final-cta h2 {
+      max-width: 850px;
+      margin: 0 auto 18px;
+    }
+
+    .final-cta p {
+      color: var(--muted);
+      max-width: 680px;
+      margin: 0 auto 30px;
+      font-size: 1.14rem;
+    }
+
+    .footer {
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      width: min(var(--max), calc(100% - 40px));
+      margin: 0 auto;
+      padding: 30px 0 44px;
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+      font-weight: 650;
+    }
+
+    @media (max-width: 930px) {
+      .hero,
+      .split {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        min-height: auto;
+        gap: 34px;
+      }
+
+      .hero-card {
+        transform: none;
+      }
+
+      .cards-3,
+      .workflow {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .nav-links {
+        display: none;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .nav,
+      .hero,
+      section,
+      .final-cta,
+      .footer {
+        width: min(100% - 26px, var(--max));
+      }
+
+      .cards-3,
+      .workflow,
+      .mini-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-copy {
+        font-size: 1.08rem;
+      }
+
+      .button {
+        width: 100%;
+      }
+
+      .final-cta {
+        padding: 34px 22px;
+      }
+
+      .band-profile {
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <nav class="nav" aria-label="Main navigation">
+      <a href="#" class="brand" aria-label="Bandie home">
+        <span class="brand-mark">B</span>
+        <span>Bandie</span>
+      </a>
+      <div class="nav-links">
+        <a href="#what">What it is</a>
+        <a href="#bands">For bands</a>
+        <a href="#organisers">For organisers</a>
+        <a href="#how">How it works</a>
+      </div>
+    </nav>
+
+    <main>
+      <header class="hero">
+        <div>
+          <div class="eyebrow"><span class="pulse"></span> Built for amateur bands who want to look pro</div>
+          <h1>The simple hub for your <span class="highlight">band life.</span></h1>
+          <p class="hero-copy">
+            Bandie helps bands promote themselves, organise gigs, agree setlists, share song resources and keep everyone on the same page — without turning band admin into a full-time job.
+          </p>
+          <div class="cta-row">
+            <a class="button button-primary" href="#bands">For Bands →</a>
+            <a class="button button-secondary" href="#organisers">Find a Band →</a>
+          </div>
+          <div class="trust-strip" aria-label="Key benefits">
+            <span class="trust-pill">Mini band website</span>
+            <span class="trust-pill">Gig planning</span>
+            <span class="trust-pill">Votable setlists</span>
+            <span class="trust-pill">Song links & notes</span>
+          </div>
+        </div>
+
+        <aside class="hero-card" aria-label="Example Bandie band profile">
+          <div class="band-profile">
+            <div class="profile-content">
+              <div class="profile-header">
+                <div class="fake-logo">SC</div>
+                <div class="status-chip">Available for gigs</div>
+              </div>
+              <h2 class="profile-title">Skin Condition</h2>
+              <div class="profile-subtitle">Post-punk / new wave covers · London</div>
+
+              <div class="mini-grid">
+                <div class="mini-card">
+                  <div class="mini-label">Promo</div>
+                  <div class="mini-value">Videos, tracks, socials and booking info in one link.</div>
+                </div>
+                <div class="mini-card">
+                  <div class="mini-label">Next gig</div>
+                  <div class="mini-value">Sat 14 Sep · 2 x 45 min sets</div>
+                </div>
+                <div class="mini-card">
+                  <div class="mini-label">Band status</div>
+                  <div class="mini-value">4/5 confirmed · setlist in progress</div>
+                </div>
+                <div class="mini-card">
+                  <div class="mini-label">Song hub</div>
+                  <div class="mini-value">Tabs, videos, lyrics and band notes linked.</div>
+                </div>
+              </div>
+
+              <div class="setlist-preview">
+                <div class="setlist-row"><span>Town Called Malice</span><span class="vote">+8</span></div>
+                <div class="setlist-row"><span>Love Will Tear Us Apart</span><span class="vote">+6</span></div>
+                <div class="setlist-row"><span>Friday I’m in Love</span><span class="vote">+5</span></div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </header>
+
+      <section id="what">
+        <div class="section-header">
+          <div class="section-kicker">What Bandie is</div>
+          <h2>One place for the things bands usually scatter everywhere.</h2>
+          <p class="section-text">
+            Bands already use YouTube, Spotify, Bandcamp, Google Drive, WhatsApp, tab sites and spreadsheets. Bandie does not replace all of that. It turns it into a structured band hub: songs, gigs, setlists, availability, promotion and decisions.
+          </p>
+        </div>
+
+        <div class="cards-3">
+          <article class="feature-card">
+            <div class="icon">🎤</div>
+            <h3>Promote the band</h3>
+            <p>Create a clean public profile with your name, logo, bio, photos, videos, tracks, social links and booking contact.</p>
+          </article>
+          <article class="feature-card">
+            <div class="icon">📅</div>
+            <h3>Organise the gig</h3>
+            <p>Keep dates, venues, arrival times, availability, setlists, notes and gear checklists in one shared place.</p>
+          </article>
+          <article class="feature-card">
+            <div class="icon">🎸</div>
+            <h3>Agree the songs</h3>
+            <p>Build your repertoire with keys, links, parts, lyrics, tabs, videos, rehearsal recordings and band-approved notes.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="split" aria-label="Audience sections">
+        <article class="audience-card bands" id="bands">
+          <div class="section-kicker">For bands</div>
+          <h3>Stop chasing everyone. Start sounding organised.</h3>
+          <p>Bandie is for amateur bands, cover bands, originals bands, weekend musicians and anyone without formal management.</p>
+          <ul class="check-list">
+            <li>Create a simple public band page you can send to venues.</li>
+            <li>Track gigs, rehearsals and member availability.</li>
+            <li>Build votable setlists for specific events.</li>
+            <li>Store song notes and links to tabs, videos and files.</li>
+            <li>Give every member the same version of the plan.</li>
+          </ul>
+          <a class="button button-primary" href="#">Create your band page →</a>
+        </article>
+
+        <article class="audience-card organisers" id="organisers">
+          <div class="section-kicker">For event organisers</div>
+          <h3>Find bands that are ready to play.</h3>
+          <p>Event organisers need to know quickly: what does the band sound like, where are they based, are they suitable, and how do I book them?</p>
+          <ul class="check-list">
+            <li>Browse bands by location, genre and event type.</li>
+            <li>Watch videos and listen to tracks from one clean profile.</li>
+            <li>Check set length, setup needs and contact details.</li>
+            <li>Shortlist suitable bands for pubs, parties, festivals and community events.</li>
+            <li>Send a booking enquiry without hunting through socials.</li>
+          </ul>
+          <a class="button button-secondary" href="#">Find a band →</a>
+        </article>
+      </section>
+
+      <section id="how">
+        <div class="section-header">
+          <div class="section-kicker">How it works</div>
+          <h2>Bandie connects the band’s outside world to its inside plan.</h2>
+          <p class="section-text">
+            Keep rich media and files where they already live. Use Bandie to make them useful: attached to songs, gigs, setlists and booking profiles.
+          </p>
+        </div>
+
+        <div class="workflow">
+          <article class="step-card">
+            <h3>Create the band</h3>
+            <p>Add name, logo, location, genre, socials, videos, tracks and booking details.</p>
+          </article>
+          <article class="step-card">
+            <h3>Add the songs</h3>
+            <p>Build a shared repertoire with keys, durations, notes and links to tabs, videos and files.</p>
+          </article>
+          <article class="step-card">
+            <h3>Plan the gig</h3>
+            <p>Check availability, build a setlist, confirm timings and make sure everyone knows the plan.</p>
+          </article>
+          <article class="step-card">
+            <h3>Share the profile</h3>
+            <p>Send organisers one clean Bandie link instead of a messy chain of messages and scattered links.</p>
+          </article>
+        </div>
+      </section>
+
+      <div class="final-cta">
+        <h2>For bands who want the fun, not the admin.</h2>
+        <p>Bandie helps amateur bands look credible, get organised and be ready for the next rehearsal, gig or booking enquiry.</p>
+        <div class="cta-row" style="justify-content: center;">
+          <a class="button button-primary" href="#">For Bands →</a>
+          <a class="button button-secondary" href="#">For Event Organisers →</a>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div>© 2026 Bandie. Built for bands without managers.</div>
+      <div>Promote · Organise · Rehearse · Play</div>
+    </footer>
+  </div>
+</body>
+</html>

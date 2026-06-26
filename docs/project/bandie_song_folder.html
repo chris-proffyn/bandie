@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bandie — Song Folder</title>
+  <style>
+:root {
+  --bg: #0d1020;
+  --panel: #151a2f;
+  --panel-2: #1d2540;
+  --card: #ffffff;
+  --muted: #6b7280;
+  --text: #121826;
+  --soft: #f4f6fb;
+  --line: #dfe4f1;
+  --purple: #7c3aed;
+  --pink: #ec4899;
+  --cyan: #06b6d4;
+  --green: #22c55e;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --blue: #3b82f6;
+  --slate: #334155;
+  --radius: 18px;
+  --shadow: 0 18px 45px rgba(12, 16, 38, 0.25);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: linear-gradient(135deg, #0c1022 0%, #181530 45%, #281437 100%);
+  color: var(--text);
+}
+a { color: inherit; text-decoration: none; }
+.app-shell { min-height: 100vh; display: grid; grid-template-columns: 260px 1fr; }
+.sidebar { padding: 28px 20px; color: #fff; border-right: 1px solid rgba(255,255,255,0.08); background: rgba(7, 10, 24, 0.58); backdrop-filter: blur(12px); position: sticky; top: 0; height: 100vh; }
+.logo { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 24px; letter-spacing: -0.04em; margin-bottom: 28px; }
+.logo-mark { width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center; background: linear-gradient(135deg, var(--purple), var(--pink)); box-shadow: 0 12px 30px rgba(124, 58, 237, 0.35); }
+.band-switcher { padding: 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.11); border-radius: 16px; margin-bottom: 24px; }
+.band-switcher small { color: rgba(255,255,255,0.58); display:block; margin-bottom: 5px; }
+.band-switcher strong { display:block; font-size: 16px; }
+.access-pill { margin-top: 10px; display:inline-flex; align-items:center; gap: 7px; color: #d1fae5; background: rgba(34,197,94,0.13); border: 1px solid rgba(34,197,94,0.25); border-radius: 999px; padding: 6px 9px; font-size: 12px; }
+.nav-label { text-transform: uppercase; font-size: 11px; color: rgba(255,255,255,0.46); letter-spacing: 0.12em; margin: 22px 12px 8px; }
+.nav-item { display:flex; align-items:center; gap: 12px; padding: 12px 13px; border-radius: 14px; color: rgba(255,255,255,0.75); margin-bottom: 4px; }
+.nav-item.active, .nav-item:hover { color:#fff; background: rgba(255,255,255,0.12); }
+.nav-item .dot { width: 9px; height: 9px; border-radius: 99px; background: var(--cyan); box-shadow: 0 0 0 4px rgba(6,182,212,0.16); }
+.nav-item:nth-of-type(2) .dot { background: var(--pink); box-shadow: 0 0 0 4px rgba(236,72,153,0.16); }
+.nav-item:nth-of-type(3) .dot { background: var(--amber); box-shadow: 0 0 0 4px rgba(245,158,11,0.16); }
+.sidebar-note { margin-top: 30px; padding: 15px; border-radius: 18px; background: linear-gradient(135deg, rgba(124,58,237,0.25), rgba(236,72,153,0.15)); border: 1px solid rgba(255,255,255,0.12); font-size: 13px; line-height: 1.45; color: rgba(255,255,255,0.78); }
+.main { padding: 30px; overflow: auto; }
+.topbar { display:flex; align-items:flex-start; justify-content:space-between; gap: 24px; margin-bottom: 24px; color:#fff; }
+.eyebrow { text-transform: uppercase; letter-spacing: .12em; color: rgba(255,255,255,.58); font-size: 12px; font-weight: 700; }
+h1 { margin: 6px 0 8px; font-size: 38px; line-height: 1.05; letter-spacing: -0.05em; color:#fff; }
+.subtitle { margin:0; color: rgba(255,255,255,.72); max-width: 850px; line-height: 1.55; }
+.actions { display:flex; gap: 10px; flex-wrap: wrap; justify-content:flex-end; min-width: 300px; }
+button, .button { border:0; cursor:pointer; border-radius: 13px; padding: 11px 14px; font-weight: 750; font-size: 14px; display:inline-flex; align-items:center; gap: 8px; }
+.primary { color:#fff; background: linear-gradient(135deg, var(--purple), var(--pink)); box-shadow: 0 12px 26px rgba(124,58,237,.3); }
+.secondary { color:#111827; background:#fff; }
+.ghost { color:#fff; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.13); }
+.content-grid { display:grid; grid-template-columns: 1.5fr .85fr; gap: 22px; align-items:start; }
+.card { background: rgba(255,255,255,.96); border: 1px solid rgba(255,255,255,.68); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; }
+.card.dark { background: rgba(21,26,47,.85); color:#fff; border-color: rgba(255,255,255,.1); }
+.card-header { display:flex; align-items:flex-start; justify-content:space-between; gap: 16px; margin-bottom: 16px; }
+.card h2, .card h3 { margin:0; letter-spacing: -0.035em; }
+.card p { color: var(--muted); line-height: 1.45; }
+.metric-row { display:grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+.metric { background: rgba(255,255,255,.96); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); border: 1px solid rgba(255,255,255,.7); }
+.metric small { color: var(--muted); font-weight: 700; }
+.metric strong { display:block; font-size: 29px; margin-top: 7px; letter-spacing: -0.04em; }
+.metric span { display:inline-block; margin-top: 10px; font-size: 12px; font-weight:700; color: var(--green); background: #dcfce7; padding: 5px 8px; border-radius: 99px; }
+.filters { display:grid; grid-template-columns: 1.6fr repeat(4, minmax(120px, .75fr)); gap: 10px; margin-bottom: 16px; }
+input, select, textarea { width:100%; border: 1px solid var(--line); background: #fff; border-radius: 12px; padding: 11px 12px; color: var(--text); font: inherit; }
+textarea { min-height: 90px; resize: vertical; }
+table { width: 100%; border-collapse: collapse; }
+th { text-align:left; color: var(--muted); font-size: 12px; text-transform:uppercase; letter-spacing:.08em; padding: 12px 10px; border-bottom: 1px solid var(--line); }
+td { padding: 14px 10px; border-bottom: 1px solid #eef2f7; vertical-align: middle; }
+.song-title { display:flex; align-items:center; gap: 10px; font-weight: 800; }
+.art { width:38px; height:38px; border-radius: 11px; background: linear-gradient(135deg, #06b6d4, #7c3aed); display:grid; place-items:center; color:#fff; font-size: 16px; }
+.pill { display:inline-flex; align-items:center; gap: 6px; border-radius: 99px; padding: 6px 9px; font-size: 12px; font-weight: 750; background:#eef2ff; color:#4338ca; white-space: nowrap; }
+.pill.green { background:#dcfce7; color:#166534; }
+.pill.amber { background:#fef3c7; color:#92400e; }
+.pill.red { background:#fee2e2; color:#991b1b; }
+.pill.blue { background:#dbeafe; color:#1d4ed8; }
+.progress { height: 9px; border-radius: 99px; background:#edf2f7; overflow:hidden; min-width: 90px; }
+.progress > span { display:block; height:100%; background: linear-gradient(90deg, var(--green), var(--cyan)); border-radius: 99px; }
+.panel-list { display:grid; gap: 13px; }
+.list-item { border: 1px solid var(--line); border-radius: 15px; padding: 14px; background: #fff; display:flex; justify-content:space-between; gap: 12px; align-items:center; }
+.list-item strong { display:block; margin-bottom: 4px; }
+.list-item small { color: var(--muted); }
+.setlist-grid { display:grid; grid-template-columns: repeat(3, minmax(240px, 1fr)); gap: 18px; }
+.setlist-card { background:#fff; border-radius: 20px; padding:18px; box-shadow: var(--shadow); border: 1px solid rgba(255,255,255,.7); }
+.setlist-top { display:flex; justify-content:space-between; gap: 10px; align-items:flex-start; margin-bottom: 14px; }
+.setlist-title { font-weight:900; font-size:20px; letter-spacing:-.04em; }
+.stat-strip { display:grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin: 14px 0; }
+.stat { background: var(--soft); border-radius: 13px; padding: 10px; }
+.stat small { display:block; color: var(--muted); font-size: 11px; font-weight:700; }
+.stat strong { display:block; margin-top: 4px; }
+.song-stack { display:grid; gap: 8px; margin-top: 12px; }
+.stack-row { display:flex; align-items:center; justify-content:space-between; gap: 10px; background:#f8fafc; border: 1px solid #edf2f7; border-radius: 12px; padding: 10px; font-size: 13px; }
+.builder { display:grid; grid-template-columns: .9fr 1.1fr; gap: 20px; }
+.folder-grid { display:grid; grid-template-columns: repeat(3, minmax(220px,1fr)); gap: 18px; }
+.folder-card { background:#fff; border-radius: 20px; padding:18px; box-shadow: var(--shadow); border: 1px solid rgba(255,255,255,.7); }
+.folder-icon { width:48px; height:42px; border-radius: 12px; background: linear-gradient(135deg, #f59e0b, #ec4899); color:#fff; display:grid; place-items:center; margin-bottom: 13px; font-size:22px; }
+.upload-zone { border: 2px dashed #c7d2fe; border-radius: 20px; padding: 28px; text-align:center; background:#f8fafc; }
+.file-row { display:grid; grid-template-columns: 1.5fr .7fr .7fr .8fr auto; align-items:center; gap: 10px; padding: 13px 0; border-bottom: 1px solid #eef2f7; }
+.file-icon { width:36px; height:36px; border-radius:10px; background:#eef2ff; display:grid; place-items:center; }
+.two-col { display:grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.timeline { display:grid; gap: 12px; }
+.timeline-item { display:grid; grid-template-columns: 78px 1fr; gap: 12px; align-items:start; }
+.timeline-item .time { font-size: 12px; font-weight:800; color: var(--muted); }
+.timeline-item .body { border-left: 3px solid #e0e7ff; padding-left: 12px; }
+.timeline-item strong { display:block; }
+.responsive-note { display:none; }
+@media (max-width: 1100px) { .app-shell{grid-template-columns: 1fr}.sidebar{position:relative;height:auto}.content-grid,.builder,.two-col{grid-template-columns:1fr}.metric-row{grid-template-columns:repeat(2,1fr)}.filters{grid-template-columns:1fr 1fr}.setlist-grid,.folder-grid{grid-template-columns:1fr 1fr}.actions{justify-content:flex-start}.topbar{display:block}.responsive-note{display:block} }
+@media (max-width: 720px){ .main{padding:18px}.metric-row,.filters,.setlist-grid,.folder-grid{grid-template-columns:1fr} table{font-size:13px}.hide-sm{display:none}.file-row{grid-template-columns:1fr}.app-shell{display:block} }
+</style>
+</head>
+<body>
+  <div class="app-shell">
+    
+<aside class="sidebar">
+  <a class="logo" href="bandie_songs_dashboard.html"><span class="logo-mark">♬</span><span>Bandie</span></a>
+  <div class="band-switcher">
+    <small>Band domain</small>
+    <strong>Skin Condition</strong>
+    <span class="access-pill">● Approved band member</span>
+  </div>
+  <div class="nav-label">Songs Management</div>
+  <a class="nav-item " href="bandie_songs_dashboard.html"><span class="dot"></span>Dashboard</a>
+  <a class="nav-item " href="bandie_setlist_management.html"><span class="dot"></span>Setlists</a>
+  <a class="nav-item active" href="bandie_song_folder.html"><span class="dot"></span>Song folder</a>
+  <div class="nav-label">Band workspace</div>
+  <a class="nav-item" href="#"><span class="dot"></span>Calendar</a>
+  <a class="nav-item" href="#"><span class="dot"></span>Gigs</a>
+  <a class="nav-item" href="#"><span class="dot"></span>Members</a>
+  <div class="sidebar-note">
+    Private content area. Songs, tabs, lyrics and sheets are visible only to approved members of this band.
+  </div>
+</aside>
+
+    <main class="main">
+      
+<section class="topbar">
+  <div>
+    <div class="eyebrow">Song Folder</div>
+    <h1>Pump It Up — song workspace</h1>
+    <p class="subtitle">One place for the band to store music sheets, lyrics, tabs, notes, recordings and part-specific files for a single song.</p>
+  </div>
+  <div class="actions">
+    <a class="button ghost" href="bandie_songs_dashboard.html">Back to songs</a>
+    <button class="secondary">Mark reviewed</button>
+    <button class="primary">Upload files</button>
+  </div>
+</section>
+
+<section class="metric-row">
+  <div class="metric"><small>Gig readiness</small><strong>96%</strong><span>Ready</span></div>
+  <div class="metric"><small>Times played</small><strong>18</strong><span>Band favourite</span></div>
+  <div class="metric"><small>Song length</small><strong>3:16</strong><span>Setlist safe</span></div>
+  <div class="metric"><small>Current key</small><strong>E</strong><span>Original key</span></div>
+</section>
+
+<section class="content-grid">
+  <div class="card">
+    <div class="card-header"><div><h2>Part folders</h2><p>Each member can upload their own files. Older versions remain visible for audit and rollback.</p></div><button class="primary">＋ Add folder</button></div>
+    <div class="folder-grid">
+      <div class="folder-card"><div class="folder-icon">🎸</div><h3>Lead Guitar</h3><p>Solo tab, intro riff, tone notes.</p><span class="pill green">4 files</span></div>
+      <div class="folder-card"><div class="folder-icon">🎸</div><h3>Rhythm Guitar</h3><p>Chord chart and arrangement notes.</p><span class="pill green">3 files</span></div>
+      <div class="folder-card"><div class="folder-icon">🎸</div><h3>Bass</h3><p>Root movement, ending variation.</p><span class="pill amber">Needs v2</span></div>
+      <div class="folder-card"><div class="folder-icon">🥁</div><h3>Drums</h3><p>Count-in, push accents, endings.</p><span class="pill green">2 files</span></div>
+      <div class="folder-card"><div class="folder-icon">🎤</div><h3>Vocals</h3><p>Lyrics, phrasing, backing cues.</p><span class="pill green">5 files</span></div>
+      <div class="folder-card"><div class="folder-icon">📎</div><h3>Shared</h3><p>Reference links, live recordings, notes.</p><span class="pill blue">8 files</span></div>
+    </div>
+  </div>
+  <aside class="panel-list">
+    <div class="card dark">
+      <div class="card-header"><h2>Song metadata</h2><span class="pill green">Approved</span></div>
+      <div class="list-item"><div><strong>Genre</strong><small>New wave / pub rock</small></div></div>
+      <div class="list-item"><div><strong>Arrangement</strong><small>Original structure, shortened outro</small></div></div>
+      <div class="list-item"><div><strong>Gig notes</strong><small>Strong opener. Drums count in 1 bar.</small></div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h2>Upload new file</h2></div>
+      <div class="upload-zone"><h3>Drop files here</h3><p>PDF, image, audio, Guitar Pro, ChordPro, DOCX</p><button class="primary">Choose files</button></div>
+      <div class="filters" style="grid-template-columns:1fr 1fr; margin-top:14px"><select><option>Folder: Lead Guitar</option><option>Rhythm Guitar</option><option>Bass</option><option>Drums</option><option>Vocals</option></select><select><option>Visibility: Band members</option><option>Private draft</option></select></div>
+    </div>
+  </aside>
+</section>
+
+<section class="two-col" style="margin-top:22px">
+  <div class="card">
+    <div class="card-header"><div><h2>Files in this song</h2><p>Versioned and grouped by part.</p></div><button class="secondary" style="border:1px solid var(--line)">Filter files</button></div>
+    <div class="file-row"><div class="song-title"><span class="file-icon">PDF</span><div>Pump It Up - Lead Guitar v4.pdf<br><small>Lead Guitar</small></div></div><span>Alex</span><span>Today</span><span class="pill green">Current</span><button class="secondary" style="border:1px solid var(--line)">View</button></div>
+    <div class="file-row"><div class="song-title"><span class="file-icon">PDF</span><div>Pump It Up - Lyrics & Cues.pdf<br><small>Vocals</small></div></div><span>Sam</span><span>2 days ago</span><span class="pill green">Current</span><button class="secondary" style="border:1px solid var(--line)">View</button></div>
+    <div class="file-row"><div class="song-title"><span class="file-icon">GP</span><div>Pump It Up Bass Draft.gp<br><small>Bass</small></div></div><span>Jo</span><span>5 days ago</span><span class="pill amber">Draft</span><button class="secondary" style="border:1px solid var(--line)">View</button></div>
+    <div class="file-row"><div class="song-title"><span class="file-icon">MP3</span><div>Rehearsal clip - June.mp3<br><small>Shared</small></div></div><span>Chris</span><span>12 Jun</span><span class="pill blue">Reference</span><button class="secondary" style="border:1px solid var(--line)">Play</button></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><h2>Comments & review tasks</h2><button class="primary">Add note</button></div>
+    <div class="timeline">
+      <div class="timeline-item"><div class="time">Today</div><div class="body"><strong>Lead tab approved</strong><small>Alex marked v4 as current for the next rehearsal.</small></div></div>
+      <div class="timeline-item"><div class="time">Yesterday</div><div class="body"><strong>Bass part needs final check</strong><small>Jo to confirm whether the bridge follows the record or live version.</small></div></div>
+      <div class="timeline-item"><div class="time">Mon</div><div class="body"><strong>Vocal cue added</strong><small>Backing vocal entry after second chorus.</small></div></div>
+    </div>
+    <textarea style="margin-top:16px" placeholder="Add a rehearsal note, arrangement change or upload request..."></textarea>
+  </div>
+</section>
+
+    </main>
+  </div>
+</body>
+</html>

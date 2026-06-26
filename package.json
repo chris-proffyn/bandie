@@ -1,0 +1,19 @@
+{
+  "name": "bandie",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Bandie — the band hub for gigs, songs and bookings",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@bandie/web",
+    "build": "npm run build --workspace=@bandie/web",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
