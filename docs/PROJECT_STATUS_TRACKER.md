@@ -2,7 +2,7 @@
 
 **Document status:** Live project tracker  
 **Product:** Bandie  
-**Phase:** Bootstrap complete — ready for homepage build  
+**Phase:** Phase 1 complete — homepage live  
 **Last updated:** 26 June 2026
 
 ---
@@ -16,9 +16,9 @@
 | Monorepo bootstrap (`apps/`, `packages/`, `supabase/`) | Complete |
 | Governance docs (requirements, delivery map) | Complete |
 | Web app scaffold (Vite + React + TypeScript) | Complete |
+| Bandie homepage (Phase 1) | Complete |
 | Mobile app | Not started (placeholder only) |
 | Supabase schema / migrations | Not started |
-| Feature development | Not started |
 
 ## Active constraints
 
@@ -33,11 +33,11 @@
 
 ## Current focus
 
-**Next capability:** Bandie Homepage (public marketing landing page)
+**Next capability:** Authentication and band membership (Phase 2)
 
 Reference documents:
-- `docs/project/bandie_homepage_functional_technical_spec.md`
-- `docs/project/bandie_homepage_mockup.html`
+- `docs/project/product-functional-requirements.md` §6
+- `docs/RSD_SUPABASE_MULTI_TENANT_DB.md`
 
 ## Blockers
 
@@ -64,14 +64,14 @@ None.
 
 ### 1. Bandie Homepage
 
-- [ ] 1.1 Create homepage route at `/`
-- [ ] 1.2 Marketing components (nav, hero, feature cards, etc.)
-- [ ] 1.3 Homepage content configuration
-- [ ] 1.4 Styling to match mockup
-- [ ] 1.5 Responsive behaviour
-- [ ] 1.6 Analytics stub
-- [ ] 1.7 SEO metadata
-- [ ] 1.8 Test and polish
+- [x] 1.1 Create homepage route at `/`
+- [x] 1.2 Marketing components (nav, hero, feature cards, etc.)
+- [x] 1.3 Homepage content configuration
+- [x] 1.4 Styling to match mockup
+- [x] 1.5 Responsive behaviour
+- [x] 1.6 Analytics stub
+- [x] 1.7 SEO metadata
+- [x] 1.8 Test and polish
 
 ### 2. Authentication and band membership
 
@@ -157,6 +157,12 @@ None.
 ---
 
 ## Session notes
+
+**26 June 2026 — Homepage (Phase 1)**
+- Implemented marketing homepage at `/` matching mockup and spec
+- Added placeholder routes `/bands` and `/signup`
+- Added `netlify.toml` and SPA redirects for client routing
+- Build and lint verified
 
 **26 June 2026 — Bootstrap**
 - Created monorepo structure per `RSD_PROJECT_BOOTSTRAP.md`

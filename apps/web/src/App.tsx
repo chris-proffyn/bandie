@@ -1,20 +1,31 @@
-import { Button } from '@bandie/ui';
-import './App.css';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { HomePage } from './pages/HomePage';
+import { PlaceholderPage } from './pages/PlaceholderPage';
 
-function App() {
+export default function App() {
   return (
-    <main className="app">
-      <p className="eyebrow">Bandie</p>
-      <h1>The simple hub for your band life.</h1>
-      <p className="lead">
-        Project bootstrap complete. The marketing homepage is the next build target.
-      </p>
-      <div className="actions">
-        <Button variant="primary">For Bands</Button>
-        <Button variant="secondary">Find a Band</Button>
-      </div>
-    </main>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route
+          path="/bands"
+          element={
+            <PlaceholderPage
+              title="Band directory"
+              description="The searchable band directory is coming soon. Event organisers will be able to filter by genre, location, price and availability."
+            />
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <PlaceholderPage
+              title="Create your band"
+              description="Account creation and band setup are coming soon. You'll be able to create a public profile and private workspace in a few steps."
+            />
+          }
+        />
+      </Routes>
+    </BrowserRouter>
   );
 }
-
-export default App;
