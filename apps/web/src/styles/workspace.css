@@ -1,0 +1,382 @@
+.band-workspace-overview {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.band-workspace-profile {
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.band-workspace-profile .band-profile-shell {
+  padding-bottom: 2rem;
+}
+
+.band-workspace-fields {
+  text-align: left;
+}
+
+.band-workspace-identity {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  padding: 0.5rem 0 1rem;
+}
+
+.band-workspace-profile .band-profile-name {
+  max-width: none;
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  text-align: left;
+}
+
+.band-workspace-profile .band-profile-subtitle,
+.band-workspace-profile .band-profile-lead {
+  text-align: left;
+  max-width: 42rem;
+}
+
+.band-workspace-profile .band-profile-meta-grid {
+  max-width: none;
+  width: 100%;
+}
+
+.band-workspace-logo-wrap .band-profile-logo-mark {
+  margin-bottom: 0;
+}
+
+.band-workspace-hero-wrap .band-profile-hero-banner {
+  margin-top: 0;
+}
+
+.workspace-field-row {
+  width: 100%;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.workspace-field-row:first-child {
+  padding-top: 1.25rem;
+}
+
+.workspace-field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.65rem;
+}
+
+.workspace-field-title {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #8f897d;
+}
+
+.workspace-section-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #f6f3ea;
+}
+
+.workspace-field-body {
+  text-align: left;
+}
+
+.workspace-section-block {
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+}
+
+.workspace-section-block .workspace-field-body > p {
+  margin-top: 0;
+}
+
+.band-workspace-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.band-workspace-publish-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #bbb6aa;
+  font-size: 0.9rem;
+}
+
+.band-workspace-hero-placeholder {
+  min-height: 180px;
+  border-radius: 28px;
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  display: grid;
+  place-items: center;
+  color: #8f897d;
+  font-size: 0.95rem;
+  padding: 1.5rem;
+  text-align: left;
+}
+
+.workspace-edit-button {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(16, 16, 20, 0.72);
+  color: #f6f3ea;
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+
+.workspace-edit-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.workspace-edit-panel {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  text-align: left;
+}
+
+.workspace-edit-actions {
+  display: flex;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.band-workspace-subheading {
+  margin: 1.25rem 0 0.75rem;
+  font-size: 1.15rem;
+  letter-spacing: -0.03em;
+}
+
+.band-workspace-placeholder {
+  color: #8f897d !important;
+  font-style: italic;
+}
+
+.workspace-team-section {
+  max-width: 920px;
+}
+
+.app-main-workspace {
+  padding-top: 0;
+}
+
+.workspace-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.workspace-badge-live {
+  background: rgba(88, 214, 141, 0.16);
+  color: #8ef0b8;
+}
+
+.workspace-badge-draft {
+  background: rgba(255, 204, 51, 0.14);
+  color: #ffdd77;
+}
+
+.workspace-status-role {
+  color: #bbb6aa;
+  font-size: 0.9rem;
+}
+
+.workspace-section {
+  padding: 1.25rem 1.35rem;
+}
+
+.workspace-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.workspace-section-header h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.workspace-section-intro,
+.workspace-section-note {
+  margin: 0.35rem 0 0;
+  color: #bbb6aa;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.workspace-empty-note {
+  margin: 0;
+  color: #bbb6aa;
+  font-size: 0.92rem;
+}
+
+.band-profile-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.85rem 1rem;
+}
+
+.band-profile-summary-label {
+  display: block;
+  color: #8f897d;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 0.2rem;
+}
+
+.band-profile-summary-grid p {
+  margin: 0;
+}
+
+.band-profile-summary-tagline {
+  margin: 1rem 0 0;
+  font-size: 1.05rem;
+  color: #f6f3ea;
+}
+
+.band-profile-summary-bio {
+  margin: 0.75rem 0 0;
+  color: #bbb6aa;
+  line-height: 1.5;
+}
+
+.band-member-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.85rem;
+}
+
+.band-member-card {
+  display: flex;
+  gap: 0.85rem;
+  padding: 0.9rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.band-member-card-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #ffcc33, #ff5e7e);
+  color: #101014;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.band-member-card-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.band-member-card-body {
+  min-width: 0;
+}
+
+.band-member-card-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.band-member-card-heading strong {
+  font-size: 1rem;
+}
+
+.band-member-role {
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #bbb6aa;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.band-member-card-meta {
+  margin: 0.2rem 0 0;
+  color: #bbb6aa;
+  font-size: 0.88rem;
+}
+
+.band-member-card-bio {
+  margin: 0.45rem 0 0;
+  color: #9d978b;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.workspace-invite-form {
+  max-width: 640px;
+}
+
+.workspace-invite-list {
+  margin-top: 1.25rem;
+}
+
+.workspace-details-section {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.workspace-details-section summary {
+  cursor: pointer;
+  padding: 0.85rem 1rem;
+  font-weight: 700;
+  color: #f6f3ea;
+  list-style: none;
+}
+
+.workspace-details-section summary::-webkit-details-marker {
+  display: none;
+}
+
+.workspace-details-body {
+  padding: 0 1rem 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 720px) {
+  .workspace-status-strip {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

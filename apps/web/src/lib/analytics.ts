@@ -5,6 +5,7 @@ export type HomepageEventSection =
   | 'hero'
   | 'bands'
   | 'organisers'
+  | 'players'
   | 'final_cta';
 
 export function trackHomepageView(): void {
@@ -25,7 +26,7 @@ export function trackCtaClick(
   section: HomepageEventSection,
   label: string,
   target: string,
-  audienceIntent: 'band' | 'organiser' | 'general',
+  audienceIntent: 'band' | 'organiser' | 'player' | 'general',
 ): void {
   track('homepage_cta_clicked', {
     page: 'homepage',
@@ -47,6 +48,16 @@ export function trackCtaClick(
 
   if (audienceIntent === 'organiser') {
     track('homepage_organiser_intent_clicked', {
+      page: 'homepage',
+      section,
+      label,
+      target,
+      audience_intent: audienceIntent,
+    });
+  }
+
+  if (audienceIntent === 'player') {
+    track('homepage_player_intent_clicked', {
       page: 'homepage',
       section,
       label,

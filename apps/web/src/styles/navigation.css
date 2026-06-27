@@ -1,0 +1,27 @@
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0 0 1.25rem;
+  color: #bbb6aa;
+  text-decoration: none;
+  font-weight: 650;
+  font-size: 0.95rem;
+}
+
+.back-link:hover,
+.back-link:focus-visible {
+  color: #f6f3ea;
+}
+
+.band-profile-shell > .back-link {
+  width: min(var(--profile-max, 1180px), calc(100% - 40px));
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 1.25rem;
+}
+
+.directory-shell > .back-link,
+.directory-player-profile > .back-link {
+  margin-bottom: 1.5rem;
+}

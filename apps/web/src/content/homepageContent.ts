@@ -1,7 +1,7 @@
 export type CtaLink = {
   label: string;
   href: string;
-  intent: 'band' | 'organiser' | 'general';
+  intent: 'band' | 'organiser' | 'player' | 'general';
   variant: 'primary' | 'secondary';
 };
 
@@ -20,6 +20,7 @@ export const homepageContent = {
       { label: 'What it is', href: '#what' },
       { label: 'For bands', href: '#bands' },
       { label: 'For organisers', href: '#organisers' },
+      { label: 'For players', href: '#players' },
       { label: 'How it works', href: '#how' },
     ],
   },
@@ -121,6 +122,25 @@ export const homepageContent = {
         href: '/bands',
         intent: 'organiser',
         variant: 'secondary',
+      } satisfies CtaLink,
+    },
+    players: {
+      id: 'players',
+      kicker: 'For players',
+      heading: 'Get seen by bands that need you.',
+      text: 'Session musicians, deps and players between bands can list themselves in the Bandie player directory — whether you want to join permanently or cover a one-off gig.',
+      benefits: [
+        'Create a player profile with instruments, genres, location and experience.',
+        'Say you are open to deputy / stand-in gigs or permanent member invites.',
+        'Show travel distance and fee guidance for dep work.',
+        'Let band leaders find you when they need a last-minute cover.',
+        'Keep one profile that works across every band you play with.',
+      ],
+      cta: {
+        label: 'Build your player profile →',
+        href: '/signup?intent=player-profile',
+        intent: 'player',
+        variant: 'primary',
       } satisfies CtaLink,
     },
   },

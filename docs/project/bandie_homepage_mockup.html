@@ -408,7 +408,7 @@
 
     .split {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 20px;
     }
 
@@ -431,6 +431,12 @@
     .audience-card.organisers {
       background:
         radial-gradient(circle at 85% 10%, rgba(97,227,194,0.18), transparent 30%),
+        rgba(255,255,255,0.055);
+    }
+
+    .audience-card.players {
+      background:
+        radial-gradient(circle at 85% 10%, rgba(255,94,126,0.20), transparent 30%),
         rgba(255,255,255,0.055);
     }
 
@@ -623,6 +629,7 @@
         <a href="#what">What it is</a>
         <a href="#bands">For bands</a>
         <a href="#organisers">For organisers</a>
+        <a href="#players">For players</a>
         <a href="#how">How it works</a>
       </div>
     </nav>
@@ -741,6 +748,20 @@
             <li>Send a booking enquiry without hunting through socials.</li>
           </ul>
           <a class="button button-secondary" href="#">Find a band →</a>
+        </article>
+
+        <article class="audience-card players" id="players">
+          <div class="section-kicker">For players</div>
+          <h3>Get seen by bands that need you.</h3>
+          <p>Session musicians, deps and players between bands can list themselves in the Bandie player directory — whether you want to join permanently or cover a one-off gig.</p>
+          <ul class="check-list">
+            <li>Create a player profile with instruments, genres, location and experience.</li>
+            <li>Say you are open to deputy / stand-in gigs or permanent member invites.</li>
+            <li>Show travel distance and fee guidance for dep work.</li>
+            <li>Let band leaders find you when they need a last-minute cover.</li>
+            <li>Keep one profile that works across every band you play with.</li>
+          </ul>
+          <a class="button button-primary" href="#">Build your player profile →</a>
         </article>
       </section>
 

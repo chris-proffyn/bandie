@@ -2,7 +2,7 @@
 
 **Document status:** Authoritative product requirements summary  
 **Product:** Bandie  
-**Last updated:** 26 June 2026
+**Last updated:** 27 June 2026
 
 ---
 
@@ -53,21 +53,25 @@ Individual musicians in multiple bands, band leaders, dep/substitute musicians, 
 
 - Marketing homepage
 - Band directory (searchable)
+- Player directory (deputy and member search modes)
 - Public band profiles (mini-sites)
-- Booking enquiry route
-- Public calendar availability (confirmed/provisional gigs)
+- Public player profiles
+- Booking enquiry route (planned)
+- Public calendar availability (confirmed/provisional gigs — planned)
 
 ### 4.2 Private band workspace
 
 Member-only area scoped to a selected band:
 
-- Songs dashboard and song folders
-- Setlist management
-- Calendar (rehearsal + gig availability)
-- Gig management
-- Members and permissions
-- Booking enquiry inbox
-- Activity and notifications
+- My bands hub and band switcher
+- Unified band overview (public profile editor, members, invitations)
+- Musician / player profile (`/app/profile`)
+- Songs dashboard and song folders (planned)
+- Setlist management (planned)
+- Calendar (rehearsal + gig availability) (planned)
+- Gig management (planned)
+- Booking enquiry inbox (planned)
+- Activity and notifications (planned)
 
 ---
 
@@ -98,15 +102,16 @@ See `docs/project/bandie_build_elements.md` for the full list. Summary:
 
 ### In scope
 
-1. User accounts and band membership
-2. Band creation and private workspace
-3. Public band profile
-4. Songs dashboard
-5. Song folder with part folders and file uploads
-6. Setlist management
-7. Calendar availability (rehearsal + gig modes)
-8. Band directory with search/filter
-9. Basic booking enquiry route
+1. User accounts and band membership — **done**
+2. Band creation and private workspace shell — **done** (songs/setlists deferred)
+3. Public band profile — **done**
+4. Musician / player profiles and directory — **done**
+5. Band directory with search/filter — **done**
+6. Songs dashboard — **not started**
+7. Song folder with part folders and file uploads — **not started**
+8. Setlist management — **not started**
+9. Calendar availability (rehearsal + gig modes) — **not started**
+10. Basic booking enquiry route — **not started**
 
 ### Out of scope (MVP)
 
@@ -155,7 +160,7 @@ Example band in mockups: **Skin Condition** (post-punk / new wave covers, London
 
 See `docs/DELIVERY_TASK_MAP.md` for phased delivery order.
 
-**Immediate next build:** Bandie Homepage (`docs/project/bandie_homepage_functional_technical_spec.md`).
+**Current focus:** Songs and repertoire management — see `docs/PROJECT_STATUS_TRACKER.md`.
 
 ---
 

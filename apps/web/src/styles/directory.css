@@ -1,0 +1,750 @@
+.directory-page {
+  --dir-max: 1240px;
+  min-height: 100vh;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(255, 94, 126, 0.22), transparent 32%),
+    radial-gradient(circle at 92% 0%, rgba(120, 168, 255, 0.12), transparent 32%),
+    linear-gradient(180deg, #101014 0%, #12131a 58%, #09090c 100%);
+  color: #f6f3ea;
+  line-height: 1.5;
+}
+
+.directory-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(18px);
+  background: rgba(16, 16, 20, 0.82);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.directory-header-inner {
+  width: min(var(--dir-max), calc(100% - 36px));
+  margin: 0 auto;
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.directory-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.directory-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 950;
+  letter-spacing: -0.03em;
+  font-size: 1.35rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.directory-brand-mark {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #ffcc33, #ff5e7e);
+  color: #101014;
+  font-weight: 950;
+  clip-path: polygon(0 0, 84% 0, 100% 100%, 14% 100%);
+}
+
+.directory-shell {
+  width: min(var(--dir-max), calc(100% - 36px));
+  margin: 0 auto;
+}
+
+.directory-hero {
+  display: grid;
+  grid-template-columns: 1fr 0.72fr;
+  gap: 3rem;
+  align-items: end;
+  padding: 4.75rem 0 2rem;
+}
+
+.directory-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #fff;
+  background: rgba(255, 204, 51, 0.14);
+  border: 1px solid rgba(255, 204, 51, 0.35);
+  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 1rem;
+}
+
+.directory-hero h1 {
+  margin: 0;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+}
+
+.directory-lead {
+  margin: 1.25rem 0 0;
+  color: #bbb6aa;
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  max-width: 38rem;
+}
+
+.directory-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 24px;
+  padding: 1.25rem;
+}
+
+.directory-stat strong {
+  display: block;
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.directory-stat span {
+  display: block;
+  margin-top: 0.35rem;
+  color: #bbb6aa;
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.directory-layout {
+  display: grid;
+  grid-template-columns: 330px 1fr;
+  gap: 1.75rem;
+  align-items: start;
+  padding: 2rem 0 4.5rem;
+}
+
+.directory-filters {
+  position: sticky;
+  top: 96px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 28px;
+  padding: 1.35rem;
+  box-shadow: 0 22px 80px rgba(0, 0, 0, 0.36);
+}
+
+.directory-filters h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.55rem;
+  letter-spacing: -0.03em;
+}
+
+.directory-filters-intro {
+  margin: 0 0 1.25rem;
+  color: #bbb6aa;
+  font-size: 0.88rem;
+}
+
+.directory-filter-group {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.directory-filter-group label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #fff;
+  font-weight: 900;
+}
+
+.directory-filter-group input,
+.directory-filter-group select {
+  width: 100%;
+  min-height: 46px;
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(0, 0, 0, 0.28);
+  color: #fff;
+  padding: 0 0.85rem;
+  font: inherit;
+}
+
+.directory-filter-group input:focus,
+.directory-filter-group select:focus {
+  outline: none;
+  border-color: rgba(255, 204, 51, 0.85);
+  box-shadow: 0 0 0 4px rgba(255, 204, 51, 0.14);
+}
+
+.directory-range-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.directory-genre-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.directory-chip {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.directory-chip.active {
+  background: #ff5e7e;
+  border-color: #ff5e7e;
+}
+
+.directory-filter-actions {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.directory-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 1rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-weight: 900;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  font: inherit;
+}
+
+.directory-btn-primary {
+  background: #ff5e7e;
+  color: #fff;
+}
+
+.directory-btn-secondary {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.directory-btn-dark {
+  background: #121319;
+  color: #fff;
+}
+
+.directory-results-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.directory-results-head h2 {
+  margin: 0;
+  font-size: 1.85rem;
+  letter-spacing: -0.04em;
+}
+
+.directory-results-head p {
+  margin: 0.35rem 0 0;
+  color: #bbb6aa;
+}
+
+.directory-sort-control {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: #bbb6aa;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.directory-sort-control select {
+  min-height: 42px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+  padding: 0 0.75rem;
+  font: inherit;
+}
+
+.directory-active-filters {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  min-height: 2rem;
+}
+
+.directory-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 94, 126, 0.18);
+  border: 1px solid rgba(255, 94, 126, 0.35);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 850;
+}
+
+.directory-band-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.1rem;
+}
+
+.directory-band-card {
+  background: #f7f2e9;
+  color: #151515;
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 20px 55px rgba(0, 0, 0, 0.26);
+  display: grid;
+  min-height: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.directory-band-hero {
+  min-height: 132px;
+  padding: 1.1rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #fff;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+}
+
+.directory-band-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 15% 15%, rgba(255, 255, 255, 0.22), transparent 28%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.32));
+  pointer-events: none;
+}
+
+.directory-band-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.directory-band-logo {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.36);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  font-weight: 950;
+  letter-spacing: -0.08em;
+  font-size: 1.25rem;
+  backdrop-filter: blur(8px);
+  overflow: hidden;
+}
+
+.directory-band-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.directory-invite-badges {
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.directory-availability-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  backdrop-filter: blur(8px);
+  border-radius: 999px;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.directory-availability-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #58d68d;
+  box-shadow: 0 0 0 5px rgba(88, 214, 141, 0.14);
+}
+
+.directory-availability-dot.limited {
+  background: #ffc857;
+  box-shadow: 0 0 0 5px rgba(255, 200, 87, 0.14);
+}
+
+.directory-availability-dot.unavailable {
+  background: #ff6b6b;
+  box-shadow: 0 0 0 5px rgba(255, 107, 107, 0.14);
+}
+
+.directory-band-body {
+  padding: 1.25rem;
+}
+
+.directory-band-title-row h3 {
+  margin: 0;
+  font-size: 1.55rem;
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+}
+
+.directory-band-meta {
+  margin: 0.5rem 0 0;
+  color: #5d5650;
+  font-weight: 750;
+  font-size: 0.88rem;
+}
+
+.directory-band-desc {
+  margin: 0.85rem 0 1rem;
+  color: #292929;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.directory-tag-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.directory-tag {
+  background: #e7ded1;
+  color: #222;
+  border-radius: 999px;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 850;
+}
+
+.directory-band-footer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.85rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.11);
+  padding-top: 1rem;
+}
+
+.directory-price {
+  font-size: 0.82rem;
+  color: #5d5650;
+  font-weight: 800;
+}
+
+.directory-price strong {
+  display: block;
+  color: #111;
+  font-size: 1.2rem;
+  line-height: 1.1;
+}
+
+.directory-empty-state {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 28px;
+  padding: 2.25rem;
+  text-align: center;
+  color: #bbb6aa;
+}
+
+.directory-empty-state strong {
+  display: block;
+  color: #fff;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.directory-loading,
+.directory-error {
+  min-height: 50vh;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 2rem;
+}
+
+.directory-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  color: #bbb6aa;
+  padding: 2rem 0;
+  font-size: 0.92rem;
+}
+
+.directory-footer-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 1060px) {
+  .directory-hero,
+  .directory-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .directory-filters {
+    position: relative;
+    top: auto;
+  }
+}
+
+@media (max-width: 780px) {
+  .directory-hero {
+    padding-top: 3rem;
+  }
+
+  .directory-band-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .directory-results-head {
+    display: block;
+  }
+
+  .directory-sort-control {
+    margin-top: 0.85rem;
+  }
+
+  .directory-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+.directory-mode-toggle {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .directory-mode-toggle {
+    grid-template-columns: 1fr;
+  }
+}
+
+.directory-mode-btn {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f6f3ea;
+  border-radius: 999px;
+  padding: 0.65rem 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.directory-mode-btn.active {
+  background: rgba(255, 204, 51, 0.18);
+  border-color: rgba(255, 204, 51, 0.45);
+  color: #fff;
+}
+
+.directory-mode-hint,
+.directory-field-hint {
+  margin: 0.45rem 0 0;
+  color: #bbb6aa;
+  font-size: 0.86rem;
+}
+
+.directory-filter-label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 0.45rem;
+}
+
+.directory-footer-links {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.directory-player-card .directory-player-hero {
+  min-height: 148px;
+}
+
+.directory-player-avatar {
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.directory-player-travel {
+  color: #d8d2c4;
+  font-size: 0.88rem;
+  margin: 0.35rem 0 0;
+}
+
+.directory-player-profile {
+  padding: 2rem 0 4rem;
+}
+
+.directory-back-link {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  color: #bbb6aa;
+  text-decoration: none;
+}
+
+.directory-back-link:hover {
+  color: #fff;
+}
+
+.directory-player-profile-hero {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 2rem;
+  align-items: end;
+  margin-bottom: 2rem;
+}
+
+.directory-player-profile-avatar-wrap {
+  border-radius: 28px;
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  background-size: cover;
+  background-position: center;
+}
+
+.directory-player-profile-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 999px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: rgba(16, 16, 20, 0.72);
+  border: 3px solid rgba(255, 255, 255, 0.18);
+  font-weight: 900;
+  font-size: 2rem;
+}
+
+.directory-player-profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.directory-player-profile-meta {
+  color: #d8d2c4;
+  margin-top: 0.35rem;
+}
+
+.directory-player-profile-section {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.directory-player-profile-section h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.directory-player-profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.directory-player-profile-cta {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  border-radius: 20px;
+  background: rgba(255, 204, 51, 0.08);
+  border: 1px solid rgba(255, 204, 51, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 780px) {
+  .directory-player-profile-hero,
+  .directory-player-profile-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.workspace-directory-page {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.workspace-directory-loading {
+  padding: 1.5rem;
+}
+
+.workspace-directory-hero {
+  display: grid;
+  grid-template-columns: 1fr 0.72fr;
+  gap: 1.5rem;
+  align-items: end;
+  padding: 0.25rem 0 0.5rem;
+}
+
+.workspace-directory-hero h1 {
+  margin: 0.35rem 0 0.75rem;
+  font-size: clamp(1.85rem, 4vw, 2.5rem);
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.workspace-directory-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 320px) 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (max-width: 1060px) {
+  .workspace-directory-hero,
+  .workspace-directory-layout {
+    grid-template-columns: 1fr;
+  }
+}

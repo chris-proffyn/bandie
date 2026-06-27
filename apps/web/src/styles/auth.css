@@ -1,0 +1,453 @@
+.auth-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem 1.25rem;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(255, 204, 51, 0.2), transparent 28%),
+    radial-gradient(circle at 88% 8%, rgba(255, 94, 126, 0.18), transparent 30%),
+    #101014;
+  color: #f6f3ea;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.auth-card {
+  width: min(100%, 440px);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  padding: 2rem;
+  box-shadow: 0 22px 80px rgba(0, 0, 0, 0.45);
+}
+
+.auth-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  font-size: 1.35rem;
+  margin-bottom: 1.5rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.auth-brand-mark {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffcc33, #ff5e7e);
+  display: grid;
+  place-items: center;
+  color: #101014;
+  font-weight: 950;
+}
+
+.auth-card h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.85rem;
+  letter-spacing: -0.05em;
+}
+
+.auth-lead {
+  color: #bbb6aa;
+  margin: 0 0 1.5rem;
+}
+
+.auth-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.auth-field label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+
+.auth-field input,
+.auth-field textarea,
+.auth-field select {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.25);
+  color: #f6f3ea;
+  padding: 0.75rem 0.9rem;
+  font: inherit;
+}
+
+.auth-field input:focus-visible,
+.auth-field textarea:focus-visible,
+.auth-field select:focus-visible {
+  outline: 2px solid #ffcc33;
+  outline-offset: 2px;
+}
+
+.auth-password-field {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+
+.auth-password-field input {
+  flex: 1;
+  min-width: 0;
+}
+
+.auth-password-toggle {
+  flex-shrink: 0;
+  min-height: 48px;
+  padding: 0 0.9rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: #f6f3ea;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.auth-password-toggle:hover {
+  border-color: rgba(255, 204, 51, 0.35);
+  color: #ffcc33;
+}
+
+.auth-password-toggle:focus-visible {
+  outline: 2px solid #ffcc33;
+  outline-offset: 2px;
+}
+
+.auth-button {
+  min-height: 52px;
+  border: none;
+  border-radius: 999px;
+  background: #ffcc33;
+  color: #101014;
+  font-weight: 900;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.auth-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.auth-button-secondary {
+  background: transparent;
+  color: #f6f3ea;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.auth-message {
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  font-size: 0.92rem;
+}
+
+.auth-message-error {
+  background: rgba(255, 94, 126, 0.14);
+  border: 1px solid rgba(255, 94, 126, 0.35);
+}
+
+.auth-message-success {
+  background: rgba(97, 227, 194, 0.12);
+  border: 1px solid rgba(97, 227, 194, 0.35);
+}
+
+.auth-links {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  color: #bbb6aa;
+  font-size: 0.92rem;
+}
+
+.auth-links a {
+  color: #ffcc33;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.app-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  background: #101014;
+  color: #f6f3ea;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.app-sidebar {
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.app-sidebar-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.app-sidebar-brand .auth-brand {
+  margin-bottom: 0;
+}
+
+.app-admin-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: rgba(255, 204, 51, 0.14);
+  border: 1px solid rgba(255, 204, 51, 0.35);
+  color: #ffcc33;
+}
+
+.app-main {
+  padding: 1.5rem;
+}
+
+.band-workspace-header {
+  margin-bottom: 1.25rem;
+}
+
+.band-workspace-name {
+  margin: 0;
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-weight: 800;
+}
+
+.app-nav-link {
+  display: block;
+  padding: 0.75rem 0.9rem;
+  border-radius: 12px;
+  color: #bbb6aa;
+  text-decoration: none;
+  font-weight: 650;
+}
+
+.app-nav-link.active,
+.app-nav-link:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #f6f3ea;
+}
+
+.band-switcher {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.band-switcher select {
+  width: 100%;
+  min-height: 44px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.25);
+  color: #f6f3ea;
+  padding: 0.6rem 0.75rem;
+}
+
+.panel {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 1.5rem;
+}
+
+.panel h2 {
+  margin: 0 0 0.75rem;
+  letter-spacing: -0.04em;
+}
+
+.panel p {
+  color: #bbb6aa;
+}
+
+.invite-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.invite-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.band-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.directory-btn-secondary {
+  background: #e7ded1;
+  color: #151515;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.my-bands-page {
+  max-width: 1100px;
+}
+
+.my-bands-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.my-bands-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.my-bands-eyebrow {
+  margin: 0 0 0.35rem;
+  color: #bbb6aa;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.my-bands-header h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  letter-spacing: -0.05em;
+}
+
+.my-bands-lead {
+  margin: 0.75rem 0 0;
+  color: #bbb6aa;
+  max-width: 36rem;
+}
+
+.my-bands-count {
+  margin: 0 0 1rem;
+  color: #bbb6aa;
+  font-weight: 700;
+}
+
+.my-bands-grid {
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 780px) {
+  .my-bands-header {
+    flex-direction: column;
+  }
+
+  .band-card-actions {
+    justify-content: flex-start;
+  }
+
+  .directory-band-footer {
+    grid-template-columns: 1fr;
+  }
+}
+
+.user-avatar-preview {
+  border-radius: 999px;
+  width: 120px;
+  height: 120px;
+}
+
+.player-profile-preview {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  padding: 1rem 1.1rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.player-profile-preview-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #ffcc33, #ff5e7e);
+  color: #101014;
+  font-weight: 950;
+  font-size: 1.35rem;
+  flex-shrink: 0;
+}
+
+.player-profile-preview-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.player-profile-preview strong {
+  display: block;
+  font-size: 1.15rem;
+}
+
+.player-profile-preview p {
+  margin: 0.25rem 0 0;
+  color: #bbb6aa;
+  font-size: 0.92rem;
+}
+
+.player-profile-preview-gear {
+  margin-top: 0.35rem !important;
+  font-size: 0.85rem !important;
+}
+
+.player-profile-preview-invites {
+  margin-top: 0.35rem !important;
+  font-size: 0.85rem !important;
+  color: #ffcc33 !important;
+}
+
+.profile-section-intro {
+  margin: -0.35rem 0 1rem;
+  color: #bbb6aa;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.user-profile-page {
+  max-width: 900px;
+}
+
+@media (max-width: 900px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .app-sidebar {
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  }
+}

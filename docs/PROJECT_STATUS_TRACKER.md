@@ -2,8 +2,8 @@
 
 **Document status:** Live project tracker  
 **Product:** Bandie  
-**Phase:** Phase 0 complete — ready for Phase 2 (auth)  
-**Last updated:** 26 June 2026
+**Phase:** Phase 5 complete (workspace shell) — ready for Phase 6 (songs & repertoire)  
+**Last updated:** 27 June 2026 (documentation sync)
 
 ---
 
@@ -18,7 +18,13 @@
 | Web app scaffold (Vite + React + TypeScript) | Complete |
 | Bandie homepage (Phase 1) | Complete |
 | Mobile app | Not started (placeholder only) |
-| Supabase schema / migrations | Platform + Bandie bootstrap applied |
+| Supabase schema / migrations | Platform + Bandie bootstrap through player directory applied |
+| Authentication & band membership (Phase 2) | Complete |
+| Public band profile (Phase 3) | Complete |
+| Band directory (Phase 4) | Complete |
+| Musician / player profile | Complete |
+| Player directory | Complete |
+| Private workspace shell (Phase 5) | Complete — overview, members, invitations; songs/setlists deferred |
 
 ## Active constraints
 
@@ -33,15 +39,34 @@
 
 ## Current focus
 
-**Next capability:** Authentication and band membership (Phase 2)
+**Next capability:** Songs and repertoire (Phase 6)
 
 Reference documents:
-- `docs/project/product-functional-requirements.md` §6
+- `docs/project/product-functional-requirements.md` §7
 - `docs/RSD_SUPABASE_MULTI_TENANT_DB.md`
 
 ## Blockers
 
 None.
+
+---
+
+### Where we are (June 2026)
+
+```text
+Bootstrap                 ██████████  monorepo + CI + GitHub + Netlify
+Supabase platform         ██████████  bandie registered; migrations applied
+Homepage                  ██████████  marketing landing page live
+Auth & membership         ██████████  signup, login, bands, invites
+Public profile & dir      ██████████  profiles + searchable directory
+Player profiles & dir     ██████████  musician profiles + /players directory
+Private workspace shell   ██████████  overview, members, profile editor, invites
+Songs & repertoire        ░░░░░░░░░░  Phase 6 — next up
+Mobile app                ░░░░░░░░░░  Phase 12 (deferred)
+Release verification      ░░░░░░░░░░  production smoke + a11y pass
+```
+
+`█` complete · `░` not started
 
 ---
 
@@ -75,34 +100,55 @@ None.
 
 ### 2. Authentication and band membership
 
-- [ ] 2.1 User registration
-- [ ] 2.2 Login / logout
-- [ ] 2.3 Password reset
-- [ ] 2.4 Band creation flow
-- [ ] 2.5 Band membership and invitations
-- [ ] 2.6 Band switcher (multi-band users)
+- [x] 2.1 User registration
+- [x] 2.2 Login / logout (sign-out routes to homepage)
+- [x] 2.3 Password reset
+- [x] 2.4 Band creation flow
+- [x] 2.5 Band membership and invitations
+- [x] 2.6 Band switcher (multi-band users)
+- [x] 2.7 Session persistence; marketing nav shows display name when signed in
+- [x] 2.8 Pending invite detection and `/app/invites` acceptance flow
+
+### 2b. Musician / player profile
+
+- [x] 2b.1 Extended `bandie_profiles` (bio, location, genres, instruments, gear, years playing)
+- [x] 2b.2 User avatar upload (`bandie-profile-images` bucket)
+- [x] 2b.3 Profile editor at `/app/profile` with live preview
+- [x] 2b.4 Display name synced to auth metadata; shown ahead of email across the app
+- [x] 2b.5 Deputy/member invite preferences and directory visibility toggles
 
 ### 3. Public band profile
 
-- [ ] 3.1 Band profile data model and RLS
-- [ ] 3.2 Public profile page (`/bands/[slug]`)
-- [ ] 3.3 Profile editing (band settings)
-- [ ] 3.4 Media and social links
-- [ ] 3.5 Public availability display
+- [x] 3.1 Band profile data model and RLS
+- [x] 3.2 Public profile page (`/bands/:slug`)
+- [x] 3.3 Profile editing (band workspace overview for leaders)
+- [x] 3.4 Media and social links
+- [x] 3.5 Public availability display
+- [x] 3.6 Band name font picker and colour palette theming
+- [x] 3.7 Logo and hero image upload
 
 ### 4. Band directory
 
-- [ ] 4.1 Directory data model and search
-- [ ] 4.2 Directory page (`/bands`)
-- [ ] 4.3 Filters (genre, location, price, rating, availability)
-- [ ] 4.4 Sorting and result cards
-- [ ] 4.5 Empty state handling
+- [x] 4.1 Directory data model and search
+- [x] 4.2 Directory page (`/bands`)
+- [x] 4.3 Filters (genre, location, price, rating, availability)
+- [x] 4.4 Sorting and result cards
+- [x] 4.5 Empty state handling
+
+### 4b. Player directory
+
+- [x] 4b.1 Public player listing data model and RLS
+- [x] 4b.2 Directory page (`/players`) with temporary vs permanent search modes
+- [x] 4b.3 Mode-specific filters (gig date, budget, travel / experience)
+- [x] 4b.4 Player cards and public profile page (`/players/:profileId`)
+- [x] 4b.5 Profile editor fields for deputy fee and travel distance
 
 ### 5. Private band workspace
 
-- [ ] 5.1 Workspace shell and navigation
-- [ ] 5.2 Member-only access enforcement
-- [ ] 5.3 Dashboard / home view
+- [x] 5.1 Workspace shell and navigation (sidebar, band switcher, protected `/app/*`)
+- [x] 5.2 Member-only access enforcement (`ProtectedRoute` + RLS)
+- [x] 5.3 Unified overview at `/app/:bandId` (public profile editor, members, invitations)
+- [ ] 5.4 Songs, setlists, calendar, and gigs navigation (deferred to Phases 6–8)
 
 ### 6. Songs and repertoire
 
@@ -143,10 +189,11 @@ None.
 
 ### 11. Platform foundations
 
-- [ ] 11.1 File storage (Supabase Storage, `bandie` buckets)
-- [ ] 11.2 Activity feed / audit log
-- [ ] 11.3 Notifications
-- [ ] 11.4 Admin portal (skeleton)
+- [x] 11.1 Profile image storage (`bandie-profile-images` bucket with RLS)
+- [ ] 11.2 Song file storage (`bandie-song-files` bucket)
+- [ ] 11.3 Activity feed / audit log
+- [ ] 11.4 Notifications
+- [ ] 11.5 Admin portal (skeleton)
 
 ### 12. Mobile app
 
@@ -158,6 +205,140 @@ None.
 
 ## Session notes
 
+**27 June 2026 — Admin player profile editing**
+- Shared `UserProfileEditor` for self-service and admin edit flows
+- Admins edit any player profile at `/app/profiles/:profileId/edit` (same fields as `/app/profile`)
+- Edit links on band member cards and workspace player profile views for admins
+- Admin avatar upload uses existing storage helpers and RLS
+
+**27 June 2026 — Platform app admin**
+- Added `is_app_admin` generated column on `platform_user_app_memberships` (`role` in `admin`, `owner`)
+- Bandie admin RLS: full read/update on profiles, bands, members, media, invitations, and profile image storage
+- `@bandie/data`: `isCurrentUserAppAdmin()`, admin profile/image helpers; admins see all bands in workspace
+- `AuthContext` exposes `isAppAdmin` for UI gating
+- Promote via SQL: `update platform_user_app_memberships set role = 'admin' where user_id = … and app_code = 'bandie'`
+
+**27 June 2026 — Test data mode**
+- Added `test_user` on `bandie_bands` and `bandie_profiles`
+- `VITE_BANDIE_DATA_MODE`: `live` hides test rows; `test` shows all directory data
+- Seeded 10 fictitious bands and 50 test players for development/demo
+
+**27 June 2026 — Player directory “Any role” search mode**
+- Added third search mode that lists all published players regardless of invite preference
+- Any mode exposes both deputy and permanent filter groups; recommended sort boosts dual availability
+
+**27 June 2026 — Player directory dual availability**
+- Directory result cards show all invite preferences when a player is open to deputy gigs and permanent membership
+- Profile editor and filter copy clarify that both invitation types can be selected independently
+
+**27 June 2026 — Player directory in workspace**
+- Authenticated player directory at `/app/players` with sidebar nav and band-leader entry points
+- Defaults to permanent member search; shared `PlayerDirectoryView` for public and workspace layouts
+- “Find players” on My bands hub and band overview (leaders)
+
+**27 June 2026 — Homepage “For players” section**
+- Added third audience panel on homepage for musicians promoting themselves (deputy gigs or permanent membership)
+- Nav anchor `#players`, CTA routes to `/signup?intent=player-profile` then `/app/profile`
+- Updated homepage spec, mockup and product functional requirements
+
+**27 June 2026 — Documentation sync**
+- Aligned project docs with implemented routes, data layer, and migration history
+- Phase 5 (workspace shell) marked complete; Phase 6 (songs) is next focus
+
+**27 June 2026 — Sign-out routing**
+- `logout()` navigates to `/` before clearing session so users land on homepage, not `/login`
+- `BrowserRouter` moved to `main.tsx` so `AuthContext` can use `useNavigate`
+
+**27 June 2026 — Display name ahead of email**
+- `resolveDisplayName()` prefers profile name, then auth metadata, then email local-part
+- `formatUserWithEmail()` renders **Name · email** when both are known
+- Pending invitations list shows invitee display name before email via `bandie_list_band_invitations_for_owner` RPC
+- Profile editor shows display name field before read-only email
+
+**27 June 2026 — Player directory**
+- Public player directory at `/players` with temporary (deputy) and permanent (member) search modes
+- Temporary filters: instrument, genre, location, gig date, budget, travel distance
+- Permanent filters: instrument, genre, location, minimum years playing
+- Migration adds deputy fee/travel fields and public RLS for published player profiles
+- Player profile editor updated with directory visibility and deputy gig preferences
+
+**27 June 2026 — Player invitation preferences**
+- Added `open_to_deputy_invites` and `open_to_member_invites` on `bandie_profiles`
+- Player profile editor at `/app/profile` includes opt-in checkboxes for deputy and permanent member invites
+- `@bandie/data` exposes `formatPlayerInvitePreferences()` for player directory filters
+
+**27 June 2026 — Temporary email verification bypass**
+- Disabled Supabase `auth.email.enable_confirmations` on remote project (config push)
+- Signup signs users in immediately via `signUpAndSignInWithEmail`; no confirmation email sent
+- Added password confirmation and show/hide toggle on signup, login, and reset password flows
+- Re-enable email verification when Resend SMTP rate limits are resolved
+
+**26 June 2026 — Split profile location fields**
+- Overview separates tagline, location (home city + travel distance), and genres into distinct editable rows
+- Added `travel_distance_miles` on bands; public profile shows location and genres separately
+
+**26 June 2026 — Edgy colour palettes**
+- Added Punk Riot, Anarcho Black, Acid Clash, and Garage Grit palettes for punk and garage bands
+
+**26 June 2026 — Band colour palettes**
+- Eight curated palettes (Bandie Gold, Stage Red, Midnight Blue, etc.) stored on `bandie_bands.color_palette`
+- Shared palette tokens in `@bandie/data` for public profiles and future poster templates
+- Palette picker on create band and band workspace overview; live preview on public profile
+
+**26 June 2026 — Public-style band workspace overview**
+- Overview mirrors public profile layout: hero, logo, band name in profile font
+- Inline Edit buttons per section; font picker only when editing band name
+- Members and invitations remain below the profile preview
+
+**26 June 2026 — Unified band workspace overview**
+- Combined Overview, Public profile, and Members into single `/app/:bandId` page
+- Leader can edit public profile inline; members see read-only summary
+- Band member cards with player profile details; invitations section for leaders
+- Legacy `/profile` and `/members` routes redirect to overview
+
+**26 June 2026 — Player profile gear section**
+- Added `gear_items` and `gear_notes` on `bandie_profiles`
+- Gear section on `/app/profile` with gear list and setup notes
+
+**26 June 2026 — Musician / player profile**
+- Extended `bandie_profiles` with bio, location, genres, instruments, years playing, visibility flag
+- User avatar upload to `bandie-profile-images` at `users/{user_id}/avatar.{ext}` with storage RLS
+- `@bandie/data` user profile APIs; display name synced to auth metadata and used in app shell
+- Profile editor at `/app/profile` with photo upload, musician fields, and live preview
+
+**26 June 2026 — Sign-up invite acceptance**
+- Added `bandie_list_my_pending_invitations()` RPC for invitees to see open invites by email
+- Sign-up and login route to `/app/invites` when pending invitations exist
+- Pending invites page supports accept one or accept all, then continues to My bands
+
+**26 June 2026 — My bands hub**
+- Post-login landing at `/app` shows directory-style cards for each band membership
+- Shared `BandCard` component used by directory and workspace views
+- Removed auto-redirect to single band or create-band flow; users always pick from My bands
+
+**26 June 2026 — Public profile layout & name font**
+- Redesigned public profile hero: logo at top (no card), band name below with selectable font
+- Added `name_font` column on `bandie_bands` with curated Google Font options
+- Profile editor includes band name font picker in Visuals section
+
+**26 June 2026 — Band directory (Phase 4)**
+- Added `@bandie/data` directory listing, client-side filter/sort helpers
+- Built `/bands` directory page with filters, sort, result cards, and empty states
+- Rating filter deferred until reviews data exists; sort by recommended uses availability + profile completeness
+
+**26 June 2026 — Public band profile (Phase 3)**
+- Extended `bandie_bands` with profile, booking, and availability fields
+- Added media, social link, and public date tables with RLS
+- Public profile page at `/bands/:slug` and workspace editor at `/app/:bandId`
+- Build, lint, and migration verified
+
+**26 June 2026 — Authentication & band membership (Phase 2)**
+- Added `@bandie/data` auth, membership, bands, and invitations modules
+- Applied `20260626200000_bandie_invitations.sql` migration (invites table, RLS, accept RPC)
+- Auth pages: signup, login, forgot/reset password; protected `/app/*` workspace shell
+- Band creation, member invitations, accept-invite flow, and multi-band switcher
+- Build, lint, and Supabase connectivity verified
+
 **26 June 2026 — Phase 0 foundations**
 - Added GitHub Actions CI (lint + build)
 - Applied platform core + Bandie bootstrap migrations to `proff-rsd-mt-1`
@@ -166,7 +347,7 @@ None.
 
 **26 June 2026 — Homepage (Phase 1)**
 - Implemented marketing homepage at `/` matching mockup and spec
-- Added placeholder routes `/bands` and `/signup`
+- Marketing nav links to live `/bands` and `/login` routes
 - Added `netlify.toml` and SPA redirects for client routing
 - Build and lint verified
 

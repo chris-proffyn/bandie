@@ -113,8 +113,10 @@ See [product-technical-requirements.md](docs/project/product-technical-requireme
 
 ## Current status
 
-**Phase:** Bootstrap complete  
-**Next:** Bandie Homepage — see [homepage spec](docs/project/bandie_homepage_functional_technical_spec.md)
+**Phase:** Workspace shell complete (Phases 0–5 in tracker); songs & repertoire next  
+**Live routes:** `/`, `/bands`, `/players`, `/login`, `/signup`, `/app`, `/app/:bandId`, `/app/profile`
+
+See [PROJECT_STATUS_TRACKER.md](docs/PROJECT_STATUS_TRACKER.md) for full delivery progress.
 
 ---
 

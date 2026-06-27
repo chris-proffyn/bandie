@@ -208,8 +208,8 @@ The band profile gives bands a single professional link to send to venues, event
 
 A band profile should include:
 
-- Band name.
-- Logo or image.
+- Band name with a selectable display font.
+- Logo or image shown at the top of the profile (above the band name, not inside a card).
 - Location and areas served.
 - Genre and style tags.
 - Short bio.
@@ -793,7 +793,7 @@ Example musical roles:
 
 Example workspace roles:
 
-- Band Owner.
+- Band Leader.
 - Band Leader.
 - Admin.
 - Member.
@@ -821,7 +821,7 @@ Public content includes only intentionally published profile information, public
 
 Possible permission behaviours:
 
-- Band Owner can manage band settings, members, and public profile.
+- Band Leader can manage band settings, members, and public profile.
 - Band Leader can create gigs, setlists, rehearsals, and song folders.
 - Members can upload files, vote on availability, comment, and update their own parts.
 - Guests/Deps can see specific songs or setlists shared with them.

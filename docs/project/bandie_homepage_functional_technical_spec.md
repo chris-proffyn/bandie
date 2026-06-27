@@ -7,7 +7,7 @@
 **Intended implementation workflow:** Cursor-assisted development  
 **Source mockup:** `bandie_homepage_mockup.html`  
 **Related source documents:** `bandie_product_description.md`, `bandie_build_elements.md`  
-**Last updated:** 26 June 2026
+**Last updated:** 27 June 2026
 
 ---
 
@@ -15,10 +15,11 @@
 
 This document defines the functional and technical specification for the Bandie Homepage.
 
-The homepage is the first public surface of Bandie. It introduces the product, explains who it is for, communicates the core promise, and routes users toward one of two main journeys:
+The homepage is the first public surface of Bandie. It introduces the product, explains who it is for, communicates the core promise, and routes users toward one of three main journeys:
 
 1. **Bands** who want to create or manage a band presence.
 2. **Event organisers** who want to find and book a band.
+3. **Players** who want to promote themselves for permanent membership or deputy / stand-in gigs.
 
 This document is intended to be used as an implementation guide for building the homepage as part of the Bandie web product. It should provide enough detail for Cursor to generate a production-ready first version and leave clear extension points for later development.
 
@@ -145,6 +146,24 @@ These users need to understand that Bandie will help them:
 - Watch or listen to media.
 - Submit a booking enquiry.
 
+### 5.3 Players
+
+The third major homepage audience is musicians who want to be discovered by bands — either to join permanently or to cover gigs as a dep.
+
+Examples:
+
+- Session musicians between bands.
+- Players open to stand-in / deputy work.
+- Multi-band musicians who want one public player profile.
+- Musicians relocating and looking for a new band.
+
+These users need to understand that Bandie will help them:
+
+- List instruments, genres, location and experience in a player directory.
+- Signal openness to deputy gigs or permanent member invites.
+- Show travel distance and fee guidance for dep work.
+- Be found by band leaders searching the player directory.
+
 ---
 
 ## 6. Page Scope
@@ -161,7 +180,7 @@ The homepage MVP should include:
 - Example band profile preview card.
 - Benefit / trust pills.
 - Feature cards describing key product areas.
-- Audience-specific sections for bands and organisers.
+- Audience-specific sections for bands, organisers and players.
 - Workflow section explaining the Bandie lifecycle.
 - Final CTA block.
 - Footer.
@@ -218,7 +237,7 @@ Public
 └── /about or /how-it-works   Optional future marketing pages
 ```
 
-For MVP, the homepage may link to placeholder routes if the downstream pages are not yet complete.
+For MVP, the homepage links to live routes: `/bands` (directory), `/login`, `/signup?intent=create-band`. Signed-in users see their display name in the nav (linking to `/app`) instead of “Log in”.
 
 Recommended route mapping:
 
@@ -229,8 +248,10 @@ Recommended route mapping:
 | For bands | `#bands` or `/signup?intent=create-band` | Anchor in static MVP; signup route when available |
 | Find a Band | `/bands` | Route to Band Directory when available |
 | For organisers | `#organisers` | Anchor scroll |
+| For players | `#players` | Anchor scroll |
 | How it works | `#how` | Anchor scroll |
 | Create your band page | `/signup?intent=create-band` | Route to signup / waitlist |
+| Build your player profile | `/signup?intent=player-profile` | Route to signup, then player profile editor |
 | Final CTA: For Bands | `/signup?intent=create-band` | Route to signup / waitlist |
 | Final CTA: For Event Organisers | `/bands` | Route to Band Directory |
 
@@ -247,6 +268,7 @@ The homepage must include a top navigation bar with:
 - Anchor link to “What it is”.
 - Anchor link to “For bands”.
 - Anchor link to “For organisers”.
+- Anchor link to “For players”.
 - Anchor link to “How it works”.
 
 Functional behaviour:
@@ -375,10 +397,11 @@ Acceptance criteria:
 
 ### 8.5 Audience Split Section
 
-The homepage must include two audience panels:
+The homepage must include three audience panels:
 
 1. For bands.
 2. For event organisers.
+3. For players.
 
 #### For Bands Panel
 
@@ -420,15 +443,36 @@ CTA:
 
 - “Find a band”.
 
+#### For Players Panel
+
+Heading:
+
+> Get seen by bands that need you.
+
+The panel should state that session musicians, deps and players between bands can promote themselves in the Bandie player directory — for permanent membership or one-off stand-in gigs.
+
+It should include benefits:
+
+- Create a player profile with instruments, genres, location and experience.
+- Say you are open to deputy / stand-in gigs or permanent member invites.
+- Show travel distance and fee guidance for dep work.
+- Let band leaders find you when they need a last-minute cover.
+- Keep one profile that works across every band you play with.
+
+CTA:
+
+- “Build your player profile” (routes to signup with `intent=player-profile`, then `/app/profile`).
+
 Functional behaviour:
 
 - Band CTA routes to signup / band creation when available.
 - Organiser CTA routes to the public band directory when available.
+- Player CTA routes to signup / player profile editor when available.
 - CTA clicks should emit analytics events.
 
 Acceptance criteria:
 
-- The two user groups are visibly distinct.
+- The three user groups are visibly distinct.
 - Each panel has a clear next action.
 - The section remains readable in a single-column mobile layout.
 
@@ -668,7 +712,7 @@ Recommended event payload:
   "location": "hero | audience_section | final_cta | nav",
   "label": "For Bands",
   "target": "/signup?intent=create-band",
-  "audience_intent": "band | organiser",
+  "audience_intent": "band | organiser | player",
   "page": "homepage"
 }
 ```
@@ -1004,7 +1048,7 @@ After login, the user should route to:
 | `section` | string | `nav`, `hero`, `bands`, `organisers`, `final_cta` |
 | `label` | string | Visible CTA or link text |
 | `target` | string | Target route or anchor |
-| `audience_intent` | string | `band`, `organiser`, `general` |
+| `audience_intent` | string | `band`, `organiser`, `player`, `general` |
 | `timestamp` | string | ISO timestamp |
 
 ### 16.3 Analytics Implementation Notes
@@ -1228,8 +1272,9 @@ For the first build:
 
 - Implement the homepage as a static public page.
 - Use the mockup content directly, structured through a content config file.
-- Route “Find a Band” to `/bands` if the directory page exists; otherwise use a placeholder route.
-- Route “For Bands” to `/signup?intent=create-band` if auth exists; otherwise use `#bands` or a placeholder waitlist route.
+- Route “Find a Band” to `/bands` (live).
+- Route “For Bands” to `/signup?intent=create-band` (live).
+- Route “For Players” to `/signup?intent=player-profile` (live).
 - Do not add email capture until consent, storage and spam handling are defined.
 - Keep the example profile card static.
 - Use reusable components so the visual system can be reused across Bandie public pages.
@@ -1238,8 +1283,8 @@ For the first build:
 
 ## 24. Summary
 
-The Bandie Homepage is the public entry point for the product. It should introduce Bandie as the simple hub for band life, explain the two-sided audience of bands and event organisers, and route each user group into the correct journey.
+The Bandie Homepage is the public entry point for the product. It should introduce Bandie as the simple hub for band life, explain the three audiences of bands, event organisers and players, and route each user group into the correct journey.
 
-The implementation should closely follow `bandie_homepage_mockup.html`, preserving its bold dark visual style, high-contrast cards, music-oriented tone, example band profile preview, audience split, workflow explanation and clear CTAs.
+The implementation should closely follow `bandie_homepage_mockup.html`, preserving its bold dark visual style, high-contrast cards, music-oriented tone, example band profile preview, audience split (bands, organisers and players), workflow explanation and clear CTAs.
 
 The homepage should be simple in MVP, but built on a component structure that can later support live featured bands, real directory stats, signup flows, analytics, testimonials, pricing and richer product storytelling.

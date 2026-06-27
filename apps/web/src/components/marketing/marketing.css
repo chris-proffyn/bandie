@@ -90,6 +90,17 @@
   color: var(--text);
 }
 
+.nav-account {
+  color: var(--text);
+  font-weight: 800;
+}
+
+.nav-auth-placeholder {
+  display: inline-block;
+  width: 4.5rem;
+  min-height: 1.25rem;
+}
+
 .hero {
   width: min(var(--max), calc(100% - 40px));
   margin: 34px auto 0;
@@ -416,7 +427,7 @@
 
 .split {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
 }
 
@@ -439,6 +450,12 @@
 .audience-card.organisers {
   background:
     radial-gradient(circle at 85% 10%, rgba(97, 227, 194, 0.18), transparent 30%),
+    rgba(255, 255, 255, 0.055);
+}
+
+.audience-card.players {
+  background:
+    radial-gradient(circle at 85% 10%, rgba(255, 94, 126, 0.2), transparent 30%),
     rgba(255, 255, 255, 0.055);
 }
 
@@ -561,6 +578,12 @@
   gap: 20px;
   flex-wrap: wrap;
   font-weight: 650;
+}
+
+@media (max-width: 1180px) {
+  .split {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 930px) {

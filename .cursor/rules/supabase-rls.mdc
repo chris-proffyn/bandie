@@ -1,0 +1,50 @@
+---
+description: RLS requirements for every new Supabase table, bucket, function, or RPC
+globs: supabase/**/*
+alwaysApply: false
+---
+
+# Supabase RLS — mandatory for new database elements
+
+Every migration that adds or changes user-facing Supabase resources **must** include RLS in the **same migration**. Do not merge schema without policies.
+
+## Tables
+
+1. `alter table … enable row level security;`
+2. Policies for each operation the app needs: `select`, `insert`, `update`, `delete`
+3. Scope data by tenant (`band_id`, `user_id`, `app_code`) — never rely on client-side filtering alone
+4. Use `platform_current_user_has_app_access('bandie')` for Bandie-scoped tables
+5. If a policy subquery reads another RLS-protected table, use a **`security definer`** helper (with `set search_path = public`) so the check does not fail due to nested RLS — see `bandie_current_user_owns_band()` and `bandie_can_manage_profile_image()`
+
+## Storage buckets
+
+1. Create bucket in migration (`insert into storage.buckets …`)
+2. Add policies on **`storage.objects`** for:
+   - **Public read** (`select` to `anon, authenticated`) if assets appear on public pages
+   - **Authenticated write** (`insert`, `update`, `delete`) with path + ownership checks
+3. Use structured paths: `bands/<band_id>/…`
+4. Prefer `security definer` helpers for ownership checks — inline `exists (select … from bandie_bands …)` in storage policies often fails because the subquery runs under the caller's RLS
+5. `upsert: true` uploads need both **insert** and **update** policies
+
+## RPC / functions
+
+1. Client-callable functions: `grant execute … to authenticated` (or `anon` if truly public)
+2. Sensitive writes: `security definer` + explicit auth checks inside the function
+3. Always `set search_path = public`
+
+## Checklist before `supabase db push`
+
+- [ ] RLS enabled on every new table
+- [ ] Policies cover anon vs authenticated vs member vs owner as required
+- [ ] Storage bucket has read + write policies on `storage.objects`
+- [ ] Ownership checks use security definer helpers where nested RLS applies
+- [ ] Data access goes through `@bandie/data`, not the UI
+- [ ] Manual smoke test: sign in as band leader and perform the action (upload, insert, etc.)
+
+## Bandie naming
+
+- Tables: `bandie_*`
+- Buckets: `bandie-*` (e.g. `bandie-profile-images`, `bandie-song-files`)
+- Paths: `bands/<band_id>/…`
+
+Reference: `docs/RSD_SUPABASE_MULTI_TENANT_DB.md`

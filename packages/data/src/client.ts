@@ -4,6 +4,8 @@ export interface BandieClientConfig {
   supabaseUrl: string;
   supabaseAnonKey: string;
   appCode?: string;
+  /** `test` shows fictitious bands/players; `live` hides rows where test_user is true */
+  dataMode?: string;
 }
 
 const DEFAULT_APP_CODE = 'bandie';
@@ -29,6 +31,8 @@ export function createBandieClient(config: BandieClientConfig): SupabaseClient {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
+      detectSessionInUrl: true,
+      storage: typeof globalThis.localStorage !== 'undefined' ? globalThis.localStorage : undefined,
     },
   });
 }

@@ -2,7 +2,7 @@
 
 **Document status:** Authoritative technical requirements  
 **Product:** Bandie  
-**Last updated:** 26 June 2026
+**Last updated:** 27 June 2026
 
 ---
 
@@ -115,6 +115,8 @@ VITE_SUPABASE_URL=https://cjmgrsvbrcgozgjxbriz.supabase.co
 VITE_SUPABASE_ANON_KEY=   # sb_publishable_... (modern publishable key)
 VITE_APP_CODE=bandie
 VITE_APP_URL=
+# live = hide fictitious test bands/players; test = show all directory data
+VITE_BANDIE_DATA_MODE=live
 
 # Server / CLI / migrations — never in client code
 SUPABASE_URL=https://cjmgrsvbrcgozgjxbriz.supabase.co
@@ -132,17 +134,22 @@ All tables prefixed `bandie_`. Full schema to be defined in migrations. Conceptu
 
 | Entity | Purpose |
 |---|---|
+| `bandie_profiles` | Musician / player profile (display name, instruments, gear, directory visibility) |
 | `bandie_bands` | Band workspace + public profile |
-| `bandie_band_memberships` | User ↔ band with roles |
-| `bandie_songs` | Repertoire entries |
-| `bandie_song_part_folders` | Part folders within a song |
-| `bandie_song_files` | File metadata and storage paths |
-| `bandie_setlists` | Setlist definitions |
-| `bandie_setlist_songs` | Songs in setlist order |
-| `bandie_calendar_events` | Rehearsals and availability windows |
-| `bandie_availability_votes` | Member votes on events |
-| `bandie_gigs` | Confirmed/proposed performances |
-| `bandie_booking_enquiries` | Inbound organiser enquiries |
+| `bandie_band_members` | User ↔ band with roles |
+| `bandie_band_invitations` | Email invitations with accept token |
+| `bandie_band_media` | Band photos, videos, tracks (URLs) |
+| `bandie_band_social_links` | Social platform links |
+| `bandie_band_public_dates` | Manual public availability dates |
+| `bandie_songs` | Repertoire entries (planned) |
+| `bandie_song_part_folders` | Part folders within a song (planned) |
+| `bandie_song_files` | File metadata and storage paths (planned) |
+| `bandie_setlists` | Setlist definitions (planned) |
+| `bandie_setlist_songs` | Songs in setlist order (planned) |
+| `bandie_calendar_events` | Rehearsals and availability windows (planned) |
+| `bandie_availability_votes` | Member votes on events (planned) |
+| `bandie_gigs` | Confirmed/proposed performances (planned) |
+| `bandie_booking_enquiries` | Inbound organiser enquiries (planned) |
 
 Plus platform tables from multi-tenant guide (`platform_apps`, `platform_app_memberships`, etc.).
 
@@ -152,19 +159,29 @@ RLS policies must enforce band membership for all private data.
 
 ## 7. Storage
 
-- Bucket: `bandie-song-files` (and others as needed)
-- Path pattern: `{band_id}/{song_id}/{part_folder_id}/{file_id}/{filename}`
-- File size limits: TBD (document when decided)
-- Supported MVP types: PDF, images, audio, Guitar Pro, ChordPro, DOCX, text
+| Bucket | Purpose | Path pattern |
+|---|---|---|
+| `bandie-profile-images` | Band logos/heroes and user avatars | `bands/{band_id}/…`, `users/{user_id}/avatar.{ext}` |
+| `bandie-song-files` | Song part files (planned) | `{band_id}/{song_id}/{part_folder_id}/{file_id}/{filename}` |
+
+- Profile images: JPEG, PNG, WebP, GIF up to 5 MB
+- Storage RLS uses `security definer` helpers (`bandie_can_manage_profile_image`, `bandie_can_manage_user_profile_image`)
+- Song file size limits: TBD (document when decided)
+- Supported MVP song types (planned): PDF, images, audio, Guitar Pro, ChordPro, DOCX, text
 
 ---
 
 ## 8. Authentication
 
-- Supabase Auth with email verification (Resend SMTP)
+- Supabase Auth (email + password)
+- **Temporary:** email verification disabled to avoid Supabase auth email rate limits during early development; signup signs users in immediately. Re-enable `auth.email.enable_confirmations` in Supabase when Resend SMTP verification is restored.
+- Signup requires password confirmation; password fields include show/hide toggle
 - Flows: register, login, logout, password reset
-- Post-auth routing based on band membership state
-- App membership via `platform_app_memberships` (multi-tenant pattern)
+- Session persisted in `localStorage` with auto-refresh and URL detection
+- Sign-out navigates to `/` before clearing session (avoids redirect to `/login`)
+- Post-auth routing based on band membership and pending invitations (`routeAfterAuth`)
+- App membership via `platform_user_app_memberships` (multi-tenant pattern)
+- Display name resolution: profile `display_name` → auth `user_metadata.display_name` → email local-part → `"Band member"`
 
 ---
 
@@ -173,13 +190,21 @@ RLS policies must enforce band membership for all private data.
 ```
 apps/web/src/
 ├── components/
-│   ├── marketing/     Public pages (homepage, etc.)
-│   └── ui/            App-specific UI (or import from @bandie/ui)
+│   ├── app/           App shell (layout, band switcher)
+│   ├── auth/          Auth layout, protected/guest routes, password field
+│   ├── band/          Band workspace (profile editor, members, invitations)
+│   ├── bands/         Band cards (My bands, workspace)
+│   ├── directory/     Band and player directory filters and cards
+│   ├── marketing/     Public homepage nav and sections
+│   └── profile/       Profile image/font/palette pickers, public profile views
 ├── content/           Static content configs (e.g. homepageContent.ts)
-├── pages/             Route-level pages
-├── hooks/
-├── lib/
-└── main.tsx
+├── context/           AuthContext (session, profile, bands, displayName)
+├── pages/
+│   ├── app/           Protected workspace pages
+│   └── auth/          Login, signup, password reset
+├── lib/               Client init, helpers, hooks
+├── styles/            auth.css, directory.css, workspace.css, bandProfile.css
+└── main.tsx           BrowserRouter + AuthProvider
 ```
 
 Homepage component breakdown per `bandie_homepage_functional_technical_spec.md` §13.3.
@@ -207,20 +232,29 @@ Breakpoints: mobile 0–639px, tablet 640–1023px, desktop 1024px+.
 
 ---
 
-## 11. Routing (planned)
+## 11. Routing (implemented)
 
-| Route | Purpose |
-|---|---|
-| `/` | Homepage |
-| `/bands` | Directory |
-| `/bands/:slug` | Public band profile |
-| `/book/:slug` | Booking enquiry |
-| `/signup` | Registration |
-| `/login` | Login |
-| `/app` | Private workspace entry (auth required) |
-| `/app/:bandId/...` | Band-scoped workspace routes |
+| Route | Access | Purpose |
+|---|---|---|
+| `/` | Public | Marketing homepage |
+| `/bands` | Public | Band directory |
+| `/bands/:slug` | Public | Public band profile |
+| `/players` | Public | Player directory |
+| `/players/:profileId` | Public | Public player profile |
+| `/invite/:token` | Public | Accept band invitation |
+| `/signup` | Guest | Registration |
+| `/login` | Guest | Login |
+| `/forgot-password` | Guest | Request password reset |
+| `/reset-password` | Auth | Set new password |
+| `/app` | Protected | My bands hub |
+| `/app/invites` | Protected | Pending band invitations |
+| `/app/profile` | Protected | Musician / player profile editor |
+| `/app/players` | Protected | Player directory (find members or deps) |
+| `/app/bands/new` | Protected | Create band |
+| `/app/:bandId` | Protected | Band workspace overview |
+| `/book/:slug` | Public | Booking enquiry (planned) |
 
-MVP may use placeholder routes until downstream pages exist.
+Legacy routes `/app/:bandId/profile` and `/app/:bandId/members` redirect to overview.
 
 ---
 
@@ -240,15 +274,17 @@ Per `RSD_TESTING_STRATEGY.md`:
 
 ---
 
-## 14. CI/CD (to be implemented)
+## 14. CI/CD
 
-GitHub Actions pipeline:
+GitHub Actions pipeline (`.github/workflows/ci.yml`):
 
-1. Install (npm ci)
+1. Install (`npm ci`)
 2. Lint
-3. Test
-4. Build `@bandie/web`
-5. Deploy to Netlify (staging/production)
+3. Build (all workspaces)
+
+Netlify deploys from `main` using `netlify.toml` with SPA redirects.
+
+Supabase migrations applied via `supabase db push` to `proff-rsd-mt-1`.
 
 ---
 
@@ -266,8 +302,8 @@ GitHub Actions pipeline:
 
 | Topic | Options | Resolve before |
 |---|---|---|
-| Tailwind vs CSS modules | Either; match mockups | Homepage styling task |
-| Vitest vs Jest | Vitest fits Vite; JLS per RSD | First test pack |
+| Tailwind vs CSS modules | CSS modules / scoped CSS in use | Resolved |
+| Vitest vs Jest | Vitest fits Vite; Jest per RSD | First test pack |
 | Real-time (Supabase Realtime) | Availability voting live updates | Calendar feature |
 | SSR/prerender for SEO | Vite plugin vs Next.js | Public profile launch |
 

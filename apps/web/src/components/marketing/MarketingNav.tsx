@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { homepageContent } from '../../content/homepageContent';
+import { useAuth } from '../../context/AuthContext';
 import { trackNavClick } from '../../lib/analytics';
 
 export function MarketingNav() {
   const { nav } = homepageContent;
+  const { session, displayName, loading } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -42,6 +44,30 @@ export function MarketingNav() {
             {link.label}
           </a>
         ))}
+        {loading ? (
+          <span className="nav-auth-placeholder" aria-hidden="true" />
+        ) : session ? (
+          <Link
+            to="/app"
+            className="nav-account"
+            onClick={() => {
+              trackNavClick(displayName, '/app');
+              setMenuOpen(false);
+            }}
+          >
+            {displayName}
+          </Link>
+        ) : (
+          <Link
+            to="/login"
+            onClick={() => {
+              trackNavClick('Log in', '/login');
+              setMenuOpen(false);
+            }}
+          >
+            Log in
+          </Link>
+        )}
       </div>
     </nav>
   );

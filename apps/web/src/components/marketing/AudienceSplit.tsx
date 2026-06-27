@@ -29,6 +29,18 @@ export function AudienceSplit() {
         </ul>
         <MarketingButton cta={audience.organisers.cta} section="organisers" />
       </article>
+
+      <article className="audience-card players" id={audience.players.id}>
+        <div className="section-kicker">{audience.players.kicker}</div>
+        <h3>{audience.players.heading}</h3>
+        <p>{audience.players.text}</p>
+        <ul className="check-list">
+          {audience.players.benefits.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+        <MarketingButton cta={audience.players.cta} section="players" />
+      </article>
     </section>
   );
 }

@@ -1,0 +1,692 @@
+.band-profile-page {
+  --profile-max: 1180px;
+  --band-bg: #101014;
+  --band-glow-primary: rgba(255, 204, 51, 0.18);
+  --band-glow-secondary: rgba(255, 94, 126, 0.16);
+  --band-surface: rgba(255, 255, 255, 0.05);
+  --band-surface-border: rgba(255, 255, 255, 0.12);
+  --band-header-bg: rgba(16, 16, 20, 0.82);
+  --band-text: #f6f3ea;
+  --band-text-muted: #bbb6aa;
+  --band-accent: #ffcc33;
+  --band-accent-secondary: #ff5e7e;
+  --band-accent-text: #101014;
+  --band-accent-soft-bg: rgba(255, 204, 51, 0.14);
+  --band-accent-soft-border: rgba(255, 204, 51, 0.35);
+  --band-booking-start: rgba(255, 204, 51, 0.12);
+  --band-booking-end: rgba(255, 94, 126, 0.08);
+  --band-logo-start: #ffcc33;
+  --band-logo-end: #ff5e7e;
+  min-height: 100vh;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background:
+    radial-gradient(circle at 12% 10%, var(--band-glow-primary), transparent 28%),
+    radial-gradient(circle at 88% 8%, var(--band-glow-secondary), transparent 30%),
+    var(--band-bg);
+  color: var(--band-text);
+  line-height: 1.5;
+}
+
+.band-profile-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  backdrop-filter: blur(18px);
+  background: var(--band-header-bg);
+  border-bottom: 1px solid var(--band-surface-border);
+}
+
+.band-profile-header-inner {
+  width: min(var(--profile-max), calc(100% - 40px));
+  margin: 0 auto;
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.band-profile-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  text-decoration: none;
+  color: inherit;
+}
+
+.band-profile-brand-mark {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--band-logo-start), var(--band-logo-end));
+  display: grid;
+  place-items: center;
+  color: var(--band-accent-text);
+  font-weight: 950;
+}
+
+.band-profile-shell {
+  width: min(var(--profile-max), calc(100% - 40px));
+  margin: 0 auto;
+}
+
+.band-profile-identity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 3rem 0 2.5rem;
+  gap: 0;
+}
+
+.band-profile-logo-mark {
+  width: clamp(96px, 18vw, 148px);
+  height: clamp(96px, 18vw, 148px);
+  display: grid;
+  place-items: center;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 950;
+  background: linear-gradient(135deg, var(--band-logo-start), var(--band-logo-end));
+  color: var(--band-accent-text);
+  border-radius: 28px;
+  margin-bottom: 1.5rem;
+}
+
+.band-profile-logo-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+.band-profile-name {
+  margin: 0;
+  font-size: clamp(2.75rem, 7vw, 5.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  font-weight: 800;
+  max-width: 16ch;
+}
+
+.band-profile-identity .band-profile-eyebrow {
+  margin-top: 1.25rem;
+  margin-bottom: 0;
+}
+
+.band-profile-identity .band-profile-subtitle {
+  margin-top: 1rem;
+}
+
+.band-profile-identity .band-profile-lead {
+  margin-top: 1.25rem;
+  max-width: 42rem;
+}
+
+.band-profile-identity .band-profile-meta-grid {
+  width: 100%;
+  max-width: 42rem;
+  margin-top: 2rem;
+}
+
+.band-profile-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--band-text);
+  background: var(--band-accent-soft-bg);
+  border: 1px solid var(--band-accent-soft-border);
+  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 1.25rem;
+}
+
+.band-profile-subtitle {
+  margin-top: 1rem;
+  color: var(--band-text-muted);
+  font-size: clamp(1.05rem, 2vw, 1.35rem);
+  font-weight: 650;
+}
+
+.band-profile-location,
+.band-profile-genres {
+  margin: 0.65rem 0 0;
+  color: var(--band-text-muted);
+  font-size: 1rem;
+}
+
+.band-profile-genres {
+  font-weight: 650;
+}
+
+.band-profile-lead {
+  margin-top: 1.25rem;
+  color: var(--band-text-muted);
+  font-size: 1.05rem;
+  max-width: 38rem;
+}
+
+.band-profile-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+.band-profile-meta-card {
+  background: var(--band-surface);
+  border: 1px solid var(--band-surface-border);
+  border-radius: 16px;
+  padding: 1rem;
+}
+
+.band-profile-meta-card strong {
+  display: block;
+  font-size: 1.25rem;
+  line-height: 1.1;
+}
+
+.band-profile-meta-card span {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--band-text-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.band-profile-section {
+  padding: 2rem 0 3rem;
+}
+
+.band-profile-section h2 {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  letter-spacing: -0.05em;
+}
+
+.band-profile-section p {
+  color: var(--band-text-muted);
+  max-width: 42rem;
+}
+
+.band-profile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.band-profile-card {
+  background: var(--band-surface);
+  border: 1px solid var(--band-surface-border);
+  border-radius: 18px;
+  padding: 1.1rem 1.2rem;
+}
+
+.band-profile-card h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.band-profile-card p,
+.band-profile-card a {
+  margin: 0;
+  color: var(--band-text-muted);
+  font-size: 0.95rem;
+  word-break: break-word;
+}
+
+.band-profile-card a {
+  color: var(--band-accent);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.band-profile-card a:hover {
+  text-decoration: underline;
+}
+
+.band-profile-video {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  border: 0;
+  border-radius: 18px;
+  background: #191922;
+}
+
+.band-profile-socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.band-profile-social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--band-surface-border);
+  background: var(--band-surface);
+  color: var(--band-text);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.band-profile-social-link:hover {
+  border-color: var(--band-accent-soft-border);
+  color: var(--band-accent);
+}
+
+.band-profile-booking {
+  margin: 2rem 0 4rem;
+  padding: 2rem;
+  border-radius: 28px;
+  background: linear-gradient(145deg, var(--band-booking-start), var(--band-booking-end));
+  border: 1px solid var(--band-surface-border);
+}
+
+.band-profile-booking h2 {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.75rem, 4vw, 2.35rem);
+  letter-spacing: -0.05em;
+}
+
+.band-profile-booking p {
+  color: var(--band-text-muted);
+  margin: 0 0 1.25rem;
+}
+
+.band-profile-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.band-profile-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 1.25rem;
+  border-radius: 999px;
+  font-weight: 800;
+  text-decoration: none;
+  border: 1px solid transparent;
+}
+
+.band-profile-button-primary {
+  background: var(--band-accent);
+  color: var(--band-accent-text);
+}
+
+.band-profile-button-secondary {
+  background: var(--band-surface);
+  border-color: var(--band-surface-border);
+  color: var(--band-text);
+}
+
+.band-profile-footer {
+  border-top: 1px solid var(--band-surface-border);
+  padding: 1.5rem 0 2.5rem;
+  color: var(--band-text-muted);
+  font-size: 0.92rem;
+}
+
+.band-profile-empty {
+  min-height: 60vh;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 2rem;
+}
+
+.band-profile-empty h1 {
+  margin: 0 0 0.75rem;
+}
+
+.band-profile-empty p {
+  color: var(--band-text-muted);
+  max-width: 28rem;
+}
+
+@media (max-width: 900px) {
+  .band-profile-identity {
+    padding-top: 2.5rem;
+  }
+
+  .band-profile-meta-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.profile-editor-section {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.profile-editor-section h3 {
+  margin: 0 0 1rem;
+  font-size: 1.15rem;
+}
+
+.profile-editor-row {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.profile-editor-row-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+
+.profile-editor-item {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.85rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.profile-editor-item label {
+  font-size: 0.82rem;
+  color: var(--band-text-muted);
+  font-weight: 700;
+}
+
+.profile-editor-item input,
+.profile-editor-item select,
+.profile-editor-item textarea {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: #f6f3ea;
+  padding: 0.65rem 0.75rem;
+  font: inherit;
+}
+
+.profile-editor-inline-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.profile-editor-inline-actions button {
+  min-height: 36px;
+  padding: 0 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: #f6f3ea;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.profile-editor-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.profile-editor-toggle input {
+  width: 18px;
+  height: 18px;
+}
+
+.profile-preview-link {
+  color: var(--band-accent);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.profile-preview-link:hover {
+  text-decoration: underline;
+}
+
+.profile-font-picker {
+  display: grid;
+  gap: 1rem;
+}
+
+.profile-font-picker-options {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.profile-font-picker-option {
+  width: 100%;
+  min-height: 52px;
+  padding: 0.75rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f6f3ea;
+  font-size: 1.35rem;
+  line-height: 1.1;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.profile-font-picker-option:hover {
+  border-color: rgba(255, 204, 51, 0.35);
+}
+
+.profile-font-picker-option-selected {
+  border-color: rgba(255, 204, 51, 0.65);
+  background: rgba(255, 204, 51, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(255, 204, 51, 0.25);
+}
+
+.profile-font-picker-preview {
+  margin: 0;
+  padding: 1rem 1.1rem;
+  border-radius: 14px;
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.03);
+  color: #f6f3ea;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  text-align: center;
+}
+
+.profile-image-field {
+  margin-bottom: 1.25rem;
+}
+
+.profile-image-hint {
+  margin: 0.35rem 0 0;
+  color: var(--band-text-muted);
+  font-size: 0.88rem;
+}
+
+.profile-image-preview {
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.profile-image-preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-image-preview-logo {
+  width: 120px;
+  height: 120px;
+}
+
+.profile-image-preview-hero {
+  width: min(100%, 420px);
+  aspect-ratio: 16 / 9;
+}
+
+.profile-image-placeholder {
+  width: min(100%, 420px);
+  min-height: 88px;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  border-radius: 18px;
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  color: var(--band-text-muted);
+  font-size: 0.92rem;
+}
+
+.band-profile-hero-banner {
+  margin-top: 1.5rem;
+  border-radius: 28px;
+  overflow: hidden;
+  border: 1px solid var(--band-surface-border);
+  max-height: 360px;
+}
+
+.profile-palette-picker {
+  display: grid;
+  gap: 1rem;
+}
+
+.profile-palette-picker-options {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.profile-palette-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f6f3ea;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.profile-palette-option:hover {
+  border-color: rgba(255, 204, 51, 0.35);
+}
+
+.profile-palette-option-selected {
+  border-color: rgba(255, 204, 51, 0.65);
+  background: rgba(255, 204, 51, 0.1);
+}
+
+.profile-palette-swatch {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.profile-palette-option-copy {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.profile-palette-option-copy strong {
+  font-size: 0.95rem;
+}
+
+.profile-palette-option-copy span {
+  color: #bbb6aa;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.profile-palette-preview {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.profile-palette-preview-mark {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-weight: 950;
+  flex-shrink: 0;
+}
+
+.profile-palette-preview-chip {
+  display: inline-flex;
+  margin-top: 0.65rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.band-workspace-palette-label {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.band-workspace-palette-desc {
+  margin: 0.35rem 0 0;
+  color: var(--band-text-muted);
+  font-size: 0.92rem;
+}
+
+.band-workspace-field-lines p {
+  margin: 0 0 0.45rem;
+  color: var(--band-text);
+}
+
+.band-workspace-field-lines p:last-child {
+  margin-bottom: 0;
+}
+
+.band-workspace-field-label {
+  display: inline-block;
+  min-width: 6.5rem;
+  color: var(--band-text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-right: 0.5rem;
+}
+
+.band-workspace-genres {
+  margin: 0;
+  color: var(--band-text);
+  font-weight: 650;
+}
+
+.band-profile-hero-banner img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 360px;
+  object-fit: cover;
+}

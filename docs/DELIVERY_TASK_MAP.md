@@ -2,9 +2,9 @@
 
 **Document status:** Structural delivery plan (no progress tracking)  
 **Product:** Bandie  
-**Last updated:** 26 June 2026
+**Last updated:** 27 June 2026
 
-**Progress tracking:** Use `docs/PROJECT_STATUS_TRACKER.md` for live status.
+**Progress tracking:** Use `docs/PROJECT_STATUS_TRACKER.md` for live status. The tracker uses finer-grained phases (e.g. band directory and player directory as separate phases) than this map.
 
 ---
 
@@ -30,6 +30,8 @@ This document defines **delivery phases, sequencing, and dependencies**. It is a
 
 **Dependencies:** None.
 
+**Status:** Complete.
+
 ---
 
 ## Phase 1 — Public marketing surface
@@ -40,13 +42,15 @@ This document defines **delivery phases, sequencing, and dependencies**. It is a
 - Marketing homepage per spec and mockup
 - SEO metadata, accessibility baseline
 - Analytics stub
-- Placeholder routes for signup and directory
+- Live links to `/bands`, `/login`, `/signup`
 
 **Exit criteria:** Homepage MVP acceptance criteria (spec §20) met.
 
 **Dependencies:** Phase 0.
 
 **Reference:** `bandie_homepage_functional_technical_spec.md`
+
+**Status:** Complete.
 
 ---
 
@@ -56,14 +60,18 @@ This document defines **delivery phases, sequencing, and dependencies**. It is a
 
 **Deliverables:**
 - Supabase Auth integration via `@bandie/data`
-- Registration, login, password reset
+- Registration, login, password reset, sign-out to homepage
 - Band creation wizard
 - Membership and invitation flow
 - Band switcher shell
+- Musician / player profile at `/app/profile`
+- Pending invite detection and acceptance
 
 **Exit criteria:** User can create account, create band, invite member, member can access workspace.
 
 **Dependencies:** Phase 0 (Supabase migrations for auth-related band tables).
+
+**Status:** Complete.
 
 ---
 
@@ -73,14 +81,18 @@ This document defines **delivery phases, sequencing, and dependencies**. It is a
 
 **Deliverables:**
 - Band profile data model + RLS
-- Public profile page
-- Profile editor in workspace
+- Public profile page with font and colour palette theming
+- Profile editor in workspace overview
 - Band directory with search/filter/sort
+- Player directory with deputy/member search modes
+- Public player profiles
 - Booking enquiry form
 
 **Exit criteria:** Band profile publishable; directory searchable; enquiry submitted and visible to band.
 
 **Dependencies:** Phase 2.
+
+**Status:** Complete except booking enquiry form (deferred).
 
 ---
 
@@ -100,6 +112,8 @@ This document defines **delivery phases, sequencing, and dependencies**. It is a
 
 **Dependencies:** Phase 2, Phase 3 (profile/settings integration).
 
+**Status:** Workspace shell and overview complete (profile editor, members, invitations). Songs/setlists/files not started.
+
 ---
 
 ## Phase 5 — Calendar, availability, and gigs
@@ -118,6 +132,8 @@ This document defines **delivery phases, sequencing, and dependencies**. It is a
 
 **Dependencies:** Phase 4.
 
+**Status:** Not started.
+
 ---
 
 ## Phase 6 — Activity, notifications, and polish
@@ -133,6 +149,8 @@ This document defines **delivery phases, sequencing, and dependencies**. It is a
 **Exit criteria:** Recent activity visible; members notified of key events.
 
 **Dependencies:** Phases 4–5.
+
+**Status:** Not started.
 
 ---
 
@@ -151,6 +169,8 @@ This document defines **delivery phases, sequencing, and dependencies**. It is a
 
 **Dependencies:** Phases 2–5 stable on web.
 
+**Status:** Not started.
+
 ---
 
 ## Phase 8 — Admin and platform operations
@@ -165,6 +185,8 @@ This document defines **delivery phases, sequencing, and dependencies**. It is a
 
 **Dependencies:** Phase 2+.
 
+**Status:** Not started.
+
 ---
 
 ## Dependency diagram
@@ -176,11 +198,11 @@ Phase 0 (Foundations)
 Phase 1 (Homepage)
     │
     ▼
-Phase 2 (Auth + Bands)
+Phase 2 (Auth + Bands + Player profiles)
     │
     ├──────────────────┐
     ▼                  ▼
-Phase 3 (Public)   Phase 4 (Workspace)
+Phase 3 (Public)   Phase 4 (Workspace core)
     │                  │
     └────────┬─────────┘
              ▼
@@ -204,5 +226,7 @@ Phases 0–5 constitute the **MVP** as defined in `PRODUCT_REQUIREMENTS.md`. Pha
 
 ## Current position
 
-**Completed:** Phase 0 (partial — CI and Supabase migrations pending)  
-**Next:** Phase 1 — Bandie Homepage
+**Completed:** Phases 0–3; Phase 4 workspace shell (overview, members, invitations)  
+**Next:** Phase 4 — Songs dashboard, song folders, and file uploads
+
+See `docs/PROJECT_STATUS_TRACKER.md` for item-level checklist (Phases 6–12 in tracker map to workspace features, calendar, gigs, etc.).

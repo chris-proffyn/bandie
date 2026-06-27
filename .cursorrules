@@ -76,6 +76,8 @@
 # - UI code must NOT call Supabase directly.
 # - All Supabase access must go through packages/data (@bandie/data).
 # - RLS must be enabled on all user-facing tables.
+# - Every new table, bucket, or client-callable RPC must ship with RLS/policies in the same migration.
+# - Follow .cursor/rules/supabase-rls.mdc for the full checklist (storage, security definer helpers, smoke tests).
 # - Never use service-role keys in client code.
 # - Any schema change must be via supabase/migrations/.
 #
