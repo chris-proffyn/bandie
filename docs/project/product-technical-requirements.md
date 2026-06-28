@@ -144,6 +144,8 @@ All tables prefixed `bandie_`. Full schema to be defined in migrations. Conceptu
 | `bandie_band_set_offers` | Fixed set length & fee packages per band |
 | `bandie_band_dynamic_fee_offers` | Session-based dynamic fee packages (appearance + per-session fees) |
 | `bandie_organiser_venues` | Organiser-managed venues (pub, club, festival site, etc.) |
+| `bandie_countries` | Directory filter reference — ISO country codes (public read) |
+| `bandie_regions` | Directory filter reference — regions within a country with search keywords (public read) |
 | `bandie_band_media` | Band photos, videos, tracks (URLs) |
 | `bandie_band_social_links` | Social platform links |
 | `bandie_band_public_dates` | Manual public availability dates |
@@ -191,6 +193,11 @@ RLS policies must enforce band membership for all private data.
 - `normalizeUsername`, `validateUsernameInput`, `ensureProfileUsername`
 - Login accepts email or username (`signInWithEmailOrUsername`)
 - Direct messages addressed by username
+
+**Directory geography (`@bandie/data`):**
+- `listBandieCountries`, `listBandieRegions`, `loadGeographyIndex` — reference data for filter dropdowns
+- `matchesAreaFilter`, `inferDefaultCountryCode` — client-side filter matching and geo defaults
+- `bandie_bands.country_id` / `region_id` and `bandie_profiles.country_id` / `region_id` — optional FKs; text location fallback via region `search_keywords`
 
 ---
 

@@ -1,5 +1,11 @@
 import { formatFeeRange } from './bandProfile';
 import { getBandieClient } from './context';
+import {
+  DEFAULT_DIRECTORY_AREA_FILTERS,
+  matchesAreaFilter,
+  type DirectoryAreaFilters,
+  type GeographyIndex,
+} from './geography';
 import { filterTestRows, includeTestData, isHiddenTestRow } from './testDataMode';
 
 export type PlayerSearchMode = 'temporary' | 'permanent' | 'any';
@@ -12,6 +18,8 @@ export type PlayerDirectoryListing = {
   profile_image_url: string | null;
   bio: string | null;
   location: string | null;
+  country_id: string | null;
+  region_id: string | null;
   genres: string[];
   instruments: string[];
   years_playing: number | null;
@@ -23,7 +31,7 @@ export type PlayerDirectoryListing = {
   created_at: string;
 };
 
-export type PlayerDirectoryFilters = {
+export type PlayerDirectoryFilters = DirectoryAreaFilters & {
   mode: PlayerSearchMode;
   name: string;
   instrument: string;
@@ -41,6 +49,7 @@ export type PlayerDirectoryFilters = {
 export type PlayerDirectorySort = 'recommended' | 'nameAsc' | 'experienceDesc' | 'feeAsc';
 
 export const DEFAULT_PLAYER_DIRECTORY_FILTERS: PlayerDirectoryFilters = {
+  ...DEFAULT_DIRECTORY_AREA_FILTERS,
   mode: 'temporary',
   name: '',
   instrument: '',
@@ -63,6 +72,8 @@ const playerDirectorySelect = `
   profile_image_url,
   bio,
   location,
+  country_id,
+  region_id,
   genres,
   instruments,
   years_playing,
@@ -274,12 +285,17 @@ function profileCompletenessScore(player: PlayerDirectoryListing): number {
 export function filterPlayerDirectory(
   players: PlayerDirectoryListing[],
   filters: PlayerDirectoryFilters,
+  geography?: GeographyIndex,
 ): PlayerDirectoryListing[] {
   const nameNeedle = filters.name.trim().toLowerCase();
   const locationNeedle = filters.location.trim().toLowerCase();
 
   return players.filter((player) => {
     if (!matchesMode(player, filters.mode)) {
+      return false;
+    }
+
+    if (geography && !matchesAreaFilter(player, filters, geography)) {
       return false;
     }
 

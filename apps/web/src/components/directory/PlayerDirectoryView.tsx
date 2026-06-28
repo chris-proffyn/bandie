@@ -8,6 +8,7 @@ import {
   DEFAULT_PLAYER_DIRECTORY_FILTERS,
   filterPlayerDirectory,
   listPublishedPlayersForDirectory,
+  loadGeographyIndex,
   PLAYER_DIRECTORY_INSTRUMENT_CATEGORY_LABELS,
   PLAYER_DIRECTORY_INSTRUMENT_CATEGORY_ORDER,
   sortPlayerDirectory,
@@ -15,7 +16,12 @@ import {
   type PlayerDirectoryFilters,
   type PlayerDirectoryListing,
   type PlayerDirectorySort,
+  type GeographyIndex,
 } from '@bandie/data';
+import {
+  createDefaultDirectoryAreaFilters,
+  resolveDirectoryAreaFilters,
+} from '../../lib/directoryAreaDefaults';
 import {
   buildPlayerActiveFilterPills,
   PlayerDirectoryFiltersPanel,
@@ -51,20 +57,26 @@ export function PlayerDirectoryView({
   const [adminRecruitBandId, setAdminRecruitBandId] = useState(findPlayersContext?.bandId ?? '');
   const storedNavigation = loadPlayerDirectoryNavigation(variant, initialFilters);
   const [players, setPlayers] = useState<PlayerDirectoryListing[]>([]);
+  const [geography, setGeography] = useState<GeographyIndex | null>(null);
+  const [geographyLoading, setGeographyLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const detectedAreaDefaults = useMemo(() => createDefaultDirectoryAreaFilters(), []);
   const [filters, setFilters] = useState<PlayerDirectoryFilters>(() => {
     const state = location.state as BackNavigationState | null;
     if (state?.playerFilters) {
-      return state.playerFilters;
+      return resolveDirectoryAreaFilters(state.playerFilters, detectedAreaDefaults);
     }
     if (findPlayersContext?.instrument) {
-      return {
-        ...initialFilters,
-        mode: 'permanent',
-        instrument: findPlayersContext.instrument,
-        primaryInstrumentOnly: true,
-      };
+      return resolveDirectoryAreaFilters(
+        {
+          ...initialFilters,
+          mode: 'permanent',
+          instrument: findPlayersContext.instrument,
+          primaryInstrumentOnly: true,
+        },
+        detectedAreaDefaults,
+      );
     }
     return storedNavigation.filters;
   });
@@ -76,14 +88,23 @@ export function PlayerDirectoryView({
   useEffect(() => {
     const state = location.state as BackNavigationState | null;
     if (state?.playerFilters) {
-      setFilters(state.playerFilters);
+      setFilters(resolveDirectoryAreaFilters(state.playerFilters, detectedAreaDefaults));
     } else if (state?.playerMode) {
       setFilters((current) => ({ ...current, mode: state.playerMode! }));
     }
     if (state?.playerSort) {
       setSort(state.playerSort);
     }
-  }, [location.pathname, location.state]);
+  }, [location.pathname, location.state, detectedAreaDefaults]);
+
+  useEffect(() => {
+    loadGeographyIndex()
+      .then(setGeography)
+      .catch((err) => {
+        console.error('Unable to load geography reference data.', err);
+      })
+      .finally(() => setGeographyLoading(false));
+  }, []);
 
   useEffect(() => {
     savePlayerDirectoryNavigation(variant, filters, sort);
@@ -101,11 +122,15 @@ export function PlayerDirectoryView({
   const stats = useMemo(() => computePlayerDirectoryStats(players), [players]);
 
   const filteredPlayers = useMemo(() => {
-    const filtered = filterPlayerDirectory(players, filters);
+    const filtered = filterPlayerDirectory(players, filters, geography ?? undefined);
     return sortPlayerDirectory(filtered, sort, filters.mode);
-  }, [players, filters, sort]);
+  }, [players, filters, sort, geography]);
 
-  const activePills = buildPlayerActiveFilterPills(filters);
+  const activePills = buildPlayerActiveFilterPills(filters, geography);
+  const resetFilters = () => {
+    setFilters(resolveDirectoryAreaFilters(initialFilters, detectedAreaDefaults));
+    setSort('recommended');
+  };
   const modeLabel = playerDirectoryModeLabel(filters.mode);
   const isWorkspace = variant === 'workspace';
   const effectiveFindPlayersContext =
@@ -207,11 +232,10 @@ export function PlayerDirectoryView({
         filters={filters}
         genres={genres}
         instruments={instruments}
+        geography={geography}
+        geographyLoading={geographyLoading}
         onChange={setFilters}
-        onReset={() => {
-          setFilters(initialFilters);
-          setSort('recommended');
-        }}
+        onReset={resetFilters}
         showPrimaryInstrumentToggle
       />
 
@@ -251,7 +275,7 @@ export function PlayerDirectoryView({
               </p>
             ) : (
               <p>
-                Try broadening your instrument, location or filters, or switch search mode.
+                Try broadening your country, area, town or filters, or switch search mode.
               </p>
             )}
           </div>

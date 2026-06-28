@@ -5,6 +5,7 @@ import {
 } from '@bandie/data';
 import type { BackNavigationState } from './backNavigation';
 import { backNavigationState } from './backNavigation';
+import { createDefaultDirectoryAreaFilters, resolveDirectoryAreaFilters } from './directoryAreaDefaults';
 
 export const WORKSPACE_PLAYER_DIRECTORY_DEFAULTS: PlayerDirectoryFilters = {
   ...DEFAULT_PLAYER_DIRECTORY_FILTERS,
@@ -25,11 +26,14 @@ function mergePlayerDirectoryFilters(
   initialFilters: PlayerDirectoryFilters,
   stored?: Partial<PlayerDirectoryFilters>,
 ): PlayerDirectoryFilters {
-  return {
-    ...DEFAULT_PLAYER_DIRECTORY_FILTERS,
-    ...initialFilters,
-    ...stored,
-  };
+  return resolveDirectoryAreaFilters(
+    {
+      ...DEFAULT_PLAYER_DIRECTORY_FILTERS,
+      ...initialFilters,
+      ...stored,
+    },
+    createDefaultDirectoryAreaFilters(),
+  );
 }
 
 export function loadPlayerDirectoryNavigation(

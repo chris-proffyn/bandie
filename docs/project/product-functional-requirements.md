@@ -92,7 +92,9 @@ Public searchable directory at `/bands`.
 
 ### Search and filters
 
-Band name, genre, location/area, price range (min/max), minimum rating, availability state.
+Band name, genre, **country**, **area (region)**, town/postcode, price range (min/max), availability state.
+
+**Area filters:** Country defaults from browser locale/timezone (United Kingdom when detected). United Kingdom regions include South West, South East, Greater London, Midlands, Cambridge and the East, Essex, Lancashire, Yorkshire, Cumbria, and Northumberland. Listings match assigned `region_id`/`country_id` or location text against region keywords.
 
 ### Result cards
 
@@ -108,7 +110,7 @@ Available, limited availability, unavailable (derived from internal calendar in 
 
 ### Implemented (June 2026)
 
-- Live at `/bands` with filter panel, sort control, result cards, and empty states
+- Live at `/bands` and `/app/bands` with country/area filter panel, town search, sort control, result cards, and empty states
 - Three-column card grid on desktop; compact availability status pills on listing cards
 - Rating filter deferred until reviews data exists
 - Signed-in users see their display name in the marketing nav when visiting the homepage
@@ -140,11 +142,13 @@ Public searchable directory at `/players` for finding musicians open to deputy o
 
 ### Filters
 
-**Any:** instrument, genre, gender, location, plus optional gig date, budget, travel distance, and minimum years playing.
+**Any:** country, area, instrument, genre, gender, town/postcode, plus optional gig date, budget, travel distance, and minimum years playing.
 
-**Temporary:** instrument, genre, gender, location, gig date, budget, travel distance.
+**Temporary:** country, area, instrument, genre, gender, town/postcode, gig date, budget, travel distance.
 
-**Permanent:** instrument, genre, gender, location, minimum years playing.
+**Permanent:** country, area, instrument, genre, gender, town/postcode, minimum years playing.
+
+Area filter behaviour matches the band directory (geo-detected default country; UK regions seeded in `bandie_regions`).
 
 ### Result cards
 

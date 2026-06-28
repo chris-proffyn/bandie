@@ -46,6 +46,8 @@ function userProfileToDirectoryListing(profile: UserProfile): PlayerDirectoryLis
     profile_image_url: profile.profile_image_url,
     bio: profile.bio,
     location: profile.location,
+    country_id: null,
+    region_id: null,
     genres: profile.genres,
     instruments: profile.instruments,
     years_playing: profile.years_playing,

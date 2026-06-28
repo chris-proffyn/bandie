@@ -1,5 +1,11 @@
 import { availabilityLabel, formatBandDirectorySubtitle, formatFeeRange } from './bandProfile';
 import { getBandieClient } from './context';
+import {
+  DEFAULT_DIRECTORY_AREA_FILTERS,
+  matchesAreaFilter,
+  type DirectoryAreaFilters,
+  type GeographyIndex,
+} from './geography';
 import { filterTestRows, includeTestData } from './testDataMode';
 
 export type DirectoryBandListing = {
@@ -8,6 +14,8 @@ export type DirectoryBandListing = {
   slug: string;
   description: string | null;
   location: string | null;
+  country_id: string | null;
+  region_id: string | null;
   travel_distance_miles: number | null;
   genres: string[];
   tagline: string | null;
@@ -22,7 +30,7 @@ export type DirectoryBandListing = {
 
 export type DirectoryAvailabilityFilter = 'available' | 'limited' | 'unavailable' | '';
 
-export type DirectoryFilters = {
+export type DirectoryFilters = DirectoryAreaFilters & {
   name: string;
   genre: string;
   location: string;
@@ -34,6 +42,7 @@ export type DirectoryFilters = {
 export type DirectorySort = 'recommended' | 'priceAsc' | 'priceDesc' | 'nameAsc';
 
 export const DEFAULT_DIRECTORY_FILTERS: DirectoryFilters = {
+  ...DEFAULT_DIRECTORY_AREA_FILTERS,
   name: '',
   genre: '',
   location: '',
@@ -48,6 +57,8 @@ const directorySelect = `
   slug,
   description,
   location,
+  country_id,
+  region_id,
   travel_distance_miles,
   genres,
   tagline,
@@ -140,11 +151,16 @@ function matchesGenre(band: DirectoryBandListing, genre: string): boolean {
 export function filterDirectoryBands(
   bands: DirectoryBandListing[],
   filters: DirectoryFilters,
+  geography?: GeographyIndex,
 ): DirectoryBandListing[] {
   const nameNeedle = filters.name.trim().toLowerCase();
   const locationNeedle = filters.location.trim().toLowerCase();
 
   return bands.filter((band) => {
+    if (geography && !matchesAreaFilter(band, filters, geography)) {
+      return false;
+    }
+
     const searchableText = [
       band.name,
       band.location,

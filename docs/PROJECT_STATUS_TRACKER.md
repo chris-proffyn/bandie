@@ -3,7 +3,7 @@
 **Document status:** Live project tracker  
 **Product:** Bandie  
 **Phase:** Phase 5 complete (workspace shell) — Phase 6 communications partial; booking enquiry partial  
-**Last updated:** 28 June 2026 (release prep — brand logo, UI polish, full doc sync)
+**Last updated:** 28 June 2026 (directory area filters — countries & regions)
 
 ---
 
@@ -24,6 +24,7 @@
 | Band directory (Phase 4) | Complete |
 | Musician / player profile | Complete |
 | Player directory | Complete |
+| Directory area filters | Complete — country + region on `/bands`, `/players`, `/app/bands`, `/app/players`; geo-detected default country |
 | Private workspace shell (Phase 5) | Complete — tabbed overview (Members / Band details), leader contact, lineup parts, player recruitment, member actions, invitations; songs/setlists deferred |
 | Workspace communications | Partial — unified hub at `/app/communications` (invites, player outreach, messages with replies) |
 | Booking enquiries | Partial — structured enquiry form on public band profile sends direct message to primary contact |
@@ -240,6 +241,12 @@ Release verification      ░░░░░░░░░░  production smoke + a11
 ---
 
 ## Session notes
+
+**28 June 2026 — Directory area filters**
+- Reference tables `bandie_countries` and `bandie_regions` with UK regions (South West through Northumberland)
+- `country_id` / `region_id` on bands and profiles; directory filters match FK or location keywords
+- Browser locale/timezone detection sets default country (`apps/web/src/lib/directoryAreaDefaults.ts`)
+- Shared filter UI on public and workspace band/player directories
 
 **28 June 2026 — Brand identity & UI polish**
 - Shared Bandie logo mark: lowercase white **b** in gradient tile (`apps/web/src/lib/brand.ts`, `apps/web/src/styles/brand.css`); used on homepage, auth, app header, directories, and public profiles

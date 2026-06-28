@@ -48,6 +48,8 @@ SQL migrations for the shared Supabase instance (`proff-rsd-mt-1`).
 | `20260628280000_bandie_public_profile_members_contact.sql` | Public band members roster and primary contact RPCs |
 | `20260628290000_bandie_organiser_venues.sql` | Organiser venues table and RLS |
 | `20260628300000_bandie_organiser_venue_images.sql` | Venue photo column and storage RLS |
+| `20260628310000_bandie_geography_areas.sql` | Countries, regions, directory area filters, band/profile area FKs |
+| `20260628320000_bandie_assign_greater_london.sql` | Assign all bands and profiles to United Kingdom / Greater London |
 
 Apply with:
 

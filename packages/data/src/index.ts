@@ -295,6 +295,32 @@ export type {
 } from './types/bandProfile';
 
 export {
+  listBandieCountries,
+  listBandieRegions,
+  loadGeographyIndex,
+  buildGeographyIndex,
+  matchesAreaFilter,
+  locationMatchesRegion,
+  locationMatchesCountry,
+  areaFilterLabel,
+  inferCountryCodeFromLocale,
+  inferCountryCodeFromTimeZone,
+  inferDefaultCountryCode,
+  regionsForCountryCode,
+  mergeDirectoryAreaFilters,
+  resetDirectoryAreaFilters,
+  DEFAULT_DIRECTORY_AREA_FILTERS,
+  BANDIE_DEFAULT_COUNTRY_CODE,
+} from './geography';
+export type {
+  BandieCountry,
+  BandieRegion,
+  DirectoryAreaFilters,
+  GeographyIndex,
+  AreaListable,
+} from './geography';
+
+export {
   listPublishedBandsForDirectory,
   filterDirectoryBands,
   sortDirectoryBands,

@@ -1,4 +1,5 @@
 import type { PlayerDirectoryFilters } from '@bandie/data';
+import { createDefaultDirectoryAreaFilters, resolveDirectoryAreaFilters } from './directoryAreaDefaults';
 import { WORKSPACE_PLAYER_DIRECTORY_DEFAULTS } from './playerDirectoryNavigation';
 
 export type FindPlayersContext = {
@@ -68,12 +69,15 @@ export function buildFindDeputyUrl(context: FindPlayersContext): string {
 }
 
 export function findPlayersDirectoryFilters(context: FindPlayersContext): PlayerDirectoryFilters {
-  return {
-    ...WORKSPACE_PLAYER_DIRECTORY_DEFAULTS,
-    mode: 'permanent',
-    instrument: context.instrument ?? '',
-    primaryInstrumentOnly: true,
-  };
+  return resolveDirectoryAreaFilters(
+    {
+      ...WORKSPACE_PLAYER_DIRECTORY_DEFAULTS,
+      mode: 'permanent',
+      instrument: context.instrument ?? '',
+      primaryInstrumentOnly: true,
+    },
+    createDefaultDirectoryAreaFilters(),
+  );
 }
 
 export function findPlayersContextLabel(context: FindPlayersContext): string {

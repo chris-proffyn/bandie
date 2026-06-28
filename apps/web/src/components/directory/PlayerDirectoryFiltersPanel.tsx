@@ -4,15 +4,19 @@ import {
   PRIMARY_INSTRUMENT_OPTIONS,
   formatPlayerGenderLabel,
   isPrimaryInstrumentOption,
+  type GeographyIndex,
   type PlayerDirectoryFilters,
   type PlayerDirectorySort,
   type PlayerSearchMode,
 } from '@bandie/data';
+import { buildAreaFilterPill, DirectoryAreaFilters } from './DirectoryAreaFilters';
 
 type PlayerDirectoryFiltersPanelProps = {
   filters: PlayerDirectoryFilters;
   genres: string[];
   instruments: string[];
+  geography: GeographyIndex | null;
+  geographyLoading?: boolean;
   onChange: (filters: PlayerDirectoryFilters) => void;
   onReset: () => void;
   showPrimaryInstrumentToggle?: boolean;
@@ -44,6 +48,8 @@ export function PlayerDirectoryFiltersPanel({
   filters,
   genres,
   instruments,
+  geography,
+  geographyLoading = false,
   onChange,
   onReset,
   showPrimaryInstrumentToggle = false,
@@ -66,6 +72,16 @@ export function PlayerDirectoryFiltersPanel({
         Search for musicians open to deputy gigs, permanent band membership, or both. Switch mode
         to see the filters that matter for your situation.
       </p>
+
+      {geography ? (
+        <DirectoryAreaFilters
+          countryCode={filters.countryCode}
+          regionId={filters.regionId}
+          geography={geography}
+          loading={geographyLoading}
+          onChange={(countryCode, regionId) => onChange({ ...filters, countryCode, regionId })}
+        />
+      ) : null}
 
       <div className="directory-filter-group">
         <span className="directory-filter-label">What are you looking for?</span>
@@ -192,11 +208,11 @@ export function PlayerDirectoryFiltersPanel({
       </div>
 
       <div className="directory-filter-group">
-        <label htmlFor="playerLocationFilter">Location / area</label>
+        <label htmlFor="playerLocationFilter">Town / postcode</label>
         <input
           id="playerLocationFilter"
           type="search"
-          placeholder="e.g. Surrey, Manchester"
+          placeholder="e.g. Manchester, EH1"
           value={filters.location}
           onChange={(event) => update('location', event.target.value)}
         />
@@ -331,8 +347,18 @@ export function PlayerDirectoryFiltersPanel({
   );
 }
 
-export function buildPlayerActiveFilterPills(filters: PlayerDirectoryFilters): string[] {
+export function buildPlayerActiveFilterPills(
+  filters: PlayerDirectoryFilters,
+  geography?: GeographyIndex | null,
+): string[] {
   const pills: string[] = [modePillLabel(filters.mode)];
+
+  if (geography) {
+    const areaPill = buildAreaFilterPill(filters, geography);
+    if (areaPill) {
+      pills.push(areaPill);
+    }
+  }
 
   if (filters.name.trim()) pills.push(`Name: ${filters.name.trim()}`);
   if (filters.instrument.trim()) {
@@ -349,7 +375,7 @@ export function buildPlayerActiveFilterPills(filters: PlayerDirectoryFilters): s
   if (filters.gender) {
     pills.push(`Gender: ${formatPlayerGenderLabel(filters.gender) ?? filters.gender}`);
   }
-  if (filters.location.trim()) pills.push(`Location: ${filters.location.trim()}`);
+  if (filters.location.trim()) pills.push(`Town: ${filters.location.trim()}`);
 
   if (filters.mode === 'temporary' || filters.mode === 'any') {
     if (filters.gigDate) {

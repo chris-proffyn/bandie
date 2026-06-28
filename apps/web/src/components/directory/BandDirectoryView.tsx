@@ -7,11 +7,17 @@ import {
   DEFAULT_DIRECTORY_FILTERS,
   filterDirectoryBands,
   listPublishedBandsForDirectory,
+  loadGeographyIndex,
   sortDirectoryBands,
   type DirectoryBandListing,
   type DirectoryFilters,
   type DirectorySort,
+  type GeographyIndex,
 } from '@bandie/data';
+import {
+  createDefaultDirectoryAreaFilters,
+  resolveDirectoryAreaFilters,
+} from '../../lib/directoryAreaDefaults';
 import {
   buildActiveFilterPills,
   DirectoryFiltersPanel,
@@ -31,10 +37,24 @@ export function BandDirectoryView({
 }: BandDirectoryViewProps) {
   const { session } = useAuth();
   const [bands, setBands] = useState<DirectoryBandListing[]>([]);
+  const [geography, setGeography] = useState<GeographyIndex | null>(null);
+  const [geographyLoading, setGeographyLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<DirectoryFilters>(initialFilters);
+  const detectedAreaDefaults = useMemo(() => createDefaultDirectoryAreaFilters(), []);
+  const [filters, setFilters] = useState<DirectoryFilters>(() =>
+    resolveDirectoryAreaFilters(initialFilters, detectedAreaDefaults),
+  );
   const [sort, setSort] = useState<DirectorySort>('recommended');
+
+  useEffect(() => {
+    loadGeographyIndex()
+      .then(setGeography)
+      .catch((err) => {
+        console.error('Unable to load geography reference data.', err);
+      })
+      .finally(() => setGeographyLoading(false));
+  }, []);
 
   useEffect(() => {
     listPublishedBandsForDirectory()
@@ -47,11 +67,13 @@ export function BandDirectoryView({
   const stats = useMemo(() => computeDirectoryStats(bands), [bands]);
 
   const filteredBands = useMemo(() => {
-    const filtered = filterDirectoryBands(bands, filters);
+    const filtered = filterDirectoryBands(bands, filters, geography ?? undefined);
     return sortDirectoryBands(filtered, sort);
-  }, [bands, filters, sort]);
+  }, [bands, filters, sort, geography]);
 
-  const activePills = buildActiveFilterPills(filters);
+  const activePills = buildActiveFilterPills(filters, geography);
+  const resetFilters = () =>
+    setFilters(resolveDirectoryAreaFilters(initialFilters, detectedAreaDefaults));
   const isWorkspace = variant === 'workspace';
 
   if (loading) {
@@ -122,8 +144,10 @@ export function BandDirectoryView({
       <DirectoryFiltersPanel
         filters={filters}
         genres={genres}
+        geography={geography}
+        geographyLoading={geographyLoading}
         onChange={setFilters}
-        onReset={() => setFilters(initialFilters)}
+        onReset={resetFilters}
       />
 
       <section aria-label="Band directory results">
@@ -159,7 +183,7 @@ export function BandDirectoryView({
                 and publish your public profile to appear here.
               </p>
             ) : (
-              <p>Try broadening your location, price range or genre filters.</p>
+              <p>Try broadening your country, area, town, price range or genre filters.</p>
             )}
           </div>
         ) : (

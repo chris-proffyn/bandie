@@ -3,11 +3,15 @@ import {
   type DirectoryAvailabilityFilter,
   type DirectoryFilters,
   type DirectorySort,
+  type GeographyIndex,
 } from '@bandie/data';
+import { buildAreaFilterPill, DirectoryAreaFilters } from './DirectoryAreaFilters';
 
 type DirectoryFiltersPanelProps = {
   filters: DirectoryFilters;
   genres: string[];
+  geography: GeographyIndex | null;
+  geographyLoading?: boolean;
   onChange: (filters: DirectoryFilters) => void;
   onReset: () => void;
 };
@@ -15,6 +19,8 @@ type DirectoryFiltersPanelProps = {
 export function DirectoryFiltersPanel({
   filters,
   genres,
+  geography,
+  geographyLoading = false,
   onChange,
   onReset,
 }: DirectoryFiltersPanelProps) {
@@ -26,9 +32,19 @@ export function DirectoryFiltersPanel({
     <aside className="directory-filters" id="filters" aria-label="Band directory filters">
       <h2>Filter bands</h2>
       <p className="directory-filters-intro">
-        Narrow the directory by name, genre, location, price, or availability. Results update as you
-        type.
+        Narrow the directory by country, area, name, genre, location, price, or availability.
+        Results update as you type.
       </p>
+
+      {geography ? (
+        <DirectoryAreaFilters
+          countryCode={filters.countryCode}
+          regionId={filters.regionId}
+          geography={geography}
+          loading={geographyLoading}
+          onChange={(countryCode, regionId) => onChange({ ...filters, countryCode, regionId })}
+        />
+      ) : null}
 
       <div className="directory-filter-group">
         <label htmlFor="nameFilter">Band name</label>
@@ -58,11 +74,11 @@ export function DirectoryFiltersPanel({
       </div>
 
       <div className="directory-filter-group">
-        <label htmlFor="locationFilter">Location / area</label>
+        <label htmlFor="locationFilter">Town / postcode</label>
         <input
           id="locationFilter"
           type="search"
-          placeholder="e.g. Surrey, London"
+          placeholder="e.g. Guildford, SW1"
           value={filters.location}
           onChange={(event) => update('location', event.target.value)}
         />
@@ -137,11 +153,20 @@ export function DirectoryFiltersPanel({
   );
 }
 
-export function buildActiveFilterPills(filters: DirectoryFilters): string[] {
+export function buildActiveFilterPills(
+  filters: DirectoryFilters,
+  geography?: GeographyIndex | null,
+): string[] {
   const pills: string[] = [];
+  if (geography) {
+    const areaPill = buildAreaFilterPill(filters, geography);
+    if (areaPill) {
+      pills.push(areaPill);
+    }
+  }
   if (filters.name.trim()) pills.push(`Name: ${filters.name.trim()}`);
   if (filters.genre) pills.push(`Genre: ${filters.genre}`);
-  if (filters.location.trim()) pills.push(`Location: ${filters.location.trim()}`);
+  if (filters.location.trim()) pills.push(`Town: ${filters.location.trim()}`);
   if (filters.minPrice != null && filters.minPrice > 0) pills.push(`Min: £${filters.minPrice}`);
   if (filters.maxPrice != null) pills.push(`Max: £${filters.maxPrice}`);
   if (filters.availability) {
