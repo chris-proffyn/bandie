@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { signInWithEmail, ensureAppMembership, ensureBandieProfile } from '@bandie/data';
+import { signInWithEmailOrUsername, ensureAppMembership, ensureBandieProfile } from '@bandie/data';
 import { AuthLayout, AuthMessage } from '../../components/auth/AuthLayout';
 import { PasswordField } from '../../components/auth/PasswordField';
 import { routeAfterAuth } from '../../lib/routeAfterAuth';
@@ -10,7 +10,7 @@ export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { refreshBands } = useAuth();
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -27,7 +27,7 @@ export function LoginPage() {
     setSubmitting(true);
 
     try {
-      await signInWithEmail(email, password);
+      await signInWithEmailOrUsername(identifier, password);
       await ensureAppMembership();
       await ensureBandieProfile();
       await refreshBands();
@@ -48,14 +48,14 @@ export function LoginPage() {
       <form className="auth-form" onSubmit={handleSubmit}>
         {error ? <AuthMessage tone="error">{error}</AuthMessage> : null}
         <div className="auth-field">
-          <label htmlFor="email">Email</label>
+          <label htmlFor="identifier">Email or username</label>
           <input
-            id="email"
-            type="email"
-            autoComplete="email"
+            id="identifier"
+            type="text"
+            autoComplete="username"
             required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
           />
         </div>
         <PasswordField

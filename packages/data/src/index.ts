@@ -14,9 +14,21 @@ export {
 export type { BandieDataMode } from './testDataMode';
 
 export {
+  canSwitchWorkspaceMode,
+  isPlayerWorkspaceRoute,
+  resolveWorkspaceMode,
+  workspaceModeHomePath,
+  WORKSPACE_MODE_LABELS,
+} from './workspaceMode';
+export type { WorkspaceMode } from './workspaceMode';
+export { setBandieAdminModeActive, isBandieAdminModeActive } from './adminMode';
+
+export {
   signUpWithEmail,
   signUpAndSignInWithEmail,
   signInWithEmail,
+  signInWithEmailOrUsername,
+  resolveLoginEmail,
   signOut,
   requestPasswordReset,
   updatePassword,
@@ -50,14 +62,77 @@ export type { Band, UserBand, CreateBandInput } from './bands';
 export {
   listBandMembersWithProfiles,
   memberDisplayName,
+  setBandMemberLineupUnavailable,
+  removeBandMember,
 } from './bandMembers';
 export type { BandMemberProfile, BandMemberWithProfile } from './bandMembers';
+
+export {
+  listBandParts,
+  createBandPart,
+  updateBandPart,
+  assignMemberToPart,
+  clearPartAssignmentsForMember,
+  deleteBandPart,
+  createDefaultBandParts,
+  syncBandSizeFromParts,
+  BAND_PART_TEMPLATES,
+} from './bandParts';
+export type { BandPart, CreateBandPartInput, UpdateBandPartInput } from './bandParts';
+
+export {
+  getBandLeaderContact,
+  listBandLeaders,
+  addBandLeader,
+  assignBandLeader,
+  removeBandLeader,
+  setPrimaryBandContact,
+  ensureBandLeader,
+} from './bandLeader';
+export type { BandLeaderContact, BandLeaderSummary } from './bandLeader';
+
+export {
+  createPlayerOutreach,
+  listPlayerOutreachForBand,
+  listMyPendingPlayerOutreach,
+  listMyReceivedPlayerOutreach,
+  countMyPendingPlayerOutreach,
+  listMySentPlayerOutreach,
+  respondToPlayerOutreach,
+  revokePlayerOutreach,
+  playerOutreachTypeLabel,
+} from './playerOutreach';
+export type {
+  PlayerOutreach,
+  PlayerOutreachType,
+  CreatePlayerOutreachInput,
+  PendingPlayerOutreach,
+  ReceivedPlayerOutreach,
+  SentPlayerOutreach,
+} from './playerOutreach';
+
+export {
+  ORGANISER_VENUE_TYPES,
+  formatOrganiserVenueType,
+  formatOrganiserVenueLocation,
+  formatOrganiserVenueAddress,
+  listMyOrganiserVenues,
+  createOrganiserVenue,
+  updateOrganiserVenue,
+  deleteOrganiserVenue,
+} from './organiserVenues';
+export type {
+  OrganiserVenue,
+  OrganiserVenueInput,
+  OrganiserVenueType,
+} from './organiserVenues';
 
 export {
   getCurrentUserProfile,
   getUserProfileById,
   getUserProfileByUserId,
   ensureBandieProfile,
+  ensureProfileUsername,
   updateUserProfile,
   updateUserProfileByUserId,
   resolveDisplayName,
@@ -67,20 +142,89 @@ export {
 export type { UserProfile, UpdateUserProfileInput } from './userProfile';
 
 export {
+  PLAYER_GENDER_OPTIONS,
+  formatPlayerGenderLabel,
+  isPlayerGender,
+} from './playerGender';
+export type { PlayerGender } from './playerGender';
+
+export {
+  PRIMARY_INSTRUMENT_OPTIONS,
+  PRIMARY_INSTRUMENT_OTHER,
+  isPrimaryInstrumentOption,
+  primaryInstrumentFormState,
+  resolvePrimaryInstrumentValue,
+} from './playerInstruments';
+export type { PrimaryInstrumentOption } from './playerInstruments';
+
+export {
+  normalizeUsername,
+  proposeUsernameFromDisplayName,
+  resolveUsernameForProfile,
+  validateUsernameInput,
+} from './username';
+
+export {
+  formatInvitationStatusLabel,
+  isInvitationAwaitingResponse,
+  isResolvedInviteStatus,
+} from './invitationStatus';
+
+export {
   createBandInvitation,
   listBandInvitations,
   listPendingInvitationsForCurrentUser,
+  listMyReceivedBandInvitations,
   acceptBandInvitation,
   acceptAllPendingInvitations,
+  declineBandInvitation,
   revokeBandInvitation,
+  listMySentBandInvitations,
 } from './invitations';
-export type { BandInvitation, CreateInvitationInput, PendingBandInvitation } from './invitations';
+export type {
+  BandInvitation,
+  CreateInvitationInput,
+  PendingBandInvitation,
+  ReceivedBandInvitation,
+  SentBandInvitation,
+} from './invitations';
+
+export {
+  listMyMessages,
+  countUnreadMessages,
+  sendDirectMessage,
+  sendDirectMessageToUser,
+  replyToMessage,
+  markMessageRead,
+} from './messages';
+export type { UserMessage, SendDirectMessageInput, ReplyToMessageInput } from './messages';
+
+export {
+  getCommunicationSummary,
+  listCommunications,
+  filterCommunications,
+  filterResolvedSentCommunications,
+  getNotificationSummary,
+} from './communications';
+export type {
+  CommunicationFilter,
+  CommunicationSummary,
+  CommunicationItem,
+  BandInvitationCommunication,
+  PlayerOutreachCommunication,
+  MessageCommunication,
+  SentBandInvitationCommunication,
+  SentPlayerOutreachCommunication,
+} from './communications';
+export type { NotificationSummary } from './communications';
 
 export { mapAuthError } from './errors';
 
 export {
   uploadBandProfileImage,
   removeBandProfileImage,
+  uploadOrganiserVenueImage,
+  removeOrganiserVenueImage,
   uploadUserProfileImage,
   removeUserProfileImage,
   uploadUserProfileImageForUser,
@@ -92,6 +236,13 @@ export {
 export type { BandProfileImageKind } from './storage';
 
 export {
+  calculateDynamicFee,
+  countDynamicFeeSessions,
+  formatDynamicFeeBreakdown,
+} from './bandDynamicFees';
+export type { DynamicFeeCalculation } from './bandDynamicFees';
+
+export {
   getPublicBandProfileBySlug,
   getBandProfileForEdit,
   updateBandProfile,
@@ -100,6 +251,8 @@ export {
   formatBandDirectorySubtitle,
   availabilityLabel,
   formatFeeRange,
+  formatAverageFee,
+  formatSetOfferSummary,
 } from './bandProfile';
 export {
   BAND_NAME_FONTS,
@@ -126,9 +279,15 @@ export type {
   BandMediaInput,
   BandSocialLinkInput,
   BandPublicDateInput,
+  BandSetOfferInput,
+  BandDynamicFeeOfferInput,
   BandMediaItem,
   BandSocialLink,
   BandPublicDate,
+  BandSetOffer,
+  BandDynamicFeeOffer,
+  PublicBandMember,
+  PublicBandPrimaryContact,
   AvailabilityStatus,
   BandMediaKind,
   SocialPlatform,
@@ -161,6 +320,7 @@ export {
   filterPlayerDirectory,
   sortPlayerDirectory,
   collectPlayerDirectoryGenres,
+  collectPlayerDirectoryPrimaryInstruments,
   collectPlayerDirectoryInstruments,
   playerDirectoryMeta,
   playerDirectoryModeBadge,
@@ -170,6 +330,10 @@ export {
   playerDirectoryFooter,
   formatPlayerTravelDistance,
   computePlayerDirectoryStats,
+  computePlayerInstrumentCategoryCounts,
+  classifyPlayerInstrumentCategory,
+  PLAYER_DIRECTORY_INSTRUMENT_CATEGORY_ORDER,
+  PLAYER_DIRECTORY_INSTRUMENT_CATEGORY_LABELS,
   resolvePlayerDisplayName,
   playerInviteSummary,
   DEFAULT_PLAYER_DIRECTORY_FILTERS,
@@ -180,4 +344,6 @@ export type {
   PlayerDirectorySort,
   PlayerSearchMode,
   PlayerDirectoryStats,
+  PlayerDirectoryInstrumentCategory,
+  PlayerDirectoryInstrumentCategoryCounts,
 } from './playerDirectory';

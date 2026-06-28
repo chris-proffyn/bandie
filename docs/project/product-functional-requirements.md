@@ -2,7 +2,7 @@
 
 **Document status:** Authoritative functional requirements  
 **Product:** Bandie  
-**Last updated:** 27 June 2026
+**Last updated:** 28 June 2026
 
 **Source documents:** `bandie_product_description.md`, `bandie_build_elements.md`, feature specs in `docs/project/`
 
@@ -21,10 +21,9 @@ This document defines **what Bandie must do** from a user and business perspecti
 | Anonymous visitor | Browses homepage, directory, public profiles; submits booking enquiries |
 | Registered user | Has a Bandie account; may belong to zero or more bands |
 | Band member | Approved member of a band with workspace access |
-| Band leader | Member who can create gigs, setlists, rehearsals, song folders |
-| Band leader | Can manage band settings, members, and public profile |
-| Guest/Dep | Limited access to specific songs or setlists |
-| Platform admin | Operational access via admin portal (future) |
+| Band leader | Member with `owner` role; can manage band settings, members, public profile, and invitations. Multiple leaders allowed; one is primary public contact (`owner_user_id`) |
+| Guest/Dep | Limited access to specific songs or setlists (planned) |
+| Platform admin | Bandie app admin (`is_app_admin`); optional admin mode toggle for cross-band management |
 
 A user may hold different roles in different bands.
 
@@ -33,15 +32,15 @@ A user may hold different roles in different bands.
 ## 3. Public marketing homepage
 
 **Spec:** `bandie_homepage_functional_technical_spec.md`  
-**Mockup:** `bandie_homepage_mockup.html`
+**Mockup:** `bandie_homepage_three_modes_v3.html` (supersedes `bandie_homepage_mockup.html`)
 
 ### Requirements
 
 - Public, unauthenticated access at `/`
-- Explain Bandie proposition to bands, event organisers and players
+- Explain Bandie proposition to **players**, **bands** and **event organisers** as three equal modes
+- Route players toward signup/player profile and the player directory
 - Route bands toward signup/band creation
 - Route organisers toward band directory
-- Route players toward signup/player profile and the player directory
 - Responsive (mobile, tablet, desktop)
 - SEO metadata and accessible markup
 - Analytics events on CTA clicks (provider-neutral stub acceptable for MVP)
@@ -49,7 +48,7 @@ A user may hold different roles in different bands.
 
 ### Key sections
 
-Navigation, hero, example band profile card, trust pills, feature cards, audience split (bands, organisers and players), how-it-works workflow, final CTA, footer.
+Sticky navigation, hero with three audience CTAs and jump cards, example public band profile card, three-mode summary cards, per-audience “how it works” sections (players, bands, organisers), platform connection strip, core capabilities grid, footer.
 
 ---
 
@@ -61,7 +60,7 @@ Each band has a public mini-site at `/bands/[slug]`.
 
 ### Content
 
-Band name (with selectable display font), logo at the top of the profile (not in a card), location, genres, bio, photos, videos, track links, social links, booking contact/enquiry form, fee guidance, band size, set lengths, equipment notes, public availability, ratings/reviews (future).
+Band name (with selectable display font), logo at the top of the profile (not in a card), location, genres, bio, photos, videos, track links, social links, active band members roster (with primary contact badge), set length & fee packages (fixed and dynamic), equipment notes, public availability, structured booking enquiry form, ratings/reviews (future).
 
 ### Layout
 
@@ -69,13 +68,19 @@ Band name (with selectable display font), logo at the top of the profile (not in
 - Logo is not contained in a card; the band name uses the font chosen in profile settings
 - Optional hero image may appear above the identity block
 - Booking stats (band size, set length, fee guidance) appear below the bio in a separate meta row
+- Set length & fee cards use a compact grid layout on public profiles
+- Active members shown in a card grid (avatar, role, instrument, lineup part, primary contact badge)
+
+### Booking enquiry (implemented)
+
+Signed-in organisers submit a structured enquiry from the public profile **Book** section: date, time, set duration (from band fee options), venue (with organiser venue picker when venues exist on profile), budget, and notes. Sender name, username, email, phone and location are included automatically. The enquiry is delivered as a direct message to the band's **primary contact** (band leader). Sign-in required.
 
 ### Behaviour
 
 - Only intentionally published content is visible
 - Private songs, files, notes, and internal availability are never exposed
 - Confirmed/provisional gig availability may appear on public calendar
-- Booking enquiry form submits to band's private workspace
+- Booking enquiries arrive in the primary contact's `/app/communications` messages feed
 
 ---
 
@@ -104,6 +109,7 @@ Available, limited availability, unavailable (derived from internal calendar in 
 ### Implemented (June 2026)
 
 - Live at `/bands` with filter panel, sort control, result cards, and empty states
+- Three-column card grid on desktop; compact availability status pills on listing cards
 - Rating filter deferred until reviews data exists
 - Signed-in users see their display name in the marketing nav when visiting the homepage
 
@@ -114,7 +120,7 @@ Fictitious bands and players are flagged with `test_user = true` on `bandie_band
 | `VITE_BANDIE_DATA_MODE` | Behaviour |
 |---|---|
 | `live` (default) | Test rows hidden from band directory, player directory, and public profiles |
-| `test` | All published bands and players shown, including 10 seeded test bands and 50 test players |
+| `test` | All published bands and players shown, including 10 seeded test bands and 50 test players (all based in London and surrounding area, within ~25 miles) |
 
 Real user-created records always have `test_user = false`.
 
@@ -134,11 +140,11 @@ Public searchable directory at `/players` for finding musicians open to deputy o
 
 ### Filters
 
-**Any:** instrument, genre, location, plus optional gig date, budget, travel distance, and minimum years playing.
+**Any:** instrument, genre, gender, location, plus optional gig date, budget, travel distance, and minimum years playing.
 
-**Temporary:** instrument, genre, location, gig date, budget, travel distance.
+**Temporary:** instrument, genre, gender, location, gig date, budget, travel distance.
 
-**Permanent:** instrument, genre, location, minimum years playing.
+**Permanent:** instrument, genre, gender, location, minimum years playing.
 
 ### Result cards
 
@@ -156,6 +162,7 @@ Each opted-in musician has a public profile at `/players/:profileId` showing ava
 - Result cards show all active invite preferences, not just the current search mode
 - Profile data edited at `/app/profile`
 - Band leaders search from `/app/players` inside the authenticated workspace (defaults to permanent member mode)
+- **Band-scoped recruitment:** from a lineup part on `/app/:bandId`, **Find players** opens `/app/players?forBand=…&part=…&instrument=…` with filters pre-set; player profiles show invite actions (audition / join) when reached from this flow
 
 ---
 
@@ -165,7 +172,7 @@ Each registered user has a musician identity at `/app/profile`, separate from ba
 
 ### Content
 
-Display name (required, shown ahead of email across the platform), profile photo, primary instrument, all instruments, location, bio, genres, years playing, gear list, gear/setup notes, deputy fee guidance, travel distance, invite preferences, directory visibility toggle.
+Display name (required, shown ahead of email across the platform), profile photo, gender (optional), primary instrument, all instruments, location, bio, genres, years playing, gear list, gear/setup notes, deputy fee guidance, travel distance, invite preferences, directory visibility toggle.
 
 ### Behaviour
 
@@ -183,11 +190,13 @@ Display name (required, shown ahead of email across the platform), profile photo
 
 A registered user can create a band, becoming band leader. Band receives a private workspace and configurable public profile.
 
+**Band leader invariant:** Every band must always have at least one active leader (`owner` membership role). Bands may assign multiple leaders; `bandie_bands.owner_user_id` points at the primary public contact. If all leaders leave, a Bandie platform admin is assigned as interim leader until a new leader is added.
+
 ### Membership
 
 - Users join bands via invitation or approval flow
 - On sign-up or login, pending invitations for the user's email are detected automatically
-- New users with open invites are routed to `/app/invites` to accept before entering a workspace
+- New users with open invites are routed to `/app/communications` to accept before entering a workspace
 - Membership includes musical role(s) and permission role
 - Multi-band: user switches between band workspaces via band switcher
 - After login, users land on `/app` (My bands) — a card grid of every band they belong to
@@ -199,15 +208,114 @@ A registered user can create a band, becoming band leader. Band receives a priva
 | Route | Purpose |
 |---|---|
 | `/app` | My bands hub |
+| `/app/communications` | Communications hub (invitations, player outreach, direct messages) |
 | `/app/profile` | Musician / player profile editor |
 | `/app/players` | Player directory (find members or deps) |
-| `/app/invites` | Pending band invitations |
+| `/app/invites` | Redirects to `/app/communications` (legacy route) |
+| `/app/notifications` | Redirects to `/app/communications` (legacy route) |
 | `/app/bands/new` | Create a new band |
-| `/app/:bandId` | Band overview (public profile editor, members, invitations) |
+| `/app/bands` | Band directory (authenticated workspace view) |
+| `/app/venues` | Organiser venues list and editor (organiser workspace mode) |
+| `/app/profiles/:profileId/edit` | Admin edit any player profile |
+| `/app/:bandId` | Band overview — **Members** tab (lineup, members, invitations) and **Band details** tab (leaders, public profile) |
 
-Sidebar shows band switcher, navigation links, user display name (link to profile), email, and sign-out.
+Top navigation shows My bands, Communications (with unread badge when applicable), My profile, and directory links. Organiser workspace mode shows Find bands, My venues, and My profile.
 
 Band leaders can edit the band's public profile inline on the overview page. Members see a read-only summary. Leaders manage pending invitations; invitee display name is shown ahead of email when the invitee has a Bandie account.
+
+### Band overview (`/app/:bandId`)
+
+The band overview uses two tabs:
+
+#### Members tab
+
+1. **Lineup & band parts** — Leaders define roles (Vocalist, Lead Guitar, Rhythm Guitar, Bass, Drums, or custom). Each part can specify an instrument filter for player search. **Band size** on the public profile is calculated from part count.
+
+2. **Active members** — Cards for approved members with role labels. Leaders (and platform admins in admin mode) use a hamburger menu per card:
+   - **Make leader** / **Remove leader** (last leader protected)
+   - **Make primary** — sets `owner_user_id` among active leaders (primary public contact)
+   - **Assign to part**, **Mark unavailable**, **Remove from band**
+   - Admins also see **Edit profile**
+
+3. **Invitations** — Email-based band membership invitations (leaders only).
+
+#### Band details tab
+
+1. **Band leaders** — Lists all leaders with contact details (email, phone). Primary contact badge on `owner_user_id`. Each leader edits their own `contact_email` and `contact_phone`. Every band always has at least one leader.
+
+2. **Public profile editor** — Inline editing of publishable profile (hero, logo, name, palette, availability, bio, set/fee offers, media, booking contact, etc.).
+
+Legacy single-page section order is superseded by this tab layout.
+
+### Player recruitment (leaders)
+
+From each lineup part, **Find players** opens the workspace player directory with query parameters scoped to that band and role:
+
+`/app/players?forBand={bandId}&part={partId}&instrument={filter}&bandName={name}&partTitle={title}`
+
+The directory defaults to **permanent member** search mode and filters by primary instrument when an instrument filter is set.
+
+On a player profile reached from this flow, the leader sees an **Invite** panel:
+
+| Type | Behaviour |
+|---|---|
+| **Join the band** | Creates a band membership invitation the player can accept from `/app/communications` |
+| **Audition** | Records a player outreach invite with an optional message (for follow-up outside Bandie) |
+
+Both flows use the `bandie_create_player_outreach` RPC; join invites also create a row in `bandie_band_invitations`.
+
+### Workspace communications
+
+Player workspace users have a communications hub at `/app/communications` for cross-band interaction.
+
+**Filter views**
+- **All** — chronological feed of every invitation and message
+- **Invites** — band membership invitations and player outreach (join/audition)
+- **Messages** — direct messages with compose, reply, and read status
+
+**Band membership invitations**
+- Lists pending email invitations matched to the signed-in user (excludes join invites already shown via player outreach)
+- Accept or decline one invitation, or accept all
+
+**Player outreach**
+- Join and audition invites sent from the player directory by band leaders
+- Shows band name, role/part, optional message, and inviter name
+- Accept or decline; join accepts also complete the linked band membership invitation
+
+**Direct messages**
+- Send a message to another Bandie user by username
+- Received and sent sections with timestamps
+- Reply inline to any message in a thread (`reply_to_message_id`)
+- Recipients can mark messages as read; unread count included in nav badge
+
+**Sent invites (band leaders)**
+- Pending, accepted, and declined join/audition invites sent from the player directory
+- Pending and resolved email membership invitations sent from band overview
+- Shown in **All** and **Invites** views; revoke available only while pending
+
+**Routing**
+- Post-auth and app entry redirect to `/app/communications` when pending invitations or player outreach exist
+- `/app/invites` and `/app/notifications` redirect to `/app/communications` for backwards compatibility
+
+Activity feed, band-scoped threads, and email/push notifications are deferred.
+
+### User workspace roles (player / organiser)
+
+At `/app/profile`, users declare how they use Bandie: **player**, **organiser**, or **both**. Users with both roles can switch **workspace mode** (player vs organiser) to show a tailored menu — organiser mode focuses on band directory discovery and venue management; player mode shows bands, player directory, and band workspaces.
+
+### Organiser venues
+
+At `/app/venues` (organiser mode), users manage venues they are associated with — pubs, clubs, festival sites and private event spaces. Each venue stores name, type, address, contact details, capacity, notes and an optional photo. Data is private to the organiser until linked to future gig/booking flows.
+
+### Platform admin mode (implemented)
+
+Bandie app admins (`is_app_admin`) can enable **admin mode** from `/app/profile`. When active:
+- All bands visible in workspace (not only memberships)
+- Admin can edit any player profile at `/app/profiles/:profileId/edit`
+- Admin band selector on player directory for cross-band recruitment
+- Admin actions on band overview (member profile edit, band management)
+
+Admin mode is a client-side flag (`setBandieAdminModeActive`); RLS still enforces server-side permissions via `bandie_current_user_is_app_admin()`.
 
 ### Workspace navigation (planned)
 
@@ -337,13 +445,13 @@ Show setlist readiness, missing parts, member confirmation in gig context.
 
 ## 12. Booking enquiries
 
-### Public
+### Public (implemented)
 
-Organiser submits enquiry from band profile: name, contact, event date, type, location, budget, message.
+Organiser submits structured enquiry from band profile **Book** section: date, time, set duration, venue, budget, notes. Requires sign-in. Delivered as direct message to band primary contact.
 
 ### Private
 
-Band receives enquiry in workspace; manage status and response (messaging deferred post-MVP).
+Primary contact receives enquiry in `/app/communications` messages. Dedicated enquiry inbox and status workflow deferred.
 
 ---
 

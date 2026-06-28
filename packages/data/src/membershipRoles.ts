@@ -1,4 +1,4 @@
-/** Internal membership slug for the band creator / primary manager. */
+/** Band membership role slug for leaders (multiple per band allowed). */
 export const BAND_LEADER_ROLE = 'owner';
 
 export function isBandLeaderRole(role: string | null | undefined): boolean {

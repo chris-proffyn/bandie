@@ -2,7 +2,7 @@
 
 **Document status:** Authoritative product requirements summary  
 **Product:** Bandie  
-**Last updated:** 27 June 2026
+**Last updated:** 28 June 2026
 
 ---
 
@@ -56,7 +56,8 @@ Individual musicians in multiple bands, band leaders, dep/substitute musicians, 
 - Player directory (deputy and member search modes)
 - Public band profiles (mini-sites)
 - Public player profiles
-- Booking enquiry route (planned)
+- Structured booking enquiry on public band profiles (sends direct message to primary contact)
+- Organiser venue management in workspace (organiser mode)
 - Public calendar availability (confirmed/provisional gigs — planned)
 
 ### 4.2 Private band workspace
@@ -64,14 +65,23 @@ Individual musicians in multiple bands, band leaders, dep/substitute musicians, 
 Member-only area scoped to a selected band:
 
 - My bands hub and band switcher
-- Unified band overview (public profile editor, members, invitations)
-- Musician / player profile (`/app/profile`)
+- Tabbed band overview at `/app/:bandId`:
+  - **Members** — lineup parts, active members (hamburger actions), invitations
+  - **Band details** — band leaders (primary contact badge), public profile editor
+- Band leader contact; multiple leaders; primary contact assignable via member menu
+- Lineup band parts with auto-calculated band size
+- Find players per part → player directory with role-scoped search
+- Player recruitment invites (audition or join band)
+- Musician / player profile (`/app/profile`) with username and workspace mode (player / organiser / both)
+- Organiser venues (`/app/venues`)
+- Workspace communications (`/app/communications`) — invitations, player outreach, direct messages with replies
 - Songs dashboard and song folders (planned)
 - Setlist management (planned)
 - Calendar (rehearsal + gig availability) (planned)
 - Gig management (planned)
-- Booking enquiry inbox (planned)
-- Activity and notifications (planned)
+- Booking enquiry inbox (planned — enquiries currently arrive as direct messages)
+- Activity feed (planned)
+- In-app communications — **partial** (unified hub at `/app/communications`: band invitations, player outreach invites, direct messages with replies; activity feed and push deferred)
 
 ---
 
@@ -111,7 +121,7 @@ See `docs/project/bandie_build_elements.md` for the full list. Summary:
 7. Song folder with part folders and file uploads — **not started**
 8. Setlist management — **not started**
 9. Calendar availability (rehearsal + gig modes) — **not started**
-10. Basic booking enquiry route — **not started**
+10. Basic booking enquiry route — **partial** (public profile form → direct message to primary contact)
 
 ### Out of scope (MVP)
 

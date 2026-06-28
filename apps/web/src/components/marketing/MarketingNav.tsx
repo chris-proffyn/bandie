@@ -6,57 +6,65 @@ import { trackNavClick } from '../../lib/analytics';
 
 export function MarketingNav() {
   const { nav } = homepageContent;
-  const { session, displayName, loading } = useAuth();
+  const { session, displayName, isAppAdmin, adminModeActive, loading, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  function handleLogout() {
+    setMenuOpen(false);
+    void logout();
+  }
 
   return (
     <nav className="nav" aria-label="Main navigation">
-      <Link
-        to="/"
-        className="brand"
-        aria-label="Bandie home"
-        onClick={() => trackNavClick('Bandie', '/')}
-      >
-        <span className="brand-mark">{nav.brandMark}</span>
-        <span>{nav.brand}</span>
-      </Link>
+      <div className="nav-start">
+        <Link
+          to="/"
+          className="brand"
+          aria-label="Bandie home"
+          onClick={() => trackNavClick('Bandie', '/')}
+        >
+          <span className="brand-mark">{nav.brandMark}</span>
+          <span>{nav.brand}</span>
+        </Link>
 
-      <button
-        type="button"
-        className="nav-toggle"
-        aria-expanded={menuOpen}
-        aria-controls="main-nav-links"
-        onClick={() => setMenuOpen((open) => !open)}
-      >
-        {menuOpen ? 'Close menu' : 'Open menu'}
-      </button>
+        <div id="main-nav-links" className={`nav-links ${menuOpen ? 'nav-links-open' : ''}`}>
+          {nav.links.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              onClick={() => {
+                trackNavClick(link.label, link.href);
+                setMenuOpen(false);
+              }}
+            >
+              {link.label}
+            </a>
+          ))}
+        </div>
+      </div>
 
-      <div id="main-nav-links" className={`nav-links ${menuOpen ? 'nav-links-open' : ''}`}>
-        {nav.links.map((link) => (
-          <a
-            key={link.href}
-            href={link.href}
-            onClick={() => {
-              trackNavClick(link.label, link.href);
-              setMenuOpen(false);
-            }}
-          >
-            {link.label}
-          </a>
-        ))}
+      <div className={`nav-actions ${menuOpen ? 'nav-actions-open' : ''}`}>
         {loading ? (
           <span className="nav-auth-placeholder" aria-hidden="true" />
         ) : session ? (
-          <Link
-            to="/app"
-            className="nav-account"
-            onClick={() => {
-              trackNavClick(displayName, '/app');
-              setMenuOpen(false);
-            }}
-          >
-            {displayName}
-          </Link>
+          <>
+            {isAppAdmin && adminModeActive ? (
+              <span className="nav-admin-badge">Admin mode</span>
+            ) : null}
+            <Link
+              to="/app"
+              className="nav-account"
+              onClick={() => {
+                trackNavClick('Workspace', '/app');
+                setMenuOpen(false);
+              }}
+            >
+              {displayName}
+            </Link>
+            <button type="button" className="nav-sign-out" onClick={handleLogout}>
+              Sign out
+            </button>
+          </>
         ) : (
           <Link
             to="/login"
@@ -69,6 +77,16 @@ export function MarketingNav() {
           </Link>
         )}
       </div>
+
+      <button
+        type="button"
+        className="nav-toggle"
+        aria-expanded={menuOpen}
+        aria-controls="main-nav-links"
+        onClick={() => setMenuOpen((open) => !open)}
+      >
+        {menuOpen ? 'Close menu' : 'Open menu'}
+      </button>
     </nav>
   );
 }

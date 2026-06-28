@@ -2,9 +2,17 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import {
   formatPlayerInvitePreferences,
+  PLAYER_GENDER_OPTIONS,
+  PRIMARY_INSTRUMENT_OPTIONS,
+  PRIMARY_INSTRUMENT_OTHER,
+  primaryInstrumentFormState,
+  proposeUsernameFromDisplayName,
   resolveDisplayName,
+  resolvePrimaryInstrumentValue,
+  resolveUsernameForProfile,
   updateUserProfile,
   updateUserProfileByUserId,
+  type PlayerGender,
   type UpdateUserProfileInput,
   type UserProfile,
 } from '@bandie/data';
@@ -15,14 +23,21 @@ type UserProfileEditorProps = {
   variant: 'self' | 'admin';
   profile: UserProfile;
   accountEmail?: string | null;
+  formId?: string;
   onSaved?: (profile: UserProfile) => void;
   onRefreshAuth?: () => Promise<void>;
+  onSubmittingChange?: (submitting: boolean) => void;
 };
 
 function applyProfileToForm(profile: UserProfile) {
+  const instrumentState = primaryInstrumentFormState(profile.preferred_instrument);
+
   return {
     displayName: profile.display_name ?? '',
-    preferredInstrument: profile.preferred_instrument ?? '',
+    username: profile.username ?? proposeUsernameFromDisplayName(profile.display_name ?? ''),
+    primaryInstrumentChoice: instrumentState.choice,
+    primaryInstrumentOther: instrumentState.other,
+    gender: profile.gender ?? '',
     profileImageUrl: profile.profile_image_url ?? '',
     bio: profile.bio ?? '',
     location: profile.location ?? '',
@@ -37,6 +52,8 @@ function applyProfileToForm(profile: UserProfile) {
     travelDistanceMiles: profile.travel_distance_miles?.toString() ?? '',
     deputyFeeMin: profile.deputy_fee_guidance_min?.toString() ?? '',
     deputyFeeMax: profile.deputy_fee_guidance_max?.toString() ?? '',
+    isPlayer: profile.is_player,
+    isOrganiser: profile.is_organiser,
   };
 }
 
@@ -44,13 +61,18 @@ export function UserProfileEditor({
   variant,
   profile,
   accountEmail,
+  formId = 'player-profile-form',
   onSaved,
   onRefreshAuth,
+  onSubmittingChange,
 }: UserProfileEditorProps) {
   const isAdmin = variant === 'admin';
   const [formProfile, setFormProfile] = useState(profile);
   const [displayName, setDisplayName] = useState('');
-  const [preferredInstrument, setPreferredInstrument] = useState('');
+  const [username, setUsername] = useState('');
+  const [primaryInstrumentChoice, setPrimaryInstrumentChoice] = useState('');
+  const [primaryInstrumentOther, setPrimaryInstrumentOther] = useState('');
+  const [gender, setGender] = useState('');
   const [profileImageUrl, setProfileImageUrl] = useState('');
   const [bio, setBio] = useState('');
   const [location, setLocation] = useState('');
@@ -65,6 +87,8 @@ export function UserProfileEditor({
   const [travelDistanceMiles, setTravelDistanceMiles] = useState('');
   const [deputyFeeMin, setDeputyFeeMin] = useState('');
   const [deputyFeeMax, setDeputyFeeMax] = useState('');
+  const [isPlayer, setIsPlayer] = useState(true);
+  const [isOrganiser, setIsOrganiser] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -73,7 +97,10 @@ export function UserProfileEditor({
     setFormProfile(profile);
     const values = applyProfileToForm(profile);
     setDisplayName(values.displayName);
-    setPreferredInstrument(values.preferredInstrument);
+    setUsername(values.username);
+    setPrimaryInstrumentChoice(values.primaryInstrumentChoice);
+    setPrimaryInstrumentOther(values.primaryInstrumentOther);
+    setGender(values.gender);
     setProfileImageUrl(values.profileImageUrl);
     setBio(values.bio);
     setLocation(values.location);
@@ -88,35 +115,52 @@ export function UserProfileEditor({
     setTravelDistanceMiles(values.travelDistanceMiles);
     setDeputyFeeMin(values.deputyFeeMin);
     setDeputyFeeMax(values.deputyFeeMax);
+    setIsPlayer(values.isPlayer);
+    setIsOrganiser(values.isOrganiser);
   }, [profile]);
 
   function buildUpdateInput(): UpdateUserProfileInput {
     return {
       display_name: displayName,
-      preferred_instrument: preferredInstrument,
+      username: resolveUsernameForProfile(username, displayName),
+      preferred_instrument: isPlayer
+        ? resolvePrimaryInstrumentValue(primaryInstrumentChoice, primaryInstrumentOther)
+        : undefined,
+      gender: isPlayer ? (gender ? (gender as PlayerGender) : null) : undefined,
       profile_image_url: profileImageUrl || null,
       bio,
       location,
-      genres: genres
-        .split(',')
-        .map((item) => item.trim())
-        .filter(Boolean),
-      instruments: instruments
-        .split(',')
-        .map((item) => item.trim())
-        .filter(Boolean),
-      years_playing: yearsPlaying ? Number(yearsPlaying) : null,
-      gear_items: gearItems
-        .split(',')
-        .map((item) => item.trim())
-        .filter(Boolean),
-      gear_notes: gearNotes,
-      open_to_deputy_invites: openToDeputyInvites,
-      open_to_member_invites: openToMemberInvites,
-      public_player_profile_enabled: publicPlayerProfile,
-      travel_distance_miles: travelDistanceMiles ? Number(travelDistanceMiles) : null,
-      deputy_fee_guidance_min: deputyFeeMin ? Number(deputyFeeMin) : null,
-      deputy_fee_guidance_max: deputyFeeMax ? Number(deputyFeeMax) : null,
+      genres: isPlayer
+        ? genres
+            .split(',')
+            .map((item) => item.trim())
+            .filter(Boolean)
+        : undefined,
+      instruments: isPlayer
+        ? instruments
+            .split(',')
+            .map((item) => item.trim())
+            .filter(Boolean)
+        : undefined,
+      years_playing: isPlayer && yearsPlaying ? Number(yearsPlaying) : isPlayer ? null : undefined,
+      gear_items: isPlayer
+        ? gearItems
+            .split(',')
+            .map((item) => item.trim())
+            .filter(Boolean)
+        : undefined,
+      gear_notes: isPlayer ? gearNotes : undefined,
+      open_to_deputy_invites: isPlayer ? openToDeputyInvites : undefined,
+      open_to_member_invites: isPlayer ? openToMemberInvites : undefined,
+      public_player_profile_enabled: isPlayer ? publicPlayerProfile : undefined,
+      travel_distance_miles:
+        isPlayer && travelDistanceMiles ? Number(travelDistanceMiles) : isPlayer ? null : undefined,
+      deputy_fee_guidance_min:
+        isPlayer && deputyFeeMin ? Number(deputyFeeMin) : isPlayer ? null : undefined,
+      deputy_fee_guidance_max:
+        isPlayer && deputyFeeMax ? Number(deputyFeeMax) : isPlayer ? null : undefined,
+      is_player: isPlayer,
+      is_organiser: isOrganiser,
     };
   }
 
@@ -124,7 +168,14 @@ export function UserProfileEditor({
     event.preventDefault();
     setError(null);
     setSuccess(null);
+
+    if (!isPlayer && !isOrganiser) {
+      setError('Choose at least one role: player, organiser, or both.');
+      return;
+    }
+
     setSubmitting(true);
+    onSubmittingChange?.(true);
 
     try {
       const input = buildUpdateInput();
@@ -143,10 +194,15 @@ export function UserProfileEditor({
       setError(err instanceof Error ? err.message : 'Unable to save profile.');
     } finally {
       setSubmitting(false);
+      onSubmittingChange?.(false);
     }
   }
 
   const previewName = displayName.trim() || resolveDisplayName(formProfile, accountEmail);
+  const previewInstrument = resolvePrimaryInstrumentValue(
+    primaryInstrumentChoice,
+    primaryInstrumentOther,
+  );
   const previewGear = gearItems
     .split(',')
     .map((item) => item.trim())
@@ -157,10 +213,12 @@ export function UserProfileEditor({
   });
 
   const fieldPrefix = isAdmin ? `admin-${formProfile.id}` : 'self';
+  const showPlayerSections = isAdmin || isPlayer;
 
   return (
     <>
-      <aside className="player-profile-preview" aria-label="Profile preview">
+      {showPlayerSections ? (
+        <aside className="player-profile-preview" aria-label="Profile preview">
         <div className="player-profile-preview-avatar">
           {profileImageUrl ? (
             <img src={profileImageUrl} alt="" />
@@ -171,7 +229,7 @@ export function UserProfileEditor({
         <div>
           <strong>{previewName}</strong>
           <p>
-            {preferredInstrument || 'Instrument not set'}
+            {previewInstrument || 'Instrument not set'}
             {location ? ` · ${location}` : ''}
           </p>
           {previewGear.length ? (
@@ -185,10 +243,65 @@ export function UserProfileEditor({
           ) : null}
         </div>
       </aside>
+      ) : (
+        <aside className="player-profile-preview" aria-label="Profile preview">
+          <div className="player-profile-preview-avatar">
+            {profileImageUrl ? (
+              <img src={profileImageUrl} alt="" />
+            ) : (
+              <span>{bandInitials(previewName)}</span>
+            )}
+          </div>
+          <div>
+            <strong>{previewName}</strong>
+            <p>
+              Event organiser
+              {location ? ` · ${location}` : ''}
+            </p>
+          </div>
+        </aside>
+      )}
 
-      <form className="auth-form" onSubmit={handleSubmit} style={{ marginTop: '1.5rem' }}>
+      <form
+        id={formId}
+        className="auth-form"
+        onSubmit={handleSubmit}
+        style={{ marginTop: '1.5rem' }}
+      >
         {error ? <div className="auth-message auth-message-error">{error}</div> : null}
         {success ? <div className="auth-message auth-message-success">{success}</div> : null}
+
+        {!isAdmin ? (
+          <div className="profile-editor-section">
+            <h3>How you use Bandie</h3>
+            <p className="profile-section-intro">
+              Choose whether you use Bandie as a musician, an event organiser, or both. This
+              controls which workspace screens and options you see.
+            </p>
+            <div className="profile-editor-toggle">
+              <input
+                id={`${fieldPrefix}-isPlayer`}
+                type="checkbox"
+                checked={isPlayer}
+                onChange={(event) => setIsPlayer(event.target.checked)}
+              />
+              <label htmlFor={`${fieldPrefix}-isPlayer`}>
+                I am a player / musician (bands, player profile, player directory)
+              </label>
+            </div>
+            <div className="profile-editor-toggle">
+              <input
+                id={`${fieldPrefix}-isOrganiser`}
+                type="checkbox"
+                checked={isOrganiser}
+                onChange={(event) => setIsOrganiser(event.target.checked)}
+              />
+              <label htmlFor={`${fieldPrefix}-isOrganiser`}>
+                I am an event organiser (find and book bands)
+              </label>
+            </div>
+          </div>
+        ) : null}
 
         <div className="profile-editor-section">
           <h3>Photo</h3>
@@ -226,23 +339,76 @@ export function UserProfileEditor({
             </div>
           ) : null}
           <div className="auth-field">
-            <label htmlFor={`${fieldPrefix}-preferredInstrument`}>Primary instrument</label>
+            <label htmlFor={`${fieldPrefix}-username`}>Username</label>
             <input
-              id={`${fieldPrefix}-preferredInstrument`}
-              placeholder="e.g. Guitar, vocals, drums"
-              value={preferredInstrument}
-              onChange={(e) => setPreferredInstrument(e.target.value)}
+              id={`${fieldPrefix}-username`}
+              autoComplete="username"
+              placeholder={proposeUsernameFromDisplayName(displayName) || 'e.g. daltonc'}
+              value={username}
+              onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''))}
             />
+            <p className="directory-field-hint">
+              Sign in with this or your email. From your name: last name + first initial (Chris
+              Dalton → daltonc).
+            </p>
           </div>
-          <div className="auth-field">
-            <label htmlFor={`${fieldPrefix}-instruments`}>All instruments (comma-separated)</label>
-            <input
-              id={`${fieldPrefix}-instruments`}
-              placeholder="Guitar, backing vocals, keys"
-              value={instruments}
-              onChange={(e) => setInstruments(e.target.value)}
-            />
-          </div>
+          {showPlayerSections ? (
+            <>
+              <div className="auth-field">
+                <label htmlFor={`${fieldPrefix}-gender`}>Gender</label>
+                <select
+                  id={`${fieldPrefix}-gender`}
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
+                >
+                  <option value="">Not specified</option>
+                  {PLAYER_GENDER_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <p className="directory-field-hint">
+                  Optional. Used when band leaders search the player directory.
+                </p>
+              </div>
+              <div className="auth-field">
+                <label htmlFor={`${fieldPrefix}-preferredInstrument`}>Primary instrument</label>
+                <select
+                  id={`${fieldPrefix}-preferredInstrument`}
+                  value={primaryInstrumentChoice}
+                  onChange={(e) => setPrimaryInstrumentChoice(e.target.value)}
+                >
+                  <option value="">Select primary instrument</option>
+                  {PRIMARY_INSTRUMENT_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                  <option value={PRIMARY_INSTRUMENT_OTHER}>Other…</option>
+                </select>
+                {primaryInstrumentChoice === PRIMARY_INSTRUMENT_OTHER ? (
+                  <input
+                    id={`${fieldPrefix}-preferredInstrumentOther`}
+                    type="text"
+                    placeholder="e.g. Upright bass, fiddle, accordion"
+                    value={primaryInstrumentOther}
+                    onChange={(e) => setPrimaryInstrumentOther(e.target.value)}
+                    style={{ marginTop: '0.65rem' }}
+                  />
+                ) : null}
+              </div>
+              <div className="auth-field">
+                <label htmlFor={`${fieldPrefix}-instruments`}>All instruments (comma-separated)</label>
+                <input
+                  id={`${fieldPrefix}-instruments`}
+                  placeholder="Guitar, backing vocals, keys"
+                  value={instruments}
+                  onChange={(e) => setInstruments(e.target.value)}
+                />
+              </div>
+            </>
+          ) : null}
           <div className="auth-field">
             <label htmlFor={`${fieldPrefix}-location`}>Location</label>
             <input
@@ -261,33 +427,41 @@ export function UserProfileEditor({
             <textarea
               id={`${fieldPrefix}-bio`}
               rows={4}
-              placeholder="Experience, style, bands you've played with, session work…"
+              placeholder={
+                showPlayerSections
+                  ? "Experience, style, bands you've played with, session work…"
+                  : 'Venues you book for, areas you cover, types of events you organise…'
+              }
               value={bio}
               onChange={(e) => setBio(e.target.value)}
             />
           </div>
-          <div className="profile-editor-row-grid">
-            <div className="auth-field">
-              <label htmlFor={`${fieldPrefix}-genres`}>Genres (comma-separated)</label>
-              <input
-                id={`${fieldPrefix}-genres`}
-                placeholder="Rock, soul, covers"
-                value={genres}
-                onChange={(e) => setGenres(e.target.value)}
-              />
+          {showPlayerSections ? (
+            <div className="profile-editor-row-grid-dual">
+              <div className="auth-field">
+                <label htmlFor={`${fieldPrefix}-genres`}>Genres (comma-separated)</label>
+                <input
+                  id={`${fieldPrefix}-genres`}
+                  placeholder="Rock, soul, covers"
+                  value={genres}
+                  onChange={(e) => setGenres(e.target.value)}
+                />
+              </div>
+              <div className="auth-field">
+                <label htmlFor={`${fieldPrefix}-yearsPlaying`}>Years playing</label>
+                <input
+                  id={`${fieldPrefix}-yearsPlaying`}
+                  inputMode="numeric"
+                  value={yearsPlaying}
+                  onChange={(e) => setYearsPlaying(e.target.value)}
+                />
+              </div>
             </div>
-            <div className="auth-field">
-              <label htmlFor={`${fieldPrefix}-yearsPlaying`}>Years playing</label>
-              <input
-                id={`${fieldPrefix}-yearsPlaying`}
-                inputMode="numeric"
-                value={yearsPlaying}
-                onChange={(e) => setYearsPlaying(e.target.value)}
-              />
-            </div>
-          </div>
+          ) : null}
         </div>
 
+        {showPlayerSections ? (
+          <>
         <div className="profile-editor-section">
           <h3>Gear</h3>
           <p className="profile-section-intro">
@@ -320,7 +494,7 @@ export function UserProfileEditor({
           <h3>Band invitations</h3>
           <p className="profile-section-intro">
             Controls whether this musician appears in the{' '}
-            <Link to="/players" className="profile-preview-link">
+            <Link to="/app/players" className="profile-preview-link">
               player directory
             </Link>{' '}
             and what types of invite they are open to.
@@ -337,7 +511,7 @@ export function UserProfileEditor({
             </label>
           </div>
           {openToDeputyInvites ? (
-            <div className="profile-editor-row-grid" style={{ marginTop: '1rem' }}>
+            <div className="profile-editor-row-grid-triple" style={{ marginTop: '1rem' }}>
               <div className="auth-field">
                 <label htmlFor={`${fieldPrefix}-travelDistanceMiles`}>Willing to travel (miles)</label>
                 <input
@@ -398,6 +572,8 @@ export function UserProfileEditor({
             </label>
           </div>
         </div>
+          </>
+        ) : null}
 
         <button className="auth-button" type="submit" disabled={submitting}>
           {submitting ? 'Saving profile…' : 'Save profile'}

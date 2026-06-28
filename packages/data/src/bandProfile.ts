@@ -5,12 +5,15 @@ import { getBandById } from './bands';
 import { getBandieClient } from './context';
 import { includeTestData, isHiddenTestRow } from './testDataMode';
 import type {
+  BandDynamicFeeOfferInput,
   BandMediaInput,
   BandPublicDateInput,
+  BandSetOfferInput,
   BandSocialLinkInput,
   PublicBandProfile,
   UpdateBandProfileInput,
 } from './types/bandProfile';
+import { calculateDynamicFee } from './bandDynamicFees';
 
 const bandProfileSelect = `
   id,
@@ -44,10 +47,13 @@ async function loadProfileRelations(bandId: string): Promise<{
   media: PublicBandProfile['media'];
   socialLinks: PublicBandProfile['socialLinks'];
   publicDates: PublicBandProfile['publicDates'];
+  setOffers: PublicBandProfile['setOffers'];
+  dynamicFeeOffers: PublicBandProfile['dynamicFeeOffers'];
 }> {
   const client = getBandieClient();
 
-  const [mediaResult, socialResult, datesResult] = await Promise.all([
+  const [mediaResult, socialResult, datesResult, setOffersResult, dynamicFeeOffersResult] =
+    await Promise.all([
     client
       .from('bandie_band_media')
       .select('*')
@@ -63,6 +69,16 @@ async function loadProfileRelations(bandId: string): Promise<{
       .select('*')
       .eq('band_id', bandId)
       .order('event_date', { ascending: true }),
+    client
+      .from('bandie_band_set_offers')
+      .select('*')
+      .eq('band_id', bandId)
+      .order('sort_order', { ascending: true }),
+    client
+      .from('bandie_band_dynamic_fee_offers')
+      .select('*')
+      .eq('band_id', bandId)
+      .order('sort_order', { ascending: true }),
   ]);
 
   if (mediaResult.error) {
@@ -74,13 +90,58 @@ async function loadProfileRelations(bandId: string): Promise<{
   if (datesResult.error) {
     throw new Error(datesResult.error.message);
   }
+  if (setOffersResult.error) {
+    throw new Error(setOffersResult.error.message);
+  }
+  if (dynamicFeeOffersResult.error) {
+    throw new Error(dynamicFeeOffersResult.error.message);
+  }
 
   return {
     media: mediaResult.data ?? [],
     socialLinks: socialResult.data ?? [],
     publicDates: datesResult.data ?? [],
+    setOffers: setOffersResult.data ?? [],
+    dynamicFeeOffers: dynamicFeeOffersResult.data ?? [],
   };
 }
+
+async function loadPublicProfileExtras(bandId: string): Promise<{
+  members: PublicBandProfile['members'];
+  primaryContact: PublicBandProfile['primaryContact'];
+}> {
+  const client = getBandieClient();
+  const [membersResult, contactResult] = await Promise.all([
+    client.rpc('bandie_list_public_band_members', { p_band_id: bandId }),
+    client.rpc('bandie_get_public_band_primary_contact', { p_band_id: bandId }),
+  ]);
+
+  if (membersResult.error) {
+    throw new Error(membersResult.error.message);
+  }
+  if (contactResult.error) {
+    throw new Error(contactResult.error.message);
+  }
+
+  const contactRow = (contactResult.data as Array<Record<string, unknown>> | null)?.[0];
+
+  return {
+    members: membersResult.data ?? [],
+    primaryContact: contactRow
+      ? {
+          user_id: contactRow.user_id as string,
+          display_name: (contactRow.display_name as string) || 'Band leader',
+          username: (contactRow.username as string | null) ?? null,
+          profile_image_url: (contactRow.profile_image_url as string | null) ?? null,
+        }
+      : null,
+  };
+}
+
+const emptyPublicExtras = {
+  members: [] as PublicBandProfile['members'],
+  primaryContact: null as PublicBandProfile['primaryContact'],
+};
 
 export async function getPublicBandProfileBySlug(slug: string): Promise<PublicBandProfile | null> {
   const client = getBandieClient();
@@ -104,13 +165,17 @@ export async function getPublicBandProfileBySlug(slug: string): Promise<PublicBa
     return null;
   }
 
-  const relations = await loadProfileRelations(band.id);
+  const [relations, publicExtras] = await Promise.all([
+    loadProfileRelations(band.id),
+    loadPublicProfileExtras(band.id),
+  ]);
   return {
     ...band,
     genres: band.genres ?? [],
     name_font: resolveBandNameFont(band.name_font),
     color_palette: resolveBandColorPalette(band.color_palette),
     ...relations,
+    ...publicExtras,
   };
 }
 
@@ -139,6 +204,7 @@ export async function getBandProfileForEdit(bandId: string): Promise<PublicBandP
     availability_status: band.availability_status ?? 'available',
     availability_note: band.availability_note ?? null,
     ...relations,
+    ...emptyPublicExtras,
   };
 }
 
@@ -250,6 +316,127 @@ async function replaceBandPublicDates(bandId: string, items: BandPublicDateInput
   }
 }
 
+function isSetOfferInputPopulated(item: BandSetOfferInput): boolean {
+  return (
+    item.set_length_minutes != null ||
+    Boolean(item.set_details?.trim()) ||
+    item.average_fee != null ||
+    Boolean(item.details?.trim())
+  );
+}
+
+function feeGuidanceFromOffers(
+  fixedOffers: BandSetOfferInput[],
+  dynamicOffers: BandDynamicFeeOfferInput[],
+): {
+  fee_guidance_min: number | null;
+  fee_guidance_max: number | null;
+  set_length_minutes: number | null;
+} {
+  const fees = [
+    ...fixedOffers
+      .map((item) => item.average_fee)
+      .filter((fee): fee is number => fee != null && fee >= 0),
+    ...dynamicOffers
+      .map((item) => calculateDynamicFee(item).total)
+      .filter((fee): fee is number => fee != null && fee >= 0),
+  ];
+  const lengths = [
+    ...fixedOffers
+      .map((item) => item.set_length_minutes)
+      .filter((length): length is number => length != null && length > 0),
+    ...dynamicOffers
+      .map((item) => item.overall_set_length_minutes)
+      .filter((length): length is number => length != null && length > 0),
+  ];
+
+  return {
+    fee_guidance_min: fees.length ? Math.min(...fees) : null,
+    fee_guidance_max: fees.length ? Math.max(...fees) : null,
+    set_length_minutes: lengths.length ? lengths[0] : null,
+  };
+}
+
+function isDynamicFeeOfferInputPopulated(item: BandDynamicFeeOfferInput): boolean {
+  return (
+    item.overall_set_length_minutes != null ||
+    Boolean(item.set_details?.trim()) ||
+    item.appearance_fee != null ||
+    item.session_fee != null ||
+    item.session_duration_minutes != null ||
+    Boolean(item.details?.trim())
+  );
+}
+
+async function replaceBandDynamicFeeOffers(
+  bandId: string,
+  items: BandDynamicFeeOfferInput[],
+): Promise<void> {
+  const client = getBandieClient();
+  const { error: deleteError } = await client
+    .from('bandie_band_dynamic_fee_offers')
+    .delete()
+    .eq('band_id', bandId);
+
+  if (deleteError) {
+    throw new Error(deleteError.message);
+  }
+
+  const populated = items.filter(isDynamicFeeOfferInputPopulated);
+  if (!populated.length) {
+    return;
+  }
+
+  const { error: insertError } = await client.from('bandie_band_dynamic_fee_offers').insert(
+    populated.map((item, index) => ({
+      band_id: bandId,
+      set_details: item.set_details?.trim() || null,
+      overall_set_length_minutes: item.overall_set_length_minutes ?? null,
+      appearance_fee: item.appearance_fee ?? null,
+      session_fee: item.session_fee ?? null,
+      session_duration_minutes: item.session_duration_minutes ?? null,
+      details: item.details?.trim() || null,
+      sort_order: item.sort_order ?? index,
+    })),
+  );
+
+  if (insertError) {
+    throw new Error(insertError.message);
+  }
+}
+
+async function replaceBandSetOffers(bandId: string, items: BandSetOfferInput[]): Promise<void> {
+  const client = getBandieClient();
+  const { error: deleteError } = await client
+    .from('bandie_band_set_offers')
+    .delete()
+    .eq('band_id', bandId);
+
+  if (deleteError) {
+    throw new Error(deleteError.message);
+  }
+
+  const populated = items.filter(isSetOfferInputPopulated);
+  if (!populated.length) {
+    return;
+  }
+
+  const { error: insertError } = await client.from('bandie_band_set_offers').insert(
+    populated.map((item, index) => ({
+      band_id: bandId,
+      set_length_minutes: item.set_length_minutes ?? null,
+      set_details: item.set_details?.trim() || null,
+      average_fee: item.average_fee ?? null,
+      details: item.details?.trim() || null,
+      sort_order: item.sort_order ?? index,
+    })),
+  );
+
+  if (insertError) {
+    throw new Error(insertError.message);
+  }
+}
+
 export async function updateBandProfile(
   bandId: string,
   input: UpdateBandProfileInput,
@@ -349,6 +536,60 @@ export async function updateBandProfile(
   if (input.publicDates !== undefined) {
     await replaceBandPublicDates(bandId, input.publicDates);
   }
+  if (input.setOffers !== undefined) {
+    await replaceBandSetOffers(bandId, input.setOffers);
+  }
+  if (input.dynamicFeeOffers !== undefined) {
+    await replaceBandDynamicFeeOffers(bandId, input.dynamicFeeOffers);
+  }
+  if (input.setOffers !== undefined || input.dynamicFeeOffers !== undefined) {
+    let fixedOffers = input.setOffers;
+    let dynamicOffers = input.dynamicFeeOffers;
+
+    if (fixedOffers === undefined || dynamicOffers === undefined) {
+      const current = await getBandProfileForEdit(bandId);
+      fixedOffers ??=
+        current?.setOffers.map(
+          ({ set_length_minutes, set_details, average_fee, details, sort_order }) => ({
+            set_length_minutes,
+            set_details,
+            average_fee,
+            details,
+            sort_order,
+          }),
+        ) ?? [];
+      dynamicOffers ??=
+        current?.dynamicFeeOffers.map(
+          ({
+            set_details,
+            overall_set_length_minutes,
+            appearance_fee,
+            session_fee,
+            session_duration_minutes,
+            details,
+            sort_order,
+          }) => ({
+            set_details,
+            overall_set_length_minutes,
+            appearance_fee,
+            session_fee,
+            session_duration_minutes,
+            details,
+            sort_order,
+          }),
+        ) ?? [];
+    }
+
+    const syncedFees = feeGuidanceFromOffers(fixedOffers, dynamicOffers);
+    const { error: syncError } = await client
+      .from('bandie_bands')
+      .update(syncedFees)
+      .eq('id', bandId);
+
+    if (syncError) {
+      throw new Error(syncError.message);
+    }
+  }
 
   const profile = await getBandProfileForEdit(bandId);
   if (!profile) {
@@ -413,6 +654,9 @@ export function availabilityLabel(status: PublicBandProfile['availability_status
 
 export function formatFeeRange(min: number | null, max: number | null): string | null {
   if (min != null && max != null) {
+    if (min === max) {
+      return formatAverageFee(min);
+    }
     return `£${min.toLocaleString()} – £${max.toLocaleString()}`;
   }
   if (min != null) {
@@ -422,4 +666,31 @@ export function formatFeeRange(min: number | null, max: number | null): string |
     return `Up to £${max.toLocaleString()}`;
   }
   return null;
+}
+
+export function formatAverageFee(fee: number | null): string | null {
+  if (fee == null) {
+    return null;
+  }
+
+  return `£${fee.toLocaleString()}`;
+}
+
+export function formatSetOfferSummary(
+  offer: Pick<BandSetOfferInput, 'set_length_minutes' | 'set_details' | 'average_fee'>,
+): string {
+  const parts: string[] = [];
+
+  if (offer.set_details?.trim()) {
+    parts.push(offer.set_details.trim());
+  } else if (offer.set_length_minutes != null) {
+    parts.push(`${offer.set_length_minutes} min`);
+  }
+
+  const feeLabel = formatAverageFee(offer.average_fee ?? null);
+  if (feeLabel) {
+    parts.push(feeLabel);
+  }
+
+  return parts.join(' · ') || 'Set option';
 }

@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { backNavigationState, resolveBackPath } from '../../lib/backNavigation';
+import { backNavigationState, resolveBackPath, type BackNavigationState } from '../../lib/backNavigation';
 import '../../styles/navigation.css';
 
 type BackLinkProps = {
@@ -7,6 +7,7 @@ type BackLinkProps = {
   workspaceFallbackTo?: string;
   label: string;
   className?: string;
+  navigationState?: BackNavigationState;
 };
 
 export function BackLink({
@@ -14,6 +15,7 @@ export function BackLink({
   workspaceFallbackTo,
   label,
   className = '',
+  navigationState,
 }: BackLinkProps) {
   const location = useLocation();
   const to = resolveBackPath(
@@ -22,7 +24,7 @@ export function BackLink({
     fallbackTo,
     workspaceFallbackTo,
   );
-  const state = backNavigationState(location.state);
+  const state = navigationState ?? backNavigationState(location.state);
 
   return (
     <Link to={to} state={state} className={`back-link ${className}`.trim()}>

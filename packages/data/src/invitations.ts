@@ -22,6 +22,22 @@ export type PendingBandInvitation = {
   created_at: string;
 };
 
+export type ReceivedBandInvitation = PendingBandInvitation & {
+  status: string;
+};
+
+export type SentBandInvitation = {
+  id: string;
+  band_id: string;
+  band_name: string;
+  email: string;
+  invitee_display_name: string | null;
+  role: string;
+  status: string;
+  expires_at: string;
+  created_at: string;
+};
+
 export type CreateInvitationInput = {
   bandId: string;
   email: string;
@@ -81,6 +97,28 @@ export async function listPendingInvitationsForCurrentUser(): Promise<PendingBan
   return data ?? [];
 }
 
+export async function listMyReceivedBandInvitations(): Promise<ReceivedBandInvitation[]> {
+  const client = getBandieClient();
+  const { data, error } = await client.rpc('bandie_list_my_received_band_invitations');
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data ?? [];
+}
+
+export async function listMySentBandInvitations(): Promise<SentBandInvitation[]> {
+  const client = getBandieClient();
+  const { data, error } = await client.rpc('bandie_list_my_sent_band_invitations');
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data ?? [];
+}
+
 export async function acceptBandInvitation(token: string): Promise<string> {
   const client = getBandieClient();
   const { data, error } = await client.rpc('bandie_accept_invitation', {
@@ -92,6 +130,17 @@ export async function acceptBandInvitation(token: string): Promise<string> {
   }
 
   return data as string;
+}
+
+export async function declineBandInvitation(token: string): Promise<void> {
+  const client = getBandieClient();
+  const { error } = await client.rpc('bandie_decline_invitation', {
+    invite_token: token,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
 }
 
 export async function acceptAllPendingInvitations(

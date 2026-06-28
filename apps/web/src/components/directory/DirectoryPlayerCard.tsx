@@ -6,23 +6,33 @@ import {
   playerDirectoryInviteBadges,
   playerDirectoryTags,
   resolvePlayerDisplayName,
+  type PlayerDirectoryFilters,
   type PlayerDirectoryListing,
+  type PlayerDirectorySort,
   type PlayerSearchMode,
 } from '@bandie/data';
 import { directoryLinkState } from '../../lib/backNavigation';
 import { bandCardGradient } from '../../lib/directoryHelpers';
 import { bandInitials } from '../../lib/profileHelpers';
 
+import type { FindPlayersContext } from '../../lib/findPlayersNavigation';
+
 type DirectoryPlayerCardProps = {
   player: PlayerDirectoryListing;
   mode: PlayerSearchMode;
   variant?: 'public' | 'workspace';
+  filters?: PlayerDirectoryFilters;
+  sort?: PlayerDirectorySort;
+  findPlayersContext?: FindPlayersContext | null;
 };
 
 export function DirectoryPlayerCard({
   player,
   mode,
   variant = 'public',
+  filters,
+  sort,
+  findPlayersContext = null,
 }: DirectoryPlayerCardProps) {
   const location = useLocation();
   const profilePath =
@@ -78,10 +88,13 @@ export function DirectoryPlayerCard({
             <Link
               className="directory-btn directory-btn-dark"
               to={profilePath}
-              state={directoryLinkState(location.pathname, {
+              state={directoryLinkState(location.pathname + location.search, {
                 variant,
                 directory: 'players',
                 playerMode: mode,
+                playerFilters: filters,
+                playerSort: sort,
+                findPlayers: findPlayersContext ?? undefined,
               })}
             >
               View profile

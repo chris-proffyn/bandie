@@ -1,9 +1,22 @@
-import type { PlayerSearchMode } from '@bandie/data';
+import type {
+  PlayerDirectoryFilters,
+  PlayerDirectorySort,
+  PlayerSearchMode,
+} from '@bandie/data';
 
 export type BackNavigationState = {
   from?: string;
   workspaceContext?: 'players' | 'bands';
   playerMode?: PlayerSearchMode;
+  playerFilters?: PlayerDirectoryFilters;
+  playerSort?: PlayerDirectorySort;
+  findPlayers?: {
+    bandId: string;
+    bandName?: string;
+    partId?: string;
+    partTitle?: string;
+    instrument?: string;
+  };
 };
 
 export function resolveBackPath(
@@ -35,13 +48,22 @@ export function resolveBackPath(
 
 export function backNavigationState(locationState: unknown): BackNavigationState | undefined {
   const state = locationState as BackNavigationState | null;
-  if (!state?.playerMode && !state?.workspaceContext) {
+  if (
+    !state?.playerMode &&
+    !state?.workspaceContext &&
+    !state?.playerFilters &&
+    !state?.playerSort &&
+    !state?.findPlayers
+  ) {
     return undefined;
   }
 
   return {
     playerMode: state.playerMode,
     workspaceContext: state.workspaceContext,
+    playerFilters: state.playerFilters,
+    playerSort: state.playerSort,
+    findPlayers: state.findPlayers,
   };
 }
 
@@ -51,11 +73,17 @@ export function directoryLinkState(
     variant: 'public' | 'workspace';
     directory: 'players' | 'bands';
     playerMode?: PlayerSearchMode;
+    playerFilters?: PlayerDirectoryFilters;
+    playerSort?: PlayerDirectorySort;
+    findPlayers?: BackNavigationState['findPlayers'];
   },
 ): BackNavigationState {
   return {
     from: fromPath,
     workspaceContext: options.variant === 'workspace' ? options.directory : undefined,
     playerMode: options.playerMode,
+    playerFilters: options.playerFilters,
+    playerSort: options.playerSort,
+    findPlayers: options.findPlayers,
   };
 }

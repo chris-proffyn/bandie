@@ -2,7 +2,7 @@
 
 **Document status:** Structural delivery plan (no progress tracking)  
 **Product:** Bandie  
-**Last updated:** 27 June 2026
+**Last updated:** 28 June 2026
 
 **Progress tracking:** Use `docs/PROJECT_STATUS_TRACKER.md` for live status. The tracker uses finer-grained phases (e.g. band directory and player directory as separate phases) than this map.
 
@@ -87,12 +87,13 @@ This document defines **delivery phases, sequencing, and dependencies**. It is a
 - Player directory with deputy/member search modes
 - Public player profiles
 - Booking enquiry form
+- Public band members roster and set/fee offers on profiles
 
-**Exit criteria:** Band profile publishable; directory searchable; enquiry submitted and visible to band.
+**Exit criteria:** Band profile publishable; directory searchable; enquiry submitted and delivered to band primary contact.
 
 **Dependencies:** Phase 2.
 
-**Status:** Complete except booking enquiry form (deferred).
+**Status:** Complete except dedicated booking enquiry inbox (enquiries delivered as direct messages).
 
 ---
 
@@ -112,7 +113,7 @@ This document defines **delivery phases, sequencing, and dependencies**. It is a
 
 **Dependencies:** Phase 2, Phase 3 (profile/settings integration).
 
-**Status:** Workspace shell and overview complete (profile editor, members, invitations). Songs/setlists/files not started.
+**Status:** Workspace shell and overview complete (tabbed overview, leader contact, lineup parts, player recruitment, profile editor, members, invitations, set fee offers). Songs/setlists/files not started.
 
 ---
 
@@ -150,7 +151,7 @@ This document defines **delivery phases, sequencing, and dependencies**. It is a
 
 **Dependencies:** Phases 4–5.
 
-**Status:** Not started.
+**Status:** Partial — `/app/communications` ships unified communications (band invitations with accept/decline, player outreach inbox, direct messages with replies); activity feed, review tasks, and push remain deferred. Band overview UX polish (tabbed members/details, compact card actions, multiple leaders, primary contact) and shared brand mark shipped alongside communications work.
 
 ---
 
@@ -226,7 +227,7 @@ Phases 0–5 constitute the **MVP** as defined in `PRODUCT_REQUIREMENTS.md`. Pha
 
 ## Current position
 
-**Completed:** Phases 0–3; Phase 4 workspace shell (overview, members, invitations)  
-**Next:** Phase 4 — Songs dashboard, song folders, and file uploads
+**Completed:** Phases 0–5; Phase 3 booking enquiry partial; Phase 6 partial (workspace communications); organiser venues with photos; multiple band leaders  
+**Next:** Phase 6 — Songs dashboard, song folders, and file uploads (or activity feed polish)
 
 See `docs/PROJECT_STATUS_TRACKER.md` for item-level checklist (Phases 6–12 in tracker map to workspace features, calendar, gigs, etc.).

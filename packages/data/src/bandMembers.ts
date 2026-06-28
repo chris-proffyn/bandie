@@ -16,6 +16,7 @@ export type BandMemberWithProfile = {
   user_id: string;
   role: string;
   status: string;
+  lineup_unavailable: boolean;
   created_at: string;
   profile: BandMemberProfile | null;
 };
@@ -36,7 +37,7 @@ export async function listBandMembersWithProfiles(bandId: string): Promise<BandM
 
   const { data: members, error: membersError } = await client
     .from('bandie_band_members')
-    .select('id, user_id, role, status, created_at')
+    .select('id, user_id, role, status, lineup_unavailable, created_at')
     .eq('band_id', bandId)
     .eq('status', 'active')
     .order('created_at', { ascending: true });
@@ -71,8 +72,39 @@ export async function listBandMembersWithProfiles(bandId: string): Promise<BandM
 
   return members.map((member) => ({
     ...member,
+    lineup_unavailable: member.lineup_unavailable ?? false,
     profile: profileByUserId.get(member.user_id) ?? null,
   }));
+}
+
+export async function setBandMemberLineupUnavailable(
+  bandId: string,
+  memberId: string,
+  unavailable: boolean,
+): Promise<void> {
+  const client = getBandieClient();
+  const { error } = await client
+    .from('bandie_band_members')
+    .update({ lineup_unavailable: unavailable })
+    .eq('id', memberId)
+    .eq('band_id', bandId)
+    .eq('status', 'active');
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function removeBandMember(bandId: string, memberId: string): Promise<void> {
+  const client = getBandieClient();
+  const { error } = await client.rpc('bandie_remove_band_member', {
+    p_band_id: bandId,
+    p_member_id: memberId,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
 }
 
 export function memberDisplayName(member: BandMemberWithProfile): string {

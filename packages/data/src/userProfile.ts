@@ -1,11 +1,19 @@
 import { getBandieClient } from './context';
+import { isBandieAdminModeActive } from './adminMode';
 import { isCurrentUserAppAdmin } from './membership';
+import type { PlayerGender } from './playerGender';
+import {
+  normalizeUsername,
+  validateUsernameInput,
+} from './username';
 
 export type UserProfile = {
   id: string;
   user_id: string;
   display_name: string | null;
+  username: string | null;
   preferred_instrument: string | null;
+  gender: PlayerGender | null;
   profile_image_url: string | null;
   bio: string | null;
   location: string | null;
@@ -20,6 +28,10 @@ export type UserProfile = {
   open_to_deputy_invites: boolean;
   open_to_member_invites: boolean;
   public_player_profile_enabled: boolean;
+  is_player: boolean;
+  is_organiser: boolean;
+  contact_email: string | null;
+  contact_phone: string | null;
   onboarding_complete: boolean;
   created_at: string;
   updated_at: string;
@@ -27,7 +39,9 @@ export type UserProfile = {
 
 export type UpdateUserProfileInput = {
   display_name?: string;
+  username?: string;
   preferred_instrument?: string;
+  gender?: PlayerGender | null;
   profile_image_url?: string | null;
   bio?: string;
   location?: string;
@@ -42,13 +56,19 @@ export type UpdateUserProfileInput = {
   open_to_deputy_invites?: boolean;
   open_to_member_invites?: boolean;
   public_player_profile_enabled?: boolean;
+  is_player?: boolean;
+  is_organiser?: boolean;
+  contact_email?: string | null;
+  contact_phone?: string | null;
 };
 
 const profileSelect = `
   id,
   user_id,
   display_name,
+  username,
   preferred_instrument,
+  gender,
   profile_image_url,
   bio,
   location,
@@ -63,6 +83,10 @@ const profileSelect = `
   open_to_deputy_invites,
   open_to_member_invites,
   public_player_profile_enabled,
+  is_player,
+  is_organiser,
+  contact_email,
+  contact_phone,
   onboarding_complete,
   created_at,
   updated_at
@@ -76,6 +100,31 @@ function defaultDisplayName(email?: string | null, metadataName?: string | null)
     return email.split('@')[0] ?? 'Band member';
   }
   return 'Band member';
+}
+
+function mapProfileSaveError(error: { message?: string; code?: string }): string {
+  if (error.code === '23505' && (error.message?.includes('username') ?? false)) {
+    return 'That username is already taken.';
+  }
+
+  if (error.code === '23505') {
+    return 'That username is already taken.';
+  }
+
+  return error.message ?? 'Unable to save profile.';
+}
+
+export async function ensureProfileUsername(userId?: string): Promise<string | null> {
+  const client = getBandieClient();
+  const { data, error } = await client.rpc('bandie_ensure_profile_username', {
+    p_user_id: userId ?? undefined,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return typeof data === 'string' ? data : null;
 }
 
 export function resolveDisplayName(
@@ -142,6 +191,8 @@ function normalizeProfileRow(data: Record<string, unknown>): UserProfile {
     genres: (data.genres as string[]) ?? [],
     instruments: (data.instruments as string[]) ?? [],
     gear_items: (data.gear_items as string[]) ?? [],
+    is_player: data.is_player !== false,
+    is_organiser: Boolean(data.is_organiser),
   };
 }
 
@@ -196,8 +247,21 @@ async function applyUserProfileUpdates(
     updates.display_name =
       input.display_name.trim() || defaultDisplayName(userEmail, metadataDisplayName);
   }
+  if (input.username !== undefined) {
+    updates.username = normalizeUsername(input.username);
+    if (!updates.username) {
+      throw new Error('Username is required.');
+    }
+    const usernameError = validateUsernameInput(updates.username as string);
+    if (usernameError) {
+      throw new Error(usernameError);
+    }
+  }
   if (input.preferred_instrument !== undefined) {
     updates.preferred_instrument = input.preferred_instrument.trim() || null;
+  }
+  if (input.gender !== undefined) {
+    updates.gender = input.gender;
   }
   if (input.profile_image_url !== undefined) {
     updates.profile_image_url = input.profile_image_url?.trim() || null;
@@ -241,6 +305,24 @@ async function applyUserProfileUpdates(
   if (input.public_player_profile_enabled !== undefined) {
     updates.public_player_profile_enabled = input.public_player_profile_enabled;
   }
+  if (input.is_player !== undefined) {
+    updates.is_player = input.is_player;
+  }
+  if (input.is_organiser !== undefined) {
+    updates.is_organiser = input.is_organiser;
+  }
+  if (input.contact_email !== undefined) {
+    updates.contact_email = input.contact_email?.trim() || null;
+  }
+  if (input.contact_phone !== undefined) {
+    updates.contact_phone = input.contact_phone?.trim() || null;
+  }
+
+  if (input.is_player !== undefined && input.is_organiser !== undefined) {
+    if (!input.is_player && !input.is_organiser) {
+      throw new Error('Choose at least one role: player, organiser, or both.');
+    }
+  }
 
   if (Object.keys(updates).length === 0) {
     return;
@@ -250,13 +332,20 @@ async function applyUserProfileUpdates(
   const { error } = await client.from('bandie_profiles').update(updates).eq('user_id', targetUserId);
 
   if (error) {
-    throw new Error(error.message);
+    throw new Error(mapProfileSaveError(error));
   }
 }
 
 export async function ensureBandieProfile(displayName?: string): Promise<UserProfile> {
   const existing = await getCurrentUserProfile();
   if (existing) {
+    if (!existing.username?.trim()) {
+      await ensureProfileUsername(existing.user_id);
+      const refreshed = await getCurrentUserProfile();
+      if (refreshed) {
+        return refreshed;
+      }
+    }
     return existing;
   }
 
@@ -279,7 +368,7 @@ export async function ensureBandieProfile(displayName?: string): Promise<UserPro
     .single();
 
   if (error) {
-    throw new Error(error.message);
+    throw new Error(mapProfileSaveError(error));
   }
 
   return {
@@ -326,8 +415,8 @@ export async function updateUserProfileByUserId(
   targetUserId: string,
   input: UpdateUserProfileInput,
 ): Promise<UserProfile> {
-  if (!(await isCurrentUserAppAdmin())) {
-    throw new Error('Only app admins can update another user profile.');
+  if (!isBandieAdminModeActive() || !(await isCurrentUserAppAdmin())) {
+    throw new Error('Only app admins in admin mode can update another user profile.');
   }
 
   const client = getBandieClient();

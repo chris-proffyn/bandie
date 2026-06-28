@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { BANDIE_BRAND_MARK } from '../../lib/brand';
 import {
   collectPlayerDirectoryGenres,
-  collectPlayerDirectoryInstruments,
+  collectPlayerDirectoryPrimaryInstruments,
   computePlayerDirectoryStats,
   DEFAULT_PLAYER_DIRECTORY_FILTERS,
   filterPlayerDirectory,
   listPublishedPlayersForDirectory,
+  PLAYER_DIRECTORY_INSTRUMENT_CATEGORY_LABELS,
+  PLAYER_DIRECTORY_INSTRUMENT_CATEGORY_ORDER,
   sortPlayerDirectory,
   playerDirectoryModeLabel,
   type PlayerDirectoryFilters,
@@ -19,32 +22,72 @@ import {
   PlayerDirectorySortControl,
 } from './PlayerDirectoryFiltersPanel';
 import { DirectoryPlayerCard } from './DirectoryPlayerCard';
+import {
+  AdminRecruitingBandSelector,
+  adminRecruitingBandContext,
+} from '../band/AdminRecruitingBandSelector';
 import { useAuth } from '../../context/AuthContext';
 import type { BackNavigationState } from '../../lib/backNavigation';
+import {
+  loadPlayerDirectoryNavigation,
+  savePlayerDirectoryNavigation,
+} from '../../lib/playerDirectoryNavigation';
+
+import type { FindPlayersContext } from '../../lib/findPlayersNavigation';
 
 type PlayerDirectoryViewProps = {
   variant: 'public' | 'workspace';
   initialFilters?: PlayerDirectoryFilters;
+  findPlayersContext?: FindPlayersContext | null;
 };
 
 export function PlayerDirectoryView({
   variant,
   initialFilters = DEFAULT_PLAYER_DIRECTORY_FILTERS,
+  findPlayersContext = null,
 }: PlayerDirectoryViewProps) {
-  const { session } = useAuth();
+  const { session, adminModeActive, bands } = useAuth();
   const location = useLocation();
+  const [adminRecruitBandId, setAdminRecruitBandId] = useState(findPlayersContext?.bandId ?? '');
+  const storedNavigation = loadPlayerDirectoryNavigation(variant, initialFilters);
   const [players, setPlayers] = useState<PlayerDirectoryListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<PlayerDirectoryFilters>(initialFilters);
-  const [sort, setSort] = useState<PlayerDirectorySort>('recommended');
+  const [filters, setFilters] = useState<PlayerDirectoryFilters>(() => {
+    const state = location.state as BackNavigationState | null;
+    if (state?.playerFilters) {
+      return state.playerFilters;
+    }
+    if (findPlayersContext?.instrument) {
+      return {
+        ...initialFilters,
+        mode: 'permanent',
+        instrument: findPlayersContext.instrument,
+        primaryInstrumentOnly: true,
+      };
+    }
+    return storedNavigation.filters;
+  });
+  const [sort, setSort] = useState<PlayerDirectorySort>(() => {
+    const state = location.state as BackNavigationState | null;
+    return state?.playerSort ?? storedNavigation.sort;
+  });
 
   useEffect(() => {
     const state = location.state as BackNavigationState | null;
-    if (state?.playerMode) {
+    if (state?.playerFilters) {
+      setFilters(state.playerFilters);
+    } else if (state?.playerMode) {
       setFilters((current) => ({ ...current, mode: state.playerMode! }));
     }
+    if (state?.playerSort) {
+      setSort(state.playerSort);
+    }
   }, [location.pathname, location.state]);
+
+  useEffect(() => {
+    savePlayerDirectoryNavigation(variant, filters, sort);
+  }, [variant, filters, sort]);
 
   useEffect(() => {
     listPublishedPlayersForDirectory()
@@ -54,7 +97,7 @@ export function PlayerDirectoryView({
   }, []);
 
   const genres = useMemo(() => collectPlayerDirectoryGenres(players), [players]);
-  const instruments = useMemo(() => collectPlayerDirectoryInstruments(players), [players]);
+  const instruments = useMemo(() => collectPlayerDirectoryPrimaryInstruments(players), [players]);
   const stats = useMemo(() => computePlayerDirectoryStats(players), [players]);
 
   const filteredPlayers = useMemo(() => {
@@ -65,6 +108,9 @@ export function PlayerDirectoryView({
   const activePills = buildPlayerActiveFilterPills(filters);
   const modeLabel = playerDirectoryModeLabel(filters.mode);
   const isWorkspace = variant === 'workspace';
+  const effectiveFindPlayersContext =
+    findPlayersContext ??
+    (adminModeActive ? adminRecruitingBandContext(bands, adminRecruitBandId) : null);
 
   if (loading) {
     return (
@@ -97,6 +143,27 @@ export function PlayerDirectoryView({
           {isWorkspace ? 'Find band members' : 'Bandie player directory for band leaders'}
         </div>
         <h1>{isWorkspace ? 'Player directory' : 'Find the right player for your band.'}</h1>
+        {effectiveFindPlayersContext ? (
+          <p className="workspace-recruiting-banner">
+            Recruiting for <strong>{effectiveFindPlayersContext.bandName ?? 'your band'}</strong>
+            {effectiveFindPlayersContext.partTitle ? (
+              <>
+                {' '}
+                · <strong>{effectiveFindPlayersContext.partTitle}</strong>
+              </>
+            ) : null}
+            {effectiveFindPlayersContext.instrument ? (
+              <> · {effectiveFindPlayersContext.instrument}</>
+            ) : null}
+          </p>
+        ) : null}
+        {adminModeActive && isWorkspace && !findPlayersContext ? (
+          <AdminRecruitingBandSelector
+            bands={bands}
+            bandId={adminRecruitBandId}
+            onChange={setAdminRecruitBandId}
+          />
+        ) : null}
         <p className={isWorkspace ? 'my-bands-lead' : 'directory-lead'}>
           {isWorkspace
             ? 'Search musicians who are open to joining a band permanently or covering a one-off gig. Filter by instrument, genre, location and experience.'
@@ -116,9 +183,16 @@ export function PlayerDirectoryView({
           <strong>{stats.memberCount}</strong>
           <span>open to join a band</span>
         </div>
-        <div className="directory-stat">
-          <strong>{stats.instrumentCount}</strong>
-          <span>instruments represented</span>
+        <div className="directory-stats-instruments">
+          <p className="directory-stats-instruments-heading">Instruments represented</p>
+          <div className="directory-stats-instrument-grid">
+            {PLAYER_DIRECTORY_INSTRUMENT_CATEGORY_ORDER.map((category) => (
+              <div key={category} className="directory-stat directory-stat-compact">
+                <strong>{stats.instrumentCategories[category]}</strong>
+                <span>{PLAYER_DIRECTORY_INSTRUMENT_CATEGORY_LABELS[category]}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </aside>
     </section>
@@ -134,7 +208,11 @@ export function PlayerDirectoryView({
         genres={genres}
         instruments={instruments}
         onChange={setFilters}
-        onReset={() => setFilters(initialFilters)}
+        onReset={() => {
+          setFilters(initialFilters);
+          setSort('recommended');
+        }}
+        showPrimaryInstrumentToggle
       />
 
       <section aria-label="Player directory results">
@@ -178,13 +256,16 @@ export function PlayerDirectoryView({
             )}
           </div>
         ) : (
-          <div className="directory-band-grid">
+          <div className="directory-band-grid directory-player-grid">
             {filteredPlayers.map((player) => (
               <DirectoryPlayerCard
                 key={player.id}
                 player={player}
                 mode={filters.mode}
                 variant={variant}
+                filters={filters}
+                sort={sort}
+                findPlayersContext={effectiveFindPlayersContext}
               />
             ))}
           </div>
@@ -207,7 +288,7 @@ export function PlayerDirectoryView({
       <header className="directory-header">
         <div className="directory-header-inner">
           <Link to="/" className="directory-brand" aria-label="Bandie home">
-            <span className="directory-brand-mark">B</span>
+            <span className="directory-brand-mark">{BANDIE_BRAND_MARK}</span>
             <span>Bandie</span>
           </Link>
           <div className="directory-header-actions">

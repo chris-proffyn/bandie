@@ -1,21 +1,23 @@
 import { Link } from 'react-router-dom';
+import { BANDIE_BRAND_MARK } from '../../lib/brand';
 import {
-  availabilityLabel,
   bandNameFontFamily,
   bandPaletteCssVariables,
   formatBandLocation,
   formatBandSubtitle,
-  formatFeeRange,
   type PublicBandProfile,
 } from '@bandie/data';
 import { BackLink } from '../navigation/BackLink';
+import { BandBookingContactCard } from './BandBookingContactCard';
+import { BandProfileHeroStage } from './BandProfileHeroStage';
+import { PublicBandMembersSection } from './PublicBandMembersSection';
 import {
-  bandInitials,
   formatDisplayDate,
   socialPlatformLabel,
   youtubeEmbedUrl,
 } from '../../lib/profileHelpers';
 import { useBandNameFont } from '../../lib/useBandNameFont';
+import { BandSetFeesFields } from '../band/BandSetFeesFields';
 import type { CSSProperties } from 'react';
 
 type PublicBandProfileViewProps = {
@@ -27,14 +29,9 @@ export function PublicBandProfileView({ profile, variant = 'public' }: PublicBan
   const isWorkspace = variant === 'workspace';
   const tagline = formatBandSubtitle(profile);
   const locationLabel = formatBandLocation(profile);
-  const genreLabel = profile.genres.filter(Boolean).join(' · ');
-  const feeRange = formatFeeRange(profile.fee_guidance_min, profile.fee_guidance_max);
   const photos = profile.media.filter((item) => item.kind === 'photo');
   const videos = profile.media.filter((item) => item.kind === 'video');
   const tracks = profile.media.filter((item) => item.kind === 'track');
-  const bookingEmail = profile.booking_email?.trim();
-  const bookingPhone = profile.booking_phone?.trim();
-  const hasMeta = Boolean(profile.band_size || profile.set_length_minutes || feeRange);
 
   useBandNameFont(profile.name_font);
 
@@ -46,12 +43,12 @@ export function PublicBandProfileView({ profile, variant = 'public' }: PublicBan
         <header className="band-profile-header">
           <div className="band-profile-header-inner">
             <Link to="/" className="band-profile-brand">
-              <span className="band-profile-brand-mark">B</span>
+              <span className="band-profile-brand-mark">{BANDIE_BRAND_MARK}</span>
               <span>Bandie</span>
             </Link>
-            {bookingEmail ? (
-              <a className="band-profile-button band-profile-button-primary" href={`mailto:${bookingEmail}`}>
-                Book this band
+            {profile.primaryContact ? (
+              <a className="band-profile-button band-profile-button-primary" href="#book">
+                Book {profile.name}
               </a>
             ) : (
               <Link className="band-profile-button band-profile-button-secondary" to="/bands">
@@ -69,58 +66,46 @@ export function PublicBandProfileView({ profile, variant = 'public' }: PublicBan
           label="Back to band directory"
         />
 
-        {profile.hero_image_url ? (
-          <div className="band-profile-hero-banner">
-            <img src={profile.hero_image_url} alt="" />
-          </div>
+        <h1
+          id="band-profile-title"
+          className="band-profile-name band-profile-name-lead"
+          style={{ fontFamily: bandNameFontFamily(profile.name_font) }}
+        >
+          {profile.name}
+        </h1>
+
+        <BandProfileHeroStage
+          bandName={profile.name}
+          heroImageUrl={profile.hero_image_url}
+          logoUrl={profile.logo_url}
+          availabilityStatus={profile.availability_status}
+        />
+
+        <section className="band-profile-intro" aria-label="About the band">
+          {tagline ? <p className="band-profile-subtitle">{tagline}</p> : null}
+          {profile.description ? <p className="band-profile-lead">{profile.description}</p> : null}
+          {locationLabel ? <p className="band-profile-location">{locationLabel}</p> : null}
+        </section>
+
+        {profile.setOffers.length || profile.dynamicFeeOffers.length ? (
+          <section className="band-profile-section" id="fees">
+            <h2>Fees</h2>
+            <BandSetFeesFields
+              mode="view"
+              publicDisplay
+              setOffers={profile.setOffers}
+              dynamicFeeOffers={profile.dynamicFeeOffers}
+              draftSetOffers={[]}
+              draftDynamicFeeOffers={[]}
+              onSetOffersChange={() => undefined}
+              onDynamicFeeOffersChange={() => undefined}
+            />
+          </section>
         ) : null}
 
-        <section className="band-profile-identity" aria-labelledby="band-profile-title">
-          <div className="band-profile-logo-mark" aria-hidden={Boolean(profile.logo_url)}>
-            {profile.logo_url ? (
-              <img src={profile.logo_url} alt={`${profile.name} logo`} />
-            ) : (
-              bandInitials(profile.name)
-            )}
-          </div>
-
-          <h1
-            id="band-profile-title"
-            className="band-profile-name"
-            style={{ fontFamily: bandNameFontFamily(profile.name_font) }}
-          >
-            {profile.name}
-          </h1>
-
-          <div className="band-profile-eyebrow">{availabilityLabel(profile.availability_status)}</div>
-          {tagline ? <p className="band-profile-subtitle">{tagline}</p> : null}
-          {locationLabel ? <p className="band-profile-location">{locationLabel}</p> : null}
-          {genreLabel ? <p className="band-profile-genres">{genreLabel}</p> : null}
-          {profile.description ? <p className="band-profile-lead">{profile.description}</p> : null}
-
-          {hasMeta ? (
-            <div className="band-profile-meta-grid">
-              {profile.band_size ? (
-                <div className="band-profile-meta-card">
-                  <strong>{profile.band_size}</strong>
-                  <span>Band members</span>
-                </div>
-              ) : null}
-              {profile.set_length_minutes ? (
-                <div className="band-profile-meta-card">
-                  <strong>{profile.set_length_minutes} min</strong>
-                  <span>Typical set length</span>
-                </div>
-              ) : null}
-              {feeRange ? (
-                <div className="band-profile-meta-card">
-                  <strong>{feeRange}</strong>
-                  <span>Fee guidance</span>
-                </div>
-              ) : null}
-            </div>
-          ) : null}
-        </section>
+        {profile.members.length ? (
+          <PublicBandMembersSection members={profile.members} variant={variant} />
+        ) : null}
 
         {profile.equipment_notes ? (
           <section className="band-profile-section" id="equipment">
@@ -148,11 +133,11 @@ export function PublicBandProfileView({ profile, variant = 'public' }: PublicBan
         {videos.length ? (
           <section className="band-profile-section" id="videos">
             <h2>Videos</h2>
-            <div className="band-profile-grid">
+            <div className="band-profile-video-grid">
               {videos.map((item) => {
                 const embedUrl = youtubeEmbedUrl(item.url);
                 return (
-                  <article key={item.id} className="band-profile-card">
+                  <article key={item.id} className="band-profile-video-card">
                     <h3>{item.title || 'Video'}</h3>
                     {embedUrl ? (
                       <iframe
@@ -230,30 +215,12 @@ export function PublicBandProfileView({ profile, variant = 'public' }: PublicBan
           </section>
         ) : null}
 
-        <section className="band-profile-booking" id="book">
-          <h2>Book {profile.name}</h2>
-          <p>
-            Send booking details including date, venue, event type and budget. The band will respond from
-            their private Bandie workspace.
-          </p>
-          <div className="band-profile-actions">
-            {bookingEmail ? (
-              <a className="band-profile-button band-profile-button-primary" href={`mailto:${bookingEmail}`}>
-                Email {profile.name}
-              </a>
-            ) : null}
-            {bookingPhone ? (
-              <a className="band-profile-button band-profile-button-secondary" href={`tel:${bookingPhone}`}>
-                Call {bookingPhone}
-              </a>
-            ) : null}
-            {!bookingEmail && !bookingPhone ? (
-              <Link className="band-profile-button band-profile-button-secondary" to="/bands">
-                Browse the band directory
-              </Link>
-            ) : null}
-          </div>
-        </section>
+        <BandBookingContactCard
+          bandName={profile.name}
+          primaryContact={profile.primaryContact}
+          setOffers={profile.setOffers}
+          dynamicFeeOffers={profile.dynamicFeeOffers}
+        />
       </div>
 
       <footer className="band-profile-shell band-profile-footer">

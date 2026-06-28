@@ -1,6 +1,7 @@
 import { slugifyBandName } from '@bandie/utils';
 import { resolveBandColorPalette } from './bandColorPalettes';
 import { getBandieClient } from './context';
+import { isBandieAdminModeActive } from './adminMode';
 import { isCurrentUserAppAdmin, PLATFORM_ADMIN_BAND_LIST_ROLE } from './membership';
 
 export type Band = {
@@ -76,7 +77,7 @@ export async function listUserBands(): Promise<UserBand[]> {
     return [];
   }
 
-  if (await isCurrentUserAppAdmin()) {
+  if (isBandieAdminModeActive() && (await isCurrentUserAppAdmin())) {
     const { data: bands, error: bandsError } = await client
       .from('bandie_bands')
       .select('*')

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { BANDIE_BRAND_MARK } from '../../lib/brand';
 import {
   collectDirectoryGenres,
   computeDirectoryStats,
@@ -162,7 +163,7 @@ export function BandDirectoryView({
             )}
           </div>
         ) : (
-          <div className="directory-band-grid">
+          <div className="directory-band-grid directory-band-listing-grid">
             {filteredBands.map((band) => (
               <DirectoryBandCard key={band.id} band={band} variant={variant} />
             ))}
@@ -186,7 +187,7 @@ export function BandDirectoryView({
       <header className="directory-header">
         <div className="directory-header-inner">
           <Link to="/" className="directory-brand" aria-label="Bandie home">
-            <span className="directory-brand-mark">B</span>
+            <span className="directory-brand-mark">{BANDIE_BRAND_MARK}</span>
             <span>Bandie</span>
           </Link>
           <div className="directory-header-actions">

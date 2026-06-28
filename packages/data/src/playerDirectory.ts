@@ -8,6 +8,7 @@ export type PlayerDirectoryListing = {
   id: string;
   display_name: string | null;
   preferred_instrument: string | null;
+  gender: string | null;
   profile_image_url: string | null;
   bio: string | null;
   location: string | null;
@@ -26,7 +27,9 @@ export type PlayerDirectoryFilters = {
   mode: PlayerSearchMode;
   name: string;
   instrument: string;
+  primaryInstrumentOnly: boolean;
   genre: string;
+  gender: string;
   location: string;
   gigDate: string;
   budgetMin: number | null;
@@ -41,7 +44,9 @@ export const DEFAULT_PLAYER_DIRECTORY_FILTERS: PlayerDirectoryFilters = {
   mode: 'temporary',
   name: '',
   instrument: '',
+  primaryInstrumentOnly: true,
   genre: '',
+  gender: '',
   location: '',
   gigDate: '',
   budgetMin: null,
@@ -54,6 +59,7 @@ const playerDirectorySelect = `
   id,
   display_name,
   preferred_instrument,
+  gender,
   profile_image_url,
   bio,
   location,
@@ -131,20 +137,60 @@ function playerDisplayName(player: PlayerDirectoryListing): string {
   return player.display_name?.trim() || 'Unnamed player';
 }
 
-function matchesInstrument(player: PlayerDirectoryListing, instrument: string): boolean {
+function matchesPrimaryInstrument(player: PlayerDirectoryListing, instrument: string): boolean {
+  const primary = player.preferred_instrument?.trim() ?? '';
+  if (!primary) {
+    return false;
+  }
+
+  const needle = instrument.trim().toLowerCase();
+  const primaryLower = primary.toLowerCase();
+
+  if (primaryLower === needle) {
+    return true;
+  }
+
+  if (primaryLower.includes(needle) || needle.includes(primaryLower)) {
+    return true;
+  }
+
+  const needleCategory = classifyPlayerInstrumentCategory(instrument);
+  if (needleCategory !== 'other') {
+    return classifyPlayerInstrumentCategory(primary) === needleCategory;
+  }
+
+  return false;
+}
+
+function matchesInstrument(
+  player: PlayerDirectoryListing,
+  instrument: string,
+  primaryInstrumentOnly = true,
+): boolean {
   if (!instrument.trim()) {
     return true;
   }
 
-  const needle = instrument.trim().toLowerCase();
-  const primary = player.preferred_instrument?.toLowerCase() ?? '';
-  if (primary.includes(needle) || needle.includes(primary)) {
+  if (primaryInstrumentOnly) {
+    return matchesPrimaryInstrument(player, instrument);
+  }
+
+  if (matchesPrimaryInstrument(player, instrument)) {
     return true;
   }
 
+  const needle = instrument.trim().toLowerCase();
   return player.instruments.some(
     (item) => item.toLowerCase().includes(needle) || needle.includes(item.toLowerCase()),
   );
+}
+
+function matchesGender(player: PlayerDirectoryListing, gender: string): boolean {
+  if (!gender.trim()) {
+    return true;
+  }
+
+  return player.gender === gender.trim();
 }
 
 function matchesGenre(player: PlayerDirectoryListing, genre: string): boolean {
@@ -258,11 +304,15 @@ export function filterPlayerDirectory(
       return false;
     }
 
-    if (!matchesInstrument(player, filters.instrument)) {
+    if (!matchesInstrument(player, filters.instrument, filters.primaryInstrumentOnly)) {
       return false;
     }
 
     if (!matchesGenre(player, filters.genre)) {
+      return false;
+    }
+
+    if (!matchesGender(player, filters.gender)) {
       return false;
     }
 
@@ -355,12 +405,21 @@ export function collectPlayerDirectoryGenres(players: PlayerDirectoryListing[]):
   return [...genres].sort((a, b) => a.localeCompare(b));
 }
 
-export function collectPlayerDirectoryInstruments(players: PlayerDirectoryListing[]): string[] {
+export function collectPlayerDirectoryPrimaryInstruments(
+  players: PlayerDirectoryListing[],
+): string[] {
   const instruments = new Set<string>();
   for (const player of players) {
     if (player.preferred_instrument?.trim()) {
       instruments.add(player.preferred_instrument.trim());
     }
+  }
+  return [...instruments].sort((a, b) => a.localeCompare(b));
+}
+
+export function collectPlayerDirectoryInstruments(players: PlayerDirectoryListing[]): string[] {
+  const instruments = new Set(collectPlayerDirectoryPrimaryInstruments(players));
+  for (const player of players) {
     for (const instrument of player.instruments) {
       if (instrument.trim()) {
         instruments.add(instrument.trim());
@@ -471,12 +530,129 @@ export function formatPlayerTravelDistance(miles: number | null): string | null 
   return `Travels up to ${miles} miles`;
 }
 
+export type PlayerDirectoryInstrumentCategory =
+  | 'guitar'
+  | 'bass'
+  | 'drums'
+  | 'keys'
+  | 'vocals'
+  | 'other';
+
+export const PLAYER_DIRECTORY_INSTRUMENT_CATEGORY_ORDER: readonly PlayerDirectoryInstrumentCategory[] = [
+  'guitar',
+  'bass',
+  'drums',
+  'keys',
+  'vocals',
+  'other',
+];
+
+export const PLAYER_DIRECTORY_INSTRUMENT_CATEGORY_LABELS: Record<
+  PlayerDirectoryInstrumentCategory,
+  string
+> = {
+  guitar: 'Guitar',
+  bass: 'Bass',
+  drums: 'Drums',
+  keys: 'Keys',
+  vocals: 'Vocals',
+  other: 'Other',
+};
+
+export type PlayerDirectoryInstrumentCategoryCounts = Record<
+  PlayerDirectoryInstrumentCategory,
+  number
+>;
+
+export function classifyPlayerInstrumentCategory(
+  instrument: string,
+): PlayerDirectoryInstrumentCategory {
+  const value = instrument.trim().toLowerCase();
+  if (!value) {
+    return 'other';
+  }
+
+  // Order matters for overlapping names (e.g. bass guitar).
+  if (
+    value.includes('vocal') ||
+    value.includes('singer') ||
+    value.includes('singing') ||
+    value === 'voice'
+  ) {
+    return 'vocals';
+  }
+
+  if (value.includes('bass')) {
+    return 'bass';
+  }
+
+  if (value.includes('drum') || value.includes('percussion')) {
+    return 'drums';
+  }
+
+  if (
+    value.includes('keys') ||
+    value.includes('keyboard') ||
+    value.includes('piano') ||
+    value.includes('synth') ||
+    value.includes('organ')
+  ) {
+    return 'keys';
+  }
+
+  if (value.includes('guitar')) {
+    return 'guitar';
+  }
+
+  return 'other';
+}
+
+function getPlayerInstrumentCategories(
+  player: PlayerDirectoryListing,
+): Set<PlayerDirectoryInstrumentCategory> {
+  const categories = new Set<PlayerDirectoryInstrumentCategory>();
+
+  if (player.preferred_instrument?.trim()) {
+    categories.add(classifyPlayerInstrumentCategory(player.preferred_instrument));
+  }
+
+  for (const instrument of player.instruments) {
+    if (instrument.trim()) {
+      categories.add(classifyPlayerInstrumentCategory(instrument));
+    }
+  }
+
+  return categories;
+}
+
+export function computePlayerInstrumentCategoryCounts(
+  players: PlayerDirectoryListing[],
+): PlayerDirectoryInstrumentCategoryCounts {
+  const counts: PlayerDirectoryInstrumentCategoryCounts = {
+    guitar: 0,
+    bass: 0,
+    drums: 0,
+    keys: 0,
+    vocals: 0,
+    other: 0,
+  };
+
+  for (const player of players) {
+    for (const category of getPlayerInstrumentCategories(player)) {
+      counts[category] += 1;
+    }
+  }
+
+  return counts;
+}
+
 export type PlayerDirectoryStats = {
   playerCount: number;
   genreCount: number;
   instrumentCount: number;
   deputyCount: number;
   memberCount: number;
+  instrumentCategories: PlayerDirectoryInstrumentCategoryCounts;
 };
 
 export function computePlayerDirectoryStats(players: PlayerDirectoryListing[]): PlayerDirectoryStats {
@@ -489,6 +665,7 @@ export function computePlayerDirectoryStats(players: PlayerDirectoryListing[]): 
     instrumentCount: instruments.length,
     deputyCount: players.filter((player) => player.open_to_deputy_invites).length,
     memberCount: players.filter((player) => player.open_to_member_invites).length,
+    instrumentCategories: computePlayerInstrumentCategoryCounts(players),
   };
 }
 

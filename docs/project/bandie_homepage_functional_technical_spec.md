@@ -5,9 +5,9 @@
 **Product area:** Bandie Homepage / Public Marketing Landing Page  
 **Primary implementation target:** Responsive web application  
 **Intended implementation workflow:** Cursor-assisted development  
-**Source mockup:** `bandie_homepage_mockup.html`  
+**Source mockup:** `bandie_homepage_three_modes_v3.html` (supersedes `bandie_homepage_mockup.html`)  
 **Related source documents:** `bandie_product_description.md`, `bandie_build_elements.md`  
-**Last updated:** 27 June 2026
+**Last updated:** 28 June 2026
 
 ---
 
@@ -51,20 +51,18 @@ The homepage is the entry point into this broader product. It should not attempt
 
 ## 3. Source Mockup Reference
 
-The homepage implementation should use `bandie_homepage_mockup.html` as the visual and structural reference.
+The homepage implementation should use `bandie_homepage_three_modes_v3.html` as the visual and structural reference.
 
 The mockup contains the following major areas:
 
-1. Top navigation.
-2. Hero section.
-3. Primary CTAs: “For Bands” and “Find a Band”.
-4. Trust / benefit pills.
-5. Example Bandie band profile card.
-6. “What Bandie is” feature section.
-7. Audience split: bands and event organisers.
-8. “How it works” workflow section.
-9. Final CTA.
-10. Footer.
+1. Sticky top navigation (For Players, For Bands, For Organisers, Features).
+2. Hero section with three audience CTAs and audience jump cards.
+3. Example public band profile preview card.
+4. Three-mode summary cards (Players, Bands, Organisers).
+5. Per-audience “how it works” sections with steps and workflow previews.
+6. Platform connection strip (Profile, Directory, Workspace, Calendar, Promotion).
+7. Core capabilities feature grid.
+8. Footer.
 
 The current mockup is a static HTML prototype. The production implementation should preserve the spirit, content hierarchy and visual tone of the mockup while converting it into reusable application components.
 
@@ -77,8 +75,9 @@ The current mockup is a static HTML prototype. The production implementation sho
 The homepage must:
 
 - Explain what Bandie is in one clear proposition.
-- Position Bandie as a lightweight operating hub for amateur bands.
-- Show that Bandie serves both bands and event organisers.
+- Position Bandie as a platform for **players**, **bands** and **event organisers**.
+- Show that Bandie serves all three audiences with equal weight.
+- Encourage players to build a profile and find opportunities.
 - Encourage bands to create a band page / account.
 - Encourage organisers to search for bands.
 - Establish a bold, music-oriented brand feel.
@@ -175,14 +174,14 @@ The homepage MVP should include:
 - Public, unauthenticated access.
 - Responsive layout across desktop, tablet and mobile.
 - Static marketing content based on the mockup.
-- Top navigation with anchor links.
-- Hero section with product proposition and CTAs.
-- Example band profile preview card.
-- Benefit / trust pills.
-- Feature cards describing key product areas.
-- Audience-specific sections for bands, organisers and players.
-- Workflow section explaining the Bandie lifecycle.
-- Final CTA block.
+- Sticky top navigation with anchor links.
+- Hero section with product proposition and three audience CTAs.
+- Audience jump cards (Players, Bands, Organisers).
+- Example public band profile preview card.
+- Three-mode summary cards.
+- Per-audience “how it works” sections (players, bands, organisers).
+- Platform connection strip.
+- Core capabilities feature grid.
 - Footer.
 - Basic analytics event tracking for CTA clicks and navigation clicks.
 - SEO metadata.
@@ -244,16 +243,16 @@ Recommended route mapping:
 | Homepage action | Target route | MVP behaviour |
 |---|---:|---|
 | Brand logo | `/` | Reload / navigate to homepage |
-| What it is | `#what` | Anchor scroll |
-| For bands | `#bands` or `/signup?intent=create-band` | Anchor in static MVP; signup route when available |
-| Find a Band | `/bands` | Route to Band Directory when available |
-| For organisers | `#organisers` | Anchor scroll |
-| For players | `#players` | Anchor scroll |
-| How it works | `#how` | Anchor scroll |
-| Create your band page | `/signup?intent=create-band` | Route to signup / waitlist |
+| For Players | `#players` | Anchor scroll |
+| For Bands | `#bands` | Anchor scroll |
+| For Organisers | `#organisers` | Anchor scroll |
+| Features | `#features` | Anchor scroll |
+| I'm a player (hero) | `#players` | Anchor scroll |
+| I'm in a band (hero) | `#bands` | Anchor scroll |
+| I organise events (hero) | `#organisers` | Anchor scroll |
 | Build your player profile | `/signup?intent=player-profile` | Route to signup, then player profile editor |
-| Final CTA: For Bands | `/signup?intent=create-band` | Route to signup / waitlist |
-| Final CTA: For Event Organisers | `/bands` | Route to Band Directory |
+| Create your band page | `/signup?intent=create-band` | Route to signup / waitlist |
+| Find a band | `/bands` | Route to Band Directory |
 
 ---
 
@@ -863,11 +862,11 @@ src/
 │   │   ├── MarketingNav.tsx
 │   │   ├── HeroSection.tsx
 │   │   ├── ExampleBandProfileCard.tsx
-│   │   ├── TrustPills.tsx
-│   │   ├── FeatureCards.tsx
-│   │   ├── AudienceSplit.tsx
-│   │   ├── WorkflowSteps.tsx
-│   │   ├── FinalCta.tsx
+│   │   ├── ModeGridSection.tsx
+│   │   ├── UseCaseSection.tsx
+│   │   ├── PlatformStrip.tsx
+│   │   ├── CoreCapabilities.tsx
+│   │   ├── MarketingButton.tsx
 │   │   └── MarketingFooter.tsx
 │   └── ui/
 │       ├── Button.tsx
@@ -1151,12 +1150,12 @@ Minimum browser support:
 The homepage MVP is complete when:
 
 1. The route `/` renders the Bandie homepage.
-2. The page matches the structure and spirit of `bandie_homepage_mockup.html`.
+2. The page matches the structure and spirit of `bandie_homepage_three_modes_v3.html`.
 3. The page is fully responsive.
 4. Navigation links work.
 5. CTAs route to configured placeholder or live routes.
 6. The hero proposition is visible above the fold on desktop.
-7. The page clearly explains both user groups: bands and event organisers.
+7. The page clearly explains all three user groups: players, bands and event organisers.
 8. The example band profile card is present and readable.
 9. SEO metadata is implemented.
 10. Accessibility checks pass at a basic level.
@@ -1182,11 +1181,10 @@ Create reusable components:
 - `MarketingNav`.
 - `HeroSection`.
 - `ExampleBandProfileCard`.
-- `TrustPills`.
-- `FeatureCards`.
-- `AudienceSplit`.
-- `WorkflowSteps`.
-- `FinalCta`.
+- `ModeGridSection`.
+- `UseCaseSection`.
+- `PlatformStrip`.
+- `CoreCapabilities`.
 - `MarketingFooter`.
 
 ### Task 3 — Add Homepage Content Configuration
@@ -1285,6 +1283,6 @@ For the first build:
 
 The Bandie Homepage is the public entry point for the product. It should introduce Bandie as the simple hub for band life, explain the three audiences of bands, event organisers and players, and route each user group into the correct journey.
 
-The implementation should closely follow `bandie_homepage_mockup.html`, preserving its bold dark visual style, high-contrast cards, music-oriented tone, example band profile preview, audience split (bands, organisers and players), workflow explanation and clear CTAs.
+The implementation should closely follow `bandie_homepage_three_modes_v3.html`, preserving its bold dark visual style, high-contrast cards, music-oriented tone, three-mode audience structure, example public band profile preview, per-audience how-it-works sections and clear CTAs.
 
 The homepage should be simple in MVP, but built on a component structure that can later support live featured bands, real directory stats, signup flows, analytics, testimonials, pricing and richer product storytelling.

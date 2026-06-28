@@ -1,4 +1,5 @@
 import { getBandieClient } from './context';
+import { isBandieAdminModeActive } from './adminMode';
 import { isCurrentUserAppAdmin } from './membership';
 
 export const PROFILE_IMAGE_BUCKET = 'bandie-profile-images';
@@ -99,8 +100,8 @@ export async function removeUserProfileImage(): Promise<void> {
 }
 
 export async function uploadUserProfileImageForUser(userId: string, file: File): Promise<string> {
-  if (!(await isCurrentUserAppAdmin())) {
-    throw new Error('Only app admins can upload images for another user.');
+  if (!isBandieAdminModeActive() || !(await isCurrentUserAppAdmin())) {
+    throw new Error('Only app admins in admin mode can upload images for another user.');
   }
 
   validateProfileImageFile(file);
@@ -124,8 +125,8 @@ export async function uploadUserProfileImageForUser(userId: string, file: File):
 }
 
 export async function removeUserProfileImageForUser(userId: string): Promise<void> {
-  if (!(await isCurrentUserAppAdmin())) {
-    throw new Error('Only app admins can remove images for another user.');
+  if (!isBandieAdminModeActive() || !(await isCurrentUserAppAdmin())) {
+    throw new Error('Only app admins in admin mode can remove images for another user.');
   }
 
   const client = getBandieClient();
@@ -199,6 +200,63 @@ export async function removeBandProfileImage(
   }
 
   const matches = (files ?? []).filter((file) => file.name.startsWith(`${kind}.`));
+  if (!matches.length) {
+    return;
+  }
+
+  const paths = matches.map((file) => `${folderPath}/${file.name}`);
+  const { error: removeError } = await client.storage.from(PROFILE_IMAGE_BUCKET).remove(paths);
+
+  if (removeError) {
+    throw new Error(removeError.message);
+  }
+}
+
+function organiserVenueImagePath(venueId: string, extension: string): string {
+  return `venues/${venueId}/photo.${extension}`;
+}
+
+export async function uploadOrganiserVenueImage(venueId: string, file: File): Promise<string> {
+  validateProfileImageFile(file);
+
+  const client = getBandieClient();
+  const {
+    data: { user },
+  } = await client.auth.getUser();
+
+  if (!user) {
+    throw new Error('Must be signed in to upload images.');
+  }
+
+  const extension = extensionForMimeType(file.type);
+  const path = organiserVenueImagePath(venueId, extension);
+
+  const { error: uploadError } = await client.storage.from(PROFILE_IMAGE_BUCKET).upload(path, file, {
+    upsert: true,
+    contentType: file.type,
+    cacheControl: '3600',
+  });
+
+  if (uploadError) {
+    throw new Error(uploadError.message);
+  }
+
+  const { data } = client.storage.from(PROFILE_IMAGE_BUCKET).getPublicUrl(path);
+  return `${data.publicUrl}?v=${Date.now()}`;
+}
+
+export async function removeOrganiserVenueImage(venueId: string): Promise<void> {
+  const client = getBandieClient();
+  const folderPath = `venues/${venueId}`;
+  const { data: files, error: listError } = await client.storage
+    .from(PROFILE_IMAGE_BUCKET)
+    .list(folderPath);
+
+  if (listError) {
+    throw new Error(listError.message);
+  }
+
+  const matches = (files ?? []).filter((file) => file.name.startsWith('photo.'));
   if (!matches.length) {
     return;
   }

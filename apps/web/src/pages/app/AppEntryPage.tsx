@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { listPendingInvitationsForCurrentUser } from '@bandie/data';
+import { listMyPendingPlayerOutreach, listPendingInvitationsForCurrentUser } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
 import { WorkspaceBandCard } from '../../components/bands/WorkspaceBandCard';
 import '../../styles/directory.css';
 
 export function AppEntryPage() {
   const navigate = useNavigate();
-  const { bands, loading, displayName } = useAuth();
+  const { bands, loading } = useAuth();
   const [checkingInvites, setCheckingInvites] = useState(true);
 
   useEffect(() => {
@@ -15,10 +15,10 @@ export function AppEntryPage() {
       return;
     }
 
-    listPendingInvitationsForCurrentUser()
-      .then((pending) => {
-        if (pending.length > 0) {
-          navigate('/app/invites', { replace: true });
+    Promise.all([listPendingInvitationsForCurrentUser(), listMyPendingPlayerOutreach()])
+      .then(([pending, outreach]) => {
+        if (pending.length > 0 || outreach.length > 0) {
+          navigate('/app/communications', { replace: true });
         }
       })
       .finally(() => setCheckingInvites(false));
@@ -38,24 +38,12 @@ export function AppEntryPage() {
     <div className="my-bands-page">
       <header className="my-bands-header">
         <div>
-          <p className="my-bands-eyebrow">Signed in as {displayName}</p>
           <h1>Your bands</h1>
           <p className="my-bands-lead">
             {bands.length
               ? 'Open a band workspace to manage your profile, members, and upcoming tools.'
               : 'Create a band or accept an invitation to get started.'}
           </p>
-        </div>
-        <div className="my-bands-header-actions">
-          <Link to="/app/players" className="directory-btn directory-btn-secondary">
-            Find players
-          </Link>
-          <Link to="/app/bands" className="directory-btn directory-btn-secondary">
-            Browse band directory
-          </Link>
-          <Link to="/app/bands/new" className="directory-btn directory-btn-primary">
-            Create a band
-          </Link>
         </div>
       </header>
 

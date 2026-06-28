@@ -1,5 +1,9 @@
 import {
   DEFAULT_PLAYER_DIRECTORY_FILTERS,
+  PLAYER_GENDER_OPTIONS,
+  PRIMARY_INSTRUMENT_OPTIONS,
+  formatPlayerGenderLabel,
+  isPrimaryInstrumentOption,
   type PlayerDirectoryFilters,
   type PlayerDirectorySort,
   type PlayerSearchMode,
@@ -11,6 +15,7 @@ type PlayerDirectoryFiltersPanelProps = {
   instruments: string[];
   onChange: (filters: PlayerDirectoryFilters) => void;
   onReset: () => void;
+  showPrimaryInstrumentToggle?: boolean;
 };
 
 function modePillLabel(mode: PlayerSearchMode): string {
@@ -41,6 +46,7 @@ export function PlayerDirectoryFiltersPanel({
   instruments,
   onChange,
   onReset,
+  showPrimaryInstrumentToggle = false,
 }: PlayerDirectoryFiltersPanelProps) {
   function update<K extends keyof PlayerDirectoryFilters>(key: K, value: PlayerDirectoryFilters[K]) {
     onChange({ ...filters, [key]: value });
@@ -101,20 +107,72 @@ export function PlayerDirectoryFiltersPanel({
       </div>
 
       <div className="directory-filter-group">
-        <label htmlFor="instrumentFilter">Instrument / role needed</label>
-        <input
+        <label htmlFor="instrumentFilter">Primary instrument</label>
+        <select
           id="instrumentFilter"
-          type="search"
-          list="playerInstrumentOptions"
-          placeholder="e.g. Drums, saxophone, backing vocals"
           value={filters.instrument}
-          onChange={(event) => update('instrument', event.target.value)}
-        />
-        <datalist id="playerInstrumentOptions">
-          {instruments.map((instrument) => (
-            <option key={instrument} value={instrument} />
+          onChange={(event) => {
+            const value = event.target.value;
+            onChange({
+              ...filters,
+              instrument: value,
+              primaryInstrumentOnly: value ? true : false,
+            });
+          }}
+        >
+          <option value="">Any instrument</option>
+          {PRIMARY_INSTRUMENT_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
           ))}
-        </datalist>
+          {instruments
+            .filter((instrument) => !isPrimaryInstrumentOption(instrument))
+            .map((instrument) => (
+              <option key={instrument} value={instrument}>
+                {instrument}
+              </option>
+            ))}
+        </select>
+        {showPrimaryInstrumentToggle ? (
+          <>
+            <button
+              type="button"
+              className={`directory-chip directory-chip-block ${!filters.primaryInstrumentOnly ? 'active' : ''}`}
+              onClick={() => update('primaryInstrumentOnly', !filters.primaryInstrumentOnly)}
+              disabled={!filters.instrument.trim()}
+            >
+              Include secondary instruments
+            </button>
+            <p className="directory-field-hint">
+              {filters.instrument.trim()
+                ? filters.primaryInstrumentOnly
+                  ? 'Matching players whose primary role fits your search.'
+                  : 'Also matching players who list this instrument as a secondary role.'
+                : 'Choose an instrument above to filter by primary role.'}
+            </p>
+          </>
+        ) : (
+          <p className="directory-field-hint">
+            Matches players by the primary instrument on their profile.
+          </p>
+        )}
+      </div>
+
+      <div className="directory-filter-group">
+        <label htmlFor="playerGenderFilter">Gender</label>
+        <select
+          id="playerGenderFilter"
+          value={filters.gender}
+          onChange={(event) => update('gender', event.target.value)}
+        >
+          <option value="">Any gender</option>
+          {PLAYER_GENDER_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="directory-filter-group">
@@ -277,8 +335,20 @@ export function buildPlayerActiveFilterPills(filters: PlayerDirectoryFilters): s
   const pills: string[] = [modePillLabel(filters.mode)];
 
   if (filters.name.trim()) pills.push(`Name: ${filters.name.trim()}`);
-  if (filters.instrument.trim()) pills.push(`Instrument: ${filters.instrument.trim()}`);
+  if (filters.instrument.trim()) {
+    pills.push(
+      filters.primaryInstrumentOnly
+        ? `Primary: ${filters.instrument.trim()}`
+        : `Instrument: ${filters.instrument.trim()}`,
+    );
+  }
+  if (!filters.primaryInstrumentOnly && filters.instrument.trim()) {
+    pills.push('Including secondary instruments');
+  }
   if (filters.genre) pills.push(`Genre: ${filters.genre}`);
+  if (filters.gender) {
+    pills.push(`Gender: ${formatPlayerGenderLabel(filters.gender) ?? filters.gender}`);
+  }
   if (filters.location.trim()) pills.push(`Location: ${filters.location.trim()}`);
 
   if (filters.mode === 'temporary' || filters.mode === 'any') {

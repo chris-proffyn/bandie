@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import './lib/bandieClient';
 import './index.css';
+import './styles/brand.css';
 import App from './App.tsx';
 
 createRoot(document.getElementById('root')!).render(

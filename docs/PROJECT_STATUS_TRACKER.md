@@ -2,8 +2,8 @@
 
 **Document status:** Live project tracker  
 **Product:** Bandie  
-**Phase:** Phase 5 complete (workspace shell) — ready for Phase 6 (songs & repertoire)  
-**Last updated:** 27 June 2026 (documentation sync)
+**Phase:** Phase 5 complete (workspace shell) — Phase 6 communications partial; booking enquiry partial  
+**Last updated:** 28 June 2026 (release prep — brand logo, UI polish, full doc sync)
 
 ---
 
@@ -18,13 +18,16 @@
 | Web app scaffold (Vite + React + TypeScript) | Complete |
 | Bandie homepage (Phase 1) | Complete |
 | Mobile app | Not started (placeholder only) |
-| Supabase schema / migrations | Platform + Bandie bootstrap through player directory applied |
+| Supabase schema / migrations | Platform + Bandie bootstrap through organiser venues (`20260628300000`); apply with `supabase db push` |
 | Authentication & band membership (Phase 2) | Complete |
 | Public band profile (Phase 3) | Complete |
 | Band directory (Phase 4) | Complete |
 | Musician / player profile | Complete |
 | Player directory | Complete |
-| Private workspace shell (Phase 5) | Complete — overview, members, invitations; songs/setlists deferred |
+| Private workspace shell (Phase 5) | Complete — tabbed overview (Members / Band details), leader contact, lineup parts, player recruitment, member actions, invitations; songs/setlists deferred |
+| Workspace communications | Partial — unified hub at `/app/communications` (invites, player outreach, messages with replies) |
+| Booking enquiries | Partial — structured enquiry form on public band profile sends direct message to primary contact |
+| Organiser venues | Complete — `/app/venues` in organiser workspace mode |
 
 ## Active constraints
 
@@ -60,7 +63,7 @@ Homepage                  ██████████  marketing landing page
 Auth & membership         ██████████  signup, login, bands, invites
 Public profile & dir      ██████████  profiles + searchable directory
 Player profiles & dir     ██████████  musician profiles + /players directory
-Private workspace shell   ██████████  overview, members, profile editor, invites
+Private workspace shell   ██████████  overview, leader, lineup parts, recruitment, invites
 Songs & repertoire        ░░░░░░░░░░  Phase 6 — next up
 Mobile app                ░░░░░░░░░░  Phase 12 (deferred)
 Release verification      ░░░░░░░░░░  production smoke + a11y pass
@@ -107,7 +110,7 @@ Release verification      ░░░░░░░░░░  production smoke + a11
 - [x] 2.5 Band membership and invitations
 - [x] 2.6 Band switcher (multi-band users)
 - [x] 2.7 Session persistence; marketing nav shows display name when signed in
-- [x] 2.8 Pending invite detection and `/app/invites` acceptance flow
+- [x] 2.8 Pending invite detection and communications acceptance flow (`/app/communications`)
 
 ### 2b. Musician / player profile
 
@@ -116,6 +119,28 @@ Release verification      ░░░░░░░░░░  production smoke + a11
 - [x] 2b.3 Profile editor at `/app/profile` with live preview
 - [x] 2b.4 Display name synced to auth metadata; shown ahead of email across the app
 - [x] 2b.5 Deputy/member invite preferences and directory visibility toggles
+
+- [x] 2b.6 Player / organiser workspace roles and mode switching (`is_player`, `is_organiser`, workspace mode panel)
+- [x] 2b.7 Profile usernames — unique handle, login by email or username, messaging by username
+- [x] 2b.8 Leader contact phone on profiles (`contact_phone`); demo seed via migration
+
+### 2d. Organiser venues
+
+- [x] 2d.1 `bandie_organiser_venues` table with RLS
+- [x] 2d.2 My venues page at `/app/venues` (organiser workspace mode)
+- [x] 2d.3 Venue photo upload; venue picker on booking enquiry form
+
+### 2c. Workspace communications
+
+- [x] 2c.1 Communications page at `/app/communications` (legacy `/app/notifications` redirects)
+- [x] 2c.2 Band invitation inbox (accept / decline one or accept all)
+- [x] 2c.3 Player outreach inbox (join and audition invites from band leaders)
+- [x] 2c.4 Direct messages between users with reply threading (`reply_to_message_id`)
+- [x] 2c.5 Unified feed with All / Invites / Messages filters
+- [x] 2c.6 Unread badge in workspace nav (`getCommunicationSummary`)
+- [x] 2c.7 `/app/invites` redirect and post-auth routing to communications
+- [ ] 2c.8 Activity feed and band-scoped threads (deferred)
+- [ ] 2c.9 Email / push notifications (deferred)
 
 ### 3. Public band profile
 
@@ -126,6 +151,9 @@ Release verification      ░░░░░░░░░░  production smoke + a11
 - [x] 3.5 Public availability display
 - [x] 3.6 Band name font picker and colour palette theming
 - [x] 3.7 Logo and hero image upload
+- [x] 3.8 Set length & fee packages (fixed and dynamic session-based offers)
+- [x] 3.9 Public band members roster with primary contact badge
+- [x] 3.10 Structured booking enquiry form (direct message to primary contact)
 
 ### 4. Band directory
 
@@ -147,8 +175,16 @@ Release verification      ░░░░░░░░░░  production smoke + a11
 
 - [x] 5.1 Workspace shell and navigation (sidebar, band switcher, protected `/app/*`)
 - [x] 5.2 Member-only access enforcement (`ProtectedRoute` + RLS)
-- [x] 5.3 Unified overview at `/app/:bandId` (public profile editor, members, invitations)
-- [ ] 5.4 Songs, setlists, calendar, and gigs navigation (deferred to Phases 6–8)
+- [x] 5.3 Tabbed overview at `/app/:bandId` — **Members** tab (lineup parts, active members, invitations) and **Band details** tab (leaders, public profile editor)
+- [x] 5.4 Band leader contact section (all leaders; primary contact badge; leaders edit own contact fields)
+- [x] 5.4a Assign primary contact — leaders use **Make primary** on active member card menu (`bandie_set_primary_band_contact`)
+- [x] 5.4b Multiple band leaders — add/remove co-leaders; last leader protected; `owner_user_id` is primary public contact
+- [x] 5.4c Band leader invariant — every band has an active owner; interim platform admin assigned when leader leaves
+- [x] 5.5 Lineup band parts (Vocalist, guitars, bass, drums, custom roles) with auto-calculated band size
+- [x] 5.6 Find players flow — part-scoped player directory search and audition/join invites
+- [x] 5.6b Active member card actions — hamburger menu (make leader, make primary, assign part, unavailable, remove)
+- [x] 5.6c Platform admin mode — toggle on profile; admins manage all bands, edit profiles, recruit players
+- [ ] 5.7 Songs, setlists, calendar, and gigs navigation (deferred to Phases 6–8)
 
 ### 6. Songs and repertoire
 
@@ -183,8 +219,8 @@ Release verification      ░░░░░░░░░░  production smoke + a11
 
 ### 10. Booking enquiries
 
-- [ ] 10.1 Enquiry form (public)
-- [ ] 10.2 Enquiry management (private workspace)
+- [x] 10.1 Enquiry form (public) — structured form on band profile; sends direct message to primary contact
+- [ ] 10.2 Enquiry management (private workspace) — received in `/app/communications` as messages; dedicated inbox deferred
 - [ ] 10.3 Notifications for new enquiries
 
 ### 11. Platform foundations
@@ -192,7 +228,7 @@ Release verification      ░░░░░░░░░░  production smoke + a11
 - [x] 11.1 Profile image storage (`bandie-profile-images` bucket with RLS)
 - [ ] 11.2 Song file storage (`bandie-song-files` bucket)
 - [ ] 11.3 Activity feed / audit log
-- [ ] 11.4 Notifications
+- [ ] 11.4 Communications — partial (invitations, player outreach, direct messages with replies; activity feed deferred)
 - [ ] 11.5 Admin portal (skeleton)
 
 ### 12. Mobile app
@@ -204,6 +240,89 @@ Release verification      ░░░░░░░░░░  production smoke + a11
 ---
 
 ## Session notes
+
+**28 June 2026 — Brand identity & UI polish**
+- Shared Bandie logo mark: lowercase white **b** in gradient tile (`apps/web/src/lib/brand.ts`, `apps/web/src/styles/brand.css`); used on homepage, auth, app header, directories, and public profiles
+- Public profile **Band members** grid: fixed card overlap (removed `min-height: 100%` on grid cards; documented in `RSD_UX_DESIGN_FRAMEWORK.md` §7.2.1)
+- Organiser venue photos: `image_url` column + storage at `venues/{venue_id}/photo.{ext}` (`20260628300000_bandie_organiser_venue_images.sql`)
+- Active member cards: compact actions, hamburger menu, View profile for all members, primary contact badge
+
+**28 June 2026 — Documentation sync (post–last commit review)**
+- Aligned tracker, product requirements, delivery map, build elements, technical requirements, and migrations README with current codebase
+- Documented: band overview tabs, member hamburger actions (including **Make primary**), set/dynamic fee offers, public members roster, booking enquiry via messaging, usernames, admin mode, organiser venues, directory card layout
+
+**28 June 2026 — Band overview UX**
+- **Members** / **Band details** tabs on `/app/:bandId` (lineup, members, invites vs leaders + profile editor)
+- Active member cards: hamburger menu with Make leader, Make primary, assign part, unavailable, remove
+- Shared responsive card grid for lineup parts and active members (consistent section width; no overlap)
+- Band directory: compact availability pills on listing cards
+
+**28 June 2026 — Primary contact assignment**
+- RPC `bandie_set_primary_band_contact` updates `bandie_bands.owner_user_id` among active leaders
+- UI: **Make primary** in active member card menu (not on band leaders list)
+
+**28 June 2026 — Set fees and public profile**
+- Fixed set offers (`bandie_band_set_offers`) and dynamic session-based offers (`bandie_band_dynamic_fee_offers`)
+- Public profile shows members roster and primary contact; booking form references primary contact
+
+**28 June 2026 — Band overview: leader contact, lineup parts, player recruitment**
+- **Band leader section** on `/app/:bandId`: shows leader name, email and phone for communication between bands, players and organisers
+- Leaders edit `contact_email` and `contact_phone` on their profile from the overview; email falls back to auth email via `bandie_get_band_leader_contact` RPC
+- **Lineup & band parts** (`bandie_band_parts`): leaders add roles (templates: Vocalist, Lead Guitar, Rhythm Guitar, Bass, Drums, or custom)
+- **Band size** auto-synced from part count (`bandie_sync_band_size_from_parts`); public profile shows calculated size (no manual override)
+- **Find players** per part routes to `/app/players?forBand=…&part=…&instrument=…` with directory pre-filtered (permanent mode, primary instrument)
+- **Player invites** from player profile when recruiting: **Join the band** (creates membership invitation) or **Audition** (records outreach with optional message) via `bandie_create_player_outreach` RPC
+- Migration: `20260628150000_bandie_band_parts_leader_contact.sql` — `contact_email`/`contact_phone` on profiles, `bandie_band_parts`, `bandie_player_outreach`, RLS
+- Data layer: `@bandie/data` modules `bandParts`, `bandLeader`, `playerOutreach`
+
+**28 June 2026 — Organiser venues (My venues)**
+- `/app/venues` in organiser workspace mode — list and manage venues the organiser is associated with
+- Fields: name, type, address, city, postcode, contact name/email/phone, capacity, notes
+- Migration `20260628290000_bandie_organiser_venues.sql`; data access via `@bandie/data` (`organiserVenues`)
+- Nav: Find bands, My venues, My profile
+
+**28 June 2026 — Player / organiser workspace roles**
+- Users declare player, organiser, or both on profile (`is_player`, `is_organiser`)
+- Workspace mode switcher filters nav and routes (organiser mode → band directory focus)
+
+**28 June 2026 — Multiple band leaders**
+- Bands can assign more than one leader (`owner` membership role); `bandie_bands.owner_user_id` remains the primary public contact
+- Migration `20260628230000_bandie_multiple_band_leaders.sql` — `bandie_add_band_leader`, `bandie_remove_band_leader`, `bandie_list_band_leaders`; RLS treats any active owner as a band leader
+- Band overview: leader section lists all leaders; members tab supports Make leader / Remove leader (last leader protected)
+- `@bandie/data`: `listBandLeaders`, `addBandLeader`, `removeBandLeader`
+
+**28 June 2026 — Band leader invariant**
+- Every band must have at least one active leader (`owner` role on membership)
+- Migration `20260628183000_bandie_band_leader_invariant.sql` repairs existing bands and adds trigger on membership changes
+- When all leaders leave, a Bandie platform admin is assigned as interim leader until a new leader is added
+
+**28 June 2026 — Workspace communications page**
+- Extended notifications into a full **Communications** hub at `/app/communications`
+- **All / Invites / Messages** filter tabs with chronological unified feed
+- Band invitations: accept or decline; player outreach inbox (join/audition from directory)
+- Direct messages: reply threading via `reply_to_message_id`
+- Migration `20260628182000_bandie_communications.sql` — decline invitation RPC, player outreach inbox/respond RPCs, message replies
+- Nav label **Communications**; `/app/notifications` redirects for backwards compatibility
+
+**28 June 2026 — Workspace notifications page**
+- Added `/app/notifications` for band invitations and direct messages (superseded by communications hub above)
+- `bandie_user_messages` table with RLS; inbox/send via `@bandie/data`
+- Nav badge for unread count; `/app/invites` redirects to notifications
+- Post-auth and app entry redirect pending invites to notifications
+
+**28 June 2026 — Player directory gender filter**
+- Added optional `gender` on player profiles (female, male, non-binary, prefer not to say)
+- Gender filter in player directory; profile editor field at `/app/profile`
+- Test seed players assigned gender values for demo filtering
+
+**28 June 2026 — Test seed London locations**
+- Relocated all 10 test bands and 50 test players to London and surrounding area (within ~25 miles)
+- Updated seed migration and added patch migration for existing databases
+
+**28 June 2026 — Homepage three-modes redesign**
+- Rebuilt marketing homepage from `bandie_homepage_three_modes_v3.html`
+- Hero with three audience CTAs, mode summary cards, per-audience how-it-works sections, platform strip and capabilities grid
+- Updated homepage content config, marketing components, styles and product docs
 
 **27 June 2026 — Admin player profile editing**
 - Shared `UserProfileEditor` for self-service and admin edit flows
@@ -221,7 +340,7 @@ Release verification      ░░░░░░░░░░  production smoke + a11
 **27 June 2026 — Test data mode**
 - Added `test_user` on `bandie_bands` and `bandie_profiles`
 - `VITE_BANDIE_DATA_MODE`: `live` hides test rows; `test` shows all directory data
-- Seeded 10 fictitious bands and 50 test players for development/demo
+- Seeded 10 fictitious bands and 50 test players for development/demo (London area, within ~25 miles)
 
 **27 June 2026 — Player directory “Any role” search mode**
 - Added third search mode that lists all published players regardless of invite preference
@@ -254,6 +373,29 @@ Release verification      ░░░░░░░░░░  production smoke + a11
 - `formatUserWithEmail()` renders **Name · email** when both are known
 - Pending invitations list shows invitee display name before email via `bandie_list_band_invitations_for_owner` RPC
 - Profile editor shows display name field before read-only email
+
+**28 June 2026 — Booking venue picker**
+- Booking form loads organiser venues from profile and offers a venue dropdown when any exist
+- Selecting a venue auto-fills the field and includes full venue details in the sent enquiry message
+
+**28 June 2026 — Band profile layout refresh**
+- Profile opens with band name (configured font), hero with logo top-left and availability pill top-right
+- Tagline, bio, and location/travel shown under hero; fees as flat cards without fixed/dynamic labels or calculations
+- Smaller video cards on public profile and workspace overview
+
+**28 June 2026 — Structured booking enquiry form**
+- Book card uses date, time, set duration (from band fee options), venue, budget, and notes fields
+- Sender name, Bandie username, email, phone, and location auto-populated from signed-in profile
+
+**28 June 2026 — Public profile card grid layout**
+- Fixed overlapping band member and fee cards by switching compact grids from flex-grow to CSS Grid auto-fill
+- Added §7.2.1 Compact card grids to `RSD_UX_DESIGN_FRAMEWORK.md` to prevent flex-shrink overlap regressions
+
+**28 June 2026 — Public band profile members & booking contact**
+- Public profiles show active band members (avatar, role, instrument, lineup part, primary contact badge)
+- Set length & fee cards use compact single-row layout on public profiles when space allows
+- Book section references the band primary contact and sends booking enquiries via in-app messaging
+- Migration adds `bandie_list_public_band_members` and `bandie_get_public_band_primary_contact` RPCs
 
 **27 June 2026 — Player directory**
 - Public player directory at `/players` with temporary (deputy) and permanent (member) search modes
@@ -308,7 +450,7 @@ Release verification      ░░░░░░░░░░  production smoke + a11
 
 **26 June 2026 — Sign-up invite acceptance**
 - Added `bandie_list_my_pending_invitations()` RPC for invitees to see open invites by email
-- Sign-up and login route to `/app/invites` when pending invitations exist
+- Sign-up and login route to `/app/communications` when pending invitations or player outreach exist
 - Pending invites page supports accept one or accept all, then continues to My bands
 
 **26 June 2026 — My bands hub**

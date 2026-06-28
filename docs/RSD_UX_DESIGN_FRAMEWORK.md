@@ -188,6 +188,40 @@ The following are fixed:
 - List Item
 - Divider
 
+#### 7.2.1 Compact card grids (multi-column layouts)
+
+When displaying **multiple cards in a row** (band members, fee options, lineup parts, directory tiles), use a **CSS Grid** with `auto-fill` — not flexbox with `flex-grow`.
+
+**Required pattern:**
+
+```css
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  grid-auto-rows: min-content;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.card-grid-item {
+  min-width: 0; /* allow text truncation inside the card */
+}
+```
+
+**Why:** `display: flex` with `flex: 1 1 <basis>` lets items **grow and shrink** to fill a row. With many cards, they shrink below their content width and **overlap** — especially on public profile and workspace grids.
+
+**Rules:**
+
+- **Never** use `flex: 1 1 …` on individual cards inside a wrapping row intended to show side-by-side tiles.
+- **Never** use `min-height: 100%` (or `height: 100%`) on cards inside a multi-row grid — percentage height resolves against the whole grid container and cards in later rows overlap earlier ones. Use `grid-auto-rows: min-content` and `align-items: start` instead.
+- **Never** use `margin-top: auto` inside grid cards to pin footers unless the card is a single-row flex item with an explicit height — it interacts badly with grid row sizing.
+- Use **`repeat(auto-fill, minmax(min(100%, Npx), 1fr))`** so cards wrap to the next row when they no longer fit, with a stable minimum width (`N` typically 200–260px depending on card content).
+- Set **`min-width: 0`** on grid children so long names or labels truncate instead of forcing overflow.
+- Keep **`gap`** explicit; do not rely on margins alone for spacing between cards.
+- On mobile (`min(100%, Npx)`), a single column is automatic — no separate breakpoint required for the grid itself.
+
+Reference implementations: `.band-profile-members-grid`, `.band-set-offers-list`, `.band-set-offers-list-compact` in `apps/web/src/styles/bandProfile.css`.
+
 ---
 
 ### 7.3 Action Components
@@ -195,6 +229,20 @@ The following are fixed:
 - Secondary Button
 - Icon Button
 - Floating Action Button (where appropriate)
+
+#### 7.3.1 Button sizing — cards and inline actions
+
+**Do not reuse full-page or form CTAs inside compact cards.** Classes such as `directory-btn` and primary form submit buttons (~42px min-height) are for page headers, filter bars, and empty states — not for actions embedded in list or grid cards.
+
+Rules for in-card and inline actions:
+
+- Use **compact action buttons** (~28px height, small type, inline flow). In Bandie workspace UI these are `band-member-btn` variants.
+- Actions sit in a **horizontal row that wraps**; they must not stretch to full card width unless the entire card is a dedicated action tile.
+- Prefer **one visible primary action** per card footer; secondary and destructive actions may be smaller text buttons, icon buttons, or menu items.
+- **Destructive actions** (remove, delete) use a danger variant at compact size — never a full-width block button dominating the card.
+- **Cards, avatars, badges, and buttons must be proportionate** to each other. If a button occupies more than ~25% of card height, the sizing is wrong.
+
+When adding new card-based UI, match existing compact patterns in the workspace (e.g. band member cards, lineup part cards) rather than importing directory or auth button styles.
 
 ---
 

@@ -1,0 +1,286 @@
+.notifications-page,
+.communications-page {
+  max-width: 860px;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.notifications-header h1,
+.communications-header h1 {
+  margin: 0.35rem 0 0.75rem;
+  font-size: clamp(1.85rem, 4vw, 2.5rem);
+  letter-spacing: -0.04em;
+}
+
+.notifications-section,
+.communications-section {
+  display: grid;
+  gap: 1rem;
+}
+
+.notifications-section-head,
+.communications-section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.notifications-section-head h2,
+.communications-section-head h2 {
+  margin: 0 0 0.35rem;
+  letter-spacing: -0.03em;
+}
+
+.notifications-section-head .profile-section-intro,
+.communications-section-head .profile-section-intro {
+  margin: 0;
+}
+
+.notifications-count-badge,
+.communications-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.75rem;
+  min-height: 1.75rem;
+  padding: 0 0.55rem;
+  border-radius: 999px;
+  background: rgba(255, 94, 126, 0.16);
+  border: 1px solid rgba(255, 94, 126, 0.35);
+  color: #ff8da8;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.notifications-section-body,
+.communications-section-body {
+  display: grid;
+  gap: 1rem;
+}
+
+.notifications-section-actions,
+.communications-section-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.notifications-item-meta,
+.communications-item-meta {
+  color: #bbb6aa;
+  font-size: 0.88rem;
+  margin-top: 0.25rem;
+}
+
+.notifications-compose,
+.communications-compose {
+  padding: 1rem;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.notifications-compose-block,
+.communications-compose-block {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.notifications-subsection-head,
+.communications-subsection-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.notifications-subsection-title,
+.communications-subsection-title {
+  margin: 0;
+  font-size: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.notifications-subsection-count,
+.communications-subsection-count {
+  color: #bbb6aa;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.notifications-message-group,
+.communications-message-group {
+  padding-top: 0.25rem;
+}
+
+.notifications-message-group + .notifications-message-group,
+.communications-message-group + .communications-message-group {
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.notifications-message-list,
+.communications-message-list,
+.communications-feed-list,
+.communications-outreach-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.notifications-message-item,
+.communications-message-item,
+.communications-feed-item,
+.communications-outreach-item {
+  padding: 0.95rem 1rem;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.notifications-message-item-unread,
+.communications-message-item-unread {
+  border-color: rgba(255, 204, 51, 0.35);
+  background: rgba(255, 204, 51, 0.06);
+}
+
+.notifications-message-head,
+.communications-message-head,
+.communications-outreach-head,
+.communications-feed-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.notifications-message-body,
+.communications-message-body,
+.communications-outreach-message {
+  margin: 0.65rem 0 0;
+  color: #f6f3ea;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.communications-message-reply-context {
+  margin: 0.55rem 0 0;
+  color: #bbb6aa;
+  font-size: 0.84rem;
+  font-style: italic;
+}
+
+.communications-reply-form {
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.communications-item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.communications-message-head .communications-item-actions,
+.communications-outreach-head .communications-item-actions {
+  margin-top: 0;
+  flex-shrink: 0;
+}
+
+.communications-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.communications-hide-resolved-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: #bbb6aa;
+  font-size: 0.9rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.communications-hide-resolved-toggle input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #ffcc33;
+}
+
+.communications-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.95rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.18);
+  color: #f6f3ea;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.communications-filter-btn.active {
+  border-color: rgba(255, 204, 51, 0.45);
+  background: rgba(255, 204, 51, 0.1);
+}
+
+.communications-filter-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35rem;
+  min-height: 1.35rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: rgba(255, 94, 126, 0.2);
+  font-size: 0.72rem;
+}
+
+.communications-type-badge {
+  display: inline-flex;
+  margin-bottom: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ddd7c8;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.communications-type-badge-sent {
+  background: rgba(120, 180, 255, 0.14);
+  color: #a8c8ff;
+}
+
+.communications-type-badge-accepted {
+  background: rgba(120, 220, 160, 0.14);
+  color: #9ee8bc;
+}
+
+@media (max-width: 720px) {
+  .notifications-section-head,
+  .communications-section-head,
+  .notifications-message-head,
+  .communications-message-head,
+  .communications-outreach-head,
+  .communications-feed-head {
+    flex-direction: column;
+  }
+
+  .communications-message-head .communications-item-actions,
+  .communications-outreach-head .communications-item-actions {
+    width: 100%;
+  }
+}

@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { ensureAppMembership, ensureBandieProfile, signUpAndSignInWithEmail } from '@bandie/data';
+import { signUpAndSignInWithEmail, ensureAppMembership, ensureBandieProfile, updateUserProfile } from '@bandie/data';
 import { AuthLayout, AuthMessage } from '../../components/auth/AuthLayout';
 import { PasswordField } from '../../components/auth/PasswordField';
 import { routeAfterAuth } from '../../lib/routeAfterAuth';
@@ -35,6 +35,9 @@ export function SignupPage() {
       await signUpAndSignInWithEmail(email, password, displayName);
       await ensureAppMembership();
       await ensureBandieProfile(displayName);
+      if (intent === 'organiser') {
+        await updateUserProfile({ is_organiser: true, is_player: false });
+      }
       await refreshBands();
       const nextPath = await routeAfterAuth({ intent, redirect });
       navigate(nextPath, { replace: true });
@@ -53,7 +56,9 @@ export function SignupPage() {
           ? 'Start with a free account, then create your band page and workspace.'
           : intent === 'player-profile'
             ? 'Create your account, then build your player profile for the directory.'
-            : 'Join Bandie to organise songs, setlists, gigs and availability.'
+            : intent === 'organiser'
+              ? 'Create your free organiser account, then search the band directory and compare profiles.'
+              : 'Join Bandie to organise songs, setlists, gigs and availability.'
       }
     >
       <form className="auth-form" onSubmit={handleSubmit}>

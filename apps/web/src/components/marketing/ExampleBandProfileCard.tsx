@@ -4,34 +4,46 @@ export function ExampleBandProfileCard() {
   const profile = homepageContent.exampleProfile;
 
   return (
-    <aside className="hero-card" aria-label="Example Bandie band profile">
-      <div className="band-profile">
+    <aside className="hero-card" aria-label="Example public band profile preview">
+      <div className="band-profile band-preview-card">
         <div className="profile-content">
           <div className="profile-header">
-            <div className="fake-logo" aria-hidden="true">
+            <div className="fake-logo band-logo" aria-hidden="true">
               {profile.initials}
             </div>
-            <div className="status-chip">{profile.status}</div>
+            <div className="status-chip available">{profile.status}</div>
           </div>
           <h2 className="profile-title">{profile.name}</h2>
           <div className="profile-subtitle">{profile.subtitle}</div>
 
-          <div className="mini-grid">
-            {profile.miniCards.map((card) => (
-              <div key={card.label} className="mini-card">
-                <div className="mini-label">{card.label}</div>
-                <div className="mini-value">{card.value}</div>
+          <div className="profile-tags" aria-label="Band tags">
+            {profile.tags.map((tag) => (
+              <span key={tag}>{tag}</span>
+            ))}
+          </div>
+
+          <div className="mini-grid band-stats">
+            {profile.stats.map((stat) => (
+              <div key={stat.label} className="mini-card">
+                <div className="mini-label">{stat.label}</div>
+                <div className="mini-value">{stat.value}</div>
               </div>
             ))}
           </div>
 
-          <div className="setlist-preview" aria-label="Example setlist preview">
-            {profile.setlist.map((row) => (
+          <div className="setlist-preview band-profile-list" aria-label="Public band profile">
+            <h3>Public band profile</h3>
+            {profile.profileRows.map((row) => (
               <div key={row.title} className="setlist-row">
                 <span>{row.title}</span>
-                <span className="vote">{row.votes}</span>
+                <span className="vote">{row.badge}</span>
               </div>
             ))}
+          </div>
+
+          <div className="profile-cta-row">
+            <span className="profile-link">{profile.profileUrl}</span>
+            <span className="profile-action">{profile.profileAction}</span>
           </div>
         </div>
       </div>

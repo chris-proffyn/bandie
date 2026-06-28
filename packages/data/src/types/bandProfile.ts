@@ -70,10 +70,73 @@ export type BandProfileFields = {
   created_at: string;
 };
 
+export type BandSetOffer = {
+  id: string;
+  band_id: string;
+  set_length_minutes: number | null;
+  set_details: string | null;
+  average_fee: number | null;
+  details: string | null;
+  sort_order: number;
+};
+
+export type PublicBandPrimaryContact = {
+  user_id: string;
+  display_name: string;
+  username: string | null;
+  profile_image_url: string | null;
+};
+
+export type PublicBandMember = {
+  profile_id: string | null;
+  user_id: string;
+  display_name: string;
+  username: string | null;
+  preferred_instrument: string | null;
+  profile_image_url: string | null;
+  member_role: string;
+  is_primary_contact: boolean;
+  lineup_part_title: string | null;
+};
+
 export type PublicBandProfile = BandProfileFields & {
   media: BandMediaItem[];
   socialLinks: BandSocialLink[];
   publicDates: BandPublicDate[];
+  setOffers: BandSetOffer[];
+  dynamicFeeOffers: BandDynamicFeeOffer[];
+  members: PublicBandMember[];
+  primaryContact: PublicBandPrimaryContact | null;
+};
+
+export type BandSetOfferInput = {
+  set_length_minutes?: number | null;
+  set_details?: string | null;
+  average_fee?: number | null;
+  details?: string | null;
+  sort_order?: number;
+};
+
+export type BandDynamicFeeOffer = {
+  id: string;
+  band_id: string;
+  set_details: string | null;
+  overall_set_length_minutes: number | null;
+  appearance_fee: number | null;
+  session_fee: number | null;
+  session_duration_minutes: number | null;
+  details: string | null;
+  sort_order: number;
+};
+
+export type BandDynamicFeeOfferInput = {
+  set_details?: string | null;
+  overall_set_length_minutes?: number | null;
+  appearance_fee?: number | null;
+  session_fee?: number | null;
+  session_duration_minutes?: number | null;
+  details?: string | null;
+  sort_order?: number;
 };
 
 export type BandMediaInput = {
@@ -122,4 +185,6 @@ export type UpdateBandProfileInput = {
   media?: BandMediaInput[];
   socialLinks?: BandSocialLinkInput[];
   publicDates?: BandPublicDateInput[];
+  setOffers?: BandSetOfferInput[];
+  dynamicFeeOffers?: BandDynamicFeeOfferInput[];
 };

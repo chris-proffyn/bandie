@@ -2,7 +2,7 @@
 
 **Document status:** Authoritative technical requirements  
 **Product:** Bandie  
-**Last updated:** 27 June 2026
+**Last updated:** 28 June 2026
 
 ---
 
@@ -134,10 +134,16 @@ All tables prefixed `bandie_`. Full schema to be defined in migrations. Conceptu
 
 | Entity | Purpose |
 |---|---|
-| `bandie_profiles` | Musician / player profile (display name, instruments, gear, directory visibility) |
+| `bandie_profiles` | Musician / player profile (display name, username, instruments, gear, directory visibility, player/organiser roles, leader contact fields) |
 | `bandie_bands` | Band workspace + public profile |
 | `bandie_band_members` | User ↔ band with roles |
 | `bandie_band_invitations` | Email invitations with accept token |
+| `bandie_band_parts` | Lineup roles (title, instrument filter, sort order, assigned member) |
+| `bandie_player_outreach` | Leader-initiated audition/join invites to directory players |
+| `bandie_user_messages` | Direct messages between Bandie users (inbox / send by username, reply threading) |
+| `bandie_band_set_offers` | Fixed set length & fee packages per band |
+| `bandie_band_dynamic_fee_offers` | Session-based dynamic fee packages (appearance + per-session fees) |
+| `bandie_organiser_venues` | Organiser-managed venues (pub, club, festival site, etc.) |
 | `bandie_band_media` | Band photos, videos, tracks (URLs) |
 | `bandie_band_social_links` | Social platform links |
 | `bandie_band_public_dates` | Manual public availability dates |
@@ -149,11 +155,42 @@ All tables prefixed `bandie_`. Full schema to be defined in migrations. Conceptu
 | `bandie_calendar_events` | Rehearsals and availability windows (planned) |
 | `bandie_availability_votes` | Member votes on events (planned) |
 | `bandie_gigs` | Confirmed/proposed performances (planned) |
-| `bandie_booking_enquiries` | Inbound organiser enquiries (planned) |
+| `bandie_booking_enquiries` | Inbound organiser enquiries (planned — currently direct messages) |
 
 Plus platform tables from multi-tenant guide (`platform_apps`, `platform_app_memberships`, etc.).
 
 RLS policies must enforce band membership for all private data.
+
+**Communications data access (`@bandie/data`):**
+- `listPendingInvitationsForCurrentUser`, `acceptBandInvitation`, `declineBandInvitation`, `acceptAllPendingInvitations` — band invitations
+- `listMyPendingPlayerOutreach`, `respondToPlayerOutreach`, `countMyPendingPlayerOutreach` — player outreach inbox
+- `listMyMessages`, `sendDirectMessage`, `replyToMessage`, `markMessageRead`, `countUnreadMessages` — direct messages
+- `listCommunications`, `filterCommunications`, `getCommunicationSummary`, `getNotificationSummary` — unified feed and nav badge
+- RPCs: `bandie_list_my_pending_invitations`, `bandie_decline_invitation`, `bandie_list_my_pending_player_outreach`, `bandie_respond_to_player_outreach`, `bandie_list_my_messages`, `bandie_count_my_unread_messages`
+
+**Band overview data access (`@bandie/data`):**
+- `getBandLeaderContact`, `listBandLeaders` — RPCs for primary and all leader contact details
+- `addBandLeader`, `removeBandLeader` — RPCs `bandie_add_band_leader`, `bandie_remove_band_leader` (any leader can add/remove co-leaders; last leader cannot be removed)
+- `setPrimaryBandContact` — RPC `bandie_set_primary_band_contact` (assign primary public contact among active leaders)
+- `assignBandLeader` — alias for `addBandLeader` (legacy name)
+- `ensureBandLeader` — RPC `bandie_ensure_band_leader` (reconcile primary contact; interim admin fallback)
+- `listBandParts`, `createBandPart`, `updateBandPart`, `deleteBandPart`, `createDefaultBandParts`, `syncBandSizeFromParts`, `assignMemberToPart` — lineup parts; syncs `bandie_bands.band_size`
+- `createPlayerOutreach`, `listPlayerOutreachForBand` — RPC `bandie_create_player_outreach` (audition/join from player directory)
+- Public profile roster: RPCs `bandie_list_public_band_members`, `bandie_get_public_band_primary_contact` (via `getPublicBandProfile`)
+- Set/fee offers: managed via `updateBandProfile` / `replaceBandSetOffers`, `replaceBandDynamicFeeOffers`
+- Leader contact fields on `UserProfile`: `contact_email`, `contact_phone` (via `updateUserProfile`)
+
+**Organiser venues (`@bandie/data`):**
+- `listMyOrganiserVenues`, `createOrganiserVenue`, `updateOrganiserVenue`, `deleteOrganiserVenue`
+- `uploadOrganiserVenueImage`, `removeOrganiserVenueImage` — storage helpers
+
+**Admin mode (`@bandie/data`):**
+- `isCurrentUserAppAdmin`, `setBandieAdminModeActive`, `isBandieAdminModeActive` — client-side admin mode flag; admins bypass membership checks when active
+
+**Usernames (`@bandie/data`):**
+- `normalizeUsername`, `validateUsernameInput`, `ensureProfileUsername`
+- Login accepts email or username (`signInWithEmailOrUsername`)
+- Direct messages addressed by username
 
 ---
 
@@ -161,7 +198,7 @@ RLS policies must enforce band membership for all private data.
 
 | Bucket | Purpose | Path pattern |
 |---|---|---|
-| `bandie-profile-images` | Band logos/heroes and user avatars | `bands/{band_id}/…`, `users/{user_id}/avatar.{ext}` |
+| `bandie-profile-images` | Band logos/heroes, user avatars, organiser venue photos | `bands/{band_id}/…`, `users/{user_id}/avatar.{ext}`, `venues/{venue_id}/…` |
 | `bandie-song-files` | Song part files (planned) | `{band_id}/{song_id}/{part_folder_id}/{file_id}/{filename}` |
 
 - Profile images: JPEG, PNG, WebP, GIF up to 5 MB
@@ -179,7 +216,7 @@ RLS policies must enforce band membership for all private data.
 - Flows: register, login, logout, password reset
 - Session persisted in `localStorage` with auto-refresh and URL detection
 - Sign-out navigates to `/` before clearing session (avoids redirect to `/login`)
-- Post-auth routing based on band membership and pending invitations (`routeAfterAuth`)
+- Post-auth routing based on band membership and pending invitations/outreach (`routeAfterAuth`); pending items route to `/app/communications`
 - App membership via `platform_user_app_memberships` (multi-tenant pattern)
 - Display name resolution: profile `display_name` → auth `user_metadata.display_name` → email local-part → `"Band member"`
 
@@ -190,20 +227,22 @@ RLS policies must enforce band membership for all private data.
 ```
 apps/web/src/
 ├── components/
-│   ├── app/           App shell (layout, band switcher)
-│   ├── auth/          Auth layout, protected/guest routes, password field
-│   ├── band/          Band workspace (profile editor, members, invitations)
+│   ├── app/           App shell (layout, header, band switcher)
+│   ├── auth/          Auth layout, protected/guest routes, workspace mode route
+│   ├── band/          Band workspace (overview tabs, leader section, lineup parts, profile editor, members, invitations)
 │   ├── bands/         Band cards (My bands, workspace)
+│   ├── communications/ Invitations, player outreach, messages panels and unified feed
 │   ├── directory/     Band and player directory filters and cards
-│   ├── marketing/     Public homepage nav and sections
-│   └── profile/       Profile image/font/palette pickers, public profile views
+│   ├── marketing/     Public homepage nav and sections (three-mode layout)
+│   ├── organiser/     Organiser venue forms and cards
+│   └── profile/       Profile editors, public profile views, booking contact card
 ├── content/           Static content configs (e.g. homepageContent.ts)
 ├── context/           AuthContext (session, profile, bands, displayName)
 ├── pages/
 │   ├── app/           Protected workspace pages
 │   └── auth/          Login, signup, password reset
-├── lib/               Client init, helpers, hooks
-├── styles/            auth.css, directory.css, workspace.css, bandProfile.css
+├── lib/               Client init, helpers, hooks (`brand.ts` — shared logo mark)
+├── styles/            auth.css, directory.css, communications.css, workspace.css, bandProfile.css, brand.css
 └── main.tsx           BrowserRouter + AuthProvider
 ```
 
@@ -217,20 +256,20 @@ From homepage spec — use consistently across public pages:
 
 ```ts
 colors: {
-  background: '#101014',
-  panel: '#191922',
-  panelSoft: '#222230',
-  text: '#f6f3ea',
-  muted: '#bbb6aa',
-  accent: '#ffcc33',
+  background: '#0b0d12',
+  backgroundAlt: '#111521',
+  paper: '#f8f2e8',
+  text: '#f8f4ec',
+  muted: '#bdb7ab',
+  accent: '#ffcf4a',
   accentPink: '#ff5e7e',
-  accentGreen: '#61e3c2',
+  accentTeal: '#55e0c0',
 }
 ```
 
 Breakpoints: mobile 0–639px, tablet 640–1023px, desktop 1024px+.
 
----
+**Logo mark:** lowercase **b** in white on a gradient rounded tile (42×42px homepage; scaled variants elsewhere). Constants: `BANDIE_BRAND_MARK`, `BANDIE_BRAND_NAME` in `apps/web/src/lib/brand.ts`; letter sizing in `apps/web/src/styles/brand.css`. Do not use uppercase **B**.
 
 ## 11. Routing (implemented)
 
@@ -247,12 +286,17 @@ Breakpoints: mobile 0–639px, tablet 640–1023px, desktop 1024px+.
 | `/forgot-password` | Guest | Request password reset |
 | `/reset-password` | Auth | Set new password |
 | `/app` | Protected | My bands hub |
-| `/app/invites` | Protected | Pending band invitations |
+| `/app/communications` | Protected | Communications hub (invitations, player outreach, messages) |
+| `/app/notifications` | Protected | Redirects to `/app/communications` |
+| `/app/invites` | Protected | Redirects to `/app/communications` |
 | `/app/profile` | Protected | Musician / player profile editor |
-| `/app/players` | Protected | Player directory (find members or deps) |
+| `/app/players` | Protected | Player directory (find members or deps); supports `?forBand=&part=&instrument=` for lineup recruitment |
+| `/app/players/:profileId` | Protected | Workspace player profile with invite panel when recruiting from a band part |
+| `/app/bands` | Protected | Band directory (workspace view) |
 | `/app/bands/new` | Protected | Create band |
-| `/app/:bandId` | Protected | Band workspace overview |
-| `/book/:slug` | Public | Booking enquiry (planned) |
+| `/app/venues` | Protected (organiser mode) | Organiser venues |
+| `/app/profiles/:profileId/edit` | Protected (admin mode) | Admin edit player profile |
+| `/app/:bandId` | Protected | Band workspace overview (Members / Band details tabs) |
 
 Legacy routes `/app/:bandId/profile` and `/app/:bandId/members` redirect to overview.
 

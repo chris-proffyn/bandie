@@ -113,8 +113,8 @@ See [product-technical-requirements.md](docs/project/product-technical-requireme
 
 ## Current status
 
-**Phase:** Workspace shell complete (Phases 0–5 in tracker); songs & repertoire next  
-**Live routes:** `/`, `/bands`, `/players`, `/login`, `/signup`, `/app`, `/app/:bandId`, `/app/profile`
+**Phase:** Workspace shell complete; communications and booking enquiry partial; songs & repertoire next  
+**Live routes:** `/`, `/bands`, `/players`, `/login`, `/signup`, `/app`, `/app/communications`, `/app/profile`, `/app/venues`, `/app/:bandId`
 
 See [PROJECT_STATUS_TRACKER.md](docs/PROJECT_STATUS_TRACKER.md) for full delivery progress.
 

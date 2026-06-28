@@ -1,0 +1,147 @@
+.notifications-page {
+  max-width: 860px;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.notifications-header h1 {
+  margin: 0.35rem 0 0.75rem;
+  font-size: clamp(1.85rem, 4vw, 2.5rem);
+  letter-spacing: -0.04em;
+}
+
+.notifications-section {
+  display: grid;
+  gap: 1rem;
+}
+
+.notifications-section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.notifications-section-head h2 {
+  margin: 0 0 0.35rem;
+  letter-spacing: -0.03em;
+}
+
+.notifications-section-head .profile-section-intro {
+  margin: 0;
+}
+
+.notifications-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.75rem;
+  min-height: 1.75rem;
+  padding: 0 0.55rem;
+  border-radius: 999px;
+  background: rgba(255, 94, 126, 0.16);
+  border: 1px solid rgba(255, 94, 126, 0.35);
+  color: #ff8da8;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.notifications-section-body {
+  display: grid;
+  gap: 1rem;
+}
+
+.notifications-section-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.notifications-item-meta {
+  color: #bbb6aa;
+  font-size: 0.88rem;
+  margin-top: 0.25rem;
+}
+
+.notifications-compose {
+  padding: 1rem;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.notifications-compose-block {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.notifications-subsection-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.notifications-subsection-title {
+  margin: 0;
+  font-size: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.notifications-subsection-count {
+  color: #bbb6aa;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.notifications-message-group {
+  padding-top: 0.25rem;
+}
+
+.notifications-message-group + .notifications-message-group {
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.notifications-message-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.notifications-message-item {
+  padding: 0.95rem 1rem;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.notifications-message-item-unread {
+  border-color: rgba(255, 204, 51, 0.35);
+  background: rgba(255, 204, 51, 0.06);
+}
+
+.notifications-message-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.notifications-message-body {
+  margin: 0.65rem 0 0;
+  color: #f6f3ea;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 720px) {
+  .notifications-section-head,
+  .notifications-message-head {
+    flex-direction: column;
+  }
+}

@@ -53,7 +53,7 @@
   display: grid;
   place-items: center;
   background: linear-gradient(135deg, #ffcc33, #ff5e7e);
-  color: #101014;
+  color: #fff;
   font-weight: 950;
   clip-path: polygon(0 0, 84% 0, 100% 100%, 14% 100%);
 }
@@ -125,6 +125,36 @@
   font-weight: 750;
 }
 
+.directory-stats-instruments {
+  grid-column: 1 / -1;
+  margin-top: 0.35rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.directory-stats-instruments-heading {
+  margin: 0 0 0.65rem;
+  color: #bbb6aa;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.directory-stats-instrument-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.directory-stat-compact strong {
+  font-size: 1.35rem;
+}
+
+.directory-stat-compact span {
+  font-size: 0.75rem;
+}
+
 .directory-layout {
   display: grid;
   grid-template-columns: 330px 1fr;
@@ -172,6 +202,8 @@
 .directory-filter-group input,
 .directory-filter-group select {
   width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   min-height: 46px;
   border-radius: 15px;
   border: 1px solid rgba(255, 255, 255, 0.16);
@@ -190,8 +222,16 @@
 
 .directory-range-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 0.65rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.directory-range-row input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .directory-genre-chips {
@@ -214,6 +254,18 @@
 .directory-chip.active {
   background: #ff5e7e;
   border-color: #ff5e7e;
+}
+
+.directory-chip-block {
+  width: 100%;
+  margin-top: 0.65rem;
+  border-radius: 12px;
+  text-align: left;
+}
+
+.directory-chip:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .directory-filter-actions {
@@ -386,8 +438,12 @@
 }
 
 .directory-availability-badge {
+  align-self: flex-start;
   display: inline-flex;
   align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  white-space: nowrap;
   gap: 0.5rem;
   background: rgba(0, 0, 0, 0.42);
   border: 1px solid rgba(255, 255, 255, 0.24);
@@ -396,6 +452,17 @@
   padding: 0.4rem 0.7rem;
   font-size: 0.75rem;
   font-weight: 900;
+}
+
+.directory-role-badge {
+  align-self: flex-start;
+  gap: 0;
+  padding: 0.1rem 0.32rem;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.1;
 }
 
 .directory-availability-dot {
@@ -537,7 +604,9 @@
     padding-top: 3rem;
   }
 
-  .directory-band-grid {
+  .directory-band-grid,
+  .directory-band-listing-grid,
+  .directory-player-grid {
     grid-template-columns: 1fr;
   }
 
@@ -601,8 +670,223 @@
   flex-wrap: wrap;
 }
 
+.directory-band-listing-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.directory-band-listing-grid .directory-band-card {
+  border-radius: 22px;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.22);
+}
+
+.directory-band-listing-grid .directory-band-hero {
+  min-height: 96px;
+  padding: 0.85rem;
+}
+
+.directory-band-listing-grid .directory-band-logo {
+  width: 44px;
+  height: 44px;
+  font-size: 1rem;
+  border-radius: 14px;
+}
+
+.directory-band-listing-grid .directory-availability-badge {
+  gap: 0.28rem;
+  padding: 0.1rem 0.32rem;
+  font-size: 0.56rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.directory-band-listing-grid .directory-availability-dot {
+  width: 5px;
+  height: 5px;
+  box-shadow: 0 0 0 2px rgba(88, 214, 141, 0.14);
+}
+
+.directory-band-listing-grid .directory-availability-dot.limited {
+  box-shadow: 0 0 0 2px rgba(255, 200, 87, 0.14);
+}
+
+.directory-band-listing-grid .directory-availability-dot.unavailable {
+  box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.14);
+}
+
+.directory-band-listing-grid .directory-role-badge {
+  padding: 0.08rem 0.28rem;
+  font-size: 0.54rem;
+}
+
+.directory-band-listing-grid .directory-band-body {
+  padding: 0.95rem 1rem 1rem;
+}
+
+.directory-band-listing-grid .directory-band-title-row h3 {
+  font-size: 1.12rem;
+  line-height: 1.08;
+}
+
+.directory-band-listing-grid .directory-band-meta {
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+}
+
+.directory-band-listing-grid .directory-band-desc {
+  margin: 0.55rem 0 0.7rem;
+  font-size: 0.84rem;
+  line-height: 1.35;
+  -webkit-line-clamp: 2;
+}
+
+.directory-band-listing-grid .directory-tag-row {
+  margin-bottom: 0.7rem;
+  gap: 0.35rem;
+}
+
+.directory-band-listing-grid .directory-tag {
+  font-size: 0.68rem;
+  padding: 0.25rem 0.45rem;
+}
+
+.directory-band-listing-grid .directory-band-footer {
+  grid-template-columns: 1fr;
+  gap: 0.55rem;
+  padding-top: 0.7rem;
+  align-items: stretch;
+}
+
+.directory-band-listing-grid .directory-price {
+  font-size: 0.74rem;
+}
+
+.directory-band-listing-grid .directory-price strong {
+  font-size: 0.98rem;
+  margin-bottom: 0.1rem;
+}
+
+.directory-band-listing-grid .band-card-actions {
+  display: flex;
+}
+
+.directory-band-listing-grid .directory-btn {
+  width: 100%;
+  min-height: 36px;
+  padding: 0 0.75rem;
+  font-size: 0.82rem;
+}
+
+@media (max-width: 1060px) {
+  .directory-band-listing-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.directory-player-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.directory-player-grid .directory-player-card {
+  border-radius: 22px;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.22);
+}
+
+.directory-player-grid .directory-player-card .directory-player-hero {
+  min-height: 96px;
+  padding: 0.85rem;
+}
+
+.directory-player-grid .directory-band-logo {
+  width: 44px;
+  height: 44px;
+  font-size: 1rem;
+  border-radius: 999px;
+}
+
+.directory-player-grid .directory-invite-badges {
+  gap: 0.25rem;
+}
+
+.directory-player-grid .directory-availability-badge {
+  padding: 0.28rem 0.5rem;
+  font-size: 0.64rem;
+  line-height: 1.2;
+}
+
+.directory-player-grid .directory-band-body {
+  padding: 0.95rem 1rem 1rem;
+}
+
+.directory-player-grid .directory-band-title-row h3 {
+  font-size: 1.12rem;
+  line-height: 1.08;
+}
+
+.directory-player-grid .directory-band-meta {
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+}
+
+.directory-player-grid .directory-player-travel {
+  font-size: 0.78rem;
+  margin-top: 0.25rem;
+  color: #5d5650;
+}
+
+.directory-player-grid .directory-band-desc {
+  margin: 0.55rem 0 0.7rem;
+  font-size: 0.84rem;
+  line-height: 1.35;
+  -webkit-line-clamp: 2;
+}
+
+.directory-player-grid .directory-tag-row {
+  margin-bottom: 0.7rem;
+  gap: 0.35rem;
+}
+
+.directory-player-grid .directory-tag {
+  font-size: 0.68rem;
+  padding: 0.25rem 0.45rem;
+}
+
+.directory-player-grid .directory-band-footer {
+  grid-template-columns: 1fr;
+  gap: 0.55rem;
+  padding-top: 0.7rem;
+  align-items: stretch;
+}
+
+.directory-player-grid .directory-price {
+  font-size: 0.74rem;
+}
+
+.directory-player-grid .directory-price strong {
+  font-size: 0.98rem;
+  margin-bottom: 0.1rem;
+}
+
+.directory-player-grid .band-card-actions {
+  display: flex;
+}
+
+.directory-player-grid .directory-btn {
+  width: 100%;
+  min-height: 36px;
+  padding: 0 0.75rem;
+  font-size: 0.82rem;
+}
+
 .directory-player-card .directory-player-hero {
   min-height: 148px;
+}
+
+@media (max-width: 1060px) {
+  .directory-player-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .directory-player-avatar {

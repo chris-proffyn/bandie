@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { BANDIE_BRAND_MARK } from '../../lib/brand';
 import {
   formatPlayerTravelDistance,
+  formatPlayerGenderLabel,
+  DEFAULT_PLAYER_DIRECTORY_FILTERS,
+  isBandLeaderRole,
   getPublicPlayerProfileById,
   getUserProfileById,
   playerDirectoryFooter,
@@ -13,6 +17,17 @@ import {
 } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
 import { BackLink } from '../navigation/BackLink';
+import { PlayerInvitePanel } from '../band/PlayerInvitePanel';
+import {
+  AdminRecruitingBandSelector,
+  adminRecruitingBandContext,
+} from '../band/AdminRecruitingBandSelector';
+import { resolveBackPath } from '../../lib/backNavigation';
+import type { BackNavigationState } from '../../lib/backNavigation';
+import {
+  buildPlayerDirectoryBackState,
+  WORKSPACE_PLAYER_DIRECTORY_DEFAULTS,
+} from '../../lib/playerDirectoryNavigation';
 import { bandCardGradient } from '../../lib/directoryHelpers';
 import { bandInitials } from '../../lib/profileHelpers';
 import '../../styles/directory.css';
@@ -27,6 +42,7 @@ function userProfileToDirectoryListing(profile: UserProfile): PlayerDirectoryLis
     id: profile.id,
     display_name: profile.display_name,
     preferred_instrument: profile.preferred_instrument,
+    gender: profile.gender,
     profile_image_url: profile.profile_image_url,
     bio: profile.bio,
     location: profile.location,
@@ -43,11 +59,13 @@ function userProfileToDirectoryListing(profile: UserProfile): PlayerDirectoryLis
 }
 
 export function PlayerProfileView({ profileId, variant }: PlayerProfileViewProps) {
-  const { session, isAppAdmin } = useAuth();
+  const { session, adminModeActive, bands } = useAuth();
+  const location = useLocation();
   const isWorkspace = variant === 'workspace';
   const [player, setPlayer] = useState<PlayerDirectoryListing | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [adminRecruitBandId, setAdminRecruitBandId] = useState('');
 
   useEffect(() => {
     if (!profileId) {
@@ -59,7 +77,7 @@ export function PlayerProfileView({ profileId, variant }: PlayerProfileViewProps
     setLoading(true);
 
     async function loadProfile() {
-      if (isAppAdmin) {
+      if (adminModeActive) {
         const adminProfile = await getUserProfileById(profileId!);
         if (!adminProfile) {
           setError('This player profile is not available.');
@@ -69,6 +87,15 @@ export function PlayerProfileView({ profileId, variant }: PlayerProfileViewProps
         setPlayer(userProfileToDirectoryListing(adminProfile));
         setError(null);
         return;
+      }
+
+      if (isWorkspace && session) {
+        const sharedProfile = await getUserProfileById(profileId!);
+        if (sharedProfile) {
+          setPlayer(userProfileToDirectoryListing(sharedProfile));
+          setError(null);
+          return;
+        }
       }
 
       const result = await getPublicPlayerProfileById(profileId!);
@@ -89,19 +116,55 @@ export function PlayerProfileView({ profileId, variant }: PlayerProfileViewProps
     loadProfile()
       .catch((err) => setError(err instanceof Error ? err.message : 'Unable to load profile.'))
       .finally(() => setLoading(false));
-  }, [profileId, isAppAdmin]);
+  }, [profileId, adminModeActive, isWorkspace, session]);
 
+  const navigationState = location.state as BackNavigationState | null;
+  const knownAppRoutes = /^\/app\/(?:profile|profiles|bands|players|communications|notifications|invites)(?:\/|$)/;
+  const fromBandOverview = Boolean(
+    navigationState?.from?.startsWith('/app/') && !knownAppRoutes.test(navigationState.from),
+  );
   const backProps = {
     fallbackTo: '/players',
     workspaceFallbackTo: '/app/players',
-    label: 'Back to player directory',
+    label: fromBandOverview ? 'Back to band' : 'Back to player directory',
   };
+  const directoryPath = resolveBackPath(
+    location.pathname,
+    location.state,
+    '/players',
+    isWorkspace ? '/app/players' : undefined,
+  );
+  const directoryNavState = buildPlayerDirectoryBackState(
+    isWorkspace ? 'workspace' : 'public',
+    isWorkspace ? WORKSPACE_PLAYER_DIRECTORY_DEFAULTS : DEFAULT_PLAYER_DIRECTORY_FILTERS,
+    location.state,
+  );
+  const profileNavigationState = (location.state as BackNavigationState | null) ?? directoryNavState;
+  const findPlayersFromNav = profileNavigationState.findPlayers;
+  const effectiveFindPlayers =
+    findPlayersFromNav ??
+    (adminModeActive ? adminRecruitingBandContext(bands, adminRecruitBandId) : null);
+  const recruitingBand = effectiveFindPlayers
+    ? bands.find((band) => band.id === effectiveFindPlayers.bandId)
+    : undefined;
+  const canInvitePlayer =
+    isWorkspace &&
+    Boolean(profileId) &&
+    (adminModeActive
+      ? Boolean(effectiveFindPlayers)
+      : Boolean(findPlayersFromNav) && isBandLeaderRole(recruitingBand?.member_role));
+
+  useEffect(() => {
+    if (findPlayersFromNav?.bandId) {
+      setAdminRecruitBandId(findPlayersFromNav.bandId);
+    }
+  }, [findPlayersFromNav?.bandId]);
 
   if (loading) {
     return (
       <div className={isWorkspace ? 'workspace-directory-loading panel' : 'directory-page directory-loading'}>
         <div className={isWorkspace ? undefined : 'directory-shell'}>
-          <BackLink {...backProps} />
+          <BackLink {...backProps} navigationState={directoryNavState} />
           <p>Loading player profile…</p>
         </div>
       </div>
@@ -112,7 +175,7 @@ export function PlayerProfileView({ profileId, variant }: PlayerProfileViewProps
     return (
       <div className={isWorkspace ? 'panel' : 'directory-page directory-error'}>
         <div className={isWorkspace ? undefined : 'directory-shell'}>
-          <BackLink {...backProps} />
+          <BackLink {...backProps} navigationState={directoryNavState} />
           <h1>Profile unavailable</h1>
           <p>{error ?? 'This profile could not be loaded.'}</p>
         </div>
@@ -121,6 +184,10 @@ export function PlayerProfileView({ profileId, variant }: PlayerProfileViewProps
   }
 
   const name = resolvePlayerDisplayName(player);
+  const genderLabel =
+    player.gender && player.gender !== 'prefer_not_to_say'
+      ? formatPlayerGenderLabel(player.gender)
+      : null;
   const inviteLabels = playerInviteSummary(player);
   const travelLabel = formatPlayerTravelDistance(player.travel_distance_miles);
   const deputyFooter = playerDirectoryFooter(player, 'temporary');
@@ -131,7 +198,7 @@ export function PlayerProfileView({ profileId, variant }: PlayerProfileViewProps
 
   const profileBody = (
     <>
-      <BackLink {...backProps} />
+      <BackLink {...backProps} navigationState={directoryNavState} />
 
       <section className="directory-player-profile-hero">
         <div className="directory-player-profile-avatar-wrap" style={heroStyle}>
@@ -146,6 +213,7 @@ export function PlayerProfileView({ profileId, variant }: PlayerProfileViewProps
         <div>
           <h1>{name}</h1>
           <p className="directory-player-profile-meta">{playerDirectoryMeta(player)}</p>
+          {genderLabel ? <p className="directory-player-profile-meta">{genderLabel}</p> : null}
           {travelLabel ? <p className="directory-player-travel">{travelLabel}</p> : null}
           {inviteLabels.length ? (
             <div className="directory-tag-row">
@@ -156,9 +224,13 @@ export function PlayerProfileView({ profileId, variant }: PlayerProfileViewProps
               ))}
             </div>
           ) : null}
-          {isAppAdmin && isWorkspace && profileId ? (
+          {adminModeActive && isWorkspace && profileId ? (
             <div className="directory-tag-row" style={{ marginTop: '0.75rem' }}>
-              <Link className="directory-btn directory-btn-primary" to={`/app/profiles/${profileId}/edit`}>
+              <Link
+                className="directory-btn directory-btn-primary"
+                to={`/app/profiles/${profileId}/edit`}
+                state={profileNavigationState}
+              >
                 Edit profile
               </Link>
             </div>
@@ -231,7 +303,29 @@ export function PlayerProfileView({ profileId, variant }: PlayerProfileViewProps
   );
 
   if (isWorkspace) {
-    return <div className="workspace-directory-page directory-player-profile">{profileBody}</div>;
+    return (
+      <div className="workspace-directory-page directory-player-profile">
+        {profileBody}
+        {adminModeActive && !findPlayersFromNav ? (
+          <AdminRecruitingBandSelector
+            bands={bands}
+            bandId={adminRecruitBandId}
+            onChange={setAdminRecruitBandId}
+            intro="Select the band you are recruiting for, then send an audition or join invitation below."
+          />
+        ) : null}
+        {canInvitePlayer && effectiveFindPlayers && profileId ? (
+          <PlayerInvitePanel
+            playerProfileId={profileId}
+            playerName={name}
+            findPlayers={{
+              ...effectiveFindPlayers,
+              bandName: effectiveFindPlayers.bandName ?? recruitingBand?.name,
+            }}
+          />
+        ) : null}
+      </div>
+    );
   }
 
   return (
@@ -239,11 +333,15 @@ export function PlayerProfileView({ profileId, variant }: PlayerProfileViewProps
       <header className="directory-header">
         <div className="directory-header-inner">
           <Link to="/" className="directory-brand" aria-label="Bandie home">
-            <span className="directory-brand-mark">B</span>
+            <span className="directory-brand-mark">{BANDIE_BRAND_MARK}</span>
             <span>Bandie</span>
           </Link>
           <div className="directory-header-actions">
-            <Link to="/players" className="directory-btn directory-btn-secondary">
+            <Link
+              to={directoryPath}
+              state={directoryNavState}
+              className="directory-btn directory-btn-secondary"
+            >
               Player directory
             </Link>
             {session ? (

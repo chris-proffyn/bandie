@@ -12,6 +12,7 @@ export type BandCardVisual = {
 type BandCardProps = {
   band: BandCardVisual;
   badgeLabel: string;
+  badgeVariant?: 'status' | 'role';
   badgeDotClass?: string;
   meta: string;
   tags: string[];
@@ -23,6 +24,7 @@ type BandCardProps = {
 export function BandCard({
   band,
   badgeLabel,
+  badgeVariant = 'status',
   badgeDotClass = '',
   meta,
   tags,
@@ -40,7 +42,11 @@ export function BandCard({
         <div className="directory-band-logo">
           {band.logo_url ? <img src={band.logo_url} alt="" /> : bandInitials(band.name)}
         </div>
-        <div className="directory-availability-badge">
+        <div
+          className={`directory-availability-badge ${
+            badgeVariant === 'role' ? 'directory-role-badge' : ''
+          }`}
+        >
           {badgeDotClass ? (
             <span className={`directory-availability-dot ${badgeDotClass}`} />
           ) : null}

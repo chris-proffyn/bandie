@@ -5,7 +5,7 @@ import { AuthLayout, AuthMessage } from '../../components/auth/AuthLayout';
 import { getAppOrigin } from '../../lib/bandieClient';
 
 export function ForgotPasswordPage() {
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -17,8 +17,8 @@ export function ForgotPasswordPage() {
     setSubmitting(true);
 
     try {
-      await requestPasswordReset(email, `${getAppOrigin()}/reset-password`);
-      setSuccess('If an account exists for that email, a reset link has been sent.');
+      await requestPasswordReset(identifier, `${getAppOrigin()}/reset-password`);
+      setSuccess('If an account exists for that email or username, a reset link has been sent.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to send reset email.');
     } finally {
@@ -32,14 +32,14 @@ export function ForgotPasswordPage() {
         {error ? <AuthMessage tone="error">{error}</AuthMessage> : null}
         {success ? <AuthMessage tone="success">{success}</AuthMessage> : null}
         <div className="auth-field">
-          <label htmlFor="email">Email</label>
+          <label htmlFor="identifier">Email or username</label>
           <input
-            id="email"
-            type="email"
-            autoComplete="email"
+            id="identifier"
+            type="text"
+            autoComplete="username"
             required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
           />
         </div>
         <button className="auth-button" type="submit" disabled={submitting}>

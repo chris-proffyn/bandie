@@ -5,8 +5,10 @@ export function MarketingFooter() {
 
   return (
     <footer className="footer">
-      <div>{footer.copyright}</div>
-      <div>{footer.tagline}</div>
+      <div>
+        <strong>Bandie</strong> — {footer.tagline}
+      </div>
+      <div>{footer.note}</div>
     </footer>
   );
 }

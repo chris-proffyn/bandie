@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bandie — Find players, run bands, book gigs</title>
+  <meta name="description" content="Bandie is a platform for players, bands and organisers: promote yourself, find bands and gigs, manage songs and rehearsals, and book local live music." />
+  <style>
+    :root {
+      --bg: #0b0d12;
+      --bg2: #111521;
+      --panel: #171c28;
+      --panel2: #202737;
+      --paper: #f8f2e8;
+      --ink: #13151b;
+      --text: #f8f4ec;
+      --muted: #bdb7ab;
+      --line: rgba(255,255,255,.13);
+      --yellow: #ffcf4a;
+      --pink: #ff5e7e;
+      --teal: #55e0c0;
+      --blue: #78a8ff;
+      --red: #ee4454;
+      --green: #5be39a;
+      --purple: #b68cff;
+      --shadow: 0 28px 90px rgba(0,0,0,.38);
+      --radius-xl: 34px;
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --max: 1200px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 8% 4%, rgba(255,207,74,.22), transparent 30%),
+        radial-gradient(circle at 88% 2%, rgba(255,94,126,.18), transparent 34%),
+        radial-gradient(circle at 50% 105%, rgba(85,224,192,.16), transparent 34%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg2) 58%, #08090d 100%);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; }
+    .noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .052;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.78'/%3E%3C/svg%3E");
+      z-index: 30;
+    }
+
+    .shell { width: min(var(--max), calc(100% - 38px)); margin: 0 auto; }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(18px);
+      background: rgba(11,13,18,.76);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 22px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 950;
+      font-size: 24px;
+      letter-spacing: -.045em;
+    }
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      background: linear-gradient(135deg, var(--yellow), var(--pink));
+      color: #111;
+      font-weight: 950;
+      box-shadow: 0 14px 34px rgba(255,207,74,.22);
+    }
+    .nav-links { display: flex; gap: 24px; align-items: center; color: var(--muted); font-weight: 760; font-size: 14px; }
+    .nav-links a:hover { color: white; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 48px;
+      padding: 0 19px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      font-weight: 950;
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease, border .18s ease;
+      white-space: nowrap;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary { background: var(--yellow); color: #111319; box-shadow: 0 16px 38px rgba(255,207,74,.22); }
+    .btn-secondary { background: rgba(255,255,255,.07); color: white; border-color: rgba(255,255,255,.16); }
+    .btn-pink { background: var(--pink); color: white; box-shadow: 0 16px 38px rgba(255,94,126,.22); }
+    .btn-dark { background: #111319; color: white; }
+
+    .hero {
+      padding: 82px 0 44px;
+      display: grid;
+      grid-template-columns: 1.03fr .97fr;
+      gap: 52px;
+      align-items: center;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 13px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.065);
+      border: 1px solid rgba(255,255,255,.14);
+      color: var(--yellow);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: .11em;
+      font-weight: 950;
+      margin-bottom: 24px;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--teal);
+      box-shadow: 0 0 0 6px rgba(85,224,192,.14);
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(52px, 8vw, 104px);
+      line-height: .88;
+      letter-spacing: -.082em;
+      max-width: 850px;
+    }
+    .hero h1 span { color: var(--yellow); }
+    .lead {
+      margin: 28px 0 0;
+      color: rgba(255,255,255,.78);
+      font-size: clamp(18px, 2vw, 23px);
+      max-width: 680px;
+    }
+    .lead strong { color: white; }
+    .hero-ctas { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 34px; }
+    .audience-jump {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 36px;
+      max-width: 690px;
+    }
+    .jump-card {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 18px;
+      padding: 15px;
+      color: var(--muted);
+    }
+    .jump-card strong { display: block; color: white; font-size: 18px; margin-bottom: 4px; }
+    .jump-card:hover { background: rgba(255,255,255,.09); }
+
+    .hero-board {
+      background: linear-gradient(180deg, rgba(255,255,255,.1), rgba(255,255,255,.04));
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: var(--radius-xl);
+      padding: 18px;
+      box-shadow: var(--shadow);
+      transform: rotate(1.3deg);
+    }
+    .dashboard-card {
+      background: var(--paper);
+      color: var(--ink);
+      border-radius: 28px;
+      padding: 22px;
+      min-height: 585px;
+      position: relative;
+      overflow: hidden;
+    }
+    .dashboard-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 170px;
+      background:
+        linear-gradient(135deg, rgba(255,207,74,.92), rgba(255,94,126,.86)),
+        repeating-linear-gradient(90deg, transparent 0 18px, rgba(0,0,0,.08) 18px 20px);
+    }
+    .dash-content { position: relative; z-index: 1; }
+    .dash-top { display: flex; justify-content: space-between; align-items: flex-end; gap: 18px; min-height: 126px; }
+    .dash-logo {
+      width: 90px;
+      height: 90px;
+      border-radius: 24px;
+      display: grid;
+      place-items: center;
+      background: #111319;
+      color: var(--yellow);
+      font-weight: 950;
+      font-size: 30px;
+      box-shadow: 0 18px 44px rgba(0,0,0,.22);
+    }
+    .dash-pill { background: rgba(17,19,25,.92); color: white; border-radius: 999px; padding: 9px 12px; font-size: 12px; font-weight: 950; }
+    .dash-title { margin: 25px 0 6px; font-size: 36px; line-height: .95; letter-spacing: -.06em; }
+    .dash-subtitle { color: #5d5548; font-weight: 780; margin-bottom: 18px; }
+    .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 18px 0; }
+    .dash-metric { background: rgba(255,255,255,.75); border: 1px solid rgba(0,0,0,.08); border-radius: 18px; padding: 14px; min-height: 91px; }
+    .dash-metric span { display: block; color: #746b5f; font-size: 11px; text-transform: uppercase; letter-spacing: .1em; font-weight: 950; }
+    .dash-metric strong { display: block; font-size: 22px; line-height: 1.08; margin-top: 7px; }
+    .dash-list { margin-top: 18px; background: #151821; color: white; border-radius: 20px; padding: 16px; }
+    .dash-list h3 { margin: 0 0 8px; font-size: 17px; }
+    .dash-row { display: flex; justify-content: space-between; gap: 14px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.11); font-weight: 820; }
+    .dash-row:last-child { border-bottom: 0; }
+    .dash-row small { color: var(--teal); font-weight: 950; }
+    .band-preview-card::before {
+      background:
+        linear-gradient(135deg, rgba(85,224,192,.88), rgba(255,94,126,.84)),
+        repeating-linear-gradient(90deg, transparent 0 18px, rgba(0,0,0,.08) 18px 20px);
+    }
+    .band-logo {
+      background: #111319;
+      color: var(--teal);
+      letter-spacing: -.08em;
+    }
+    .dash-pill.available {
+      background: rgba(17,19,25,.92);
+      color: #c6fff0;
+    }
+    .profile-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 16px 0 18px;
+    }
+    .profile-tags span {
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(0,0,0,.08);
+      color: #25211b;
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 900;
+    }
+    .band-stats .dash-metric strong { font-size: 21px; }
+    .band-profile-list h3 { display: flex; justify-content: space-between; align-items: center; }
+    .band-profile-list h3::after {
+      content: "Public preview";
+      color: var(--yellow);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+    }
+    .profile-cta-row {
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(0,0,0,.08);
+      border-radius: 16px;
+      padding: 12px;
+      color: #1d1a16;
+      font-weight: 900;
+    }
+    .profile-link { font-size: 13px; color: #5d5548; word-break: break-word; }
+    .profile-action {
+      white-space: nowrap;
+      background: #151821;
+      color: white;
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-size: 12px;
+    }
+
+
+    section { padding: 78px 0; }
+    .section-head { display: flex; align-items: end; justify-content: space-between; gap: 26px; margin-bottom: 32px; }
+    .section-head > div { max-width: 760px; }
+    .kicker { color: var(--yellow); text-transform: uppercase; letter-spacing: .13em; font-size: 12px; font-weight: 950; margin-bottom: 10px; }
+    h2 { margin: 0; font-size: clamp(34px, 5vw, 64px); line-height: .94; letter-spacing: -.068em; }
+    .section-copy { margin: 16px 0 0; color: var(--muted); font-size: 18px; max-width: 760px; }
+
+    .mode-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .mode-card {
+      background: rgba(255,255,255,.065);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: var(--radius-lg);
+      padding: 26px;
+      min-height: 390px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 18px 56px rgba(0,0,0,.18);
+    }
+    .mode-card.players { --mode: var(--teal); }
+    .mode-card.bands { --mode: var(--yellow); }
+    .mode-card.organisers { --mode: var(--pink); }
+    .mode-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      background: color-mix(in srgb, var(--mode), transparent 82%);
+      border: 1px solid color-mix(in srgb, var(--mode), transparent 62%);
+      font-size: 26px;
+      margin-bottom: 20px;
+    }
+    .mode-card h3 { margin: 0 0 12px; font-size: 30px; letter-spacing: -.045em; }
+    .mode-card p { margin: 0; color: var(--muted); }
+    .mode-card ul { margin: 18px 0 24px; padding-left: 18px; color: rgba(255,255,255,.82); }
+    .mode-card li { margin: 8px 0; }
+    .mode-card .btn { margin-top: auto; align-self: flex-start; }
+
+    .usecase-section {
+      border-top: 1px solid rgba(255,255,255,.08);
+      position: relative;
+    }
+    .usecase-layout {
+      display: grid;
+      grid-template-columns: .86fr 1.14fr;
+      gap: 34px;
+      align-items: start;
+    }
+    .usecase-intro {
+      position: sticky;
+      top: 104px;
+      background: rgba(255,255,255,.055);
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      box-shadow: 0 18px 56px rgba(0,0,0,.16);
+    }
+    .usecase-intro h2 { font-size: clamp(36px, 4.5vw, 58px); }
+    .usecase-intro p { color: var(--muted); font-size: 18px; }
+    .persona-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+    .tag { border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.07); border-radius: 999px; padding: 8px 11px; font-size: 13px; font-weight: 850; }
+
+    .how-card {
+      background: var(--paper);
+      color: var(--ink);
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255,255,255,.12);
+    }
+    .how-header {
+      padding: 26px;
+      color: white;
+      background: linear-gradient(135deg, #1a1e2b, #0f1118);
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+    }
+    .how-header.players { background: linear-gradient(135deg, rgba(85,224,192,.95), rgba(15,17,24,.96)); }
+    .how-header.bands { background: linear-gradient(135deg, rgba(255,207,74,.95), rgba(15,17,24,.96)); }
+    .how-header.organisers { background: linear-gradient(135deg, rgba(255,94,126,.95), rgba(15,17,24,.96)); }
+    .how-header h3 { margin: 0; font-size: 30px; line-height: .98; letter-spacing: -.045em; }
+    .how-header p { margin: 8px 0 0; color: rgba(255,255,255,.82); }
+    .role-pill { background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.16); color: white; border-radius: 999px; padding: 8px 11px; font-size: 12px; font-weight: 950; white-space: nowrap; }
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); }
+    .step { padding: 24px; border-right: 1px solid rgba(0,0,0,.08); background: rgba(255,255,255,.62); }
+    .step:nth-child(even) { background: rgba(249,244,235,.88); }
+    .step:last-child { border-right: 0; }
+    .step-num { width: 34px; height: 34px; border-radius: 999px; display: grid; place-items: center; background: #111319; color: white; font-weight: 950; margin-bottom: 14px; }
+    .step h4 { margin: 0 0 8px; font-size: 18px; letter-spacing: -.02em; }
+    .step p { margin: 0; color: #5d5548; font-weight: 680; }
+    .workflow-preview { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 24px; border-top: 1px solid rgba(0,0,0,.08); }
+    .preview-box { background: #fff; border: 1px solid rgba(0,0,0,.08); border-radius: 18px; padding: 16px; }
+    .preview-box span { display: block; color: #81776b; text-transform: uppercase; letter-spacing: .11em; font-size: 11px; font-weight: 950; margin-bottom: 8px; }
+    .preview-box strong { display: block; font-size: 20px; line-height: 1.1; }
+    .preview-box p { margin: 9px 0 0; color: #62594f; }
+
+    .platform-strip {
+      background: linear-gradient(135deg, rgba(255,207,74,.12), rgba(255,94,126,.1));
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: var(--radius-xl);
+      padding: 34px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      align-items: center;
+      box-shadow: var(--shadow);
+    }
+    .connection-map { display: grid; gap: 12px; }
+    .map-row { display: grid; grid-template-columns: 145px 1fr; gap: 12px; align-items: center; }
+    .map-label { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); border-radius: 999px; padding: 9px 12px; font-weight: 950; text-align: center; }
+    .map-value { color: var(--muted); }
+
+    .feature-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .feature-tile { background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.12); border-radius: 20px; padding: 18px; }
+    .feature-tile strong { display: block; font-size: 18px; margin-bottom: 6px; }
+    .feature-tile span { color: var(--muted); font-size: 14px; }
+footer { padding: 42px 0 62px; border-top: 1px solid var(--line); color: var(--muted); }
+    .footer-row { display: flex; justify-content: space-between; gap: 22px; flex-wrap: wrap; }
+
+    @media (max-width: 1020px) {
+      .hero, .usecase-layout, .platform-strip { grid-template-columns: 1fr; }
+      .hero-board { transform: none; }
+      .mode-grid, .feature-grid { grid-template-columns: 1fr 1fr; }
+      .steps { grid-template-columns: 1fr 1fr; }
+      .usecase-intro { position: static; }
+    }
+
+    @media (max-width: 720px) {
+      .nav-links { display: none; }
+      .hero { padding-top: 52px; }
+      .audience-jump, .mode-grid, .feature-grid, .steps, .workflow-preview, .dash-grid { grid-template-columns: 1fr; }
+      .section-head { display: block; }
+      .section-head .btn { margin-top: 18px; }
+      .platform-strip { padding: 26px; }
+      .map-row { grid-template-columns: 1fr; }
+      .dash-top { min-height: 112px; }
+      .dashboard-card { min-height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="noise"></div>
+
+  <header>
+    <div class="shell nav">
+      <a class="brand" href="#top" aria-label="Bandie home">
+        <span class="brand-mark">B</span>
+        <span>Bandie</span>
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="#players">For Players</a>
+        <a href="#bands">For Bands</a>
+        <a href="#organisers">For Organisers</a>
+        <a href="#features">Features</a>
+      </nav>
+      <a class="btn btn-secondary" href="/login">Log in</a>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="shell hero" aria-label="Bandie introduction">
+      <div>
+        <div class="eyebrow">One platform. Three ways into live music.</div>
+        <h1>Find players. Run bands. Book gigs. <span>All in Bandie.</span></h1>
+        <p class="lead"><strong>Bandie connects the people who make local live music happen.</strong> Players promote themselves and find opportunities. Bands look professional and stay organised. Organisers discover bands, plan gigs and create promotional content.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary" href="#players">I’m a player</a>
+          <a class="btn btn-secondary" href="#bands">I’m in a band</a>
+          <a class="btn btn-pink" href="#organisers">I organise events</a>
+        </div>
+        <div class="audience-jump" id="choose-mode">
+          <a class="jump-card" href="#players"><strong>Players</strong>Build a profile, find bands, find gigs.</a>
+          <a class="jump-card" href="#bands"><strong>Bands</strong>Promote, manage line-ups, rehearse, get gig-ready.</a>
+          <a class="jump-card" href="#organisers"><strong>Organisers</strong>Find bands, plan gigs, create promo.</a>
+        </div>
+      </div>
+
+      <aside class="hero-board" aria-label="Example public band profile preview">
+        <div class="dashboard-card band-preview-card">
+          <div class="dash-content">
+            <div class="dash-top">
+              <div class="dash-logo band-logo">NM</div>
+              <div class="dash-pill available">Available for bookings</div>
+            </div>
+            <h2 class="dash-title">The Neon Mondays</h2>
+            <div class="dash-subtitle">Indie, new wave and crowd-friendly guitar classics · Bristol and South West</div>
+
+            <div class="profile-tags" aria-label="Band tags">
+              <span>5-piece</span>
+              <span>2 x 45 min sets</span>
+              <span>Female lead vocal</span>
+              <span>Pub / party / festival</span>
+            </div>
+
+            <div class="dash-grid band-stats">
+              <div class="dash-metric"><span>Rating</span><strong>4.8 ★</strong></div>
+              <div class="dash-metric"><span>Typical fee</span><strong>£450–£700</strong></div>
+              <div class="dash-metric"><span>Next free date</span><strong>Sat 14 Sep</strong></div>
+              <div class="dash-metric"><span>Gig readiness</span><strong>92%</strong></div>
+            </div>
+
+            <div class="dash-list band-profile-list">
+              <h3>Public band profile</h3>
+              <div class="dash-row"><span>Videos, tracks and socials</span><small>Media</small></div>
+              <div class="dash-row"><span>Available dates and enquiry form</span><small>Bookings</small></div>
+              <div class="dash-row"><span>Approved line-up and set length</span><small>Band info</small></div>
+              <div class="dash-row"><span>Event page and poster generator</span><small>Promo</small></div>
+            </div>
+
+            <div class="profile-cta-row">
+              <span class="profile-link">bandie.app/the-neon-mondays</span>
+              <span class="profile-action">View profile</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="shell" aria-label="Bandie modes summary">
+      <div class="section-head">
+        <div>
+          <div class="kicker">The three Bandie modes</div>
+          <h2>Bandie is built around what you are trying to do.</h2>
+          <p class="section-copy">Most music tools only serve one group. Bandie connects individual musicians, band workspaces and event organisers so discovery, preparation and promotion all meet in one place.</p>
+        </div>
+      </div>
+      <div class="mode-grid">
+        <article class="mode-card players">
+          <div class="mode-icon">🎸</div>
+          <h3>For Players</h3>
+          <p>Create a musician profile that shows what you play, what you like, where you are based and when you are available.</p>
+          <ul>
+            <li>Promote yourself to bands and organisers.</li>
+            <li>Find bands looking for members or deps.</li>
+            <li>Find local gigs and playing opportunities.</li>
+          </ul>
+          <a class="btn btn-secondary" href="#players">How it works</a>
+        </article>
+        <article class="mode-card bands">
+          <div class="mode-icon">🥁</div>
+          <h3>For Bands</h3>
+          <p>Create a public band profile and a private workspace for everything the band needs to rehearse, organise and perform.</p>
+          <ul>
+            <li>Promote the band to organisers and players.</li>
+            <li>Manage line-ups, songs, setlists and readiness.</li>
+            <li>Coordinate rehearsals, gigs and availability.</li>
+          </ul>
+          <a class="btn btn-primary" href="#bands">How it works</a>
+        </article>
+        <article class="mode-card organisers">
+          <div class="mode-icon">🎟️</div>
+          <h3>For Organisers</h3>
+          <p>Search for suitable bands, check availability, organise gigs and generate the content needed to promote the event.</p>
+          <ul>
+            <li>Find bands by genre, location, price and rating.</li>
+            <li>Plan dates and enquiries in one place.</li>
+            <li>Create gig pages, posters and social content.</li>
+          </ul>
+          <a class="btn btn-pink" href="#organisers">How it works</a>
+        </article>
+      </div>
+    </section>
+
+    <section class="shell usecase-section" id="players" aria-label="For Players">
+      <div class="usecase-layout">
+        <div class="usecase-intro">
+          <div class="kicker">For Players</div>
+          <h2>Get seen. Find people to play with.</h2>
+          <p>Bandie gives individual musicians a profile that helps them be discovered by bands, other players and event organisers. It is for guitarists, singers, drummers, bassists, keys players, deps and anyone looking for the next musical opportunity.</p>
+          <div class="persona-tags">
+            <span class="tag">Guitarists</span><span class="tag">Singers</span><span class="tag">Drummers</span><span class="tag">Deps</span><span class="tag">New members</span>
+          </div>
+        </div>
+        <article class="how-card">
+          <div class="how-header players">
+            <div>
+              <h3>How it works for players</h3>
+              <p>Build a useful player profile and turn it into band, gig and dep opportunities.</p>
+            </div>
+            <span class="role-pill">Player mode</span>
+          </div>
+          <div class="steps">
+            <div class="step"><div class="step-num">1</div><h4>Create your player profile</h4><p>Add instruments, genres, influences, location, availability, media links and experience level.</p></div>
+            <div class="step"><div class="step-num">2</div><h4>Show what you can do</h4><p>Link to clips, tracks, socials and examples of you playing, without having to build a separate site.</p></div>
+            <div class="step"><div class="step-num">3</div><h4>Find bands and gigs</h4><p>Search bands looking for members, dep slots or local events needing musicians.</p></div>
+            <div class="step"><div class="step-num">4</div><h4>Join the workspace</h4><p>When accepted by a band, get access to the songs, setlists, notes and rehearsal plans you need.</p></div>
+          </div>
+          <div class="workflow-preview">
+            <div class="preview-box"><span>Profile</span><strong>Sarah — Lead vocals</strong><p>Female vocalist, rock/pop covers, available evenings, based in Hounslow.</p></div>
+            <div class="preview-box"><span>Opportunity</span><strong>Skin Condition need a dep singer</strong><p>Friday gig, 2 x 45 min sets, setlist already shared in Bandie.</p></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="shell usecase-section" id="bands" aria-label="For Bands">
+      <div class="usecase-layout">
+        <div class="usecase-intro">
+          <div class="kicker">For Bands</div>
+          <h2>Look professional outside. Stay organised inside.</h2>
+          <p>Bandie gives every band a public promotion page and a private operating workspace. It is built for amateur bands without managers who still need to organise songs, setlists, members, rehearsals, availability and gigs.</p>
+          <div class="persona-tags">
+            <span class="tag">Cover bands</span><span class="tag">Pub bands</span><span class="tag">Originals</span><span class="tag">Wedding bands</span><span class="tag">Community bands</span>
+          </div>
+        </div>
+        <article class="how-card">
+          <div class="how-header bands">
+            <div>
+              <h3>How it works for bands</h3>
+              <p>Promote the band, coordinate the people, and track whether the band is ready to play.</p>
+            </div>
+            <span class="role-pill">Band mode</span>
+          </div>
+          <div class="steps">
+            <div class="step"><div class="step-num">1</div><h4>Register the band</h4><p>Create a public band profile with genre, location, lineup, media links, pricing guidance and booking CTA.</p></div>
+            <div class="step"><div class="step-num">2</div><h4>Manage the line-up</h4><p>Add members, roles and permissions. Invite players, manage deps and keep member access controlled.</p></div>
+            <div class="step"><div class="step-num">3</div><h4>Build the working songbook</h4><p>Store song links, parts, notes, folders, setlists and track song readiness for upcoming gigs.</p></div>
+            <div class="step"><div class="step-num">4</div><h4>Organise rehearsals and gigs</h4><p>Poll availability, propose rehearsal series, confirm gig dates and publish public availability when ready.</p></div>
+          </div>
+          <div class="workflow-preview">
+            <div class="preview-box"><span>Private workspace</span><strong>Gig readiness: 82%</strong><p>Setlist confirmed, 14 songs ready, two songs need drummer review.</p></div>
+            <div class="preview-box"><span>Public profile</span><strong>Bookable in Surrey & Hounslow</strong><p>Logo, videos, track links, pricing range, reviews and contact route.</p></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="shell usecase-section" id="organisers" aria-label="For Organisers">
+      <div class="usecase-layout">
+        <div class="usecase-intro">
+          <div class="kicker">For Organisers</div>
+          <h2>Find the right band and promote the gig.</h2>
+          <p>Bandie helps organisers discover local bands, compare suitability, check availability and generate professional event content. It is for pubs, venues, festivals, community events, private parties and local promoters.</p>
+          <div class="persona-tags">
+            <span class="tag">Pubs</span><span class="tag">Venues</span><span class="tag">Festivals</span><span class="tag">Parties</span><span class="tag">Community events</span>
+          </div>
+        </div>
+        <article class="how-card">
+          <div class="how-header organisers">
+            <div>
+              <h3>How it works for organisers</h3>
+              <p>Search the directory, shortlist bands, organise the gig and generate promotion assets.</p>
+            </div>
+            <span class="role-pill">Organiser mode</span>
+          </div>
+          <div class="steps">
+            <div class="step"><div class="step-num">1</div><h4>Search the directory</h4><p>Filter bands by name, genre, location, price range, rating and availability.</p></div>
+            <div class="step"><div class="step-num">2</div><h4>Review band profiles</h4><p>Check videos, tracks, bios, areas served, line-up, set length, reviews and booking information.</p></div>
+            <div class="step"><div class="step-num">3</div><h4>Plan and confirm the gig</h4><p>Send enquiries, propose dates and track whether the band is provisional or confirmed.</p></div>
+            <div class="step"><div class="step-num">4</div><h4>Generate promo content</h4><p>Create a gig page, QR code, poster and shareable content for social channels and venues.</p></div>
+          </div>
+          <div class="workflow-preview">
+            <div class="preview-box"><span>Directory result</span><strong>20 bands found near Weybridge</strong><p>Filter: post-punk, £300–£700, available in February, rating 4★+.</p></div>
+            <div class="preview-box"><span>Event content</span><strong>Poster + QR page generated</strong><p>Venue, date, time, price and band details turned into promotional assets.</p></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="shell" id="features" aria-label="Connected Bandie platform">
+      <div class="platform-strip">
+        <div>
+          <div class="kicker">Why it works</div>
+          <h2>Bandie connects public discovery with private preparation.</h2>
+          <p class="section-copy">A band can be discovered publicly, then prepare privately. Organisers see the polished profile and public availability. Members see the song folders, setlists, notes and readiness tasks.</p>
+        </div>
+        <div class="connection-map" aria-label="Bandie connected object map">
+          <div class="map-row"><div class="map-label">Profile</div><div class="map-value">Public band and player pages for discovery and credibility.</div></div>
+          <div class="map-row"><div class="map-label">Directory</div><div class="map-value">Searchable marketplace for organisers and players.</div></div>
+          <div class="map-row"><div class="map-label">Workspace</div><div class="map-value">Private band management for members, songs and gigs.</div></div>
+          <div class="map-row"><div class="map-label">Calendar</div><div class="map-value">Availability, rehearsal planning and public gig readiness.</div></div>
+          <div class="map-row"><div class="map-label">Promotion</div><div class="map-value">Event pages, QR links, poster templates and shareable content.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="shell" aria-label="Core Bandie capabilities">
+      <div class="section-head">
+        <div>
+          <div class="kicker">Core capabilities</div>
+          <h2>Everything the early platform needs, without becoming heavy.</h2>
+          <p class="section-copy">Bandie should stay lightweight and practical. The goal is less admin, fewer lost messages and a clearer route from discovery to gig readiness.</p>
+        </div>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-tile"><strong>Player profiles</strong><span>Promote instruments, genres, clips, availability and location.</span></div>
+        <div class="feature-tile"><strong>Band profiles</strong><span>Public mini-sites for organisers, players and prospective bookers.</span></div>
+        <div class="feature-tile"><strong>Band directory</strong><span>Find bands by genre, location, price, rating and availability.</span></div>
+        <div class="feature-tile"><strong>Line-up management</strong><span>Members, roles, approvals, deps and private workspace access.</span></div>
+        <div class="feature-tile"><strong>Songs & folders</strong><span>Song metadata, external resources, parts, files, notes and readiness.</span></div>
+        <div class="feature-tile"><strong>Setlists</strong><span>Create, reuse and track setlists for gigs and rehearsals.</span></div>
+        <div class="feature-tile"><strong>Calendar</strong><span>Rehearsal proposals, gig availability and public calendar outputs.</span></div>
+        <div class="feature-tile"><strong>Promo generator</strong><span>Event pages, QR codes, posters and shareable gig content.</span></div>
+      </div>
+    </section>
+</main>
+
+  <footer>
+    <div class="shell footer-row">
+      <div><strong>Bandie</strong> — Find players, run bands, book gigs.</div>
+      <div>Homepage redesign mockup for Cursor implementation</div>
+    </div>
+  </footer>
+</body>
+</html>

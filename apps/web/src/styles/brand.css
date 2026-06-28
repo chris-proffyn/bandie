@@ -1,0 +1,23 @@
+/* Logo tile dimensions stay fixed; scale the letter inside. */
+.brand-mark,
+.auth-brand-mark,
+.directory-brand-mark,
+.band-profile-brand-mark,
+.app-header-brand-mark {
+  color: #fff;
+}
+
+.brand-mark,
+.auth-brand-mark,
+.directory-brand-mark,
+.band-profile-brand-mark {
+  font-size: 1.85rem;
+  line-height: 1;
+  letter-spacing: -0.06em;
+}
+
+.app-header-brand-mark {
+  font-size: 1.45rem;
+  line-height: 1;
+  letter-spacing: -0.06em;
+}

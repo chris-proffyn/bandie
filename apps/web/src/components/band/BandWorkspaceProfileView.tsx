@@ -1,9 +1,9 @@
 import { useState, type CSSProperties, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  availabilityLabel,
   bandNameFontFamily,
   bandPaletteCssVariables,
+  formatBandLocation,
   formatBandSubtitle,
   formatFeeRange,
   getBandColorPalette,
@@ -16,7 +16,6 @@ import {
   type SocialPlatform,
 } from '@bandie/data';
 import {
-  bandInitials,
   formatDisplayDate,
   socialPlatformLabel,
   youtubeEmbedUrl,
@@ -27,18 +26,26 @@ import {
   emptyDate,
   emptyMedia,
   emptySocial,
+  dynamicFeeOfferDraftsFromProfile,
+  dynamicFeeOfferDraftsToInput,
   mediaDraftsFromProfile,
   mediaDraftsToInput,
+  setOfferDraftsFromProfile,
+  setOfferDraftsToInput,
   socialDraftsFromProfile,
   socialDraftsToInput,
   type DateDraft,
+  type DynamicFeeOfferDraft,
   type MediaDraft,
+  type SetOfferDraft,
   type SocialDraft,
 } from '../../lib/bandProfileDrafts';
 import { useBandNameFont } from '../../lib/useBandNameFont';
 import { BandNameFontPicker } from '../profile/BandNameFontPicker';
 import { BandColorPalettePicker } from '../profile/BandColorPalettePicker';
+import { BandProfileHeroStage } from '../profile/BandProfileHeroStage';
 import { ProfileImageUploadField } from '../profile/ProfileImageUploadField';
+import { BandSetFeesFields } from './BandSetFeesFields';
 import {
   WorkspaceEditActions,
   WorkspaceEditableSection,
@@ -79,6 +86,7 @@ export function BandWorkspaceProfileView({
   onPublishChange,
 }: BandWorkspaceProfileViewProps) {
   const tagline = formatBandSubtitle(profile);
+  const locationLabel = formatBandLocation(profile);
   const genreLabel = profile.genres.filter(Boolean).join(', ');
   const feeRange = formatFeeRange(profile.fee_guidance_min, profile.fee_guidance_max);
   const photos = profile.media.filter((item) => item.kind === 'photo');
@@ -86,7 +94,9 @@ export function BandWorkspaceProfileView({
   const tracks = profile.media.filter((item) => item.kind === 'track');
   const bookingEmail = profile.booking_email?.trim();
   const bookingPhone = profile.booking_phone?.trim();
-  const hasMeta = Boolean(profile.band_size || profile.set_length_minutes || feeRange);
+  const hasBookingMeta = Boolean(
+    profile.setOffers.length || profile.dynamicFeeOffers.length || feeRange,
+  );
 
   useBandNameFont(profile.name_font);
 
@@ -109,10 +119,8 @@ export function BandWorkspaceProfileView({
   const [draftTravelDistance, setDraftTravelDistance] = useState('');
   const [draftGenres, setDraftGenres] = useState('');
   const [draftDescription, setDraftDescription] = useState('');
-  const [draftBandSize, setDraftBandSize] = useState('');
-  const [draftSetLength, setDraftSetLength] = useState('');
-  const [draftFeeMin, setDraftFeeMin] = useState('');
-  const [draftFeeMax, setDraftFeeMax] = useState('');
+  const [draftSetOffers, setDraftSetOffers] = useState<SetOfferDraft[]>([]);
+  const [draftDynamicFeeOffers, setDraftDynamicFeeOffers] = useState<DynamicFeeOfferDraft[]>([]);
   const [draftEquipmentNotes, setDraftEquipmentNotes] = useState('');
   const [draftBookingEmail, setDraftBookingEmail] = useState('');
   const [draftBookingPhone, setDraftBookingPhone] = useState('');
@@ -157,10 +165,8 @@ export function BandWorkspaceProfileView({
         setDraftDescription(profile.description ?? '');
         break;
       case 'meta':
-        setDraftBandSize(profile.band_size?.toString() ?? '');
-        setDraftSetLength(profile.set_length_minutes?.toString() ?? '');
-        setDraftFeeMin(profile.fee_guidance_min?.toString() ?? '');
-        setDraftFeeMax(profile.fee_guidance_max?.toString() ?? '');
+        setDraftSetOffers(setOfferDraftsFromProfile(profile.setOffers));
+        setDraftDynamicFeeOffers(dynamicFeeOfferDraftsFromProfile(profile.dynamicFeeOffers));
         break;
       case 'equipment':
         setDraftEquipmentNotes(profile.equipment_notes ?? '');
@@ -238,10 +244,8 @@ export function BandWorkspaceProfileView({
           break;
         case 'meta':
           updated = await updateBandProfile(bandId, {
-            band_size: draftBandSize ? Number(draftBandSize) : null,
-            set_length_minutes: draftSetLength ? Number(draftSetLength) : null,
-            fee_guidance_min: draftFeeMin ? Number(draftFeeMin) : null,
-            fee_guidance_max: draftFeeMax ? Number(draftFeeMax) : null,
+            setOffers: setOfferDraftsToInput(draftSetOffers),
+            dynamicFeeOffers: dynamicFeeOfferDraftsToInput(draftDynamicFeeOffers),
           });
           break;
         case 'equipment':
@@ -333,6 +337,56 @@ export function BandWorkspaceProfileView({
 
       <div className="band-profile-shell band-workspace-fields">
         <WorkspaceEditableSection
+          title="Band name"
+          canEdit={canEdit}
+          isEditing={editing === 'name'}
+          onEdit={() => openEdit('name')}
+          className="band-workspace-name-wrap"
+        >
+          {editing === 'name' ? (
+            editPanel(
+              'name',
+              <>
+                <div className="auth-field">
+                  <label htmlFor="workspaceBandName">Band name</label>
+                  <input
+                    id="workspaceBandName"
+                    required
+                    value={draftName}
+                    onChange={(event) => setDraftName(event.target.value)}
+                  />
+                </div>
+                <div className="auth-field">
+                  <label htmlFor="workspaceBandSlug">Public slug</label>
+                  <input
+                    id="workspaceBandSlug"
+                    required
+                    value={draftSlug}
+                    onChange={(event) => setDraftSlug(event.target.value)}
+                  />
+                </div>
+                <div className="auth-field">
+                  <label htmlFor="workspaceBandFont">Band name font</label>
+                  <BandNameFontPicker
+                    value={draftNameFont}
+                    onChange={setDraftNameFont}
+                    previewName={draftName.trim() || 'Your band name'}
+                  />
+                </div>
+              </>,
+            )
+          ) : (
+            <h1
+              id="band-workspace-title"
+              className="band-profile-name band-profile-name-lead"
+              style={{ fontFamily: bandNameFontFamily(profile.name_font) }}
+            >
+              {profile.name}
+            </h1>
+          )}
+        </WorkspaceEditableSection>
+
+        <WorkspaceEditableSection
           title="Hero image"
           canEdit={canEdit}
           isEditing={editing === 'hero'}
@@ -353,14 +407,116 @@ export function BandWorkspaceProfileView({
                 previewClassName="profile-image-preview profile-image-preview-hero"
               />,
             )
-          ) : profile.hero_image_url ? (
-            <div className="band-profile-hero-banner">
-              <img src={profile.hero_image_url} alt="" />
-            </div>
+          ) : profile.hero_image_url || profile.logo_url ? (
+            <BandProfileHeroStage
+              bandName={profile.name}
+              heroImageUrl={profile.hero_image_url}
+              logoUrl={profile.logo_url}
+              availabilityStatus={profile.availability_status}
+            />
           ) : canEdit ? (
             <div className="band-workspace-hero-placeholder">Add a hero image for your public profile</div>
-          ) : null}
+          ) : (
+            <BandProfileHeroStage
+              bandName={profile.name}
+              heroImageUrl={null}
+              logoUrl={profile.logo_url}
+              availabilityStatus={profile.availability_status}
+            />
+          )}
         </WorkspaceEditableSection>
+
+        <section className="band-profile-intro band-workspace-intro">
+          <WorkspaceEditableSection
+            title="Tagline"
+            canEdit={canEdit}
+            isEditing={editing === 'tagline'}
+            onEdit={() => openEdit('tagline')}
+          >
+            {editing === 'tagline' ? (
+              editPanel(
+                'tagline',
+                <div className="auth-field">
+                  <label htmlFor="workspaceTagline">Tagline</label>
+                  <input
+                    id="workspaceTagline"
+                    placeholder="Post-punk covers · high energy"
+                    value={draftTagline}
+                    onChange={(event) => setDraftTagline(event.target.value)}
+                  />
+                </div>,
+              )
+            ) : tagline ? (
+              <p className="band-profile-subtitle">{tagline}</p>
+            ) : canEdit ? (
+              <p className="band-workspace-placeholder">Add a short tagline for your band</p>
+            ) : null}
+          </WorkspaceEditableSection>
+
+          <WorkspaceEditableSection
+            title="Bio"
+            canEdit={canEdit}
+            isEditing={editing === 'bio'}
+            onEdit={() => openEdit('bio')}
+          >
+            {editing === 'bio' ? (
+              editPanel(
+                'bio',
+                <div className="auth-field">
+                  <label htmlFor="workspaceBio">Bio</label>
+                  <textarea
+                    id="workspaceBio"
+                    rows={4}
+                    value={draftDescription}
+                    onChange={(event) => setDraftDescription(event.target.value)}
+                  />
+                </div>,
+              )
+            ) : profile.description ? (
+              <p className="band-profile-lead">{profile.description}</p>
+            ) : canEdit ? (
+              <p className="band-workspace-placeholder">Add your band bio</p>
+            ) : null}
+          </WorkspaceEditableSection>
+
+          <WorkspaceEditableSection
+            title="Location"
+            canEdit={canEdit}
+            isEditing={editing === 'location'}
+            onEdit={() => openEdit('location')}
+          >
+            {editing === 'location' ? (
+              editPanel(
+                'location',
+                <>
+                  <div className="auth-field">
+                    <label htmlFor="workspaceHomeCity">Home city</label>
+                    <input
+                      id="workspaceHomeCity"
+                      placeholder="e.g. Guildford, UK"
+                      value={draftHomeCity}
+                      onChange={(event) => setDraftHomeCity(event.target.value)}
+                    />
+                  </div>
+                  <div className="auth-field">
+                    <label htmlFor="workspaceTravelDistance">Distance prepared to travel (miles)</label>
+                    <input
+                      id="workspaceTravelDistance"
+                      inputMode="numeric"
+                      placeholder="e.g. 50"
+                      value={draftTravelDistance}
+                      onChange={(event) => setDraftTravelDistance(event.target.value)}
+                    />
+                  </div>
+                </>,
+              )
+            ) : locationLabel ? (
+              <p className="band-profile-location">{locationLabel}</p>
+            ) : canEdit ? (
+              <p className="band-workspace-placeholder">Add your home city and how far you will travel</p>
+            ) : null}
+          </WorkspaceEditableSection>
+        </section>
 
         <section className="band-workspace-identity">
           <WorkspaceEditableSection
@@ -378,71 +534,19 @@ export function BandWorkspaceProfileView({
                   bandId={bandId}
                   kind="logo"
                   label="Logo"
-                  hint="Square image works best."
+                  hint="Square image works best. Shown on the top-left of your hero image."
                   value={draftLogoUrl}
                   onChange={setDraftLogoUrl}
                   previewClassName="profile-image-preview profile-image-preview-logo"
                 />,
               )
-            ) : (
-              <div className="band-profile-logo-mark" aria-hidden={Boolean(profile.logo_url)}>
-                {profile.logo_url ? (
-                  <img src={profile.logo_url} alt={`${profile.name} logo`} />
-                ) : (
-                  bandInitials(profile.name)
-                )}
-              </div>
-            )}
-          </WorkspaceEditableSection>
-
-          <WorkspaceEditableSection
-            title="Band name"
-            canEdit={canEdit}
-            isEditing={editing === 'name'}
-            onEdit={() => openEdit('name')}
-            className="band-workspace-name-wrap"
-          >
-            {editing === 'name' ? (
-              editPanel(
-                'name',
-                <>
-                  <div className="auth-field">
-                    <label htmlFor="workspaceBandName">Band name</label>
-                    <input
-                      id="workspaceBandName"
-                      required
-                      value={draftName}
-                      onChange={(event) => setDraftName(event.target.value)}
-                    />
-                  </div>
-                  <div className="auth-field">
-                    <label htmlFor="workspaceBandSlug">Public slug</label>
-                    <input
-                      id="workspaceBandSlug"
-                      required
-                      value={draftSlug}
-                      onChange={(event) => setDraftSlug(event.target.value)}
-                    />
-                  </div>
-                  <div className="auth-field">
-                    <label htmlFor="workspaceBandFont">Band name font</label>
-                    <BandNameFontPicker
-                      value={draftNameFont}
-                      onChange={setDraftNameFont}
-                      previewName={draftName.trim() || 'Your band name'}
-                    />
-                  </div>
-                </>,
-              )
-            ) : (
-              <h1
-                id="band-workspace-title"
-                className="band-profile-name"
-                style={{ fontFamily: bandNameFontFamily(profile.name_font) }}
-              >
-                {profile.name}
-              </h1>
-            )}
+            ) : canEdit ? (
+              <p className="band-workspace-placeholder">
+                {profile.logo_url
+                  ? 'Logo is shown on the top-left of your hero image.'
+                  : 'Add a logo to display on your hero image.'}
+              </p>
+            ) : null}
           </WorkspaceEditableSection>
 
           <WorkspaceEditableSection
@@ -499,85 +603,10 @@ export function BandWorkspaceProfileView({
                   </div>
                 </>,
               )
-            ) : (
-              <div className="band-profile-eyebrow">{availabilityLabel(profile.availability_status)}</div>
-            )}
-          </WorkspaceEditableSection>
-
-          <WorkspaceEditableSection
-            title="Tagline"
-            canEdit={canEdit}
-            isEditing={editing === 'tagline'}
-            onEdit={() => openEdit('tagline')}
-          >
-            {editing === 'tagline' ? (
-              editPanel(
-                'tagline',
-                <div className="auth-field">
-                  <label htmlFor="workspaceTagline">Tagline</label>
-                  <input
-                    id="workspaceTagline"
-                    placeholder="Post-punk covers · high energy"
-                    value={draftTagline}
-                    onChange={(event) => setDraftTagline(event.target.value)}
-                  />
-                </div>,
-              )
-            ) : tagline ? (
-              <p className="band-profile-subtitle">{tagline}</p>
             ) : canEdit ? (
-              <p className="band-workspace-placeholder">Add a short tagline for your band</p>
-            ) : null}
-          </WorkspaceEditableSection>
-
-          <WorkspaceEditableSection
-            title="Location"
-            canEdit={canEdit}
-            isEditing={editing === 'location'}
-            onEdit={() => openEdit('location')}
-          >
-            {editing === 'location' ? (
-              editPanel(
-                'location',
-                <>
-                  <div className="auth-field">
-                    <label htmlFor="workspaceHomeCity">Home city</label>
-                    <input
-                      id="workspaceHomeCity"
-                      placeholder="e.g. Guildford, UK"
-                      value={draftHomeCity}
-                      onChange={(event) => setDraftHomeCity(event.target.value)}
-                    />
-                  </div>
-                  <div className="auth-field">
-                    <label htmlFor="workspaceTravelDistance">Distance prepared to travel (miles)</label>
-                    <input
-                      id="workspaceTravelDistance"
-                      inputMode="numeric"
-                      placeholder="e.g. 50"
-                      value={draftTravelDistance}
-                      onChange={(event) => setDraftTravelDistance(event.target.value)}
-                    />
-                  </div>
-                </>,
-              )
-            ) : profile.location || profile.travel_distance_miles != null ? (
-              <div className="band-workspace-field-lines">
-                {profile.location ? (
-                  <p>
-                    <span className="band-workspace-field-label">Home city</span>
-                    {profile.location}
-                  </p>
-                ) : null}
-                {profile.travel_distance_miles != null ? (
-                  <p>
-                    <span className="band-workspace-field-label">Will travel</span>
-                    Up to {profile.travel_distance_miles} miles
-                  </p>
-                ) : null}
-              </div>
-            ) : canEdit ? (
-              <p className="band-workspace-placeholder">Add your home city and how far you will travel</p>
+              <p className="band-workspace-placeholder">
+                Availability is shown on the top-right of your hero image.
+              </p>
             ) : null}
           </WorkspaceEditableSection>
 
@@ -607,35 +636,25 @@ export function BandWorkspaceProfileView({
             ) : null}
           </WorkspaceEditableSection>
 
-          <WorkspaceEditableSection
-            title="Bio"
-            canEdit={canEdit}
-            isEditing={editing === 'bio'}
-            onEdit={() => openEdit('bio')}
-          >
-            {editing === 'bio' ? (
-              editPanel(
-                'bio',
-                <div className="auth-field">
-                  <label htmlFor="workspaceBio">Bio</label>
-                  <textarea
-                    id="workspaceBio"
-                    rows={4}
-                    value={draftDescription}
-                    onChange={(event) => setDraftDescription(event.target.value)}
-                  />
-                </div>,
-              )
-            ) : profile.description ? (
-              <p className="band-profile-lead">{profile.description}</p>
-            ) : canEdit ? (
-              <p className="band-workspace-placeholder">Add your band bio</p>
-            ) : null}
-          </WorkspaceEditableSection>
+          {profile.band_size != null ? (
+            <WorkspaceEditableSection title="Band members" canEdit={false} isEditing={false} onEdit={() => undefined}>
+              <div className="band-profile-meta-grid band-profile-meta-grid-single">
+                <div className="band-profile-meta-card">
+                  <strong>{profile.band_size}</strong>
+                  <span>Band members</span>
+                </div>
+              </div>
+              {canEdit ? (
+                <p className="directory-field-hint">
+                  Calculated from lineup parts on the band overview. Add or remove parts there to update this count.
+                </p>
+              ) : null}
+            </WorkspaceEditableSection>
+          ) : null}
 
-          {(hasMeta || canEdit) && (
+          {(hasBookingMeta || canEdit) && (
             <WorkspaceEditableSection
-              title="Band details"
+              title="Fees"
               canEdit={canEdit}
               isEditing={editing === 'meta'}
               onEdit={() => openEdit('meta')}
@@ -643,68 +662,31 @@ export function BandWorkspaceProfileView({
               {editing === 'meta' ? (
                 editPanel(
                   'meta',
-                  <div className="profile-editor-row-grid">
-                    <div className="auth-field">
-                      <label htmlFor="workspaceBandSize">Band size</label>
-                      <input
-                        id="workspaceBandSize"
-                        inputMode="numeric"
-                        value={draftBandSize}
-                        onChange={(event) => setDraftBandSize(event.target.value)}
-                      />
-                    </div>
-                    <div className="auth-field">
-                      <label htmlFor="workspaceSetLength">Set length (minutes)</label>
-                      <input
-                        id="workspaceSetLength"
-                        inputMode="numeric"
-                        value={draftSetLength}
-                        onChange={(event) => setDraftSetLength(event.target.value)}
-                      />
-                    </div>
-                    <div className="auth-field">
-                      <label htmlFor="workspaceFeeMin">Fee from (£)</label>
-                      <input
-                        id="workspaceFeeMin"
-                        inputMode="numeric"
-                        value={draftFeeMin}
-                        onChange={(event) => setDraftFeeMin(event.target.value)}
-                      />
-                    </div>
-                    <div className="auth-field">
-                      <label htmlFor="workspaceFeeMax">Fee to (£)</label>
-                      <input
-                        id="workspaceFeeMax"
-                        inputMode="numeric"
-                        value={draftFeeMax}
-                        onChange={(event) => setDraftFeeMax(event.target.value)}
-                      />
-                    </div>
-                  </div>,
+                  <BandSetFeesFields
+                    mode="edit"
+                    setOffers={profile.setOffers}
+                    dynamicFeeOffers={profile.dynamicFeeOffers}
+                    draftSetOffers={draftSetOffers}
+                    draftDynamicFeeOffers={draftDynamicFeeOffers}
+                    onSetOffersChange={setDraftSetOffers}
+                    onDynamicFeeOffersChange={setDraftDynamicFeeOffers}
+                  />,
                 )
-              ) : hasMeta ? (
-                <div className="band-profile-meta-grid">
-                  {profile.band_size ? (
-                    <div className="band-profile-meta-card">
-                      <strong>{profile.band_size}</strong>
-                      <span>Band members</span>
-                    </div>
-                  ) : null}
-                  {profile.set_length_minutes ? (
-                    <div className="band-profile-meta-card">
-                      <strong>{profile.set_length_minutes} min</strong>
-                      <span>Typical set length</span>
-                    </div>
-                  ) : null}
-                  {feeRange ? (
-                    <div className="band-profile-meta-card">
-                      <strong>{feeRange}</strong>
-                      <span>Fee guidance</span>
-                    </div>
-                  ) : null}
-                </div>
+              ) : profile.setOffers.length || profile.dynamicFeeOffers.length ? (
+                <BandSetFeesFields
+                  mode="view"
+                  publicDisplay
+                  setOffers={profile.setOffers}
+                  dynamicFeeOffers={profile.dynamicFeeOffers}
+                  draftSetOffers={draftSetOffers}
+                  draftDynamicFeeOffers={draftDynamicFeeOffers}
+                  onSetOffersChange={setDraftSetOffers}
+                  onDynamicFeeOffersChange={setDraftDynamicFeeOffers}
+                />
               ) : canEdit ? (
-                <p className="band-workspace-placeholder">Add band size, set length or fee guidance</p>
+                <p className="band-workspace-placeholder">
+                  Add fixed or dynamic fee options for different set lengths and booking types.
+                </p>
               ) : null}
             </WorkspaceEditableSection>
           )}
@@ -832,11 +814,11 @@ export function BandWorkspaceProfileView({
                 {videos.length ? (
                   <>
                     <h3 className="band-workspace-subheading">Videos</h3>
-                    <div className="band-profile-grid">
+                    <div className="band-profile-video-grid">
                       {videos.map((item) => {
                         const embedUrl = youtubeEmbedUrl(item.url);
                         return (
-                          <article key={item.id} className="band-profile-card">
+                          <article key={item.id} className="band-profile-video-card">
                             <h3>{item.title || 'Video'}</h3>
                             {embedUrl ? (
                               <iframe

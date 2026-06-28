@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { loginPathForProtectedRoute } from '../../lib/authRedirects';
 
 export function ProtectedRoute() {
   const { session, loading } = useAuth();
@@ -16,7 +17,12 @@ export function ProtectedRoute() {
   }
 
   if (!session) {
-    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+    return (
+      <Navigate
+        to={loginPathForProtectedRoute(location.pathname, location.search)}
+        replace
+      />
+    );
   }
 
   return <Outlet />;

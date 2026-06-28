@@ -7,21 +7,59 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import type { Session, User } from '@supabase/supabase-js';
 import {
+  canSwitchWorkspaceMode,
   ensureAppMembership,
   ensureBandieProfile,
   getCurrentSession,
   getCurrentUserProfile,
   isPlatformAppAdminRole,
+  isPlayerWorkspaceRoute,
   listUserBands,
   onAuthStateChange,
   resolveDisplayName,
+  resolveWorkspaceMode,
+  setBandieAdminModeActive,
   signOut,
+  workspaceModeHomePath,
   type UserBand,
   type UserProfile,
+  type WorkspaceMode,
 } from '@bandie/data';
+
+const ADMIN_MODE_STORAGE_PREFIX = 'bandie-admin-mode';
+const WORKSPACE_MODE_STORAGE_PREFIX = 'bandie-workspace-mode';
+
+function adminModeStorageKey(userId: string): string {
+  return `${ADMIN_MODE_STORAGE_PREFIX}:${userId}`;
+}
+
+function workspaceModeStorageKey(userId: string): string {
+  return `${WORKSPACE_MODE_STORAGE_PREFIX}:${userId}`;
+}
+
+function readStoredAdminMode(userId: string): boolean {
+  return localStorage.getItem(adminModeStorageKey(userId)) === 'true';
+}
+
+function writeStoredAdminMode(userId: string, active: boolean): void {
+  if (active) {
+    localStorage.setItem(adminModeStorageKey(userId), 'true');
+  } else {
+    localStorage.removeItem(adminModeStorageKey(userId));
+  }
+}
+
+function readStoredWorkspaceMode(userId: string): WorkspaceMode | null {
+  const value = localStorage.getItem(workspaceModeStorageKey(userId));
+  return value === 'player' || value === 'organiser' ? value : null;
+}
+
+function writeStoredWorkspaceMode(userId: string, mode: WorkspaceMode): void {
+  localStorage.setItem(workspaceModeStorageKey(userId), mode);
+}
 
 type AuthContextValue = {
   session: Session | null;
@@ -30,9 +68,16 @@ type AuthContextValue = {
   displayName: string;
   bands: UserBand[];
   isAppAdmin: boolean;
+  adminModeActive: boolean;
+  isPlayer: boolean;
+  isOrganiser: boolean;
+  workspaceMode: WorkspaceMode;
+  canSwitchWorkspaceMode: boolean;
   loading: boolean;
   refreshBands: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  setAdminModeActive: (active: boolean) => Promise<void>;
+  setWorkspaceMode: (mode: WorkspaceMode) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -40,10 +85,13 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [bands, setBands] = useState<UserBand[]>([]);
   const [isAppAdmin, setIsAppAdmin] = useState(false);
+  const [adminModeEnabled, setAdminModeEnabled] = useState(false);
+  const [workspaceMode, setWorkspaceModeState] = useState<WorkspaceMode>('player');
   const [loading, setLoading] = useState(true);
 
   const refreshProfile = useCallback(async () => {
@@ -106,20 +154,104 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setBands([]);
       setProfile(null);
       setIsAppAdmin(false);
+      setAdminModeEnabled(false);
+      setWorkspaceModeState('player');
+      setBandieAdminModeActive(false);
       return;
     }
 
     ensureAppMembership()
       .then(async (membership) => {
-        setIsAppAdmin(isPlatformAppAdminRole(membership.role));
+        const appAdmin = isPlatformAppAdminRole(membership.role);
+        setIsAppAdmin(appAdmin);
+
+        const storedAdminMode = appAdmin ? readStoredAdminMode(session.user.id) : false;
+        setAdminModeEnabled(storedAdminMode);
+        setBandieAdminModeActive(appAdmin && storedAdminMode);
+
         await Promise.all([refreshBands(), refreshProfile()]);
       })
       .catch(() => {
         setBands([]);
         setProfile(null);
         setIsAppAdmin(false);
+        setAdminModeEnabled(false);
+        setWorkspaceModeState('player');
+        setBandieAdminModeActive(false);
       });
   }, [session, refreshBands, refreshProfile]);
+
+  useEffect(() => {
+    if (!session?.user || !profile) {
+      return;
+    }
+
+    const storedMode = readStoredWorkspaceMode(session.user.id);
+    const resolvedMode = resolveWorkspaceMode(profile.is_player, profile.is_organiser, storedMode);
+    setWorkspaceModeState(resolvedMode);
+
+    if (storedMode !== resolvedMode) {
+      writeStoredWorkspaceMode(session.user.id, resolvedMode);
+    }
+  }, [session?.user, profile]);
+
+  const adminModeActive = isAppAdmin && adminModeEnabled;
+
+  useEffect(() => {
+    if (loading || !session || !profile || adminModeActive) {
+      return;
+    }
+
+    if (workspaceMode === 'organiser' && isPlayerWorkspaceRoute(location.pathname)) {
+      navigate(workspaceModeHomePath('organiser'), { replace: true });
+    }
+  }, [loading, session, profile, adminModeActive, workspaceMode, location.pathname, navigate]);
+
+  const setAdminModeActive = useCallback(
+    async (active: boolean) => {
+      if (!session?.user || !isAppAdmin) {
+        return;
+      }
+
+      setAdminModeEnabled(active);
+      writeStoredAdminMode(session.user.id, active);
+      setBandieAdminModeActive(active);
+      await refreshBands();
+
+      if (!active) {
+        navigate('/app/profile', { replace: true });
+      }
+    },
+    [session?.user, isAppAdmin, refreshBands, navigate],
+  );
+
+  const setWorkspaceMode = useCallback(
+    async (mode: WorkspaceMode) => {
+      if (!session?.user || !profile) {
+        return;
+      }
+
+      if (!canSwitchWorkspaceMode(profile.is_player, profile.is_organiser)) {
+        return;
+      }
+
+      if (mode === 'player' && !profile.is_player) {
+        return;
+      }
+
+      if (mode === 'organiser' && !profile.is_organiser) {
+        return;
+      }
+
+      setWorkspaceModeState(mode);
+      writeStoredWorkspaceMode(session.user.id, mode);
+
+      if (mode === 'organiser' && isPlayerWorkspaceRoute(location.pathname)) {
+        navigate(workspaceModeHomePath('organiser'), { replace: true });
+      }
+    },
+    [session?.user, profile, location.pathname, navigate],
+  );
 
   const logout = useCallback(async () => {
     navigate('/', { replace: true });
@@ -128,6 +260,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setBands([]);
     setProfile(null);
     setIsAppAdmin(false);
+    setAdminModeEnabled(false);
+    setWorkspaceModeState('player');
+    setBandieAdminModeActive(false);
   }, [navigate]);
 
   const displayName = useMemo(
@@ -140,6 +275,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [profile, session?.user?.email, session?.user?.user_metadata?.display_name],
   );
 
+  const isPlayer = profile?.is_player ?? true;
+  const isOrganiser = profile?.is_organiser ?? false;
+  const canSwitchModes = canSwitchWorkspaceMode(isPlayer, isOrganiser);
+
   const value = useMemo(
     () => ({
       session,
@@ -148,12 +287,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       displayName,
       bands,
       isAppAdmin,
+      adminModeActive,
+      isPlayer,
+      isOrganiser,
+      workspaceMode,
+      canSwitchWorkspaceMode: canSwitchModes,
       loading,
       refreshBands,
       refreshProfile,
+      setAdminModeActive,
+      setWorkspaceMode,
       logout,
     }),
-    [session, profile, displayName, bands, isAppAdmin, loading, refreshBands, refreshProfile, logout],
+    [
+      session,
+      profile,
+      displayName,
+      bands,
+      isAppAdmin,
+      adminModeActive,
+      isPlayer,
+      isOrganiser,
+      workspaceMode,
+      canSwitchModes,
+      loading,
+      refreshBands,
+      refreshProfile,
+      setAdminModeActive,
+      setWorkspaceMode,
+      logout,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

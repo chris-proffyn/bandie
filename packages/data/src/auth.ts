@@ -64,6 +64,36 @@ export async function signInWithEmail(email: string, password: string): Promise<
   return { user: data.user, session: data.session };
 }
 
+export async function resolveLoginEmail(identifier: string): Promise<string | null> {
+  const client = getBandieClient();
+  const { data, error } = await client.rpc('bandie_resolve_login_email', {
+    p_identifier: identifier.trim(),
+  });
+
+  if (error) {
+    throw new Error(mapAuthError(error.message));
+  }
+
+  return typeof data === 'string' && data.trim() ? data.trim() : null;
+}
+
+export async function signInWithEmailOrUsername(
+  identifier: string,
+  password: string,
+): Promise<AuthResult> {
+  const trimmed = identifier.trim();
+  if (!trimmed) {
+    throw new Error('Enter your email or username.');
+  }
+
+  const email = await resolveLoginEmail(trimmed);
+  if (!email) {
+    throw new Error('Email or password is incorrect.');
+  }
+
+  return signInWithEmail(email, password);
+}
+
 export async function signOut(): Promise<void> {
   const client = getBandieClient();
   const { error } = await client.auth.signOut();
@@ -73,10 +103,11 @@ export async function signOut(): Promise<void> {
 }
 
 export async function requestPasswordReset(
-  email: string,
+  identifier: string,
   redirectTo?: string,
 ): Promise<void> {
   const client = getBandieClient();
+  const email = (await resolveLoginEmail(identifier)) ?? identifier.trim();
   const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo });
 
   if (error) {
