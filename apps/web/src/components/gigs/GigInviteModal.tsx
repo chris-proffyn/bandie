@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   formatGigInviteNotificationBody,
   formatGigInviteStatus,
@@ -12,6 +13,7 @@ import {
   type UserProfile,
 } from '@bandie/data';
 import type { FindGigContext } from '../../lib/findGigNavigation';
+import '../../styles/directory.css';
 import '../../styles/gigs.css';
 
 type GigInviteModalProps = {
@@ -119,10 +121,12 @@ export function GigInviteModal({
     }
   }
 
-  return (
+  const showActions = Boolean(gig && !existingInvite && !loading);
+
+  return createPortal(
     <div className="gigs-dialog-backdrop" role="presentation" onClick={onClose}>
       <div
-        className="gigs-dialog surface-light"
+        className="gigs-dialog"
         role="dialog"
         aria-modal="true"
         aria-labelledby="gig-invite-modal-title"
@@ -135,115 +139,125 @@ export function GigInviteModal({
           </button>
         </header>
 
-        {loading ? <p>Loading gig details…</p> : null}
-        {error ? <div className="auth-message auth-message-error">{error}</div> : null}
+        <div className="gigs-dialog-body">
+          {loading ? <p>Loading gig details…</p> : null}
+          {error ? <div className="gigs-dialog-error">{error}</div> : null}
 
-        {existingInvite ? (
-          <p className="workspace-empty-note">
-            {bandName} is already invited ({formatGigInviteStatus(existingInvite.invite_status)}).
-          </p>
-        ) : null}
+          {existingInvite ? (
+            <p className="gigs-dialog-note">
+              {bandName} is already invited ({formatGigInviteStatus(existingInvite.invite_status)}).
+            </p>
+          ) : null}
 
-        {gig && !existingInvite ? (
-          <>
-            <section className="gig-invite-modal-summary" aria-label="Gig summary">
-              <h3>{gig.title}</h3>
-              <p>
-                {formatGigStatus(gig.status)} ·{' '}
-                {new Date(gig.starts_at).toLocaleString('en-GB', {
-                  weekday: 'long',
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </p>
-              {gig.venue_name ? <p>Venue: {gig.venue_name}</p> : null}
-              {gig.venue_address ? <p>{gig.venue_address}</p> : null}
-              {gig.default_slot_duration_minutes ? (
-                <p>Default slot: {formatSlotDuration(gig.default_slot_duration_minutes)}</p>
-              ) : null}
-            </section>
-
-            {profile ? (
-              <section className="gig-invite-modal-summary" aria-label="Your contact details">
-                <h3>Your contact details</h3>
-                <p>{profile.display_name?.trim() || 'Organiser'}</p>
-                {profile.username ? <p>@{profile.username}</p> : null}
-                {organiserEmail ? <p>{organiserEmail}</p> : null}
-                {profile.contact_phone ? <p>{profile.contact_phone}</p> : null}
+          {gig && !existingInvite ? (
+            <>
+              <section className="gig-invite-modal-summary" aria-label="Gig summary">
+                <p className="gig-invite-modal-section-title">Gig details</p>
+                <h3>{gig.title}</h3>
+                <p>
+                  {formatGigStatus(gig.status)} ·{' '}
+                  {new Date(gig.starts_at).toLocaleString('en-GB', {
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </p>
+                {gig.venue_name ? <p>{gig.venue_name}</p> : null}
+                {gig.venue_address ? <p>{gig.venue_address}</p> : null}
+                {gig.default_slot_duration_minutes ? (
+                  <p>Default slot: {formatSlotDuration(gig.default_slot_duration_minutes)}</p>
+                ) : null}
               </section>
-            ) : null}
 
-            {slotOptions.length > 0 ? (
-              <div className="gig-invite-modal-fields">
-                <div className="auth-field">
-                  <label htmlFor="gig-invite-slot">Assign slot (optional)</label>
-                  <select
-                    id="gig-invite-slot"
-                    value={slotNumber}
-                    onChange={(event) => setSlotNumber(event.target.value)}
-                  >
-                    <option value="">Unassigned</option>
-                    {slotOptions.map((slot) => (
-                      <option key={slot} value={slot}>
-                        Slot {slot}
-                      </option>
-                    ))}
-                  </select>
+              {profile ? (
+                <section className="gig-invite-modal-summary" aria-label="Your contact details">
+                  <p className="gig-invite-modal-section-title">Your contact details</p>
+                  <h3>{profile.display_name?.trim() || 'Organiser'}</h3>
+                  {profile.username ? <p>@{profile.username}</p> : null}
+                  {organiserEmail ? <p>{organiserEmail}</p> : null}
+                  {profile.contact_phone ? <p>{profile.contact_phone}</p> : null}
+                </section>
+              ) : null}
+
+              {slotOptions.length > 0 ? (
+                <div className="gigs-form gigs-form-grid">
+                  <label>
+                    Assign slot (optional)
+                    <select
+                      id="gig-invite-slot"
+                      value={slotNumber}
+                      onChange={(event) => setSlotNumber(event.target.value)}
+                    >
+                      <option value="">Unassigned</option>
+                      {slotOptions.map((slot) => (
+                        <option key={slot} value={slot}>
+                          Slot {slot}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    Slot duration override (minutes)
+                    <input
+                      id="gig-invite-duration"
+                      type="number"
+                      min={5}
+                      step={5}
+                      value={slotDuration}
+                      placeholder={
+                        gig.default_slot_duration_minutes
+                          ? String(gig.default_slot_duration_minutes)
+                          : '45'
+                      }
+                      onChange={(event) => setSlotDuration(event.target.value)}
+                    />
+                  </label>
                 </div>
-                <div className="auth-field">
-                  <label htmlFor="gig-invite-duration">Slot duration override (minutes)</label>
-                  <input
-                    id="gig-invite-duration"
-                    type="number"
-                    min={5}
-                    step={5}
-                    value={slotDuration}
-                    placeholder={
-                      gig.default_slot_duration_minutes
-                        ? String(gig.default_slot_duration_minutes)
-                        : '45'
-                    }
-                    onChange={(event) => setSlotDuration(event.target.value)}
+              ) : null}
+
+              <div className="gigs-form">
+                <label htmlFor="gig-invite-message">
+                  Personal message (optional)
+                  <textarea
+                    id="gig-invite-message"
+                    rows={3}
+                    value={personalMessage}
+                    onChange={(event) => setPersonalMessage(event.target.value)}
+                    placeholder="Add a note for the band leader…"
                   />
-                </div>
+                </label>
               </div>
-            ) : null}
 
-            <div className="auth-field">
-              <label htmlFor="gig-invite-message">Personal message (optional)</label>
-              <textarea
-                id="gig-invite-message"
-                rows={3}
-                value={personalMessage}
-                onChange={(event) => setPersonalMessage(event.target.value)}
-                placeholder="Add a note for the band leader…"
-              />
-            </div>
+              {previewBody ? (
+                <section className="gig-invite-modal-preview" aria-label="Notification preview">
+                  <h3>Notification preview</h3>
+                  <pre className="gig-invite-modal-preview-body">{previewBody}</pre>
+                </section>
+              ) : null}
+            </>
+          ) : null}
+        </div>
 
-            <section className="gig-invite-modal-preview" aria-label="Notification preview">
-              <h3>Notification preview</h3>
-              <pre>{previewBody}</pre>
-            </section>
-
-            <div className="gigs-dialog-actions">
-              <button type="button" className="auth-button auth-button-secondary" onClick={onClose}>
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="auth-button"
-                disabled={submitting || gig.status === 'confirmed'}
-                onClick={() => void handleSubmit()}
-              >
-                {submitting ? 'Sending…' : 'Send gig invite'}
-              </button>
-            </div>
-          </>
+        {showActions ? (
+          <footer className="gigs-dialog-actions">
+            <button type="button" className="directory-btn directory-btn-secondary" onClick={onClose}>
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="directory-btn directory-btn-primary"
+              disabled={submitting || gig?.status === 'confirmed'}
+              onClick={() => void handleSubmit()}
+            >
+              {submitting ? 'Sending…' : 'Send gig invite'}
+            </button>
+          </footer>
         ) : null}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

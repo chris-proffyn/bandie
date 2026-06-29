@@ -7,13 +7,9 @@ import {
   canConfirmOrganiserGig,
   cancelGigBandInvite,
   confirmOrganiserGig,
-  formatGigInviteStatus,
   formatGigStatus,
   formatOrganiserVenueAddress,
-  formatSlotDuration,
-  formatSlotTimeRange,
   getOrganiserGig,
-  gigInviteStatusPillClass,
   gigStatusPillClass,
   listMyOrganiserVenues,
   reopenOrganiserGig,
@@ -22,7 +18,7 @@ import {
   type OrganiserGigDetail,
   type OrganiserVenue,
 } from '@bandie/data';
-import { buildFindGigUrl } from '../../lib/findGigNavigation';
+import { GigLineupSection } from '../../components/gigs/GigLineupSection';
 import '../../styles/gigs.css';
 
 function toDatetimeLocalValue(iso: string | null | undefined): string {
@@ -247,23 +243,40 @@ export function OrganiserGigDetailPage() {
 
       {error ? <div className="auth-message auth-message-error">{error}</div> : null}
 
-      <section className="panel gig-workflow-panel">
-        <h2>Planning workflow</h2>
-        <ol className="gig-workflow-steps">
-          {workflowSteps.map((step) => (
-            <li key={step.id} className={step.complete ? 'gig-workflow-step-complete' : ''}>
-              <span className="gig-workflow-step-marker" aria-hidden="true">
-                {step.complete ? '✓' : '○'}
+      <section className="panel workspace-section gig-workflow-panel">
+        <header className="workspace-section-header">
+          <div>
+            <h2>Planning progress</h2>
+            <p className="workspace-section-intro">
+              Work through each step — you can revisit earlier steps until the gig is confirmed.
+            </p>
+          </div>
+        </header>
+        <ol className="gig-workflow-track">
+          {workflowSteps.map((step, index) => (
+            <li
+              key={step.id}
+              className={`gig-workflow-track-step ${step.complete ? 'gig-workflow-track-step-complete' : ''}`}
+            >
+              <span className="gig-workflow-track-number" aria-hidden="true">
+                {step.complete ? '✓' : index + 1}
               </span>
-              <span>{step.label}</span>
+              <span className="gig-workflow-track-label">{step.label}</span>
             </li>
           ))}
         </ol>
       </section>
 
-      <section className="panel">
-        <h2>1. Gig placeholder</h2>
-        <p className="workspace-empty-note">Start with a title and event date. You can refine show times in step 3.</p>
+      <section className="panel workspace-section">
+        <header className="workspace-section-header">
+          <div>
+            <p className="gig-step-eyebrow">Step 1</p>
+            <h2>Gig placeholder</h2>
+            <p className="workspace-section-intro">
+              Start with a title and event date. Refine show times in the structure step.
+            </p>
+          </div>
+        </header>
         <form className="auth-form" onSubmit={handleSaveBasics}>
           <div className="gig-detail-grid">
             <div className="auth-field">
@@ -291,8 +304,14 @@ export function OrganiserGigDetailPage() {
         </form>
       </section>
 
-      <section className="panel">
-        <h2>2. Venue</h2>
+      <section className="panel workspace-section">
+        <header className="workspace-section-header">
+          <div>
+            <p className="gig-step-eyebrow">Step 2</p>
+            <h2>Venue</h2>
+            <p className="workspace-section-intro">Choose a saved venue or enter details for this gig.</p>
+          </div>
+        </header>
         <form className="auth-form" onSubmit={handleSaveBasics}>
           <div className="auth-field">
             <label htmlFor="gig-venue-id">Saved venue</label>
@@ -328,9 +347,16 @@ export function OrganiserGigDetailPage() {
         </form>
       </section>
 
-      <section className="panel">
-        <h2>3. Gig structure</h2>
-        <p className="workspace-empty-note">Set show start/end, number of slots, and default slot duration.</p>
+      <section className="panel workspace-section">
+        <header className="workspace-section-header">
+          <div>
+            <p className="gig-step-eyebrow">Step 3</p>
+            <h2>Gig structure</h2>
+            <p className="workspace-section-intro">
+              Set show start and end, number of slots, and default slot duration.
+            </p>
+          </div>
+        </header>
         <form className="auth-form" onSubmit={handleSaveStructure}>
           <div className="gig-detail-grid">
             <div className="auth-field">
@@ -389,123 +415,23 @@ export function OrganiserGigDetailPage() {
         </form>
       </section>
 
-      <section className="panel">
-        <h2>4–6. Bands, responses and running order</h2>
-        <p className="workspace-empty-note">
-          Invite bands, assign slot positions, track accept/reject status, and adjust durations.
-        </p>
+      <GigLineupSection
+        gig={gig}
+        slotSchedule={slotSchedule}
+        isConfirmed={isConfirmed}
+        onSlotUpdate={(gigBandId, slotNumber, slotDuration) =>
+          void handleSlotUpdate(gigBandId, slotNumber, slotDuration)
+        }
+        onCancelInvite={(gigBandId) => void handleCancelInvite(gigBandId)}
+      />
 
-        {!isConfirmed ? (
-          <div className="gig-find-bands-panel">
-            <p className="workspace-empty-note">
-              Search the band directory, open profiles, and send invites with your contact and venue
-              details. The band leader is notified in their communications.
-            </p>
-            <Link
-              to={buildFindGigUrl({ gigId: gig.id, gigTitle: gig.title })}
-              className="auth-button"
-            >
-              Find bands in directory
-            </Link>
+      <section className="panel workspace-section">
+        <header className="workspace-section-header">
+          <div>
+            <p className="gig-step-eyebrow">Step 7</p>
+            <h2>Confirm gig</h2>
           </div>
-        ) : null}
-
-        {gig.bands.length === 0 ? (
-          <p className="workspace-empty-note">No bands invited yet.</p>
-        ) : (
-          <ul className="gigs-list gigs-invite-list">
-            {gig.bands.map((invite) => {
-              const schedule = slotSchedule.find((entry) => entry.invite.id === invite.id);
-              return (
-                <li key={invite.id}>
-                  <div className="gigs-invite-row">
-                    <div className="gig-band-summary">
-                      {isConfirmed && invite.bandLogoUrl ? (
-                        <img src={invite.bandLogoUrl} alt="" className="gig-band-logo" />
-                      ) : null}
-                      <div>
-                        <strong>{invite.bandName}</strong>
-                        <p>
-                          {formatGigInviteStatus(invite.invite_status)}
-                          {schedule
-                            ? ` · ${formatSlotTimeRange(schedule.startsAt, schedule.endsAt)} (${formatSlotDuration(schedule.durationMinutes)})`
-                            : ''}
-                          {invite.setlistTitle ? ` · Setlist: ${invite.setlistTitle}` : ''}
-                        </p>
-                      </div>
-                    </div>
-                    <span className={gigInviteStatusPillClass(invite.invite_status)}>
-                      {formatGigInviteStatus(invite.invite_status)}
-                    </span>
-                  </div>
-                  {!isConfirmed ? (
-                    <div className="gigs-invite-controls">
-                      <label>
-                        Slot
-                        <input
-                          type="number"
-                          min={1}
-                          max={gig.slot_count ?? undefined}
-                          defaultValue={invite.running_order ?? ''}
-                          onBlur={(event) =>
-                            void handleSlotUpdate(
-                              invite.id,
-                              event.target.value,
-                              String(invite.slot_duration_minutes ?? ''),
-                            )
-                          }
-                        />
-                      </label>
-                      <label>
-                        Duration (min)
-                        <input
-                          type="number"
-                          min={5}
-                          step={5}
-                          defaultValue={invite.slot_duration_minutes ?? gig.default_slot_duration_minutes ?? ''}
-                          onBlur={(event) =>
-                            void handleSlotUpdate(
-                              invite.id,
-                              String(invite.running_order ?? ''),
-                              event.target.value,
-                            )
-                          }
-                        />
-                      </label>
-                      {invite.invite_status === 'pending' ? (
-                        <button
-                          type="button"
-                          className="auth-button auth-button-secondary"
-                          onClick={() => void handleCancelInvite(invite.id)}
-                        >
-                          Cancel invite
-                        </button>
-                      ) : null}
-                    </div>
-                  ) : null}
-                </li>
-              );
-            })}
-          </ul>
-        )}
-
-        {slotSchedule.length > 0 ? (
-          <div className="gig-slot-preview">
-            <h3>Running order preview</h3>
-            <ol>
-              {slotSchedule.map((entry) => (
-                <li key={entry.invite.id}>
-                  <strong>{entry.invite.bandName}</strong> — slot {entry.slotNumber},{' '}
-                  {formatSlotTimeRange(entry.startsAt, entry.endsAt)} ({formatSlotDuration(entry.durationMinutes)})
-                </li>
-              ))}
-            </ol>
-          </div>
-        ) : null}
-      </section>
-
-      <section className="panel">
-        <h2>7. Confirm gig</h2>
+        </header>
         {isConfirmed ? (
           <>
             <p className="workspace-empty-note">This gig is confirmed. Re-open it to change structure or lineup.</p>
@@ -538,9 +464,16 @@ export function OrganiserGigDetailPage() {
       </section>
 
       {isConfirmed ? (
-        <section className="panel">
-          <h2>8. Band branding</h2>
-          <p className="workspace-empty-note">Branding is pulled from each band&apos;s public profile.</p>
+        <section className="panel workspace-section">
+          <header className="workspace-section-header">
+            <div>
+              <p className="gig-step-eyebrow">Step 8</p>
+              <h2>Band branding</h2>
+              <p className="workspace-section-intro">
+                Branding is pulled from each accepted band&apos;s public profile.
+              </p>
+            </div>
+          </header>
           <ul className="gig-branding-grid">
             {gig.bands
               .filter((band) => band.invite_status === 'accepted')
