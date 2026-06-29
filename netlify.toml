@@ -3,11 +3,14 @@
   publish = "apps/web/dist"
   functions = "netlify/functions"
 
+[functions]
+  node_bundler = "esbuild"
+
 [dev]
   command = "npm run dev --workspace=@bandie/web"
   targetPort = 5173
   port = 8888
-  autoLaunch = false
+  autoLaunch = true
 
 [[redirects]]
   from = "/api/integrations/dropbox/connect"
@@ -34,7 +37,7 @@
   to = "/.netlify/functions/band-song-part-storage-health"
   status = 200
 
-# SPA fallback — production/deploy only (skipped during `netlify dev` so Vite assets work)
+# SPA fallback — production/deploy only (skipped during netlify dev)
 [[redirects]]
   from = "/*"
   to = "/index.html"

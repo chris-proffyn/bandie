@@ -189,8 +189,8 @@ export function BandSongPartStoragePanel({ bandId, canManage }: BandSongPartStor
       {loading ? <p>Loading storage settings…</p> : null}
       {apiUnavailable ? (
         <div className="auth-message">
-          Dropbox connect and health checks need the API server. Use <code>npm run dev:full</code>{' '}
-          locally, or test on a Netlify deploy. Saved storage settings still load from the database.
+          Dropbox connect and health checks need <code>npm run dev</code> (Netlify at{' '}
+          <code>http://localhost:8888</code>), not Vite-only on port 5173.
         </div>
       ) : null}
       {actionError ? <div className="auth-message auth-message-error">{actionError}</div> : null}

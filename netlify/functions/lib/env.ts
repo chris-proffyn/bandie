@@ -31,9 +31,13 @@ export function getIntegrationTokenKey(): string {
 }
 
 export function getAppUrl(): string {
-  const configured = process.env.VITE_APP_URL ?? process.env.APP_URL ?? process.env.URL;
+  const configured =
+    process.env.URL ??
+    process.env.DEPLOY_PRIME_URL ??
+    process.env.APP_URL ??
+    process.env.VITE_APP_URL;
   if (!configured) {
-    throw new Error('Missing VITE_APP_URL, APP_URL, or URL for redirect handling.');
+    throw new Error('Missing URL, APP_URL, or VITE_APP_URL for redirect handling.');
   }
   return configured.replace(/\/$/, '');
 }

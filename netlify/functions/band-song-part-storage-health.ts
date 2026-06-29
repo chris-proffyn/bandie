@@ -1,7 +1,7 @@
 import type { Handler, HandlerEvent } from '@netlify/functions';
-import { loadDropboxAccessToken, verifyDropboxFolder } from '../lib/dropboxTokens';
-import { errorResponse, jsonResponse } from '../lib/http';
-import { getSupabaseAdmin, getUserFromBearerToken, userIsBandMember } from '../lib/supabase';
+import { loadDropboxAccessToken, verifyDropboxFolder } from './lib/dropboxTokens';
+import { errorResponse, jsonResponse } from './lib/http';
+import { getSupabaseAdmin, getUserFromBearerToken, userIsBandMember } from './lib/supabase';
 
 export const handler: Handler = async (event: HandlerEvent) => {
   if (event.httpMethod !== 'GET') {

@@ -3,9 +3,9 @@ import {
   buildDropboxAuthorizeUrl,
   createOAuthState,
   hashOAuthState,
-} from '../lib/dropbox';
-import { errorResponse, jsonResponse } from '../lib/http';
-import { getSupabaseAdmin, getUserFromBearerToken, userOwnsBand } from '../lib/supabase';
+} from './lib/dropbox';
+import { errorResponse, jsonResponse } from './lib/http';
+import { getSupabaseAdmin, getUserFromBearerToken, userOwnsBand } from './lib/supabase';
 
 type ConnectBody = {
   bandId?: string;

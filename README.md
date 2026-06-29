@@ -43,7 +43,9 @@ npm install
 npm run dev
 ```
 
-The web app runs at [http://localhost:5173](http://localhost:5173).
+The dev server runs at [http://localhost:8888](http://localhost:8888) (Netlify Dev — Vite + API functions on one port). Use this URL for local Dropbox OAuth redirect testing.
+
+For Vite-only (no API routes), use `npm run dev:vite` on port 5173.
 
 ### Build
 

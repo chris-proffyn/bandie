@@ -1,13 +1,13 @@
 import type { Handler, HandlerEvent } from '@netlify/functions';
-import { encryptSecret } from '../lib/crypto';
+import { encryptSecret } from './lib/crypto';
 import {
   exchangeDropboxCode,
   getDropboxAccount,
   hashOAuthState,
-} from '../lib/dropbox';
-import { getAppUrl, getIntegrationTokenKey } from '../lib/env';
-import { errorResponse, redirectResponse } from '../lib/http';
-import { getSupabaseAdmin } from '../lib/supabase';
+} from './lib/dropbox';
+import { getAppUrl, getIntegrationTokenKey } from './lib/env';
+import { errorResponse, redirectResponse } from './lib/http';
+import { getSupabaseAdmin } from './lib/supabase';
 
 export const handler: Handler = async (event: HandlerEvent) => {
   if (event.httpMethod !== 'GET') {

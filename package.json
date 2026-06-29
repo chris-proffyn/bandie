@@ -8,8 +8,8 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "npm run dev --workspace=@bandie/web",
-    "dev:full": "node --env-file=.env scripts/dev.mjs",
+    "dev": "netlify dev --filter @bandie/web",
+    "dev:vite": "npm run dev --workspace=@bandie/web",
     "build": "npm run build --workspace=@bandie/web",
     "lint": "npm run lint --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",

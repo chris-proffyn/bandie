@@ -61,7 +61,7 @@ async function parseApiJson<T>(response: Response): Promise<T> {
   if (!contentType.includes('application/json')) {
     if (body.trimStart().startsWith('<!')) {
       throw new Error(
-        'Song-part API is unavailable in this dev setup. Run npm run dev:full or test on Netlify for Dropbox connect/health.',
+        'Song-part API is unavailable. Start the app with npm run dev (Netlify on port 8888) or use a Netlify deploy.',
       );
     }
     throw new Error('Unexpected response from song-part API.');

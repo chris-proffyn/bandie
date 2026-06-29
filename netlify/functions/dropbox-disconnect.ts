@@ -1,6 +1,6 @@
 import type { Handler, HandlerEvent } from '@netlify/functions';
-import { errorResponse, jsonResponse } from '../lib/http';
-import { getSupabaseAdmin, getUserFromBearerToken } from '../lib/supabase';
+import { errorResponse, jsonResponse } from './lib/http';
+import { getSupabaseAdmin, getUserFromBearerToken } from './lib/supabase';
 
 export const handler: Handler = async (event: HandlerEvent) => {
   if (event.httpMethod !== 'POST') {

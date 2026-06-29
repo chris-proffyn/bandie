@@ -7,5 +7,5 @@
     "skipLibCheck": true,
     "types": ["node"]
   },
-  "include": ["functions/**/*.ts"]
+  "include": ["functions/**/*.ts", "lib/**/*.ts"]
 }

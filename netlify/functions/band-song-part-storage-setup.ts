@@ -2,10 +2,10 @@ import type { Handler, HandlerEvent } from '@netlify/functions';
 import {
   bandSongPartsRootPath,
   createDropboxFolder,
-} from '../lib/dropbox';
-import { loadDropboxAccessToken } from '../lib/dropboxTokens';
-import { errorResponse, jsonResponse } from '../lib/http';
-import { getSupabaseAdmin, getUserFromBearerToken, userOwnsBand } from '../lib/supabase';
+} from './lib/dropbox';
+import { loadDropboxAccessToken } from './lib/dropboxTokens';
+import { errorResponse, jsonResponse } from './lib/http';
+import { getSupabaseAdmin, getUserFromBearerToken, userOwnsBand } from './lib/supabase';
 
 type SetupBody = {
   bandId?: string;
