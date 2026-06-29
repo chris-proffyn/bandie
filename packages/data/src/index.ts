@@ -373,3 +373,22 @@ export type {
   PlayerDirectoryInstrumentCategory,
   PlayerDirectoryInstrumentCategoryCounts,
 } from './playerDirectory';
+
+export {
+  getUserDropboxIntegration,
+  getBandSongPartStorage,
+  startDropboxConnect,
+  setupBandSongPartStorage,
+  checkBandSongPartStorageHealth,
+  disconnectDropbox,
+  buildSongPartStorageHealthFromRecords,
+  formatSongPartStorageStatus,
+} from './songPartStorage';
+export type {
+  IntegrationProvider,
+  UserIntegrationStatus,
+  UserIntegration,
+  BandSongPartStorageStatus,
+  BandSongPartStorage,
+  SongPartStorageHealth,
+} from './songPartStorage';

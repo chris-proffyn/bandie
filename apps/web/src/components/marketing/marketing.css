@@ -98,13 +98,7 @@
 .brand-mark {
   width: 42px;
   height: 42px;
-  border-radius: 15px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  display: grid;
-  place-items: center;
-  color: #fff;
-  font-weight: 950;
-  box-shadow: 0 14px 34px rgba(255, 207, 74, 0.22);
+  flex-shrink: 0;
 }
 
 .nav-toggle {
@@ -323,9 +317,12 @@
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.04));
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: var(--radius-xl);
-  padding: 18px;
+  padding: 15px;
   box-shadow: var(--shadow);
   transform: rotate(1.3deg);
+  max-width: 400px;
+  margin-left: auto;
+  width: 100%;
 }
 
 .band-profile {
@@ -352,6 +349,149 @@
   background:
     linear-gradient(135deg, rgba(85, 224, 192, 0.88), rgba(255, 94, 126, 0.84)),
     repeating-linear-gradient(90deg, transparent 0 18px, rgba(0, 0, 0, 0.08) 18px 20px);
+}
+
+.band-preview-card-photo {
+  padding: 0;
+  min-height: auto;
+  border-radius: 24px;
+}
+
+.band-preview-card-photo::before {
+  display: none;
+}
+
+.band-preview-hero {
+  position: relative;
+  height: 168px;
+  overflow: hidden;
+  border-radius: 24px 24px 0 0;
+}
+
+.band-preview-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.04) 0%, rgba(0, 0, 0, 0.28) 100%);
+  pointer-events: none;
+}
+
+.band-preview-hero img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+}
+
+.band-preview-card-photo .profile-content {
+  padding: 0 17px 17px;
+}
+
+.band-preview-logo {
+  width: 74px;
+  height: 74px;
+  border-radius: 18px;
+  object-fit: contain;
+  background: #fff;
+  padding: 8px;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.21);
+  border: 2px solid var(--paper);
+  flex-shrink: 0;
+}
+
+.profile-header-photo {
+  min-height: auto;
+  align-items: flex-end;
+  margin-top: -34px;
+  margin-bottom: 0;
+}
+
+.band-preview-card-photo .profile-title {
+  margin-top: 14px;
+  font-size: 1.9rem;
+}
+
+.band-preview-card-photo .profile-subtitle {
+  font-size: 0.84rem;
+  line-height: 1.35;
+  margin-bottom: 12px;
+}
+
+.band-preview-card-photo .profile-tags {
+  gap: 6px;
+  margin: 10px 0 12px;
+}
+
+.band-preview-card-photo .profile-tags span {
+  padding: 4px 8px;
+  font-size: 0.69rem;
+}
+
+.band-preview-card-photo .status-chip {
+  padding: 6px 10px;
+  font-size: 0.68rem;
+}
+
+.band-preview-card-photo .mini-grid {
+  gap: 9px;
+  margin: 12px 0;
+}
+
+.band-preview-card-photo .mini-card {
+  padding: 10px 11px;
+  min-height: 64px;
+  border-radius: 14px;
+}
+
+.band-preview-card-photo .mini-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.09em;
+}
+
+.band-preview-card-photo .mini-value {
+  font-size: 1.1rem;
+  margin-top: 5px;
+}
+
+.band-preview-card-photo .setlist-preview {
+  margin-top: 12px;
+  padding: 12px 13px;
+  border-radius: 16px;
+}
+
+.band-preview-card-photo .band-profile-list h3 {
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+}
+
+.band-preview-card-photo .band-profile-list h3::after {
+  font-size: 0.62rem;
+}
+
+.band-preview-card-photo .setlist-row {
+  padding: 7px 0;
+  font-size: 0.78rem;
+  gap: 10px;
+}
+
+.band-preview-card-photo .vote {
+  font-size: 0.66rem;
+}
+
+.band-preview-card-photo .profile-cta-row {
+  margin-top: 10px;
+  padding: 9px 11px;
+  border-radius: 14px;
+}
+
+.band-preview-card-photo .profile-link {
+  font-size: 0.72rem;
+}
+
+.band-preview-card-photo .profile-action {
+  padding: 5px 9px;
+  font-size: 0.68rem;
 }
 
 .profile-content {
@@ -900,6 +1040,12 @@
 
   .hero-card {
     transform: none;
+    max-width: none;
+    margin-left: 0;
+  }
+
+  .band-preview-hero {
+    height: 172px;
   }
 
   .mode-grid,
@@ -1018,6 +1164,14 @@
 
   .profile-header {
     min-height: 112px;
+  }
+
+  .profile-header-photo {
+    min-height: auto;
+  }
+
+  .band-preview-hero {
+    height: 148px;
   }
 
   .band-profile {

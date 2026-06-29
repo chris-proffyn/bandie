@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { homepageContent } from '../../content/homepageContent';
 import { useAuth } from '../../context/AuthContext';
 import { trackNavClick } from '../../lib/analytics';
+import { BandieLogo } from '../brand/BandieLogo';
 
 export function MarketingNav() {
   const { nav } = homepageContent;
@@ -23,7 +24,7 @@ export function MarketingNav() {
           aria-label="Bandie home"
           onClick={() => trackNavClick('Bandie', '/')}
         >
-          <span className="brand-mark">{nav.brandMark}</span>
+          <BandieLogo className="brand-mark" />
           <span>{nav.brand}</span>
         </Link>
 

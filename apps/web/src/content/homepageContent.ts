@@ -1,4 +1,4 @@
-import { BANDIE_BRAND_MARK, BANDIE_BRAND_NAME } from '../lib/brand';
+import { BANDIE_BRAND_NAME } from '../lib/brand';
 
 export type CtaLink = {
   label: string;
@@ -42,7 +42,6 @@ export const homepageContent = {
   },
   nav: {
     brand: BANDIE_BRAND_NAME,
-    brandMark: BANDIE_BRAND_MARK,
     links: [
       { label: 'For Players', href: '#players' },
       { label: 'For Bands', href: '#bands' },
@@ -97,11 +96,13 @@ export const homepageContent = {
     ],
   },
   exampleProfile: {
-    initials: 'SC',
+    heroImage: '/marketing/skin-condition-band-photo.png',
+    heroImageAlt: 'Skin Condition band photo in a graffiti tunnel',
+    logoImage: '/marketing/skin-condition-logo.png',
     status: 'Available for bookings',
     name: 'Skin Condition',
     subtitle: 'Indie, new wave and crowd-friendly guitar classics · Surrey and West London',
-    tags: ['5-piece', '2 x 45 min sets', 'Female lead vocal', 'Pub / party / festival'],
+    tags: ['5-piece', 'Female lead vocal', 'Pub / party / festival'],
     stats: [
       { label: 'Rating', value: '4.8 ★' },
       { label: 'Typical fee', value: '£250–£400' },
@@ -114,7 +115,7 @@ export const homepageContent = {
       { title: 'Approved line-up and set length', badge: 'Band info' },
       { title: 'Event page and poster generator', badge: 'Promo' },
     ],
-    profileUrl: 'bandie.app/the-neon-mondays',
+    profileUrl: 'bandie.app/bands/skin-condition',
     profileAction: 'View profile',
   },
   modes: {

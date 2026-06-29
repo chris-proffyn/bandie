@@ -329,7 +329,16 @@ Songs Dashboard, Setlists, Song Folder, Calendar, Gigs — deferred to later pha
 
 ## 7. Songs and repertoire management
 
-**Mockup:** `bandie_songs_dashboard.html`
+**Mockup:** `bandie_songs_dashboard.html`  
+**Song-part files:** `docs/project/bandie_dropbox_song_part_storage_spec.md`
+
+### Storage model (decided)
+
+- **Bandie** stores song metadata, part definitions, file metadata, status, readiness, and activity.
+- **Dropbox** stores song-part file bytes only (PDFs, tabs, charts, lyric sheets, images of handwritten notes).
+- Each band leader connects their own Dropbox account; one song-parts root folder per band.
+- Approved members access files through Bandie — they do not need their own Dropbox account.
+- Dropbox is **not** used for setlists, gigs, rehearsals, calendar, booking enquiries, or public profile media.
 
 ### Song directory
 
@@ -349,7 +358,49 @@ Summary of gig readiness, songs needing parts, blockers for setlists.
 
 ### Recent activity
 
-File uploads, setlist changes, new songs, review tasks.
+File uploads (logged in `bandie_song_part_file_activity`), setlist changes, new songs, review tasks.
+
+### Readiness (part completeness)
+
+A required part is complete when at least one **current**, **available** file exists for that part. Song file completeness:
+
+```text
+required parts with current file / total required parts
+```
+
+Feeds into broader song readiness alongside manual status and rehearsal confidence (setlists/gigs link in later phases).
+
+---
+
+## 8b. Dropbox song-part storage integration
+
+**Authoritative spec:** `docs/project/bandie_dropbox_song_part_storage_spec.md`
+
+### Entry points
+
+- Band Settings → Song Part Storage (connect, health, disconnect).
+- Song folder → per-part upload and attach actions.
+
+### Dropbox folder pattern
+
+```text
+/Bandie/bands/{bandSlug}/song-parts/{songSlug}/{partSlug}
+```
+
+Standard part slugs: `lead-guitar`, `rhythm-guitar`, `bass`, `drums`, `vocals`, `shared`. Lazy-created on first upload (MVP).
+
+### Permissions summary
+
+| Role | Connect Dropbox | Upload | Preview/download | Manage file status |
+|---|---|---|---|---|
+| Band leader / admin | Yes | Yes | Yes | Yes |
+| Approved member | No | Yes (contributor) | Yes | Limited |
+| Dep / guest | No | Scoped only | Scoped only | No |
+| Public / organiser | No | No | No | No |
+
+### Out of scope for Dropbox
+
+Setlists, gigs, rehearsals, calendar, booking enquiries, public band media, general documents, whole-account Dropbox browse.
 
 ---
 
@@ -369,7 +420,17 @@ Lead Guitar, Rhythm Guitar, Bass, Drums, Vocals, Shared — plus configurable ad
 
 ### Files
 
-Upload PDF, images, audio, Guitar Pro, ChordPro, DOCX, text/lyrics. Metadata: name, type, folder, uploader, date, version, status (current/draft/reference/archived/superseded).
+Upload and attach song-part files through Bandie into the leader’s Dropbox song-parts folder. Bandie stores metadata only.
+
+**MVP allowed types:** PDF, JPEG/PNG/WebP, plain text/markdown, ChordPro (`.cho`, `.crd`, `.chordpro`), Guitar Pro (`.gp`, `.gp3`–`.gpx`). Max 25 MB per file. Video not allowed in MVP.
+
+Metadata in Bandie: name, type, part folder, uploader, date, version label, status (`current` / `draft` / `reference` / `superseded` / `archived` / `unavailable`).
+
+**Leader actions:** connect/reconnect Dropbox, initialise band song-parts root, upload, attach existing Dropbox file (scoped to band root), mark status, remove attachment from Bandie (MVP: does not delete Dropbox file).
+
+**Member actions:** view, upload (where permitted), preview, download through Bandie.
+
+**Health states:** disconnected, needs reconnect, folder missing — songs and setlists remain usable; only file access is affected.
 
 ### Versioning
 
@@ -377,7 +438,7 @@ Older versions retained for audit; new uploads do not silently replace history.
 
 ### Comments and review tasks
 
-Part approval, missing part flags, arrangement decisions.
+Part approval, missing part flags, arrangement decisions. Major file actions recorded in `bandie_song_part_file_activity`.
 
 ---
 

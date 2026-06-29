@@ -105,15 +105,15 @@ This document defines **delivery phases, sequencing, and dependencies**. It is a
 - Workspace shell and navigation
 - Songs dashboard
 - Song folder with part folders
-- File upload to Supabase Storage
+- **Dropbox song-part storage** (leader OAuth, upload, preview/download — see `bandie_dropbox_song_part_storage_spec.md`)
 - Setlist library and builder
-- Readiness tracking (basic)
+- Readiness tracking (part completeness from current files)
 
 **Exit criteria:** Band can manage repertoire, upload files, build and save a setlist.
 
 **Dependencies:** Phase 2, Phase 3 (profile/settings integration).
 
-**Status:** Workspace shell and overview complete (tabbed overview, leader contact, lineup parts, player recruitment, profile editor, members, invitations, set fee offers). Songs/setlists/files not started.
+**Status:** Workspace shell and overview complete (tabbed overview, leader contact, lineup parts, player recruitment, profile editor, members, invitations, set fee offers). Songs/setlists/Dropbox file storage not started.
 
 ---
 
@@ -227,7 +227,7 @@ Phases 0–5 constitute the **MVP** as defined in `PRODUCT_REQUIREMENTS.md`. Pha
 
 ## Current position
 
-**Completed:** Phases 0–5; Phase 3 booking enquiry partial; Phase 6 partial (workspace communications); organiser venues with photos; multiple band leaders  
-**Next:** Phase 6 — Songs dashboard, song folders, and file uploads (or activity feed polish)
+**Completed:** Phases 0–5; Phase 3 booking enquiry partial; Phase 6 partial (workspace communications); organiser venues with photos; multiple band leaders; directory area filters; brand logo assets  
+**Next:** Tracker Phase 6 — Songs dashboard, song folders, Dropbox integration (spec: `bandie_dropbox_song_part_storage_spec.md`)
 
 See `docs/PROJECT_STATUS_TRACKER.md` for item-level checklist (Phases 6–12 in tracker map to workspace features, calendar, gigs, etc.).

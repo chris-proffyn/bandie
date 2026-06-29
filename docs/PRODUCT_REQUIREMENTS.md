@@ -2,7 +2,7 @@
 
 **Document status:** Authoritative product requirements summary  
 **Product:** Bandie  
-**Last updated:** 28 June 2026
+**Last updated:** 29 June 2026
 
 ---
 
@@ -75,7 +75,7 @@ Member-only area scoped to a selected band:
 - Musician / player profile (`/app/profile`) with username and workspace mode (player / organiser / both)
 - Organiser venues (`/app/venues`)
 - Workspace communications (`/app/communications`) — invitations, player outreach, direct messages with replies
-- Songs dashboard and song folders (planned)
+- Songs dashboard and song folders with **Dropbox song-part storage** (planned — `bandie_dropbox_song_part_storage_spec.md`)
 - Setlist management (planned)
 - Calendar (rehearsal + gig availability) (planned)
 - Gig management (planned)
@@ -118,7 +118,7 @@ See `docs/project/bandie_build_elements.md` for the full list. Summary:
 4. Musician / player profiles and directory — **done**
 5. Band directory with search/filter — **done**
 6. Songs dashboard — **not started**
-7. Song folder with part folders and file uploads — **not started**
+7. Song folder with part folders and **Dropbox song-part file storage** — **not started** (leader OAuth; Bandie stores metadata only)
 8. Setlist management — **not started**
 9. Calendar availability (rehearsal + gig modes) — **not started**
 10. Basic booking enquiry route — **partial** (public profile form → direct message to primary contact)
@@ -170,7 +170,7 @@ Example band in mockups: **Skin Condition** (post-punk / new wave covers, London
 
 See `docs/DELIVERY_TASK_MAP.md` for phased delivery order.
 
-**Current focus:** Songs and repertoire management — see `docs/PROJECT_STATUS_TRACKER.md`.
+**Current focus:** Songs and repertoire with Dropbox song-part storage — see `docs/PROJECT_STATUS_TRACKER.md` and `docs/project/bandie_dropbox_song_part_storage_spec.md`.
 
 ---
 
@@ -179,8 +179,10 @@ See `docs/DELIVERY_TASK_MAP.md` for phased delivery order.
 Tracked in `bandie_product_description.md` §16. Key items for early resolution:
 
 - Public profile publication: opt-in vs default public?
-- File size limits and hosted vs linked files in MVP?
+- ~~File size limits and hosted vs linked files in MVP?~~ **Resolved:** Dropbox for song-part bytes; 25 MB limit; types per `bandie_dropbox_song_part_storage_spec.md` §6.6
 - Automatic vs manual public availability publishing?
 - Mobile MVP feature subset?
+- Attach-existing-Dropbox-file picker in MVP vs upload-only first?
+- Audio reference files in MVP (spec: deferred)?
 
 Decisions should be recorded in functional requirements when resolved.

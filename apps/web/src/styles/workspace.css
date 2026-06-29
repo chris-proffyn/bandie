@@ -1198,3 +1198,35 @@
 .organiser-venue-form {
   max-width: 720px;
 }
+
+.workspace-meta-list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0 0 1rem;
+}
+
+.workspace-meta-list > div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.workspace-meta-list dt {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #9d978b;
+}
+
+.workspace-meta-list dd {
+  margin: 0;
+  color: #f6f3ea;
+  word-break: break-word;
+}
+
+.song-part-storage-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}

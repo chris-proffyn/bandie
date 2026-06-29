@@ -59,12 +59,7 @@
 .band-profile-brand-mark {
   width: 38px;
   height: 38px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--band-logo-start), var(--band-logo-end));
-  display: grid;
-  place-items: center;
-  color: #fff;
-  font-weight: 950;
+  flex-shrink: 0;
 }
 
 .band-profile-name-lead {
@@ -1218,21 +1213,24 @@
   padding: 0;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
-  grid-auto-rows: min-content;
   gap: 0.75rem;
-  align-items: start;
+  align-items: stretch;
 }
 
 .band-profile-members-grid > li {
   min-width: 0;
+  display: flex;
 }
 
 .band-profile-member-card {
+  position: relative;
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
   width: 100%;
+  height: 100%;
   min-width: 0;
+  min-height: 5.5rem;
   box-sizing: border-box;
   padding: 0.75rem 0.9rem;
   border-radius: 14px;
@@ -1240,6 +1238,10 @@
   background: rgba(255, 255, 255, 0.04);
   color: inherit;
   text-decoration: none;
+}
+
+.band-profile-member-card-primary {
+  padding-right: 4.25rem;
 }
 
 .band-profile-member-body {
@@ -1283,18 +1285,23 @@
 }
 
 .band-profile-member-instrument {
-  min-height: 0;
+  min-height: 1.35em;
 }
 
-.band-profile-member-badge {
+.band-profile-member-primary-pill {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.6rem;
   display: inline-flex;
-  margin-top: 0.2rem;
-  padding: 0.12rem 0.45rem;
+  padding: 0.1rem 0.34rem;
   border-radius: 999px;
   background: rgba(255, 204, 51, 0.12);
   color: var(--band-accent, #ffdd77);
-  font-size: 0.72rem;
-  font-weight: 700;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.1;
 }
 
 .band-profile-booking-contact {

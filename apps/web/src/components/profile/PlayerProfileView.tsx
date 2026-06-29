@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BANDIE_BRAND_MARK } from '../../lib/brand';
+import { BandieLogo } from '../brand/BandieLogo';
 import {
   formatPlayerTravelDistance,
   formatPlayerGenderLabel,
@@ -335,7 +335,7 @@ export function PlayerProfileView({ profileId, variant }: PlayerProfileViewProps
       <header className="directory-header">
         <div className="directory-header-inner">
           <Link to="/" className="directory-brand" aria-label="Bandie home">
-            <span className="directory-brand-mark">{BANDIE_BRAND_MARK}</span>
+            <BandieLogo className="directory-brand-mark" />
             <span>Bandie</span>
           </Link>
           <div className="directory-header-actions">

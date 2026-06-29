@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import {
   addBandLeader,
   assignMemberToPart,
@@ -24,11 +24,13 @@ import { BandLeaderSection } from '../../components/band/BandLeaderSection';
 import { BandMemberCard } from '../../components/band/BandMemberCard';
 import { BandOverviewTabBar, type BandOverviewTab } from '../../components/band/BandOverviewTabs';
 import { BandPartsPanel } from '../../components/band/BandPartsPanel';
+import { BandSongPartStoragePanel } from '../../components/band/BandSongPartStoragePanel';
 import { BandWorkspaceProfileView } from '../../components/band/BandWorkspaceProfileView';
 import '../../styles/workspace.css';
 
 export function WorkspaceHomePage() {
   const { bandId } = useParams();
+  const [searchParams] = useSearchParams();
   const { bands, refreshBands, adminModeActive } = useAuth();
   const membership = bands.find((item) => item.id === bandId);
   const canAccessBand = Boolean(membership) || adminModeActive;
@@ -73,6 +75,13 @@ export function WorkspaceHomePage() {
   useEffect(() => {
     loadWorkspace().catch(() => undefined);
   }, [loadWorkspace]);
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'details' || tab === 'members') {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   const handleBandSizeChanged = useCallback((size: number) => {
     setProfile((current) => {
@@ -363,6 +372,8 @@ export function WorkspaceHomePage() {
 
       {activeTab === 'details' ? (
         <div className="band-overview-tab-panel" role="tabpanel" aria-label="Band details">
+          <BandSongPartStoragePanel bandId={bandId} canManage={isLeader} />
+
           <BandLeaderSection bandId={bandId} canEditContact={isLeader} />
 
           <BandWorkspaceProfileView

@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "dev": "npm run dev --workspace=@bandie/web",
+    "dev:full": "node --env-file=.env scripts/dev.mjs",
     "build": "npm run build --workspace=@bandie/web",
     "lint": "npm run lint --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
@@ -16,5 +17,12 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "dependencies": {
+    "@netlify/functions": "^2.8.2",
+    "@supabase/supabase-js": "^2.49.1"
+  },
+  "devDependencies": {
+    "netlify-cli": "^23.0.0"
   }
 }

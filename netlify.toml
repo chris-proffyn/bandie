@@ -1,8 +1,42 @@
 [build]
   command = "npm run build"
   publish = "apps/web/dist"
+  functions = "netlify/functions"
 
+[dev]
+  command = "npm run dev --workspace=@bandie/web"
+  targetPort = 5173
+  port = 8888
+  autoLaunch = false
+
+[[redirects]]
+  from = "/api/integrations/dropbox/connect"
+  to = "/.netlify/functions/dropbox-connect"
+  status = 200
+
+[[redirects]]
+  from = "/api/integrations/dropbox/callback"
+  to = "/.netlify/functions/dropbox-callback"
+  status = 200
+
+[[redirects]]
+  from = "/api/integrations/dropbox/disconnect"
+  to = "/.netlify/functions/dropbox-disconnect"
+  status = 200
+
+[[redirects]]
+  from = "/api/bands/song-part-storage/dropbox/setup"
+  to = "/.netlify/functions/band-song-part-storage-setup"
+  status = 200
+
+[[redirects]]
+  from = "/api/bands/song-part-storage/dropbox/health"
+  to = "/.netlify/functions/band-song-part-storage-health"
+  status = 200
+
+# SPA fallback — production/deploy only (skipped during `netlify dev` so Vite assets work)
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+  conditions = {Context = ["production", "deploy-preview", "branch-deploy"]}

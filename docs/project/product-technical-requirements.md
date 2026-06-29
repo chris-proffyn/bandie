@@ -150,8 +150,11 @@ All tables prefixed `bandie_`. Full schema to be defined in migrations. Conceptu
 | `bandie_band_social_links` | Social platform links |
 | `bandie_band_public_dates` | Manual public availability dates |
 | `bandie_songs` | Repertoire entries (planned) |
-| `bandie_song_part_folders` | Part folders within a song (planned) |
-| `bandie_song_files` | File metadata and storage paths (planned) |
+| `bandie_song_part_folders` | Logical part folders per song; optional Dropbox path mapping (planned) |
+| `bandie_song_part_files` | Song-part file metadata; bytes in Dropbox (planned) |
+| `bandie_song_part_file_activity` | Audit log for song-part file actions (planned) |
+| `bandie_user_integrations` | Leader OAuth connections to external providers — Dropbox MVP (planned) |
+| `bandie_band_song_part_storage` | Per-band Dropbox song-parts root folder mapping (planned) |
 | `bandie_setlists` | Setlist definitions (planned) |
 | `bandie_setlist_songs` | Songs in setlist order (planned) |
 | `bandie_calendar_events` | Rehearsals and availability windows (planned) |
@@ -199,19 +202,33 @@ RLS policies must enforce band membership for all private data.
 - `matchesAreaFilter`, `inferDefaultCountryCode` — client-side filter matching and geo defaults
 - `bandie_bands.country_id` / `region_id` and `bandie_profiles.country_id` / `region_id` — optional FKs; text location fallback via region `search_keywords`
 
+**Dropbox song-part storage (planned — Phase 6):**
+
+Authoritative spec: `docs/project/bandie_dropbox_song_part_storage_spec.md`
+
+- OAuth connect/callback — server-side only; encrypted tokens in `bandie_user_integrations`
+- Band song-parts root initialisation — `bandie_band_song_part_storage`
+- Upload, attach, preview, download — Bandie API routes proxy Dropbox; path validated under band root
+- File metadata and status — `bandie_song_part_files`; activity — `bandie_song_part_file_activity`
+- Provider abstraction — `ExternalStorageProvider` interface; MVP implements Dropbox only
+- UI must not receive refresh tokens; members access files via Bandie permissions, not Dropbox ACLs
+
 ---
 
 ## 7. Storage
 
-| Bucket | Purpose | Path pattern |
+| Store | Purpose | Notes |
 |---|---|---|
-| `bandie-profile-images` | Band logos/heroes, user avatars, organiser venue photos | `bands/{band_id}/…`, `users/{user_id}/avatar.{ext}`, `venues/{venue_id}/…` |
-| `bandie-song-files` | Song part files (planned) | `{band_id}/{song_id}/{part_folder_id}/{file_id}/{filename}` |
+| `bandie-profile-images` (Supabase) | Band logos/heroes, user avatars, organiser venue photos | `bands/{band_id}/…`, `users/{user_id}/avatar.{ext}`, `venues/{venue_id}/…` |
+| **Dropbox** (external) | Song-part file bytes only — tabs, PDFs, charts, lyrics | Leader-owned OAuth; one song-parts root per band. See `bandie_dropbox_song_part_storage_spec.md` |
+| Bandie Postgres | Song metadata, part folders, file metadata, status, readiness, activity | Source of truth for permissions and relationships |
 
 - Profile images: JPEG, PNG, WebP, GIF up to 5 MB
 - Storage RLS uses `security definer` helpers (`bandie_can_manage_profile_image`, `bandie_can_manage_user_profile_image`)
-- Song file size limits: TBD (document when decided)
-- Supported MVP song types (planned): PDF, images, audio, Guitar Pro, ChordPro, DOCX, text
+- **Song-part files (decided):** Dropbox, not `bandie-song-files` Supabase bucket
+- Song-part MVP types: PDF, JPEG/PNG/WebP, plain text/markdown, ChordPro, Guitar Pro
+- Song-part MVP size limit: **25 MB** per file; video not allowed in MVP
+- Dropbox tokens: encrypted at rest, server-side only; never exposed to frontend
 
 ---
 
@@ -276,7 +293,7 @@ colors: {
 
 Breakpoints: mobile 0–639px, tablet 640–1023px, desktop 1024px+.
 
-**Logo mark:** lowercase **b** in white on a gradient rounded tile (42×42px homepage; scaled variants elsewhere). Constants: `BANDIE_BRAND_MARK`, `BANDIE_BRAND_NAME` in `apps/web/src/lib/brand.ts`; letter sizing in `apps/web/src/styles/brand.css`. Do not use uppercase **B**.
+**Logo mark:** `bandie_logo.svg` in `apps/web/public/` (PNG fallback: `bandie logo.png`). Rendered via `BandieLogo` component and `BANDIE_LOGO_SVG` / `BANDIE_LOGO_PNG` in `apps/web/src/lib/brand.ts`; sizing in `apps/web/src/styles/brand.css`.
 
 ## 11. Routing (implemented)
 
@@ -355,7 +372,10 @@ Supabase migrations applied via `supabase db push` to `proff-rsd-mt-1`.
 |---|---|---|
 | Tailwind vs CSS modules | CSS modules / scoped CSS in use | Resolved |
 | Vitest vs Jest | Vitest fits Vite; Jest per RSD | First test pack |
+| Song-part file hosting | ~~Supabase Storage~~ vs Dropbox vs multi-provider | **Resolved — Dropbox for MVP** (`bandie_dropbox_song_part_storage_spec.md`) |
+| Song-part file size / types | Spec §6.6 | **Resolved — 25 MB; PDF, images, text, ChordPro, Guitar Pro** |
 | Real-time (Supabase Realtime) | Availability voting live updates | Calendar feature |
 | SSR/prerender for SEO | Vite plugin vs Next.js | Public profile launch |
+| Additional storage providers | Google Drive, OneDrive, Box, Bandie native | Post-MVP |
 
 Record decisions in this document when resolved.

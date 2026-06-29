@@ -5,12 +5,14 @@ export function ExampleBandProfileCard() {
 
   return (
     <aside className="hero-card" aria-label="Example public band profile preview">
-      <div className="band-profile band-preview-card">
+      <div className="band-profile band-preview-card band-preview-card-photo">
+        <div className="band-preview-hero">
+          <img src={profile.heroImage} alt={profile.heroImageAlt} />
+        </div>
+
         <div className="profile-content">
-          <div className="profile-header">
-            <div className="fake-logo band-logo" aria-hidden="true">
-              {profile.initials}
-            </div>
+          <div className="profile-header profile-header-photo">
+            <img className="band-preview-logo" src={profile.logoImage} alt="" />
             <div className="status-chip available">{profile.status}</div>
           </div>
           <h2 className="profile-title">{profile.name}</h2>

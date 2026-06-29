@@ -45,6 +45,13 @@ export function AppEntryPage() {
               : 'Create a band or accept an invitation to get started.'}
           </p>
         </div>
+        {bands.length > 0 ? (
+          <div className="my-bands-header-actions">
+            <Link to="/app/bands/new" className="directory-btn directory-btn-primary">
+              Create a band
+            </Link>
+          </div>
+        ) : null}
       </header>
 
       {bands.length === 0 ? (

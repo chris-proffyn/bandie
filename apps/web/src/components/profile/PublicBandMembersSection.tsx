@@ -29,6 +29,9 @@ export function PublicBandMembersSection({
 
           const card = (
             <>
+              {member.is_primary_contact ? (
+                <span className="band-profile-member-primary-pill">Primary</span>
+              ) : null}
               <div className="band-profile-member-avatar">
                 {member.profile_image_url ? (
                   <img src={member.profile_image_url} alt="" />
@@ -45,21 +48,22 @@ export function PublicBandMembersSection({
                 <p className="band-profile-member-meta band-profile-member-instrument">
                   {member.preferred_instrument || '\u00A0'}
                 </p>
-                {member.is_primary_contact ? (
-                  <span className="band-profile-member-badge">Primary contact</span>
-                ) : null}
               </div>
             </>
           );
 
+          const cardClassName = `band-profile-member-card${
+            member.is_primary_contact ? ' band-profile-member-card-primary' : ''
+          }`;
+
           return (
             <li key={member.user_id}>
               {profilePath ? (
-                <Link className="band-profile-member-card" to={profilePath}>
+                <Link className={cardClassName} to={profilePath}>
                   {card}
                 </Link>
               ) : (
-                <div className="band-profile-member-card">{card}</div>
+                <div className={cardClassName}>{card}</div>
               )}
             </li>
           );

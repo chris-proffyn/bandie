@@ -2,8 +2,8 @@
 
 **Document status:** Live project tracker  
 **Product:** Bandie  
-**Phase:** Phase 5 complete (workspace shell) — Phase 6 communications partial; booking enquiry partial  
-**Last updated:** 28 June 2026 (directory area filters — countries & regions)
+**Phase:** Phase 6.1 in progress (songs foundation + Dropbox integration)
+**Last updated:** 29 June 2026 (Phase 6.1 foundation — songs schema, Dropbox OAuth, storage settings UI)
 
 ---
 
@@ -29,6 +29,8 @@
 | Workspace communications | Partial — unified hub at `/app/communications` (invites, player outreach, messages with replies) |
 | Booking enquiries | Partial — structured enquiry form on public band profile sends direct message to primary contact |
 | Organiser venues | Complete — `/app/venues` in organiser workspace mode |
+| Song-part file storage | Planned — **Dropbox** (leader-owned OAuth); spec: `bandie_dropbox_song_part_storage_spec.md` |
+| Songs & repertoire (Phase 6) | In progress — foundation schema, Dropbox connect, band storage settings UI |
 
 ## Active constraints
 
@@ -43,11 +45,12 @@
 
 ## Current focus
 
-**Next capability:** Songs and repertoire (Phase 6)
+**Next capability:** Songs and repertoire with Dropbox song-part storage (Phase 6)
 
 Reference documents:
-- `docs/project/product-functional-requirements.md` §7
-- `docs/RSD_SUPABASE_MULTI_TENANT_DB.md`
+- `docs/project/product-functional-requirements.md` §7–8, §8b
+- `docs/project/bandie_dropbox_song_part_storage_spec.md`
+- `docs/project/product-technical-requirements.md` §6–7, §16
 
 ## Blockers
 
@@ -65,7 +68,7 @@ Auth & membership         ██████████  signup, login, bands, 
 Public profile & dir      ██████████  profiles + searchable directory
 Player profiles & dir     ██████████  musician profiles + /players directory
 Private workspace shell   ██████████  overview, leader, lineup parts, recruitment, invites
-Songs & repertoire        ░░░░░░░░░░  Phase 6 — next up
+Songs & repertoire        ░░░░░░░░░░  Phase 6 — next up (Dropbox song-part files)
 Mobile app                ░░░░░░░░░░  Phase 12 (deferred)
 Release verification      ░░░░░░░░░░  production smoke + a11y pass
 ```
@@ -189,12 +192,29 @@ Release verification      ░░░░░░░░░░  production smoke + a11
 
 ### 6. Songs and repertoire
 
-- [ ] 6.1 Songs data model
-- [ ] 6.2 Songs dashboard
-- [ ] 6.3 Song directory (search, filter, metrics)
-- [ ] 6.4 Song folder / workspace
-- [ ] 6.5 Part folders and file uploads
-- [ ] 6.6 Readiness tracking
+- [x] 6.1 Songs data model (`bandie_songs`, integration and storage tables)
+- [ ] 6.2 Songs dashboard (search, filter, metrics)
+- [ ] 6.3 Song folder / workspace UI
+- [ ] 6.4 Song part folders (lead guitar, rhythm, bass, drums, vocals, shared)
+- [ ] 6.5 Readiness tracking (part completeness from current files per spec §6.7)
+- [x] 6.6 Dropbox OAuth connect/callback and token storage (`bandie_user_integrations` + secrets table)
+- [x] 6.7 Band song-part storage setup (`bandie_band_song_part_storage`, health checks)
+- [ ] 6.8 Upload song-part files to Dropbox via Bandie; metadata in `bandie_song_part_files`
+- [ ] 6.9 Preview/download through Bandie-controlled endpoints (members without Dropbox access)
+- [ ] 6.10 File status, activity log, disconnect/reconnect error states
+
+### 6b. Dropbox song-part storage (detail)
+
+Authoritative spec: `docs/project/bandie_dropbox_song_part_storage_spec.md`
+
+**Principle:** Bandie owns structured data; Dropbox stores song-part file bytes only (tabs, PDFs, charts, lyrics). Leader-owned OAuth per user; one song-parts root per band. Not used for setlists, gigs, rehearsals, calendar, or public media.
+
+**MVP build order (from spec §9):**
+1. Foundation — OAuth, token storage, settings UI — **done (29 Jun 2026)**
+2. Band folder setup — initialise `/Bandie/bands/{bandSlug}/song-parts/…` — **done (setup endpoint + auto-init after OAuth)**
+3. Song part uploads — lazy part folders, upload, metadata, activity
+4. Preview and download — permission-controlled endpoints
+5. Readiness integration — part completeness → song readiness metrics
 
 ### 7. Setlist management
 
@@ -227,8 +247,8 @@ Release verification      ░░░░░░░░░░  production smoke + a11
 ### 11. Platform foundations
 
 - [x] 11.1 Profile image storage (`bandie-profile-images` bucket with RLS)
-- [ ] 11.2 Song file storage (`bandie-song-files` bucket)
-- [ ] 11.3 Activity feed / audit log
+- [ ] 11.2 Song-part file storage — **Dropbox** (leader OAuth, server-side tokens); not Supabase Storage for song parts. See `bandie_dropbox_song_part_storage_spec.md`
+- [ ] 11.3 Activity feed / audit log (song-part file activity table planned)
 - [ ] 11.4 Communications — partial (invitations, player outreach, direct messages with replies; activity feed deferred)
 - [ ] 11.5 Admin portal (skeleton)
 
@@ -241,6 +261,21 @@ Release verification      ░░░░░░░░░░  production smoke + a11
 ---
 
 ## Session notes
+
+**29 June 2026 — Phase 6.1 foundation (songs + Dropbox)**
+- Migration `20260629100000_bandie_songs_dropbox_foundation.sql`: `bandie_songs`, `bandie_user_integrations`, `bandie_user_integration_secrets`, `bandie_integration_oauth_states`, `bandie_band_song_part_storage`
+- Netlify Functions: Dropbox OAuth connect/callback/disconnect; band song-part storage setup and health
+- `@bandie/data` `songPartStorage` module; `BandSongPartStoragePanel` on band workspace → Band details tab
+- Tokens encrypted server-side (`BANDIE_INTEGRATION_TOKEN_KEY`); never exposed to client
+- Local dev: run `npm run dev:api` (Netlify dev) alongside `npm run dev` for `/api` routes
+
+**29 June 2026 — Dropbox song-part storage (Phase 6 decision)**
+- Adopted `docs/project/bandie_dropbox_song_part_storage_spec.md` as authoritative for song-part files
+- **Decision:** Dropbox (leader-owned OAuth) stores file bytes; Bandie Postgres stores metadata, permissions, status, readiness, activity
+- **Not in Dropbox:** setlists, gigs, rehearsals, calendar, booking, public profile media
+- **MVP file types:** PDF, JPEG/PNG/WebP, plain text/markdown, ChordPro, Guitar Pro; max 25 MB; no video
+- **Readiness:** required part has ≥1 current, available file → contributes to song completeness (spec §6.7)
+- Updated functional requirements, technical requirements, delivery map, product requirements, and build elements
 
 **28 June 2026 — Directory area filters**
 - Reference tables `bandie_countries` and `bandie_regions` with UK regions (South West through Northumberland)

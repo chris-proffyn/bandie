@@ -3,7 +3,8 @@ import { Link, NavLink } from 'react-router-dom';
 import { getNotificationSummary, WORKSPACE_MODE_LABELS } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
 import { getAppNavItems } from '../../lib/appNavigation';
-import { BANDIE_BRAND_MARK, BANDIE_BRAND_NAME } from '../../lib/brand';
+import { BANDIE_BRAND_NAME } from '../../lib/brand';
+import { BandieLogo } from '../brand/BandieLogo';
 
 type AppHeaderProps = {
   bandId?: string;
@@ -40,7 +41,7 @@ export function AppHeader({ bandId }: AppHeaderProps) {
     <header className="app-header">
       <div className="app-header-inner">
         <Link to="/" className="app-header-brand" aria-label="Bandie home">
-          <span className="app-header-brand-mark">{BANDIE_BRAND_MARK}</span>
+          <BandieLogo className="app-header-brand-mark" />
           <span>{BANDIE_BRAND_NAME}</span>
         </Link>
 

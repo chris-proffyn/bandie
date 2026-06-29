@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { BANDIE_BRAND_MARK } from '../../lib/brand';
+import { BandieLogo } from '../brand/BandieLogo';
 import {
   bandNameFontFamily,
   bandPaletteCssVariables,
@@ -43,7 +43,7 @@ export function PublicBandProfileView({ profile, variant = 'public' }: PublicBan
         <header className="band-profile-header">
           <div className="band-profile-header-inner">
             <Link to="/" className="band-profile-brand">
-              <span className="band-profile-brand-mark">{BANDIE_BRAND_MARK}</span>
+              <BandieLogo className="band-profile-brand-mark" />
               <span>Bandie</span>
             </Link>
             {profile.primaryContact ? (

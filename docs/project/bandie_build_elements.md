@@ -24,10 +24,10 @@ These are the various different elements we will build for Bandie. Status as of 
 — The private band domain where approved members manage the band's operational activity. **Shell done** — tabbed overview at `/app/:bandId`: **Members** tab (lineup parts, active members with hamburger actions, invitations); **Band details** tab (all leaders with primary contact badge, public profile editor with set fee offers); songs/setlists/calendar deferred.
 
 ## Songs and Repertoire Management 
-— A searchable working songbook for managing the band's repertoire, readiness and song metadata. **Not started**
+— A searchable working songbook for managing the band's repertoire, readiness and song metadata. **Not started** (Phase 6)
 
 ## Song Folder / Song Workspace 
-— A dedicated workspace for each song, containing files, notes, parts and rehearsal resources. **Not started**
+— A dedicated workspace for each song, containing files, notes, parts and rehearsal resources. Song-part **files stored in Dropbox** (leader-owned); Bandie holds metadata, status, and readiness. **Not started** — spec: `bandie_dropbox_song_part_storage_spec.md`
 
 ## Setlist Management 
 — Tools for creating, reusing and tracking setlists for rehearsals, gigs and specific event types. **Not started**
@@ -51,4 +51,4 @@ These are the various different elements we will build for Bandie. Status as of 
 — Mobile-friendly views for rehearsals and gigs, including readable setlists and song resources. **Not started**
 
 ## Administration and Platform Foundations 
-— Core platform capabilities such as authentication, permissions, file storage, roles, search and audit history. **Partial** — auth, RLS, profile image storage, platform app admin and admin mode done; song storage and admin portal deferred.
+— Core platform capabilities such as authentication, permissions, file storage, roles, search and audit history. **Partial** — auth, RLS, profile image storage (Supabase), platform app admin and admin mode done; **Dropbox song-part storage** and admin portal planned (Phase 6).
