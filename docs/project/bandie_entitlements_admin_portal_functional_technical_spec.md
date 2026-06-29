@@ -372,8 +372,8 @@ Example gated actions:
 | Create song folder | `song_folder.create` |
 | Upload song file | `song_file.upload` |
 | Create setlist | `setlist.create` |
-| Create gig | `gig.create` |
 | Create organiser venue | `venue.create` |
+| Create organiser gig | `gig.create` |
 | Create open mic event | `open_mic.create` |
 | Generate poster | `poster.generate` |
 | Use custom URL | `profile.custom_url` |
@@ -416,7 +416,7 @@ Examples:
 
 ### Feature locked (Player Free)
 
-> Creating a band workspace is available on Player Plus. Upgrade to lead a band and manage songs, setlists and gigs.
+> Creating a band workspace is available on Player Plus. Upgrade to lead a band and manage songs and setlists.
 
 ### Organiser venue limit reached
 
@@ -1401,8 +1401,6 @@ Suggested initial capability keys:
 - `setlist.create`
 - `setlists.max_count`
 - `calendar.use`
-- `gig.create`
-- `gigs.active_max_count`
 - `booking_enquiry.receive`
 - `poster.generate`
 - `analytics.view`
@@ -1417,6 +1415,8 @@ Suggested initial capability keys:
 - `booking_enquiries.monthly_max_count`
 - `event_brief.create`
 - `event_briefs.active_max_count`
+- `gig.create`
+- `gigs.active_max_count`
 - `open_mic.create`
 - `open_mic.monthly_max_count`
 - `poster.generate`
@@ -1433,7 +1433,7 @@ Suggested initial capability keys:
 4. Player Free has `band.create = false`.
 5. User sees upgrade prompt:
 
-> Creating a band workspace is available on Player Plus plans. Upgrade to create a band, invite members and manage songs, setlists and gigs.
+> Creating a band workspace is available on Player Plus plans. Upgrade to create a band, invite members and manage songs and setlists.
 
 ## 19.2 Player Plus Band Reaches Song Limit
 
@@ -1548,8 +1548,9 @@ Recommended MVP answers (superseded — see §20.1):
 | `song_folder.create` | false | true | true | — | — |
 | `song_file.upload` | false | true | true | — | — |
 | `band_members.max_count` (per band) | 0 | 10 | 20 | — | — |
-| `gigs.active_max_count` (per band) | 0 | 50 | null (fair use) | — | — |
 | `calendar.use` | none | full | full | — | — |
+| `gig.create` | — | — | — | true | true |
+| `gigs.active_max_count` (per organiser) | — | — | — | 10 | null (unlimited) |
 | `venues.max_count` | — | — | — | 1 | 10 |
 | `booking_enquiries.monthly_max_count` | — | — | — | 20 | null (unlimited) |
 | `open_mic.create` (trial) | — | — | — | 1 (lifetime trial) | included |

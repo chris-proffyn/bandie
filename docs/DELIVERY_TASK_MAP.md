@@ -126,12 +126,14 @@ This document defines **delivery phases, sequencing, and dependencies**. It is a
 - Member availability voting
 - Status rules (confirmed/provisional/proposed)
 - Public calendar publishing
-- Gig management area
-- Gig ↔ setlist linking
+- Gig management area (organiser-owned; band invite + setlist assignment)
+- Gig ↔ setlist linking (per band on invite record)
 
-**Exit criteria:** Band can propose dates, members vote, confirmed dates appear on public profile; gig record links to setlist.
+**Exit criteria:** Band can propose dates, members vote, confirmed dates appear on public profile; organiser creates gig and invites band; band leader accepts and links setlist.
 
 **Dependencies:** Phase 4, Phase 8 entitlement hooks (tracker).
+
+**Status:** Complete — calendar and availability on band workspace; organiser gigs at `/app/gigs`; band invites at `/app/:bandId/gigs`.
 
 **Status:** Complete (tracker Phases 9–10). MVP calendar UI is functional; richer monthly grid vs mockup may follow in polish (Phase 16).
 

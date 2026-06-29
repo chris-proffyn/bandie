@@ -9,7 +9,10 @@ These are the various different elements we will build for Bandie. Status as of 
 — Public mini-sites that help bands showcase who they are, what they play, where they operate, and how they can be booked. **Done** (`/bands/:slug`) — includes members roster, set/fee offers, structured booking enquiry to primary contact.
 
 ## Organiser Venues
-— Venues an organiser manages or is associated with (pubs, clubs, festival sites). **Done** (`/app/venues` in organiser workspace mode); used in booking enquiry venue picker.
+— Venues an organiser manages or is associated with (pubs, clubs, festival sites). **Done** (`/app/venues` in organiser workspace mode); linked to organiser gigs and booking enquiry venue picker.
+
+## Organiser Gig Management
+— Event planning for organisers: create gigs, pick venues, invite bands from the directory, set running order. **Done** (`/app/gigs`, `/app/gigs/:gigId` in organiser workspace mode). Bands receive invites at `/app/:bandId/gigs`; leaders accept/reject and assign setlists.
 
 ## Band Directory 
 — A searchable public directory where event organisers can find bands by genre, location, price, rating and availability. **Done** (`/bands`)
@@ -21,7 +24,7 @@ These are the various different elements we will build for Bandie. Status as of 
 — Each user's musician identity: display name, photo, instruments, gear, bio, and directory visibility. **Done** (`/app/profile`)
 
 ## Band Account, Workspace and Membership 
-— The private band domain where approved members manage the band's operational activity. **Done** — tabbed overview at `/app/:bandId` (Members / Band details); songs, setlists, calendar, and gigs in band nav.
+— The private band domain where approved members manage the band's operational activity. **Done** — tabbed overview at `/app/:bandId` (Members / Band details); songs, setlists, calendar, and gig invites in band nav.
 
 ## Songs and Repertoire Management 
 — A searchable working songbook for managing the band's repertoire, readiness and song metadata. **Done** (`/app/:bandId/songs`) — dashboard, filters, metrics, soft delete.
@@ -35,8 +38,8 @@ These are the various different elements we will build for Bandie. Status as of 
 ## Calendar and Availability Planning 
 — A shared availability planner for rehearsals and potential gig dates. **Done** (`/app/:bandId/calendar`) — rehearsal + gig availability modes, member voting, public profile sync for confirmed/provisional gigs.
 
-## Gig Management 
-— A structured area for managing confirmed and provisional gigs, logistics, setlists and post-gig history. **Done** (`/app/:bandId/gigs`) — status workflow, setlist linking, readiness context.
+## Gig Invitations (band side)
+— Band view of organiser gig invitations: accept/reject and assign setlists from the band library. **Done** (`/app/:bandId/gigs`) — read-only event details; setlist readiness on accepted invites. Organisers create and manage gigs at `/app/gigs` (see Organiser Gig Management above).
 
 ## Booking Enquiries 
 — A workflow for event organisers to contact bands and for bands to manage inbound booking interest. **Done** — structured form on public profiles; dedicated **Booking enquiries** inbox in `/app/communications`; entitlement rate limits when enforcing.

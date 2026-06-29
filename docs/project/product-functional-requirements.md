@@ -228,10 +228,14 @@ A registered user can create a band, becoming band leader. Band receives a priva
 | `/app/bands/new` | Create a new band |
 | `/app/bands` | Band directory (authenticated workspace view) |
 | `/app/venues` | Organiser venues list and editor (organiser workspace mode) |
+| `/app/gigs` | Organiser gig list and create (organiser workspace mode) |
+| `/app/gigs/:gigId` | Organiser gig detail — venue, invite bands, running order |
+| `/app/:bandId/gigs` | Band gig invitations (all members view; leaders accept/reject) |
+| `/app/:bandId/gigs/:gigId` | Band gig invitation detail — setlist assignment (leaders only) |
 | `/app/profiles/:profileId/edit` | Admin edit any player profile |
 | `/app/:bandId` | Band overview — **Members** tab (lineup, members, invitations) and **Band details** tab (leaders, public profile) |
 
-Top navigation shows My bands, Communications (with unread badge when applicable), My profile, and directory links. Organiser workspace mode shows Find bands, My venues, and My profile.
+Top navigation shows My bands, Communications (with unread badge when applicable), My profile, and directory links. **Player** workspace mode adds band-scoped links (Songs, Setlists, Calendar, Gig invites) when a band is selected. **Organiser** workspace mode shows Find bands, **My gigs**, My venues, and My profile.
 
 Band leaders can edit the band's public profile inline on the overview page. Members see a read-only summary. Leaders manage pending invitations; invitee display name is shown ahead of email when the invitee has a Bandie account.
 
@@ -313,11 +317,13 @@ Activity feed, band-scoped threads, and email/push notifications are deferred.
 
 ### User workspace roles (player / organiser)
 
-At `/app/profile`, users declare how they use Bandie: **player**, **organiser**, or **both**. Users with both roles can switch **workspace mode** (player vs organiser) to show a tailored menu — organiser mode focuses on band directory discovery and venue management; player mode shows bands, player directory, and band workspaces.
+At `/app/profile`, users declare how they use Bandie: **player**, **organiser**, or **both**. Users with both roles can switch **workspace mode** (player vs organiser) to show a tailored menu — organiser mode focuses on band directory discovery, **gig planning** (`/app/gigs`), and venue management; player mode shows bands, player directory, and band workspaces.
+
+Organiser-only routes (`/app/venues`, `/app/gigs`, …) are excluded from player band routes (`/app/:bandId/...`). The app redirects organisers away from player band URLs to `/app/bands` when mode switching; `/app/gigs` is treated as an organiser route (not a band workspace).
 
 ### Organiser venues
 
-At `/app/venues` (organiser mode), users manage venues they are associated with — pubs, clubs, festival sites and private event spaces. Each venue stores name, type, address, contact details, capacity, notes and an optional photo. Data is private to the organiser until linked to future gig/booking flows.
+At `/app/venues` (organiser mode), users manage venues they are associated with — pubs, clubs, festival sites and private event spaces. Each venue stores name, type, address, contact details, capacity, notes and an optional photo. Saved venues can be linked when creating or editing gigs at `/app/gigs`.
 
 ### Platform admin mode (implemented)
 

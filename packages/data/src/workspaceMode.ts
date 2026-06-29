@@ -69,7 +69,17 @@ export function isPlayerWorkspaceRoute(pathname: string): boolean {
 
   if (
     !firstSegment ||
-    ['profile', 'bands', 'players', 'venues', 'invites', 'notifications', 'communications', 'profiles'].includes(firstSegment)
+    [
+      'profile',
+      'bands',
+      'players',
+      'venues',
+      'gigs',
+      'invites',
+      'notifications',
+      'communications',
+      'profiles',
+    ].includes(firstSegment)
   ) {
     return false;
   }

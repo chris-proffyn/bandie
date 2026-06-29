@@ -296,6 +296,12 @@ Authoritative spec: `docs/project/bandie_dropbox_song_part_storage_spec.md`
 - App membership via `platform_user_app_memberships` (multi-tenant pattern)
 - Display name resolution: profile `display_name` → auth `user_metadata.display_name` → email local-part → `"Band member"`
 
+**Workspace mode routing (`@bandie/data` `workspaceMode.ts`, `AuthContext`):**
+- `resolveWorkspaceMode` — player-only, organiser-only, or stored preference when user has both roles
+- `workspaceModeHomePath` — player → `/app`; organiser → `/app/bands`
+- `isPlayerWorkspaceRoute` — true for `/app/:bandId/...` band workspaces; **false** for organiser routes (`/app/venues`, `/app/gigs`, `/app/bands`, `/app/players`, …). Organisers on a player band URL are redirected to `/app/bands`.
+- `bandRoutes.ts` — `RESERVED_APP_BAND_SEGMENTS` prevents `/app/gigs`, `/app/venues`, etc. from matching `:bandId`
+
 ---
 
 ## 9. Web application structure
@@ -371,14 +377,16 @@ Breakpoints: mobile 0–639px, tablet 640–1023px, desktop 1024px+.
 | `/app/bands` | Protected | Band directory (workspace view) |
 | `/app/bands/new` | Protected | Create band |
 | `/app/venues` | Protected (organiser mode) | Organiser venues |
+| `/app/gigs` | Protected (organiser mode) | Organiser gig list and create |
+| `/app/gigs/:gigId` | Protected (organiser mode) | Organiser gig detail (venue, band invites, running order) |
 | `/app/profiles/:profileId/edit` | Protected (admin mode) | Admin edit player profile |
 | `/app/:bandId/songs` | Protected | Songs dashboard |
 | `/app/:bandId/songs/:songId` | Protected | Song folder |
 | `/app/:bandId/setlists` | Protected | Setlist library |
 | `/app/:bandId/setlists/:setlistId` | Protected | Setlist builder |
 | `/app/:bandId/calendar` | Protected | Calendar and availability |
-| `/app/:bandId/gigs` | Protected | Gig list |
-| `/app/:bandId/gigs/:gigId` | Protected | Gig detail |
+| `/app/:bandId/gigs` | Protected | Band gig invitations |
+| `/app/:bandId/gigs/:gigId` | Protected | Band gig invitation detail (accept/reject, setlist) |
 | `/admin` | Protected (app admin) | Platform admin overview |
 | `/admin/accounts` | Protected (app admin) | User/band search |
 | `/admin/metrics` | Protected (app admin) | Platform metrics |

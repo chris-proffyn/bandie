@@ -58,6 +58,7 @@ Individual musicians in multiple bands, band leaders, dep/substitute musicians, 
 - Public player profiles
 - Structured booking enquiry on public band profiles (creates enquiry record + message to primary contact)
 - Organiser venue management in workspace (organiser mode)
+- Organiser gig management in workspace (organiser mode) — create gigs, invite bands, running order
 - Public calendar availability (confirmed/provisional gigs from calendar sync)
 
 ### 4.2 Private band workspace
@@ -74,11 +75,13 @@ Member-only area scoped to a selected band:
 - Player recruitment invites (audition or join band)
 - Musician / player profile (`/app/profile`) with username and workspace mode (player / organiser / both)
 - Organiser venues (`/app/venues`)
+- Organiser gigs (`/app/gigs`, `/app/gigs/:gigId`) — create events, invite bands from directory, set running order
+- Band gig invitations (`/app/:bandId/gigs`) — view invites; leaders accept/reject and assign setlist
 - Workspace communications (`/app/communications`) — invitations, player outreach, direct messages, **booking enquiries**
 - Songs dashboard and song folders with **Dropbox song-part storage** — **done (web MVP)**
 - Setlist management — **done (web)** — library, builder, drag reorder, metrics
 - Calendar (rehearsal + gig availability) — **done (web)** — `/app/:bandId/calendar`
-- Gig management — **done (web)** — `/app/:bandId/gigs`, setlist linking
+- Gig management — **done (web)** — organiser-owned: `/app/gigs` (create, invite bands); band side: `/app/:bandId/gigs` (invites, setlist assignment)
 - Activity feed — **planned** (Phase 16)
 - Platform admin portal — **done** — `/admin` for app admins (metrics, editable plan catalogue, entitlements draft/publish, overrides, gate logs, audit); separate from in-app admin mode
 

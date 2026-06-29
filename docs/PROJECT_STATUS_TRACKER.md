@@ -29,11 +29,12 @@
 | Workspace communications | Complete — unified hub at `/app/communications` (invites, outreach, messages, booking enquiries) |
 | Booking enquiries | Complete — public form, structured inbox, entitlement rate limits when enforcing |
 | Organiser venues | Complete — `/app/venues` in organiser workspace mode |
+| Organiser gigs | Complete — `/app/gigs` in organiser workspace mode; band invites at `/app/:bandId/gigs` |
 | Song-part file storage | **Dropbox** — leader OAuth, band song-parts root, upload/preview/download via Netlify (`bandie_dropbox_song_part_storage_spec.md`) |
 | Songs & repertoire (Phase 6) | Complete — dashboard, song folder, Dropbox uploads, part templates, in-app PDF view, soft delete |
 | Setlist management (Phase 7) | Complete — library, builder with drag reorder, live metrics, leader-only edit |
 | Entitlement framework (Phase 8) | Complete — schema, seeds, service, gate hooks; enforcement off by default |
-| Calendar & gigs (Phases 9–10) | Complete — `/app/:bandId/calendar`, `/app/:bandId/gigs` |
+| Calendar & gigs (Phases 9–10) | Complete — `/app/:bandId/calendar`; organiser gigs `/app/gigs`; band invites `/app/:bandId/gigs` |
 | Admin portal & metrics (Phases 12–14) | Complete — `/admin` (overview, accounts, metrics, editable plan catalogue, audit); enforcement toggle |
 | Billing (Phase 15) | Implemented — Stripe checkout, webhooks, `/app/profile` billing, `/admin/billing`; requires env vars + plan sync |
 
@@ -303,6 +304,7 @@ Reference: `product-functional-requirements.md` §11. Capability keys: `gig.crea
 - [x] 10.4 Band setlist assignment on accepted invites — `/app/:bandId/gigs/:gigId`
 - [x] 10.5 Gig status workflow — enquiry through archived
 - [x] 10.6 Entitlements moved to organiser plans (`gig.create`, `gigs.active_max_count` per organiser user)
+- [x] 10.7 Organiser nav and workspace routing — `/app/gigs` in organiser mode nav; `isPlayerWorkspaceRoute` excludes organiser segments; reserved `:bandId` segments in `bandRoutes.ts`
 
 ### 11. Booking enquiries
 
@@ -394,6 +396,13 @@ Authoritative spec: entitlements spec §35 Phase E. Deferred until admin portal 
 ---
 
 ## Session notes
+
+**30 June 2026 — Organiser-owned gigs and `/app/gigs` routing**
+- Migration `20260630220000_bandie_organiser_gigs.sql` applied to remote — `bandie_gig_bands` invites, organiser-owned `bandie_gigs`, band-leader RPCs (`bandie_respond_gig_invite`, `bandie_assign_gig_setlist`)
+- Organiser UI: `/app/gigs`, `/app/gigs/:gigId` (My gigs nav); band UI: `/app/:bandId/gigs` (invites + setlist assignment only)
+- `gig.create` and `gigs.active_max_count` on organiser plans (removed from player plans)
+- **Routing fix:** `isPlayerWorkspaceRoute` excludes `/app/gigs` so organiser mode no longer redirects to `/app/bands`; `bandRoutes.ts` reserves `gigs` (and other top-level segments) from `:bandId` matching
+- Docs: product functional/technical requirements, product requirements, build elements, delivery map, tracker §10
 
 **30 June 2026 — Documentation alignment (full sweep)**
 - Entitlements spec §§5–7, 10, 13, 19, 22, 25, 31, 33–35, 37: examples, matrices, API samples, and acceptance criteria aligned to §20.2 / `20260630190000`
@@ -559,7 +568,7 @@ Authoritative spec: entitlements spec §35 Phase E. Deferred until admin portal 
 - `/app/venues` in organiser workspace mode — list and manage venues the organiser is associated with
 - Fields: name, type, address, city, postcode, contact name/email/phone, capacity, notes
 - Migration `20260628290000_bandie_organiser_venues.sql`; data access via `@bandie/data` (`organiserVenues`)
-- Nav: Find bands, My venues, My profile
+- Nav: Find bands, My gigs, My venues, My profile
 
 **28 June 2026 — Player / organiser workspace roles**
 - Users declare player, organiser, or both on profile (`is_player`, `is_organiser`)
