@@ -46,6 +46,8 @@
 }
 
 .setlists-metric {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.68);
   border-radius: 18px;
   padding: 1rem 1.1rem;
   box-shadow: 0 18px 45px rgba(12, 16, 38, 0.12);
@@ -162,7 +164,7 @@
 
 .setlists-stat small {
   display: block;
-  color: #6b7280;
+  color: #4b5563;
   font-size: 0.68rem;
   font-weight: 700;
 }
@@ -170,6 +172,7 @@
 .setlists-stat strong {
   display: block;
   margin-top: 0.25rem;
+  color: #111827;
 }
 
 .setlists-pill {
@@ -224,11 +227,12 @@
 
 .setlists-stack-row strong {
   display: block;
+  color: #111827;
 }
 
 .setlists-stack-row span,
 .setlists-stack-row small {
-  color: #6b7280;
+  color: #374151;
 }
 
 .setlists-card-footer {
@@ -272,14 +276,33 @@
   margin-top: 0.25rem;
 }
 
-.setlists-builder {
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  gap: 1.25rem;
+.setlists-light-panel {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  border-radius: 18px;
+  padding: 1.25rem;
+  box-shadow: 0 18px 45px rgba(12, 16, 38, 0.12);
+  color: #1f2937;
+}
+
+.setlists-light-panel h2,
+.setlists-light-panel h3 {
+  margin: 0 0 0.75rem;
+  color: #111827;
+}
+
+.setlists-light-panel .setlists-side-card-header p {
+  margin: 0;
+  color: #4b5563;
+}
+
+.setlists-details-panel {
+  margin-top: 0.25rem;
 }
 
 .setlists-builder-column h3 {
   margin: 0 0 0.75rem;
+  color: #111827;
 }
 
 .setlists-picker-filters {
@@ -308,10 +331,11 @@
 .setlists-picker-item strong {
   display: block;
   margin-bottom: 0.2rem;
+  color: #111827;
 }
 
 .setlists-picker-item small {
-  color: #6b7280;
+  color: #374151;
 }
 
 .setlists-running-order .setlists-stack-row {
@@ -382,11 +406,18 @@
   grid-column: 1 / -1;
 }
 
+.setlists-builder {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 1.25rem;
+}
+
 .setlists-form label {
   display: grid;
   gap: 0.35rem;
   font-weight: 600;
   font-size: 0.9rem;
+  color: #111827;
 }
 
 .setlists-form textarea {

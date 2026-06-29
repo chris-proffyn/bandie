@@ -427,7 +427,7 @@ export function SetlistBuilderPage() {
             </article>
           </section>
 
-          <section className="panel setlists-builder-panel">
+          <section className="setlists-light-panel surface-light setlists-builder-panel">
             <div className="setlists-side-card-header">
               <div>
                 <h2>Setlist builder</h2>
@@ -600,7 +600,7 @@ export function SetlistBuilderPage() {
             </div>
           </section>
 
-          <section className="panel">
+          <section className="setlists-light-panel surface-light setlists-details-panel">
             <h2>Setlist details</h2>
             <form id="setlist-details-form" className="setlists-form setlists-details-form" onSubmit={handleSaveDetails}>
               <label>
