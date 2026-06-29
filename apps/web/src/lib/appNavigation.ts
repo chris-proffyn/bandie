@@ -59,6 +59,11 @@ export function getAppNavItems({
       { label: 'Find bands', to: '/app/bands', end: true },
       { label: 'My gigs', to: '/app/gigs' },
       { label: 'My venues', to: '/app/venues' },
+      {
+        label: 'Communications',
+        to: '/app/communications',
+        badge: notificationCount || undefined,
+      },
       { label: 'My profile', to: '/app/profile' },
     ];
   }

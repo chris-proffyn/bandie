@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getCommunicationSummary, type CommunicationFilter } from '@bandie/data';
+import { useAuth } from '../../context/AuthContext';
 import { CommunicationsFeed } from '../../components/communications/CommunicationsFeed';
 import { IncomingBandInvitationsPanel } from '../../components/communications/IncomingBandInvitationsPanel';
 import { IncomingPlayerOutreachPanel } from '../../components/communications/IncomingPlayerOutreachPanel';
@@ -15,6 +16,9 @@ const FILTER_OPTIONS: { value: CommunicationFilter; label: string }[] = [
 ];
 
 export function CommunicationsPage() {
+  const { workspaceMode } = useAuth();
+  const isOrganiserView = workspaceMode === 'organiser';
+
   const [filter, setFilter] = useState<CommunicationFilter>('all');
   const [hideResolvedInvites, setHideResolvedInvites] = useState(true);
   const [summary, setSummary] = useState({
@@ -22,6 +26,7 @@ export function CommunicationsPage() {
     pendingPlayerOutreach: 0,
     unreadMessages: 0,
     unreadBookingEnquiries: 0,
+    unreadGigInvites: 0,
     total: 0,
   });
   const [loadingSummary, setLoadingSummary] = useState(true);
@@ -38,6 +43,7 @@ export function CommunicationsPage() {
         pendingPlayerOutreach: 0,
         unreadMessages: 0,
         unreadBookingEnquiries: 0,
+        unreadGigInvites: 0,
         total: 0,
       });
     } finally {
@@ -49,7 +55,9 @@ export function CommunicationsPage() {
     void refreshSummary();
   }, [refreshSummary]);
 
-  const pendingInvites = summary.pendingInvitations + summary.pendingPlayerOutreach;
+  const pendingInvites = isOrganiserView
+    ? 0
+    : summary.pendingInvitations + summary.pendingPlayerOutreach;
 
   return (
     <div className="communications-page">
@@ -58,8 +66,9 @@ export function CommunicationsPage() {
           <p className="my-bands-eyebrow">Workspace</p>
           <h1>Communications</h1>
           <p className="my-bands-lead">
-            Invitations and messages across Bandie — sent and received. Accept invites, reply to
-            messages, and track invites you have sent as a band leader.
+            {isOrganiserView
+              ? 'Gig invitations you have sent, booking enquiries, and direct messages with bands and organisers across Bandie.'
+              : 'Invitations and messages across Bandie — sent and received. Accept invites, reply to messages, and track invites you have sent as a band leader.'}
             {loadingSummary ? null : summary.total > 0 ? (
               <>
                 {' '}
@@ -119,7 +128,26 @@ export function CommunicationsPage() {
         </section>
       ) : null}
 
-      {filter === 'invites' ? (
+      {filter === 'invites' && isOrganiserView ? (
+        <section className="panel communications-section">
+          <div className="communications-section-head">
+            <div>
+              <h2>Gig invitations</h2>
+              <p className="profile-section-intro">
+                Gig invites you have sent to bands from the directory, including notification
+                previews and band responses.
+              </p>
+            </div>
+          </div>
+          <CommunicationsFeed
+            filter="invites"
+            hideResolvedInvites={hideResolvedInvites}
+            onChanged={refreshSummary}
+          />
+        </section>
+      ) : null}
+
+      {filter === 'invites' && !isOrganiserView ? (
         <>
           <section className="panel communications-section">
             <div className="communications-section-head">
@@ -182,7 +210,9 @@ export function CommunicationsPage() {
             <div>
               <h2>Booking enquiries</h2>
               <p className="profile-section-intro">
-                Structured booking requests from public band profiles, with venue and date context.
+                {isOrganiserView
+                  ? 'Booking enquiries you have sent to bands from public profiles, with venue and date context.'
+                  : 'Structured booking requests from public band profiles, with venue and date context.'}
               </p>
             </div>
             {summary.unreadBookingEnquiries > 0 ? (

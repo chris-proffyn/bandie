@@ -220,7 +220,7 @@ A registered user can create a band, becoming band leader. Band receives a priva
 | Route | Purpose |
 |---|---|
 | `/app` | My bands hub |
-| `/app/communications` | Communications hub (invitations, player outreach, direct messages) |
+| `/app/communications` | Communications hub (invitations, gig invites, player outreach, booking enquiries, direct messages) |
 | `/app/profile` | Musician / player profile editor |
 | `/app/players` | Player directory (find members or deps) |
 | `/app/invites` | Redirects to `/app/communications` (legacy route) |
@@ -235,7 +235,7 @@ A registered user can create a band, becoming band leader. Band receives a priva
 | `/app/profiles/:profileId/edit` | Admin edit any player profile |
 | `/app/:bandId` | Band overview — **Members** tab (lineup, members, invitations) and **Band details** tab (leaders, public profile) |
 
-Top navigation shows My bands, Communications (with unread badge when applicable), My profile, and directory links. **Player** workspace mode adds band-scoped links (Songs, Setlists, Calendar, Gig invites) when a band is selected. **Organiser** workspace mode shows Find bands, **My gigs**, My venues, and My profile.
+Top navigation shows My bands, Communications (with unread badge when applicable), My profile, and directory links. **Player** workspace mode adds band-scoped links (Songs, Setlists, Calendar, Gig invites) when a band is selected. **Organiser** workspace mode shows Find bands, **My gigs**, My venues, **Communications**, and My profile.
 
 Band leaders can edit the band's public profile inline on the overview page. Members see a read-only summary. Leaders manage pending invitations; invitee display name is shown ahead of email when the invitee has a Bandie account.
 

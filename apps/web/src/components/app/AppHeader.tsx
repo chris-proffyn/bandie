@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { getNotificationSummary, listUserSubscriptions, WORKSPACE_MODE_LABELS } from '@bandie/data';
+import { getCommunicationSummary, listUserSubscriptions, WORKSPACE_MODE_LABELS } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
 import { getAppNavItems } from '../../lib/appNavigation';
 import { BANDIE_BRAND_NAME } from '../../lib/brand';
@@ -26,15 +26,15 @@ export function AppHeader({ bandId }: AppHeaderProps) {
   });
 
   useEffect(() => {
-    if (!session || workspaceMode === 'organiser') {
+    if (!session) {
       setNotificationCount(0);
       return;
     }
 
-    getNotificationSummary()
+    getCommunicationSummary()
       .then((summary) => setNotificationCount(summary.total))
       .catch(() => setNotificationCount(0));
-  }, [session, workspaceMode, bandId]);
+  }, [session, workspaceMode, bandId, location.pathname]);
 
   useEffect(() => {
     if (!session) {
