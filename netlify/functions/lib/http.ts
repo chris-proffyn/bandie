@@ -1,21 +1,21 @@
-export function jsonResponse(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+import type { HandlerResponse } from '@netlify/functions';
+
+export function jsonResponse(body: unknown, status = 200): HandlerResponse {
+  return {
+    statusCode: status,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  };
 }
 
-export function errorResponse(message: string, status = 400): Response {
+export function errorResponse(message: string, status = 400): HandlerResponse {
   return jsonResponse({ error: message }, status);
 }
 
-export function redirectResponse(location: string, status = 302): Response {
-  return new Response(null, {
-    status,
-    headers: {
-      Location: location,
-    },
-  });
+export function redirectResponse(location: string, status = 302): HandlerResponse {
+  return {
+    statusCode: status,
+    headers: { Location: location },
+    body: '',
+  };
 }
