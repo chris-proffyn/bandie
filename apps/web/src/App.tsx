@@ -12,6 +12,7 @@ import { CreateBandPage } from './pages/app/CreateBandPage';
 import { WorkspaceHomePage } from './pages/app/WorkspaceHomePage';
 import { SongsDashboardPage } from './pages/app/SongsDashboardPage';
 import { SongFolderPage } from './pages/app/SongFolderPage';
+import { SongPartFolderPage } from './pages/app/SongPartFolderPage';
 import { SetlistsDashboardPage } from './pages/app/SetlistsDashboardPage';
 import { SetlistBuilderPage } from './pages/app/SetlistBuilderPage';
 import { WorkspaceBandDirectoryPage } from './pages/app/WorkspaceBandDirectoryPage';
@@ -142,6 +143,14 @@ export default function App() {
               element={
                 <WorkspaceModeRoute mode="player">
                   <SetlistsDashboardPage />
+                </WorkspaceModeRoute>
+              }
+            />
+            <Route
+              path=":bandId/songs/:songId/parts/:partFolderId"
+              element={
+                <WorkspaceModeRoute mode="player">
+                  <SongPartFolderPage />
                 </WorkspaceModeRoute>
               }
             />

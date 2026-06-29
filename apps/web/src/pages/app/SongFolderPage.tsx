@@ -1,37 +1,22 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
-  canPreviewSongPartFile,
-  checkBandSongPartStorageHealth,
-  downloadSongPartFile,
   formatSongDuration,
-  formatSongPartFileStatus,
   formatSongReadinessStatus,
   getBandSong,
-  getSongPartDisplay,
   isBandLeaderRole,
-  listSongPartFiles,
   listSongPartFolders,
-  type SongPartFile,
+  SONG_PARTS_LEADER_ONLY_MESSAGE,
   type SongPartFolderWithStats,
   type SongWithReadiness,
 } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
-import { SongPartFoldersEditor } from '../../components/songs/SongPartFoldersEditor';
+import { AddSongPartFolderDialog } from '../../components/songs/AddSongPartFolderDialog';
 import { EditSongDialog } from '../../components/songs/EditSongDialog';
-import { SongPartFileViewerModal } from '../../components/songs/SongPartFileViewerModal';
-import { SongPartUploadPanel } from '../../components/songs/SongPartUploadPanel';
+import { SongMetadataPanel } from '../../components/songs/SongMetadataPanel';
+import { SongPartFolderCards } from '../../components/songs/SongPartFolderCards';
 import { SongsBandContextBar } from '../../components/songs/SongsBandContextBar';
 import '../../styles/songs.css';
-
-function fileTypeLabel(file: SongPartFile): string {
-  const name = file.display_name.toLowerCase();
-  if (name.endsWith('.pdf')) return 'PDF';
-  if (name.match(/\.(gp|gp3|gp4|gp5|gpx)$/)) return 'GP';
-  if (name.match(/\.(mp3|wav|m4a)$/)) return 'AUD';
-  if (name.match(/\.(png|jpg|jpeg|gif|webp)$/)) return 'IMG';
-  return 'FILE';
-}
 
 export function SongFolderPage() {
   const { bandId, songId } = useParams();
@@ -43,78 +28,39 @@ export function SongFolderPage() {
 
   const [song, setSong] = useState<SongWithReadiness | null>(null);
   const [partFolders, setPartFolders] = useState<SongPartFolderWithStats[]>([]);
-  const [files, setFiles] = useState<SongPartFile[]>([]);
-  const [storageActive, setStorageActive] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [actionError, setActionError] = useState<string | null>(null);
-  const [actionId, setActionId] = useState<string | null>(null);
   const [showEditSong, setShowEditSong] = useState(false);
-  const [viewerFile, setViewerFile] = useState<{ file: SongPartFile; partLabel: string } | null>(null);
+  const [showAddFolder, setShowAddFolder] = useState(false);
 
-  const folderLabelById = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const folder of partFolders) {
-      map.set(folder.id, folder.part_label);
-    }
-    return map;
-  }, [partFolders]);
-
-  const loadSongWorkspace = useCallback(async (options?: { silent?: boolean }) => {
+  const loadSongWorkspace = useCallback(async () => {
     if (!bandId || !songId) {
       return;
     }
 
-    if (!options?.silent) {
-      setLoading(true);
-    }
+    setLoading(true);
     setLoadError(null);
 
     try {
-      const [songResult, folderRows, fileRows, health] = await Promise.all([
+      const [songResult, folderRows] = await Promise.all([
         getBandSong(bandId, songId),
         listSongPartFolders(bandId, songId),
-        listSongPartFiles(bandId, songId),
-        checkBandSongPartStorageHealth(bandId).catch(() => ({ status: 'not_configured' as const })),
       ]);
 
       setSong(songResult);
       setPartFolders(folderRows);
-      setFiles(fileRows);
-      setStorageActive(health.status === 'active');
     } catch (err) {
       setSong(null);
       setPartFolders([]);
-      setFiles([]);
       setLoadError(err instanceof Error ? err.message : 'Unable to load song workspace.');
     } finally {
-      if (!options?.silent) {
-        setLoading(false);
-      }
+      setLoading(false);
     }
   }, [bandId, songId]);
 
   useEffect(() => {
     void loadSongWorkspace();
   }, [loadSongWorkspace]);
-
-  async function handleDownload(file: SongPartFile) {
-    if (!bandId) {
-      return;
-    }
-
-    setActionId(file.id);
-    setActionError(null);
-
-    try {
-      await downloadSongPartFile(bandId, file.id, file.display_name);
-      await loadSongWorkspace();
-    } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Unable to download file.');
-    } finally {
-      setActionId(null);
-    }
-  }
 
   if (!bandId || !songId) {
     return null;
@@ -130,7 +76,7 @@ export function SongFolderPage() {
     );
   }
 
-  if (loading && !viewerFile) {
+  if (loading) {
     return (
       <div className="songs-page">
         <div className="panel">
@@ -183,7 +129,6 @@ export function SongFolderPage() {
       </header>
 
       {loadError ? <div className="songs-error">{loadError}</div> : null}
-      {actionError ? <div className="songs-error">{actionError}</div> : null}
 
       <section className="songs-metrics" aria-label="Song metrics">
         <article className="songs-metric surface-light">
@@ -208,165 +153,41 @@ export function SongFolderPage() {
         </article>
       </section>
 
-      <section className="songs-content-grid">
-        <div className="panel">
-          <div className="songs-side-card-header">
-            <div>
-              <h2>Part folders</h2>
-              <p>Each member can upload files for their part. Required parts count toward gig readiness.</p>
-            </div>
-          </div>
-          <SongPartFoldersEditor
-            bandId={bandId}
-            songId={songId}
-            partFolders={partFolders}
-            canManage={canManageSongParts}
-            onChanged={() => void loadSongWorkspace()}
-          />
-        </div>
+      <SongMetadataPanel song={song} onEdit={() => setShowEditSong(true)} />
 
-        <aside className="songs-side-stack">
-          <div className="songs-side-card dark">
-            <div className="songs-side-card-header">
-              <h2>Song metadata</h2>
-              <div className="songs-side-card-header-actions">
-                <button
-                  type="button"
-                  className="directory-btn directory-btn-secondary songs-metadata-edit-btn"
-                  onClick={() => setShowEditSong(true)}
-                >
-                  Edit
-                </button>
-                <span className="songs-pill green">{formatSongReadinessStatus(song.readiness_status)}</span>
-              </div>
-            </div>
-            <div className="songs-list-item">
-              <div>
-                <strong>Key</strong>
-                <small>{song.song_key ?? 'Not set'}</small>
-              </div>
-            </div>
-            <div className="songs-list-item">
-              <div>
-                <strong>Duration</strong>
-                <small>{formatSongDuration(song.duration_seconds)}</small>
-              </div>
-            </div>
-            <div className="songs-list-item">
-              <div>
-                <strong>Genre</strong>
-                <small>{song.genre ?? 'Not set'}</small>
-              </div>
-            </div>
-            <div className="songs-list-item">
-              <div>
-                <strong>Parts complete</strong>
-                <small>
-                  {song.partsRequired > 0
-                    ? `${song.partsComplete} of ${song.partsRequired} required parts have a current file`
-                    : 'No required parts configured'}
-                </small>
-              </div>
-            </div>
-            {song.notes ? (
-              <div className="songs-list-item">
-                <div>
-                  <strong>Notes</strong>
-                  <small>{song.notes}</small>
-                </div>
-              </div>
-            ) : null}
-          </div>
-
-          <SongPartUploadPanel
-            bandId={bandId}
-            songId={songId}
-            partFolders={partFolders}
-            storageActive={storageActive}
-            canManage={canManageSongParts}
-            onUploaded={() => void loadSongWorkspace()}
-          />
-        </aside>
-      </section>
-
-      <section className="panel" style={{ marginTop: '1rem' }}>
+      <section className="panel songs-part-folders-section">
         <div className="songs-side-card-header">
           <div>
-            <h2>Files in this song</h2>
-            <p>View PDFs in Bandie or download any file — no Dropbox account needed.</p>
+            <h2>Part folders</h2>
+            <p>Open a folder to view, upload, or download files for that part.</p>
           </div>
         </div>
 
-        {files.length === 0 ? (
-          <p>No files uploaded yet. Connect Dropbox and upload your first part file above.</p>
-        ) : (
-          files.map((file) => {
-            const partLabel = folderLabelById.get(file.song_part_folder_id) ?? 'Part';
-            const folder = partFolders.find((item) => item.id === file.song_part_folder_id);
-            const display = getSongPartDisplay(folder?.part_key ?? '', partLabel);
+        {!canManageSongParts ? (
+          <p className="my-bands-lead songs-leader-only-note">{SONG_PARTS_LEADER_ONLY_MESSAGE}</p>
+        ) : null}
 
-            return (
-              <div key={file.id} className="songs-file-row">
-                <div className="songs-table-link">
-                  <span className="songs-file-icon">{fileTypeLabel(file)}</span>
-                  <div>
-                    {file.display_name}
-                    <small className="songs-artist">
-                      {display.icon} {partLabel}
-                    </small>
-                  </div>
-                </div>
-                <span className="songs-hide-sm">{file.added_by_user_id ? 'Member' : '—'}</span>
-                <span className="songs-hide-sm">
-                  {new Date(file.created_at).toLocaleDateString(undefined, {
-                    day: 'numeric',
-                    month: 'short',
-                  })}
-                </span>
-                <span className={`songs-pill ${file.status === 'current' ? 'green' : 'amber'}`}>
-                  {formatSongPartFileStatus(file.status)}
-                </span>
-                <div style={{ display: 'flex', gap: '0.45rem' }}>
-                  {canPreviewSongPartFile(file) ? (
-                    <button
-                      type="button"
-                      className="directory-btn directory-btn-secondary"
-                      disabled={file.status === 'unavailable'}
-                      onClick={() =>
-                        setViewerFile({
-                          file,
-                          partLabel,
-                        })
-                      }
-                    >
-                      View
-                    </button>
-                  ) : null}
-                  <button
-                    type="button"
-                    className="directory-btn directory-btn-secondary"
-                    disabled={actionId === file.id || file.status === 'unavailable'}
-                    onClick={() => void handleDownload(file)}
-                  >
-                    Download
-                  </button>
-                </div>
-              </div>
-            );
-          })
-        )}
+        <SongPartFolderCards bandId={bandId} songId={songId} partFolders={partFolders} />
+
+        {canManageSongParts ? (
+          <div className="songs-part-folders-actions">
+            <button
+              type="button"
+              className="directory-btn directory-btn-primary"
+              onClick={() => setShowAddFolder(true)}
+            >
+              Add folder
+            </button>
+          </div>
+        ) : null}
       </section>
 
-      {viewerFile ? (
-        <SongPartFileViewerModal
+      {showAddFolder ? (
+        <AddSongPartFolderDialog
           bandId={bandId}
-          fileId={viewerFile.file.id}
-          displayName={viewerFile.file.display_name}
-          partLabel={viewerFile.partLabel}
-          onClose={() => {
-            setViewerFile(null);
-            void loadSongWorkspace({ silent: true });
-          }}
+          songId={songId}
+          onClose={() => setShowAddFolder(false)}
+          onCreated={() => void loadSongWorkspace()}
         />
       ) : null}
 
