@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import { getOrganiserGig, getPublicBandProfileBySlug, type GigBandInviteWithBand, type PublicBandProfile } from '@bandie/data';
+import { getOrganiserGig, getPublicBandProfileBySlug, isActiveGigInviteStatus, type GigBandInviteWithBand, type PublicBandProfile } from '@bandie/data';
 import { BackLink } from '../../components/navigation/BackLink';
 import { PublicBandProfileView } from '../../components/profile/PublicBandProfileView';
 import type { BackNavigationState } from '../../lib/backNavigation';
@@ -47,7 +47,7 @@ export function WorkspaceBandProfilePage() {
     getOrganiserGig(findGig.gigId)
       .then((gig) => {
         const invite = gig?.bands.find(
-          (item) => item.band_id === profile.id && item.invite_status !== 'cancelled',
+          (item) => item.band_id === profile.id && isActiveGigInviteStatus(item.invite_status),
         );
         setResolvedInvite(invite ?? null);
       })

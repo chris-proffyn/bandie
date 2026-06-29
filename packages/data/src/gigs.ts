@@ -31,6 +31,12 @@ export const GIG_INVITE_STATUS_OPTIONS: GigInviteStatus[] = [
   'cancelled',
 ];
 
+export const ACTIVE_GIG_INVITE_STATUSES: GigInviteStatus[] = ['pending', 'accepted'];
+
+export function isActiveGigInviteStatus(status: GigInviteStatus): boolean {
+  return ACTIVE_GIG_INVITE_STATUSES.includes(status);
+}
+
 export const ACTIVE_GIG_STATUSES: GigStatus[] = ['enquiry', 'proposed', 'confirmed'];
 
 export const GIG_BAND_LEADER_MESSAGE =
