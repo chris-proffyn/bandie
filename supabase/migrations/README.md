@@ -73,9 +73,10 @@ Song-part file bytes live in **Dropbox** (leader OAuth), not Supabase Storage. A
 ## Phase 8 — entitlements (applied)
 
 - `20260630100000_bandie_entitlements_foundation.sql` — plan catalogue, capabilities, subscriptions, usage meters, overrides (RLS + `bandie_set_usage_meter` RPC)
-- `20260630110000_bandie_entitlements_seed.sql` — five-plan catalogue (`player_free`, `player_plus`, `player_pro`, `organiser_free`, `organiser_plus`), capability seeds, `plan_scope`, default subscriptions, profile trigger
+- `20260630110000_bandie_entitlements_seed.sql` — five-plan catalogue (`player_free`, `player_plus`, `player_pro`, `organiser_free`, `organiser_plus`), capability seeds, `plan_scope`, default subscriptions, profile trigger. **Player plan limits in this file are superseded by `20260630190000`.**
 - `20260630120000_bandie_calendar.sql` — calendar events, availability votes, public date sync
-- `20260630130000_bandie_gigs.sql` — gig records with setlist link
+- `20260630130000_bandie_gigs.sql` — gig records (legacy band-scoped; superseded by organiser model)
+- `20260630220000_bandie_organiser_gigs.sql` — organiser-owned gigs, `bandie_gig_bands` invites, band leader RPCs, organiser entitlements
 - `20260630140000_bandie_booking_enquiries.sql` — booking enquiry metadata + list RPC
 - `20260630150000_bandie_admin_metrics_entitlements.sql` — audit, metrics, drafts, gate logs, admin search, aggregation RPC
 - `20260630160000_bandie_plan_display_names.sql` — legacy display name rename (superseded by code alignment)

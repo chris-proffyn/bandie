@@ -78,6 +78,8 @@ Copy `.env.example` to `.env` (repo root) and `apps/web/.env.local` (web client 
 VITE_SUPABASE_URL=https://cjmgrsvbrcgozgjxbriz.supabase.co
 VITE_SUPABASE_ANON_KEY=
 VITE_APP_CODE=bandie
+# `live` (default) hides seeded test bands/players; `test` shows them and enables Hide test data toggles
+VITE_BANDIE_DATA_MODE=live
 
 # Server — secret key (sb_secret_...), root .env / supabase/.env only
 SUPABASE_SECRET_KEY=

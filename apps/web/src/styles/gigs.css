@@ -7,6 +7,7 @@
   display: flex;
   justify-content: space-between;
   gap: 1rem;
+  align-items: flex-start;
 }
 
 .gigs-header-actions,
@@ -14,6 +15,18 @@
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.gigs-header-actions .directory-btn,
+.gigs-header-actions .auth-button,
+.gigs-form-actions .auth-button {
+  width: auto;
+  flex: 0 0 auto;
+  min-height: 42px;
+  padding: 0.55rem 1.15rem;
+  border-radius: 12px;
 }
 
 .gigs-metrics {
@@ -80,4 +93,99 @@
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
+  align-items: center;
+}
+
+.gig-detail-actions .auth-button,
+.gig-detail-actions .directory-btn {
+  width: auto;
+  flex: 0 0 auto;
+  min-height: 42px;
+  padding: 0.55rem 1.15rem;
+  border-radius: 12px;
+}
+
+.gig-invite-status {
+  display: inline-flex;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.gig-invite-status-pending {
+  background: rgba(255, 193, 7, 0.18);
+}
+
+.gig-invite-status-accepted {
+  background: rgba(76, 175, 80, 0.18);
+}
+
+.gig-invite-status-rejected,
+.gig-invite-status-cancelled {
+  background: rgba(244, 67, 54, 0.16);
+}
+
+.gigs-band-picker,
+.gigs-invite-list {
+  margin-top: 1rem;
+}
+
+.gigs-band-picker li,
+.gigs-invite-list li {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+}
+
+.gigs-band-picker li {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.gigs-invite-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.gigs-invite-controls {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.gigs-invite-controls label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+
+.gigs-invite-controls input[type='number'] {
+  width: 5rem;
+}
+
+.gig-readonly-details {
+  display: grid;
+  gap: 0.85rem;
+  margin: 0;
+}
+
+.gig-readonly-details div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.gig-readonly-details dt {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.gig-readonly-details dd {
+  margin: 0;
 }

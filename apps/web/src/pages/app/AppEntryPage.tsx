@@ -1,14 +1,35 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { listMyPendingPlayerOutreach, listPendingInvitationsForCurrentUser } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
 import { WorkspaceBandCard } from '../../components/bands/WorkspaceBandCard';
+import { DirectoryTestDataToggle } from '../../components/directory/DirectoryTestDataToggle';
+import {
+  applyDirectoryTestDataFilter,
+  countDirectoryTestRows,
+  readDirectoryHideTestData,
+  saveDirectoryHideTestData,
+  showDirectoryTestDataToggle,
+} from '../../lib/directoryTestDataPreference';
 import '../../styles/directory.css';
 
 export function AppEntryPage() {
   const navigate = useNavigate();
   const { bands, loading } = useAuth();
   const [checkingInvites, setCheckingInvites] = useState(true);
+  const [hideTestData, setHideTestData] = useState(readDirectoryHideTestData);
+
+  const visibleBands = useMemo(
+    () => applyDirectoryTestDataFilter(bands, hideTestData),
+    [bands, hideTestData],
+  );
+  const testBandCount = useMemo(() => countDirectoryTestRows(bands), [bands]);
+  const showTestDataToggle = useMemo(() => showDirectoryTestDataToggle(bands), [bands]);
+
+  function handleHideTestDataChange(nextHidden: boolean) {
+    setHideTestData(nextHidden);
+    saveDirectoryHideTestData(nextHidden);
+  }
 
   useEffect(() => {
     if (loading) {
@@ -47,6 +68,14 @@ export function AppEntryPage() {
         </div>
         {bands.length > 0 ? (
           <div className="my-bands-header-actions">
+            {showTestDataToggle ? (
+              <DirectoryTestDataToggle
+                hideTestData={hideTestData}
+                testItemCount={testBandCount}
+                itemLabel="bands"
+                onChange={handleHideTestDataChange}
+              />
+            ) : null}
             <Link to="/app/bands/new" className="directory-btn directory-btn-primary">
               Create a band
             </Link>
@@ -71,13 +100,21 @@ export function AppEntryPage() {
             Browse band directory
           </Link>
         </div>
+      ) : visibleBands.length === 0 && hideTestData && testBandCount > 0 ? (
+        <div className="directory-empty-state">
+          <strong>Test data is hidden</strong>
+          <p>Choose Show test data to view your seeded test bands.</p>
+        </div>
       ) : (
         <>
           <p className="my-bands-count">
-            {bands.length} {bands.length === 1 ? 'band' : 'bands'}
+            {visibleBands.length} {visibleBands.length === 1 ? 'band' : 'bands'}
+            {hideTestData && testBandCount > 0 ? (
+              <span className="directory-filter-pill my-bands-test-data-pill">Test data hidden</span>
+            ) : null}
           </p>
           <div className="directory-band-grid my-bands-grid">
-            {bands.map((band) => (
+            {visibleBands.map((band) => (
               <WorkspaceBandCard key={band.id} band={band} />
             ))}
           </div>

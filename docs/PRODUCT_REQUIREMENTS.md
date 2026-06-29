@@ -2,7 +2,7 @@
 
 **Document status:** Authoritative product requirements summary  
 **Product:** Bandie  
-**Last updated:** 30 June 2026
+**Last updated:** 30 June 2026 (full documentation alignment — player plans §20.2, UX, test-data toggles)
 
 ---
 
@@ -123,11 +123,11 @@ See `docs/project/bandie_build_elements.md` for the full list. Summary:
 9. Calendar availability (rehearsal + gig modes) — **done (web)**
 10. Gig management — **done (web)**
 11. Booking enquiry route — **done** (public form + structured inbox; entitlement limits when enforcing)
-12. Entitlement framework — **done** (enforcement off by default until Phase 15 billing or admin toggle)
+12. Entitlement framework — **done** (enforcement off by default; toggle at `/admin/entitlements` or `VITE_BANDIE_ENFORCE_ENTITLEMENTS`)
+13. Stripe billing — **done** (checkout, webhooks, `/app/profile` billing panel, `/admin/billing`; requires env + plan sync)
 
 ### Out of scope (MVP)
 
-- Payments and invoicing (Stripe billing — Phase 15, next)
 - Contract generation
 - Full review/ratings marketplace
 - AI setlist generation
@@ -172,7 +172,7 @@ Example band in mockups: **Skin Condition** (post-punk / new wave covers, London
 
 See `docs/DELIVERY_TASK_MAP.md` for phased delivery order.
 
-**Current focus:** Billing integration (Phase 15) — see `docs/PROJECT_STATUS_TRACKER.md`. Core web MVP (Phases 0–14) is shipped; enforcement remains off by default.
+**Current focus:** Phase 16 polish (activity feed, notifications), deployment hardening, and launch promo verification — see `docs/PROJECT_STATUS_TRACKER.md`. Core web MVP (Phases 0–15) is shipped; entitlement enforcement remains off by default until launch.
 
 ---
 

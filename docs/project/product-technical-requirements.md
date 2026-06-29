@@ -213,13 +213,25 @@ RLS policies must enforce band membership for all private data.
 
 | Code | Display name | Scope |
 |---|---|---|
-| `player_free` | Player Free | Band leader (default) |
+| `player_free` | Player Free | Player (default) — member-first; no band creates |
 | `player_plus` | Player Plus | Band leader (paid) |
 | `player_pro` | Player Pro | Band leader (paid) |
 | `organiser_free` | Organiser Free | Organiser (default) |
 | `organiser_plus` | Organiser Plus | Organiser (paid) |
 
 Band workspace limits resolve from the **primary leader’s** active subscription (`plan_scope = leader`). Upgrade prompt labels use `PLAN_DISPLAY_NAMES` for known codes; live plan names also load from the DB on subscription join.
+
+**Player plan limits (seeded in `20260630190000`; authoritative in entitlements spec §20.2):**
+
+| Code | `bands.max_count` | `songs.max_count` | `setlists.max_count` | Creates (band/song/setlist/upload) |
+|---|---:|---:|---:|---|
+| `player_free` | 0 | 0 | 0 | No |
+| `player_plus` | 1 | 20 | 3 | Yes |
+| `player_pro` | unlimited | 999 | 999 | Yes |
+
+**Test data (`VITE_BANDIE_DATA_MODE`):**
+- `live` — `@bandie/data` `filterTestRows()` excludes `test_user` rows from directory APIs; web hides **Hide test data** toggles
+- `test` — all rows returned; web may filter client-side via `directoryTestDataPreference.ts` (session storage)
 
 **Platform admin (`@bandie/data`):**
 - `adminPortal.ts` — search, audit, overview counts
@@ -228,8 +240,8 @@ Band workspace limits resolve from the **primary leader’s** active subscriptio
 - `gateLogs.ts` — gate decision logging
 
 **Calendar, gigs, booking (`@bandie/data`):**
-- `calendar.ts` — events, votes, `calendar.use` tier (`basic` on Player Free leader; `full` on Player Plus / Player Pro)
-- `gigs.ts` — CRUD, setlist context, `gig.create` limits
+- `calendar.ts` — events, votes, `calendar.use` tier (`none` on Player Free; `full` on Player Plus / Player Pro)
+- `gigs.ts` — organiser gig CRUD, band invites, setlist assignment RPCs, `gig.create` limits (organiser scope)
 - `bookingEnquiries.ts` — send, inbox, `booking_enquiry.send` limits
 
 **Usernames (`@bandie/data`):**

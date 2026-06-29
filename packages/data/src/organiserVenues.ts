@@ -146,6 +146,21 @@ export async function listMyOrganiserVenues(): Promise<OrganiserVenue[]> {
   return (data ?? []).map((row) => normalizeVenueRow(row as Record<string, unknown>));
 }
 
+export async function getOrganiserVenue(venueId: string): Promise<OrganiserVenue | null> {
+  const client = getBandieClient();
+  const { data, error } = await client
+    .from('bandie_organiser_venues')
+    .select('*')
+    .eq('id', venueId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data ? normalizeVenueRow(data as Record<string, unknown>) : null;
+}
+
 export async function createOrganiserVenue(input: OrganiserVenueInput): Promise<OrganiserVenue> {
   const client = getBandieClient();
   const {

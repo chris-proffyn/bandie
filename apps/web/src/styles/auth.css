@@ -725,6 +725,14 @@
   margin: 0 0 1rem;
   color: #bbb6aa;
   font-weight: 700;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.my-bands-test-data-pill {
+  margin: 0;
 }
 
 .my-bands-grid {

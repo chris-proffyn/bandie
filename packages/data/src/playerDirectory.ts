@@ -51,7 +51,7 @@ export type PlayerDirectorySort = 'recommended' | 'nameAsc' | 'experienceDesc' |
 
 export const DEFAULT_PLAYER_DIRECTORY_FILTERS: PlayerDirectoryFilters = {
   ...DEFAULT_DIRECTORY_AREA_FILTERS,
-  mode: 'temporary',
+  mode: 'any',
   name: '',
   instrument: '',
   primaryInstrumentOnly: true,

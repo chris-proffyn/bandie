@@ -229,6 +229,10 @@ Pale status pills (e.g. `#eef2ff` fill, `#dbeafe` fill) **without borders** disa
 
 **Billing and plan cards:** use the same light-surface rules. The billing panel is a nested `surface-light` card inside the profile page — never combine `panel` (dark translucent) with `surface-light`. Plan rows use white `#ffffff` shells; the current plan row uses `#eef2ff` fill with `#6366f1` border and `#111827` text (not dark fill with dark text).
 
+**Admin plan catalogue:** at `/admin/entitlements`, use grouped plan pills (Player plans / Organiser plans) and a single detail panel for the selected plan. Do not repeat full edit forms per plan in accordions. Internal plan codes (`player_free`, etc.) belong in muted meta text, not in pill labels.
+
+**Hide test data toggles:** only when `VITE_BANDIE_DATA_MODE=test` and the list contains `test_user` rows. Never show in `live` build mode. Use `directory-btn-secondary` styling; shared session preference across My Bands and directories.
+
 ---
 
 ## 7. Reusable Component Library

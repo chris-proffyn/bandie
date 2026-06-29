@@ -1,3 +1,5 @@
+import { includeTestData } from '@bandie/data';
+
 type DirectoryTestDataToggleProps = {
   hideTestData: boolean;
   testItemCount: number;
@@ -11,7 +13,7 @@ export function DirectoryTestDataToggle({
   itemLabel,
   onChange,
 }: DirectoryTestDataToggleProps) {
-  if (testItemCount === 0) {
+  if (!includeTestData() || testItemCount === 0) {
     return null;
   }
 

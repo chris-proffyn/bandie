@@ -1,5 +1,7 @@
 -- Phase 8.3: Entitlement plan catalogue, capabilities, seeds, default subscriptions.
 -- Product limits: docs/project/bandie_entitlements_admin_portal_functional_technical_spec.md §20.2
+-- NOTE: Player plan entitlement values below are superseded for live limits by
+--       20260630190000_bandie_player_plan_entitlements.sql (member-first Player Free model).
 
 -- ---------------------------------------------------------------------------
 -- Subscription scope — leader vs organiser plans on the same user

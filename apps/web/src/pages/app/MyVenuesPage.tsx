@@ -115,7 +115,7 @@ export function MyVenuesPage() {
           <div className="my-bands-header-actions">
             <button
               type="button"
-              className="directory-btn directory-btn-dark"
+              className="directory-btn directory-btn-primary"
               onClick={() => setShowAddForm(true)}
             >
               Add venue

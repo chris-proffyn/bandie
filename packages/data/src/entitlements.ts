@@ -45,7 +45,7 @@ const REQUIRED_UPGRADE_PLAN: Record<string, PlanCode> = {
   'band_members.max_count': PLAN_CODES.PLAYER_PLUS,
   'venues.max_count': PLAN_CODES.ORGANISER_PLUS,
   'booking_enquiries.monthly_max_count': PLAN_CODES.ORGANISER_PLUS,
-  'gigs.active_max_count': PLAN_CODES.PLAYER_PLUS,
+  'gigs.active_max_count': PLAN_CODES.ORGANISER_PLUS,
 };
 
 function allowedDecision(partial: Partial<GateDecision> = {}): GateDecision {
@@ -102,7 +102,9 @@ function resolvePlanScope(input: EntitlementCheckInput): EntitlementPlanScope {
     input.capability.startsWith('organiser_') ||
     input.capability.startsWith('booking_enquiry') ||
     input.capability.startsWith('open_mic') ||
-    input.capability.startsWith('event_brief')
+    input.capability.startsWith('event_brief') ||
+    input.capability.startsWith('gig.') ||
+    input.capability.startsWith('gigs.')
   ) {
     return 'organiser';
   }
@@ -121,7 +123,7 @@ function usageSubjectForCapability(
     return { subjectType: 'user', subjectId: billingUserId };
   }
   if (capability === 'gigs.active_max_count') {
-    return { subjectType: 'band', subjectId: input.bandId ?? input.subjectId };
+    return { subjectType: 'user', subjectId: billingUserId };
   }
   return { subjectType: input.subjectType, subjectId: input.subjectId };
 }

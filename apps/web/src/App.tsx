@@ -19,6 +19,8 @@ import { SetlistBuilderPage } from './pages/app/SetlistBuilderPage';
 import { CalendarPage } from './pages/app/CalendarPage';
 import { GigsDashboardPage } from './pages/app/GigsDashboardPage';
 import { GigDetailPage } from './pages/app/GigDetailPage';
+import { OrganiserGigsDashboardPage } from './pages/app/OrganiserGigsDashboardPage';
+import { OrganiserGigDetailPage } from './pages/app/OrganiserGigDetailPage';
 import { AdminLayout } from './components/admin/AdminLayout';
 import { AdminOverviewPage } from './pages/admin/AdminOverviewPage';
 import { AdminAccountsPage } from './pages/admin/AdminAccountsPage';
@@ -128,6 +130,22 @@ export default function App() {
               element={
                 <WorkspaceModeRoute mode="organiser">
                   <MyVenuesPage />
+                </WorkspaceModeRoute>
+              }
+            />
+            <Route
+              path="gigs/:gigId"
+              element={
+                <WorkspaceModeRoute mode="organiser">
+                  <OrganiserGigDetailPage />
+                </WorkspaceModeRoute>
+              }
+            />
+            <Route
+              path="gigs"
+              element={
+                <WorkspaceModeRoute mode="organiser">
+                  <OrganiserGigsDashboardPage />
                 </WorkspaceModeRoute>
               }
             />

@@ -48,7 +48,7 @@ export function getAppNavItems({
       items.push({ label: 'Songs', to: `/app/${resolvedBandId}/songs` });
       items.push({ label: 'Setlists', to: `/app/${resolvedBandId}/setlists` });
       items.push({ label: 'Calendar', to: `/app/${resolvedBandId}/calendar` });
-      items.push({ label: 'Gigs', to: `/app/${resolvedBandId}/gigs` });
+      items.push({ label: 'Gig invites', to: `/app/${resolvedBandId}/gigs` });
     }
 
     return items;
@@ -57,6 +57,7 @@ export function getAppNavItems({
   if (workspaceMode === 'organiser') {
     return [
       { label: 'Find bands', to: '/app/bands', end: true },
+      { label: 'My gigs', to: '/app/gigs' },
       { label: 'My venues', to: '/app/venues' },
       { label: 'My profile', to: '/app/profile' },
     ];
@@ -78,7 +79,7 @@ export function getAppNavItems({
     items.push({ label: 'Songs', to: `/app/${resolvedBandId}/songs` });
     items.push({ label: 'Setlists', to: `/app/${resolvedBandId}/setlists` });
     items.push({ label: 'Calendar', to: `/app/${resolvedBandId}/calendar` });
-    items.push({ label: 'Gigs', to: `/app/${resolvedBandId}/gigs` });
+    items.push({ label: 'Gig invites', to: `/app/${resolvedBandId}/gigs` });
   }
 
   return items;

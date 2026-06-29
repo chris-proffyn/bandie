@@ -7,10 +7,8 @@ import type { BackNavigationState } from './backNavigation';
 import { backNavigationState } from './backNavigation';
 import { createDefaultDirectoryAreaFilters, resolveDirectoryAreaFilters } from './directoryAreaDefaults';
 
-export const WORKSPACE_PLAYER_DIRECTORY_DEFAULTS: PlayerDirectoryFilters = {
-  ...DEFAULT_PLAYER_DIRECTORY_FILTERS,
-  mode: 'permanent',
-};
+export const WORKSPACE_PLAYER_DIRECTORY_DEFAULTS: PlayerDirectoryFilters =
+  DEFAULT_PLAYER_DIRECTORY_FILTERS;
 
 type StoredPlayerDirectoryNav = {
   filters: PlayerDirectoryFilters;

@@ -3,7 +3,7 @@
 **Document status:** Live project tracker  
 **Product:** Bandie  
 **Phase:** Phase 15 (billing) implemented — configure Stripe env vars and sync plans  
-**Last updated:** 30 June 2026 (Phase 15 Stripe billing: checkout, webhooks, profile billing UI)
+**Last updated:** 30 June 2026 (player plan entitlements, UX polish, test-data toggles, docs sync)
 
 ---
 
@@ -18,7 +18,7 @@
 | Web app scaffold (Vite + React + TypeScript) | Complete |
 | Bandie homepage (Phase 1) | Complete |
 | Mobile app (Phase 18) | Not started (placeholder only) |
-| Supabase schema / migrations | Platform + Bandie through `20260630160000` (plan display names); applied to remote (`supabase db push`) |
+| Supabase schema / migrations | Platform + Bandie through `20260630190000` (player plan entitlements); applied to remote (`supabase db push`) |
 | Authentication & band membership (Phase 2) | Complete |
 | Public band profile (Phase 3) | Complete |
 | Band directory (Phase 4) | Complete |
@@ -209,7 +209,7 @@ Release verification      ░░░░░░░░░░  Phase 16 — productio
 ### 4b. Player directory
 
 - [x] 4b.1 Public player listing data model and RLS
-- [x] 4b.2 Directory page (`/players`) with temporary vs permanent search modes
+- [x] 4b.2 Directory page (`/players`) with Any, temporary (deputy), and permanent (member) search modes — **Any** is default
 - [x] 4b.3 Mode-specific filters (gig date, budget, travel / experience)
 - [x] 4b.4 Player cards and public profile page (`/players/:profileId`)
 - [x] 4b.5 Profile editor fields for deputy fee and travel distance
@@ -271,11 +271,11 @@ Authoritative spec: `docs/project/bandie_entitlements_admin_portal_functional_te
 
 **Principle:** Plans, capabilities and limits are data — product code calls `canPerform()`, not hard-coded tier checks. **Subscriptions attach to users (players/organisers); band features resolve from the primary leader’s plan** (§20.1 #7). Enforce server-side in `@bandie/data` and critical DB writes. Ship permissive seed plans first so product work is not blocked; enforce freemium limits in Phase 14.
 
-**Product decisions:** Confirmed 29 June 2026 (stakeholder review) — spec §20.1–§20.2.
+**Product decisions:** Confirmed 30 June 2026 — spec §20.1–§20.2; player plan update migration `20260630190000`.
 
 - [x] 8.1 Document resolved product decisions (§20) — authoritative in `bandie_entitlements_admin_portal_functional_technical_spec.md` §20.1–§20.2
 - [x] 8.2 Schema — `bandie_plans`, `bandie_capabilities`, `bandie_plan_entitlements`, `bandie_subscriptions`, `bandie_usage_meters`, `bandie_entitlement_overrides` (RLS on all); migration `20260630100000`
-- [x] 8.3 Seed plans — `player_free` (**Player Free**), `player_plus` (**Player Plus**), `player_pro` (**Player Pro**), `organiser_free` (**Organiser Free**), `organiser_plus` (**Organiser Plus**); capabilities per §20.2; migrations `20260630110000`, code alignment `20260630170000`
+- [x] 8.3 Seed plans — five-plan catalogue; limits per §20.2; migrations `20260630110000`, `20260630170000`, **`20260630190000`** (Player Free member-first model)
 - [x] 8.4 `@bandie/data` entitlement service — `canPerform()`, plan resolution, usage summary, `EntitlementGateError`
 - [x] 8.5 Dev-mode permissive defaults — `VITE_BANDIE_ENFORCE_ENTITLEMENTS=false` by default (enforcement in Phase 14)
 - [x] 8.6 Gate pattern for new features — `checkBandLeaderCapability()` / `assertCanPerform()` exported for calendar/gigs
@@ -295,12 +295,14 @@ Reference: `product-functional-requirements.md` §10; mockup `bandie_calendar_mo
 
 ### 10. Gig management
 
-Reference: `product-functional-requirements.md` §11. Capability keys: `gig.create`, `gigs.active_max_count` (Phase 8).
+Reference: `product-functional-requirements.md` §11. Capability keys: `gig.create`, `gigs.active_max_count` (organiser scope, Phase 8).
 
-- [x] 10.1 Gig data model (`bandie_gigs`; RLS)
-- [x] 10.2 Gig list and detail views
-- [x] 10.3 Linked setlists and readiness context
-- [x] 10.4 Gig status workflow — enquiry through archived
+- [x] 10.1 Gig data model (`bandie_gigs`, `bandie_gig_bands`; RLS)
+- [x] 10.2 Organiser gig list and detail — `/app/gigs`, `/app/gigs/:gigId` (create, venue, invite bands, running order)
+- [x] 10.3 Band gig invitations — `/app/:bandId/gigs` (view invites; leaders accept/reject)
+- [x] 10.4 Band setlist assignment on accepted invites — `/app/:bandId/gigs/:gigId`
+- [x] 10.5 Gig status workflow — enquiry through archived
+- [x] 10.6 Entitlements moved to organiser plans (`gig.create`, `gigs.active_max_count` per organiser user)
 
 ### 11. Booking enquiries
 
@@ -392,6 +394,25 @@ Authoritative spec: entitlements spec §35 Phase E. Deferred until admin portal 
 ---
 
 ## Session notes
+
+**30 June 2026 — Documentation alignment (full sweep)**
+- Entitlements spec §§5–7, 10, 13, 19, 22, 25, 31, 33–35, 37: examples, matrices, API samples, and acceptance criteria aligned to §20.2 / `20260630190000`
+- Product functional/technical requirements, delivery map, UX framework, README, `.env.example` synced (player plans, test-data toggles, billing UX, plan catalogue UI)
+- Seed migration `20260630110000` annotated — live limits authoritative in `20260630190000`
+
+**30 June 2026 — Player plan entitlements (product update)**
+- Migration `20260630190000_bandie_player_plan_entitlements.sql` applied to remote
+- **Player Free:** profile + join bands by invite; view-only on band repertoire — no `band.create`, songs, setlists, uploads, or gig creates
+- **Player Plus:** 1 band, 20 songs, 3 setlists; full song folders and calendar (`calendar.use = full`)
+- **Player Pro:** unlimited bands; 999 songs and 999 setlists per band
+- Docs: entitlements spec §20.1–§20.2, product functional/technical requirements, tracker
+
+**30 June 2026 — UX and test-data polish**
+- **Billing & plans** (`/app/profile`): light-surface card, readable current-plan row, high-contrast buttons (`entitlements.css`, `RSD_UX_DESIGN_FRAMEWORK.md` §6.5)
+- **Admin plan catalogue** (`/admin/entitlements`): select-one plan picker (Player / Organiser groups) + single edit panel — no accordion per plan
+- **Player directory:** default search mode **Any role** (was temporary / permanent on workspace)
+- **Hide test data:** toggle on My Bands (`/app`), band directory, and player directory; shared session preference; toggles hidden when `VITE_BANDIE_DATA_MODE=live`
+- **Test data badges:** `TestDataBadge` on directory cards and workspace band cards when `test_user = true`
 
 **30 June 2026 — Phase 15 Stripe billing**
 - Implemented checkout, Customer Portal, webhooks, `/app/profile` billing panel, `/admin/billing`
@@ -598,7 +619,8 @@ Authoritative spec: entitlements spec §35 Phase E. Deferred until admin portal 
 
 **27 June 2026 — Test data mode**
 - Added `test_user` on `bandie_bands` and `bandie_profiles`
-- `VITE_BANDIE_DATA_MODE`: `live` hides test rows; `test` shows all directory data
+- `VITE_BANDIE_DATA_MODE`: `live` hides test rows from API queries; `test` shows all directory data including seeds
+- **Hide test data** toggle (test mode only): `/app` My Bands, `/bands`, `/players`, `/app/bands`, `/app/players` — session preference `bandie:directory:hide-test-data`
 - Seeded 10 fictitious bands and 50 test players for development/demo (London area, within ~25 miles)
 
 **27 June 2026 — Player directory “Any role” search mode**
@@ -611,7 +633,7 @@ Authoritative spec: entitlements spec §35 Phase E. Deferred until admin portal 
 
 **27 June 2026 — Player directory in workspace**
 - Authenticated player directory at `/app/players` with sidebar nav and band-leader entry points
-- Defaults to permanent member search; shared `PlayerDirectoryView` for public and workspace layouts
+- Defaults to **Any role** search mode (shared `PlayerDirectoryView` for public and workspace); band recruitment links still pre-set **Permanent member** + instrument
 - “Find players” on My bands hub and band overview (leaders)
 
 **27 June 2026 — Homepage “For players” section**

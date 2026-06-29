@@ -187,7 +187,7 @@ This document defines **delivery phases, sequencing, and dependencies**. It is a
 
 **Dependencies:** Phase 2+, entitlement framework (tracker Phase 8).
 
-**Status:** Partial — `/admin` portal shipped (overview, accounts, metrics, editable plan catalogue, entitlements draft/publish, overrides, gate logs, audit); billing admin (Phase 15), moderation and system health (Phase 19) deferred.
+**Status:** Partial — `/admin` portal shipped (overview, accounts, metrics, editable plan catalogue, entitlements draft/publish, overrides, gate logs, audit); Stripe billing admin at `/admin/billing` (Phase 15); moderation and system health (Phase 19) deferred.
 
 ---
 
@@ -230,8 +230,8 @@ Phases 0–5 constitute the **core product MVP** as defined in `PRODUCT_REQUIREM
 
 ## Current position
 
-**Completed:** Delivery map Phases 0–5; Phase 6 partial (communications); Phase 8 partial (admin portal foundation)  
-**Tracker alignment:** Phases 0–14 complete on web; remote DB migrated through `20260630150000`  
-**Next:** Phase 15 billing (Stripe); then Phase 16 polish, Phase 17 open mic, Phase 18 mobile
+**Completed:** Delivery map Phases 0–5; Phase 6 partial (communications); tracker Phases 0–15 on web  
+**Tracker alignment:** Phases 0–15 complete on web; remote DB migrated through `20260630190000`  
+**Next:** Phase 16 polish, Phase 17 open mic, Phase 18 mobile
 
 See `docs/PROJECT_STATUS_TRACKER.md` for the unified phase roadmap and item-level checklist (Phases 0–19).

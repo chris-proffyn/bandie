@@ -14,6 +14,17 @@
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.calendar-header-actions .directory-btn,
+.calendar-header-actions .auth-button {
+  width: auto;
+  flex: 0 0 auto;
+  min-height: 42px;
+  padding: 0.55rem 1.15rem;
+  border-radius: 12px;
 }
 
 .calendar-form-grid {

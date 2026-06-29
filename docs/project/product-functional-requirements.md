@@ -121,10 +121,18 @@ Fictitious bands and players are flagged with `test_user = true` on `bandie_band
 
 | `VITE_BANDIE_DATA_MODE` | Behaviour |
 |---|---|
-| `live` (default) | Test rows hidden from band directory, player directory, and public profiles |
+| `live` (default) | Test rows hidden from band directory, player directory, and public profiles; **Hide test data** toggles are not shown |
 | `test` | All published bands and players shown, including 10 seeded test bands and 50 test players (all based in London and surrounding area, within ~25 miles) |
 
 Real user-created records always have `test_user = false`.
+
+**Hide test data (test mode only):** When build mode is `test` and the current list includes seeded rows, users can hide them client-side without changing the API. Toggle appears on:
+
+- **My Bands** (`/app`)
+- Band directory (`/bands`, `/app/bands`)
+- Player directory (`/players`, `/app/players`)
+
+Preference is stored in session storage (`bandie:directory:hide-test-data`) and shared across those screens. Cards for test rows show a **Test data** badge when visible.
 
 ---
 
@@ -134,11 +142,11 @@ Public searchable directory at `/players` for finding musicians open to deputy o
 
 ### Search modes
 
-| Mode | Purpose |
-|---|---|
-| Any | Browse all listed musicians; optional deputy and member filters |
-| Temporary (deputy) | Find stand-in musicians for a specific gig |
-| Permanent (member) | Find musicians open to joining a band long-term |
+| Mode | Purpose | Default |
+|---|---|---|
+| Any | Browse all listed musicians; optional deputy and member filters | **Yes** — default on `/players` and `/app/players` |
+| Temporary (deputy) | Find stand-in musicians for a specific gig | |
+| Permanent (member) | Find musicians open to joining a band long-term | Used when arriving from band recruitment (`?forBand=…`) |
 
 ### Filters
 
@@ -165,8 +173,8 @@ Each opted-in musician has a public profile at `/players/:profileId` showing ava
 - Each flag controls visibility in the matching search mode; players open to both appear in temporary and permanent searches
 - Result cards show all active invite preferences, not just the current search mode
 - Profile data edited at `/app/profile`
-- Band leaders search from `/app/players` inside the authenticated workspace (defaults to permanent member mode)
-- **Band-scoped recruitment:** from a lineup part on `/app/:bandId`, **Find players** opens `/app/players?forBand=…&part=…&instrument=…` with filters pre-set; player profiles show invite actions (audition / join) when reached from this flow
+- Band leaders search from `/app/players` inside the authenticated workspace (defaults to **Any role** unless recruitment context applies)
+- **Band-scoped recruitment:** from a lineup part on `/app/:bandId`, **Find players** opens `/app/players?forBand=…&part=…&instrument=…` with filters pre-set to **Permanent member** and the part instrument; player profiles show invite actions (audition / join) when reached from this flow
 
 ---
 
@@ -328,12 +336,24 @@ Bandie app admins (`is_app_admin`) also have a dedicated **`/admin`** portal (se
 - Overview counts (users, bands, songs, setlists, gigs)
 - User and band search
 - Platform metrics (DAU/WAU/MAU, content totals, tier distribution) with CSV export
-- Entitlement admin — **editable plan catalogue** (five plans: **Player Free**, **Player Plus**, **Player Pro**, **Organiser Free**, **Organiser Plus**; plan codes unchanged), draft/publish workflow, manual overrides, gate decision logs, enforcement toggle
+- Entitlement admin — **editable plan catalogue** (five plans: **Player Free**, **Player Plus**, **Player Pro**, **Organiser Free**, **Organiser Plus**; plan codes unchanged): select a plan from grouped pills (Player / Organiser), then edit metadata and capabilities in one panel; draft/publish workflow, manual overrides, gate decision logs, enforcement toggle
 - Audit log
 
 Plan display names are stored in `bandie_plans.name` and surfaced in upgrade prompts via `PLAN_DISPLAY_NAMES` for known plan codes. Authoritative limits remain in `bandie_plan_entitlements`.
 
 Authoritative spec: `bandie_entitlements_admin_portal_functional_technical_spec.md` §20.2.
+
+### Player subscription tiers (band leader plans)
+
+Limits apply when entitlements are enforced. Band workspace features resolve from the **primary band leader’s** subscription (`plan_scope = leader`). Members on **Player Free** can view band content but cannot create bands, songs, setlists, or uploads on their own account.
+
+| Plan | Code | Summary |
+|---|---|---|
+| Player Free | `player_free` | Profile + join bands by invite; view songs/setlists — no creates |
+| Player Plus | `player_plus` | 1 band; 20 songs and 3 setlists per band; full calendar and song folders |
+| Player Pro | `player_pro` | Unlimited bands; 999 songs and 999 setlists per band |
+
+Billing UI at `/app/profile` (Stripe checkout and Customer Portal when configured). See tracker Phase 15.
 
 ### Workspace navigation (implemented)
 
@@ -509,21 +529,33 @@ Monthly view, event cards, member availability grid, summary counts.
 
 ## 11. Gig management
 
-**Status:** Implemented (web MVP) — `/app/:bandId/gigs`, `/app/:bandId/gigs/:gigId`
+**Status:** Implemented (web MVP) — organisers: `/app/gigs`, `/app/gigs/:gigId`; bands: `/app/:bandId/gigs`, `/app/:bandId/gigs/:gigId`
 
-Dedicated area for actual performance events (not just availability proposals).
+Gigs are **organiser-owned** events. Organisers create gigs, choose venues, invite bands and set running order. Band leaders **accept or reject** invites and **assign a setlist** from their band library (setlists are created in the setlists screen). All band members can view gig invitations and details.
+
+### Organiser responsibilities
+
+Create gig, venue (saved venue or ad hoc), date/time, status, notes, fee notes. Invite bands from the directory. Set running order for accepted bands. Manage gig pipeline (enquiry through archived).
+
+### Band leader responsibilities
+
+Respond to pending invites (accept/reject). Assign or change linked setlist after acceptance. View setlist readiness in gig context.
 
 ### Gig data
 
-Name, venue, address, date/times (load-in, soundcheck, performance), set length, sets, fee, deposit, organiser contact, visibility, notes, equipment, linked setlist, member availability, status.
+Name, venue, address, date/times, fee notes, organiser notes, status, linked venue record, invited bands with running order. Per-band setlist assignment on the invite record.
 
 ### Statuses
 
-Enquiry, proposed, provisional, confirmed, cancelled, completed, archived.
+Enquiry, proposed, confirmed, cancelled, completed, archived.
+
+### Invite statuses (per band)
+
+Pending, accepted, rejected, cancelled.
 
 ### Context
 
-Show setlist readiness, missing parts, member confirmation in gig context.
+Show setlist readiness, missing parts context via linked setlist metrics in band gig detail.
 
 ---
 
@@ -554,7 +586,9 @@ MVP may use in-app activity only; push/email deferred.
 | Homepage, directory, public profiles | Public |
 | Private workspace, songs, files, setlists, internal calendar | Approved band members only |
 | Band settings, member management | Band leader / admin |
-| Gigs, setlists, rehearsals creation | Band leader and above |
+| Gigs (create, venue, invites, running order) | Organiser |
+| Gig invites (accept/reject, assign setlist) | Band leader |
+| Gig invitation details | Band members (view) |
 | File upload, availability voting, comments | Members |
 | Specific songs/setlists | Guests/deps (scoped) |
 

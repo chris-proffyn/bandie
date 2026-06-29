@@ -102,12 +102,12 @@ export async function countActiveBandMembers(bandId: string): Promise<number> {
   return count ?? 0;
 }
 
-export async function countActiveGigsInBand(bandId: string): Promise<number> {
+export async function countActiveGigsForOrganiser(userId: string): Promise<number> {
   const client = getBandieClient();
   const { count, error } = await client
     .from('bandie_gigs')
     .select('id', { count: 'exact', head: true })
-    .eq('band_id', bandId)
+    .eq('organiser_user_id', userId)
     .in('status', ['enquiry', 'proposed', 'confirmed']);
 
   if (error) {
@@ -149,7 +149,7 @@ export async function measureUsage(
     case METER_KEYS.BOOKING_ENQUIRIES_SENT:
       return countBookingEnquiriesSentThisMonth(subjectId);
     case METER_KEYS.GIGS_ACTIVE_COUNT:
-      return countActiveGigsInBand(subjectId);
+      return countActiveGigsForOrganiser(subjectId);
     default:
       return 0;
   }
@@ -189,7 +189,6 @@ export async function reconcileBandUsageMeters(bandId: string): Promise<void> {
     syncUsageMeter(METER_KEYS.SONGS_COUNT, 'band', bandId),
     syncUsageMeter(METER_KEYS.SETLISTS_COUNT, 'band', bandId),
     syncUsageMeter(METER_KEYS.BAND_MEMBERS_COUNT, 'band', bandId),
-    syncUsageMeter(METER_KEYS.GIGS_ACTIVE_COUNT, 'band', bandId),
   ]);
 }
 
@@ -197,5 +196,6 @@ export async function reconcileUserUsageMeters(userId: string): Promise<void> {
   await Promise.all([
     syncUsageMeter(METER_KEYS.BANDS_COUNT, 'user', userId),
     syncUsageMeter(METER_KEYS.VENUES_COUNT, 'user', userId),
+    syncUsageMeter(METER_KEYS.GIGS_ACTIVE_COUNT, 'user', userId),
   ]);
 }

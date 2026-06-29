@@ -286,11 +286,15 @@ export function inferDefaultCountryCode(options?: {
   const locale = options?.locale;
   const timeZone = options?.timeZone;
 
-  return (
-    inferCountryCodeFromLocale(locale) ??
-    inferCountryCodeFromTimeZone(timeZone) ??
-    BANDIE_DEFAULT_COUNTRY_CODE
-  );
+  const fromTimeZone = inferCountryCodeFromTimeZone(timeZone);
+  const fromLocale = inferCountryCodeFromLocale(locale);
+
+  // UK/Ireland: prefer timezone over a misleading en-US browser locale.
+  if (fromTimeZone === 'GB' || fromTimeZone === 'IE') {
+    return fromTimeZone;
+  }
+
+  return fromLocale ?? fromTimeZone ?? BANDIE_DEFAULT_COUNTRY_CODE;
 }
 
 export function regionsForCountryCode(

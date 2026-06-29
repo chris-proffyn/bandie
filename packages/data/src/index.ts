@@ -119,6 +119,7 @@ export {
   formatOrganiserVenueLocation,
   formatOrganiserVenueAddress,
   listMyOrganiserVenues,
+  getOrganiserVenue,
   createOrganiserVenue,
   updateOrganiserVenue,
   deleteOrganiserVenue,
@@ -565,7 +566,7 @@ export {
   countSetlistsInBand,
   countOrganiserVenues,
   countActiveBandMembers,
-  countActiveGigsInBand,
+  countActiveGigsForOrganiser,
   countBookingEnquiriesSentThisMonth,
 } from './usageMeters';
 
@@ -595,19 +596,41 @@ export type {
 } from './calendar';
 
 export {
-  listBandGigs,
-  getGig,
-  createGig,
-  updateGig,
-  archiveGig,
+  listOrganiserGigs,
+  getOrganiserGig,
+  createOrganiserGig,
+  updateOrganiserGig,
+  archiveOrganiserGig,
+  inviteBandToGig,
+  cancelGigBandInvite,
+  updateGigBandRunningOrder,
+  listBandGigInvitations,
+  getBandGigInvitation,
+  respondToGigInvitation,
+  assignGigSetlist,
   computeGigDashboardMetrics,
+  computeBandGigInviteMetrics,
   formatGigStatus,
+  formatGigInviteStatus,
   gigStatusPillClass,
+  gigInviteStatusPillClass,
   GIG_STATUS_OPTIONS,
+  GIG_INVITE_STATUS_OPTIONS,
   ACTIVE_GIG_STATUSES,
-  GIG_LEADER_ONLY_MESSAGE,
+  GIG_BAND_LEADER_MESSAGE,
+  GIG_ORGANISER_ONLY_MESSAGE,
 } from './gigs';
-export type { BandGig, GigStatus, GigWithSetlistContext, CreateGigInput, UpdateGigInput } from './gigs';
+export type {
+  OrganiserGig,
+  GigStatus,
+  GigInviteStatus,
+  GigBandInvite,
+  GigBandInviteWithBand,
+  BandGigInvitation,
+  OrganiserGigDetail,
+  CreateOrganiserGigInput,
+  UpdateOrganiserGigInput,
+} from './gigs';
 
 export {
   listMyBookingEnquiries,
