@@ -1,5 +1,7 @@
 import { NavLink, Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import '../../styles/auth.css';
+import '../../styles/workspace.css';
 import '../../styles/admin.css';
 
 const ADMIN_NAV = [
@@ -14,7 +16,11 @@ export function AdminLayout() {
   const { isAppAdmin, loading, membershipResolved } = useAuth();
 
   if (loading || !membershipResolved) {
-    return <p className="workspace-empty-note">Loading admin portal…</p>;
+    return (
+      <div className="admin-shell-loading">
+        <p className="workspace-empty-note">Loading admin portal…</p>
+      </div>
+    );
   }
 
   if (!isAppAdmin) {
