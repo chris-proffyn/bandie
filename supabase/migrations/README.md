@@ -64,6 +64,10 @@ Song-part file bytes live in **Dropbox** (leader OAuth), not Supabase Storage. A
 
 - `20260629100000_bandie_songs_dropbox_foundation.sql` — `bandie_songs`, integrations, storage
 - `20260629110000_bandie_song_part_folders_files.sql` — part folders, file metadata, activity
+- `20260629120000_bandie_band_song_part_templates.sql` — band-level default part templates (RLS)
+- `20260629130000_bandie_ensure_song_part_templates_rpc.sql` — member seed RPC (superseded; dropped in `20260629140000`)
+- `20260629140000_bandie_song_parts_leader_only.sql` — leader-only folder writes; drops member template RPC
+- `20260629150000_bandie_songs_soft_delete.sql` — `is_deleted`, `deleted_at`, leader-only delete/restore trigger
 
 OAuth and Dropbox API routes run server-side (Netlify functions); tokens are not client-readable.
 

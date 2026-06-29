@@ -142,6 +142,21 @@ export function getSongPartDisplay(partKey: string, partLabel: string) {
   };
 }
 
+export function canPreviewSongPartFile(file: {
+  mime_type?: string | null;
+  display_name: string;
+}): boolean {
+  const mime = (file.mime_type ?? '').toLowerCase().trim();
+  if (mime === 'application/pdf') {
+    return true;
+  }
+  return file.display_name.toLowerCase().endsWith('.pdf');
+}
+
+/** Shown when a non-leader tries to manage part folders or upload song-part files. */
+export const SONG_PARTS_LEADER_ONLY_MESSAGE =
+  'This is a band leader feature. Ask your band leader to upload files and manage song part folders.';
+
 function songPartIconFromKey(partKey: string): string {
   const key = partKey.toLowerCase();
   if (key.includes('drum')) return '🥁';

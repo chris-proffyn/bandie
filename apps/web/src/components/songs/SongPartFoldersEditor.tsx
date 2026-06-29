@@ -3,6 +3,7 @@ import {
   createSongPartFolder,
   deleteSongPartFolder,
   getSongPartDisplay,
+  SONG_PARTS_LEADER_ONLY_MESSAGE,
   updateSongPartFolder,
   type SongPartFolderWithStats,
 } from '@bandie/data';
@@ -94,6 +95,12 @@ export function SongPartFoldersEditor({
   return (
     <div className="songs-part-folders-editor">
       {error ? <div className="songs-error">{error}</div> : null}
+
+      {!canManage ? (
+        <p className="my-bands-lead songs-leader-only-note" style={{ margin: 0 }}>
+          {SONG_PARTS_LEADER_ONLY_MESSAGE}
+        </p>
+      ) : null}
 
       <div className="songs-folder-grid">
         {partFolders.map((folder) => {

@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import {
   getSongPartDisplay,
+  SONG_PARTS_LEADER_ONLY_MESSAGE,
   uploadSongPartFile,
   type SongPartFolderWithStats,
 } from '@bandie/data';
@@ -11,6 +12,7 @@ type SongPartUploadPanelProps = {
   partFolders: SongPartFolderWithStats[];
   onUploaded: () => void;
   storageActive: boolean;
+  canManage: boolean;
 };
 
 const ACCEPTED_TYPES =
@@ -45,6 +47,7 @@ export function SongPartUploadPanel({
   partFolders,
   onUploaded,
   storageActive,
+  canManage,
 }: SongPartUploadPanelProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [partFolderId, setPartFolderId] = useState(partFolders[0]?.id ?? '');
@@ -54,6 +57,11 @@ export function SongPartUploadPanel({
 
   async function handleFiles(files: FileList | null) {
     if (!files?.length || !partFolderId) {
+      return;
+    }
+
+    if (!canManage) {
+      setError(SONG_PARTS_LEADER_ONLY_MESSAGE);
       return;
     }
 
@@ -98,6 +106,8 @@ export function SongPartUploadPanel({
       {error ? <div className="songs-error" style={{ marginBottom: '0.75rem' }}>{error}</div> : null}
       {message ? <div className="songs-success" style={{ marginBottom: '0.75rem' }}>{message}</div> : null}
 
+      {canManage ? (
+        <>
       <div
         className="songs-upload-zone surface-light"
         onDragOver={(event) => event.preventDefault()}
@@ -137,6 +147,12 @@ export function SongPartUploadPanel({
           </select>
         </label>
       </div>
+        </>
+      ) : (
+        <p className="my-bands-lead songs-leader-only-note" style={{ margin: 0 }}>
+          {SONG_PARTS_LEADER_ONLY_MESSAGE}
+        </p>
+      )}
     </div>
   );
 }

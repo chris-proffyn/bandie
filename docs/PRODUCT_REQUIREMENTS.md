@@ -75,7 +75,7 @@ Member-only area scoped to a selected band:
 - Musician / player profile (`/app/profile`) with username and workspace mode (player / organiser / both)
 - Organiser venues (`/app/venues`)
 - Workspace communications (`/app/communications`) — invitations, player outreach, direct messages with replies
-- Songs dashboard and song folders with **Dropbox song-part storage** (planned — `bandie_dropbox_song_part_storage_spec.md`)
+- Songs dashboard and song folders with **Dropbox song-part storage** — **done (web MVP)** — leader OAuth, upload, in-app PDF preview, download; leader-only folder management and uploads
 - Setlist management (planned)
 - Calendar (rehearsal + gig availability) (planned)
 - Gig management (planned)
@@ -113,12 +113,12 @@ See `docs/project/bandie_build_elements.md` for the full list. Summary:
 ### In scope
 
 1. User accounts and band membership — **done**
-2. Band creation and private workspace shell — **done** (songs/setlists deferred)
+2. Band creation and private workspace shell — **done**
 3. Public band profile — **done**
 4. Musician / player profiles and directory — **done**
 5. Band directory with search/filter — **done**
-6. Songs dashboard — **not started**
-7. Song folder with part folders and **Dropbox song-part file storage** — **not started** (leader OAuth; Bandie stores metadata only)
+6. Songs dashboard — **done (web)**
+7. Song folder with part folders and **Dropbox song-part file storage** — **done (web MVP)** — configurable band templates (default Guitar/Bass/Drums/Vocals/Shared), readiness, soft delete/restore, in-app PDF viewer
 8. Setlist management — **not started**
 9. Calendar availability (rehearsal + gig modes) — **not started**
 10. Basic booking enquiry route — **partial** (public profile form → direct message to primary contact)
@@ -170,7 +170,7 @@ Example band in mockups: **Skin Condition** (post-punk / new wave covers, London
 
 See `docs/DELIVERY_TASK_MAP.md` for phased delivery order.
 
-**Current focus:** Songs and repertoire with Dropbox song-part storage — see `docs/PROJECT_STATUS_TRACKER.md` and `docs/project/bandie_dropbox_song_part_storage_spec.md`.
+**Current focus:** Setlist management — see `docs/PROJECT_STATUS_TRACKER.md`. Songs and Dropbox song-part storage MVP is shipped on web.
 
 ---
 

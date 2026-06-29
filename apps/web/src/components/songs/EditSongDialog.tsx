@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { updateBandSong, type SongWithReadiness } from '@bandie/data';
+import { softDeleteBandSong, updateBandSong, type SongWithReadiness } from '@bandie/data';
 import {
   parseDurationFromForm,
   songToMetadataFormValues,
@@ -10,13 +10,23 @@ import { SongMetadataFormFields } from './SongMetadataFormFields';
 type EditSongDialogProps = {
   bandId: string;
   song: SongWithReadiness;
+  canManage: boolean;
   onClose: () => void;
   onSaved: () => void;
+  onDeleted?: () => void;
 };
 
-export function EditSongDialog({ bandId, song, onClose, onSaved }: EditSongDialogProps) {
+export function EditSongDialog({
+  bandId,
+  song,
+  canManage,
+  onClose,
+  onSaved,
+  onDeleted,
+}: EditSongDialogProps) {
   const [values, setValues] = useState<SongMetadataFormValues>(() => songToMetadataFormValues(song));
   const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   function handleChange(patch: Partial<SongMetadataFormValues>) {
@@ -47,6 +57,31 @@ export function EditSongDialog({ bandId, song, onClose, onSaved }: EditSongDialo
     }
   }
 
+  async function handleDelete() {
+    if (
+      !window.confirm(
+        `Delete "${song.title}" from the band songbook? Part files stay in Dropbox but the song will be hidden until restored.`,
+      )
+    ) {
+      return;
+    }
+
+    setDeleting(true);
+    setError(null);
+
+    try {
+      await softDeleteBandSong(bandId, song.id);
+      onDeleted?.();
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to delete song.');
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  const busy = submitting || deleting;
+
   return (
     <div className="songs-dialog-backdrop" role="presentation" onClick={onClose}>
       <div
@@ -64,13 +99,32 @@ export function EditSongDialog({ bandId, song, onClose, onSaved }: EditSongDialo
         <form className="songs-form" onSubmit={handleSubmit}>
           <SongMetadataFormFields values={values} onChange={handleChange} />
 
-          <div className="songs-form-actions">
-            <button type="button" className="directory-btn directory-btn-secondary" onClick={onClose}>
-              Cancel
-            </button>
-            <button type="submit" className="directory-btn directory-btn-primary" disabled={submitting}>
-              {submitting ? 'Saving…' : 'Save changes'}
-            </button>
+          <div className="songs-form-actions songs-form-actions-split">
+            {canManage ? (
+              <button
+                type="button"
+                className="songs-card-btn songs-card-btn-danger"
+                disabled={busy}
+                onClick={() => void handleDelete()}
+              >
+                {deleting ? 'Deleting…' : 'Delete song'}
+              </button>
+            ) : (
+              <span />
+            )}
+            <div className="songs-form-actions-main">
+              <button
+                type="button"
+                className="directory-btn directory-btn-secondary"
+                disabled={busy}
+                onClick={onClose}
+              >
+                Cancel
+              </button>
+              <button type="submit" className="directory-btn directory-btn-primary" disabled={busy}>
+                {submitting ? 'Saving…' : 'Save changes'}
+              </button>
+            </div>
           </div>
         </form>
       </div>

@@ -15,7 +15,7 @@ import {
   SONG_PART_UPLOAD_MAX_BYTES,
   validateSongPartMimeType,
 } from './lib/songPartsServer';
-import { getSupabaseAdmin, getUserFromBearerToken, userIsBandMember } from './lib/supabase';
+import { getSupabaseAdmin, getUserFromBearerToken, userOwnsBand } from './lib/supabase';
 
 type UploadBody = {
   bandId?: string;
@@ -54,9 +54,12 @@ export const handler: Handler = async (event: HandlerEvent) => {
       return errorResponse('bandId, songId, partFolderId, fileName and contentBase64 are required.', 400);
     }
 
-    const isMember = await userIsBandMember(user.id, bandId);
-    if (!isMember) {
-      return errorResponse('Only approved band members can upload song-part files.', 403);
+    const isLeader = await userOwnsBand(user.id, bandId);
+    if (!isLeader) {
+      return errorResponse(
+        'Only band leaders can upload song-part files. Ask your band leader to upload charts and part files for this band.',
+        403,
+      );
     }
 
     if (!validateSongPartMimeType(mimeType)) {
@@ -71,7 +74,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
     const admin = getSupabaseAdmin();
     const [{ data: band }, { data: song }, { data: partFolder }] = await Promise.all([
       admin.from('bandie_bands').select('id, slug').eq('id', bandId).maybeSingle(),
-      admin.from('bandie_songs').select('id, slug, readiness_status').eq('band_id', bandId).eq('id', songId).maybeSingle(),
+      admin.from('bandie_songs').select('id, slug, readiness_status, is_deleted').eq('band_id', bandId).eq('id', songId).maybeSingle(),
       admin
         .from('bandie_song_part_folders')
         .select('*')
@@ -83,6 +86,10 @@ export const handler: Handler = async (event: HandlerEvent) => {
 
     if (!band?.slug || !song || !partFolder) {
       return errorResponse('Song or part folder not found.', 404);
+    }
+
+    if (song.is_deleted) {
+      return errorResponse('This song has been deleted. Restore it before uploading files.', 409);
     }
 
     const { storage, integration } = await loadActiveBandSongPartStorage(admin, bandId);

@@ -4,6 +4,7 @@ import {
   deleteBandSongPartTemplate,
   ensureBandSongPartTemplates,
   listBandSongPartTemplates,
+  SONG_PARTS_LEADER_ONLY_MESSAGE,
   songPartDescription,
   songPartIcon,
   updateBandSongPartTemplate,
@@ -112,56 +113,56 @@ export function BandSongPartTemplatesPanel({ bandId, canManage }: BandSongPartTe
       {error ? <div className="songs-error">{error}</div> : null}
 
       {loading ? (
-        <p>Loading part templates…</p>
+        <p className="songs-templates-loading">Loading part templates…</p>
       ) : (
-        <div className="songs-template-list">
+        <div className="songs-template-grid">
           {templates.map((template) => (
-            <div key={template.id} className="songs-template-row surface-light">
-              <div className="songs-template-row-main">
-                <span className="songs-folder-icon" aria-hidden>
-                  {songPartIcon(template.part_key)}
-                </span>
-                <div>
-                  <strong>{template.part_label}</strong>
-                  <small>{songPartDescription(template.part_label)}</small>
+            <article key={template.id} className="songs-template-card surface-light">
+              <span className="songs-folder-icon" aria-hidden>
+                {songPartIcon(template.part_key)}
+              </span>
+              <h3>{template.part_label}</h3>
+              <p>{songPartDescription(template.part_label)}</p>
+              <span
+                className={
+                  template.required_for_readiness ? 'songs-pill green songs-pill-compact' : 'songs-pill blue songs-pill-compact'
+                }
+              >
+                {template.required_for_readiness ? 'Required' : 'Optional'}
+              </span>
+              {canManage ? (
+                <div className="songs-template-card-actions">
+                  <button
+                    type="button"
+                    className="songs-card-btn"
+                    disabled={submittingId === template.id}
+                    aria-label={
+                      template.required_for_readiness
+                        ? `Mark ${template.part_label} optional for readiness`
+                        : `Mark ${template.part_label} required for readiness`
+                    }
+                    onClick={() => void handleToggleRequired(template)}
+                  >
+                    {template.required_for_readiness ? 'Optional' : 'Required'}
+                  </button>
+                  <button
+                    type="button"
+                    className="songs-card-btn songs-card-btn-danger"
+                    disabled={submittingId === template.id || templates.length <= 1}
+                    aria-label={`Remove ${template.part_label} from band template`}
+                    onClick={() => void handleDelete(template)}
+                  >
+                    Remove
+                  </button>
                 </div>
-              </div>
-              <div className="songs-template-row-actions">
-                <span
-                  className={
-                    template.required_for_readiness ? 'songs-pill green' : 'songs-pill blue'
-                  }
-                >
-                  {template.required_for_readiness ? 'Required for readiness' : 'Optional'}
-                </span>
-                {canManage ? (
-                  <>
-                    <button
-                      type="button"
-                      className="directory-btn directory-btn-secondary"
-                      disabled={submittingId === template.id}
-                      onClick={() => void handleToggleRequired(template)}
-                    >
-                      {template.required_for_readiness ? 'Mark optional' : 'Mark required'}
-                    </button>
-                    <button
-                      type="button"
-                      className="directory-btn directory-btn-secondary"
-                      disabled={submittingId === template.id || templates.length <= 1}
-                      onClick={() => void handleDelete(template)}
-                    >
-                      Remove
-                    </button>
-                  </>
-                ) : null}
-              </div>
-            </div>
+              ) : null}
+            </article>
           ))}
         </div>
       )}
 
       {canManage ? (
-        <form className="songs-template-add-form" onSubmit={handleAddPart}>
+        <form className="songs-template-add-form surface-light" onSubmit={handleAddPart}>
           <label>
             Add part folder
             <input
@@ -172,15 +173,15 @@ export function BandSongPartTemplatesPanel({ bandId, canManage }: BandSongPartTe
           </label>
           <button
             type="submit"
-            className="directory-btn directory-btn-primary"
+            className="songs-card-btn songs-card-btn-primary"
             disabled={submittingId === 'new' || !newLabel.trim()}
           >
             Add part
           </button>
         </form>
       ) : (
-        <p className="my-bands-lead" style={{ margin: 0 }}>
-          Band leaders can edit the default part folders for new songs.
+        <p className="my-bands-lead songs-leader-only-note" style={{ margin: 0 }}>
+          {SONG_PARTS_LEADER_ONLY_MESSAGE}
         </p>
       )}
     </section>

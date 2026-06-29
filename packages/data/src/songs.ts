@@ -29,6 +29,8 @@ export type BandSong = {
   created_by: string;
   created_at: string;
   updated_at: string;
+  is_deleted: boolean;
+  deleted_at: string | null;
 };
 
 export type SongWithReadiness = BandSong & {
@@ -51,6 +53,7 @@ export type SongListFilters = {
   readiness?: 'all' | 'gig_ready' | 'not_started' | 'in_progress' | 'ready' | 'needs_review';
   key?: string;
   sort?: 'title' | 'recent' | 'played' | 'readiness';
+  includeDeleted?: boolean;
 };
 
 export type CreateSongInput = {
@@ -317,6 +320,7 @@ async function resolveUniqueSongSlug(
       .select('id')
       .eq('band_id', bandId)
       .eq('slug', candidate)
+      .eq('is_deleted', false)
       .maybeSingle();
 
     if (error) {
@@ -635,11 +639,13 @@ export async function listBandSongs(
   filters: SongListFilters = {},
 ): Promise<SongWithReadiness[]> {
   const client = getBandieClient();
-  const { data, error } = await client
-    .from('bandie_songs')
-    .select('*')
-    .eq('band_id', bandId)
-    .order('created_at', { ascending: false });
+  let query = client.from('bandie_songs').select('*').eq('band_id', bandId);
+
+  if (!filters.includeDeleted) {
+    query = query.eq('is_deleted', false);
+  }
+
+  const { data, error } = await query.order('created_at', { ascending: false });
 
   if (error) {
     throw new Error(error.message);
@@ -659,14 +665,19 @@ export async function getBandSongDashboardMetrics(bandId: string): Promise<SongD
   return computeSongDashboardMetrics(songs);
 }
 
-export async function getBandSong(bandId: string, songId: string): Promise<SongWithReadiness | null> {
+export async function getBandSong(
+  bandId: string,
+  songId: string,
+  options: { includeDeleted?: boolean } = {},
+): Promise<SongWithReadiness | null> {
   const client = getBandieClient();
-  const { data, error } = await client
-    .from('bandie_songs')
-    .select('*')
-    .eq('band_id', bandId)
-    .eq('id', songId)
-    .maybeSingle();
+  let query = client.from('bandie_songs').select('*').eq('band_id', bandId).eq('id', songId);
+
+  if (!options.includeDeleted) {
+    query = query.eq('is_deleted', false);
+  }
+
+  const { data, error } = await query.maybeSingle();
 
   if (error) {
     throw new Error(error.message);
@@ -729,6 +740,15 @@ export async function updateBandSong(
   input: UpdateSongInput,
 ): Promise<SongWithReadiness> {
   const client = getBandieClient();
+  const existingSong = await getBandSong(bandId, songId, { includeDeleted: true });
+  if (!existingSong) {
+    throw new Error('Song not found.');
+  }
+
+  if (existingSong.is_deleted) {
+    throw new Error('This song has been deleted. Restore it before editing.');
+  }
+
   const updates: Record<string, unknown> = {};
 
   if (input.title !== undefined) {
@@ -771,6 +791,70 @@ export async function updateBandSong(
   }
 
   return updated;
+}
+
+export async function softDeleteBandSong(bandId: string, songId: string): Promise<void> {
+  const client = getBandieClient();
+  const { data, error } = await client
+    .from('bandie_songs')
+    .update({
+      is_deleted: true,
+      deleted_at: new Date().toISOString(),
+    })
+    .eq('band_id', bandId)
+    .eq('id', songId)
+    .eq('is_deleted', false)
+    .select('id')
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data) {
+    throw new Error('Song not found or already deleted.');
+  }
+}
+
+export async function restoreBandSong(bandId: string, songId: string): Promise<SongWithReadiness> {
+  const client = getBandieClient();
+  const song = await getBandSong(bandId, songId, { includeDeleted: true });
+  if (!song) {
+    throw new Error('Song not found.');
+  }
+
+  if (!song.is_deleted) {
+    return song;
+  }
+
+  const slug = await resolveUniqueSongSlug(bandId, song.title, songId);
+  const { data, error } = await client
+    .from('bandie_songs')
+    .update({
+      is_deleted: false,
+      deleted_at: null,
+      slug,
+    })
+    .eq('band_id', bandId)
+    .eq('id', songId)
+    .eq('is_deleted', true)
+    .select('*')
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data) {
+    throw new Error('Unable to restore song.');
+  }
+
+  const restored = await getBandSong(bandId, songId);
+  if (!restored) {
+    throw new Error('Song was restored but could not be loaded.');
+  }
+
+  return restored;
 }
 
 export async function listSongPartFolders(

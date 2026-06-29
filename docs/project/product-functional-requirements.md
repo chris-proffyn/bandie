@@ -387,14 +387,14 @@ Feeds into broader song readiness alongside manual status and rehearsal confiden
 /Bandie/bands/{bandSlug}/song-parts/{songSlug}/{partSlug}
 ```
 
-Standard part slugs: `lead-guitar`, `rhythm-guitar`, `bass`, `drums`, `vocals`, `shared`. Lazy-created on first upload (MVP).
+Standard part slugs: `guitar`, `bass`, `drums`, `vocals`, `shared` (band-level templates; configurable per band and per song). Lazy-created on first upload (MVP).
 
 ### Permissions summary
 
-| Role | Connect Dropbox | Upload | Preview/download | Manage file status |
+| Role | Connect Dropbox | Upload | Preview/download | Manage file status / part folders |
 |---|---|---|---|---|
 | Band leader / admin | Yes | Yes | Yes | Yes |
-| Approved member | No | Yes (contributor) | Yes | Limited |
+| Approved member | No | No | Yes | No (view only) |
 | Dep / guest | No | Scoped only | Scoped only | No |
 | Public / organiser | No | No | No | No |
 
@@ -416,7 +416,7 @@ Title, artist, genre, arrangement notes, gig notes, readiness, times played, len
 
 ### Part folders
 
-Lead Guitar, Rhythm Guitar, Bass, Drums, Vocals, Shared — plus configurable additional folders (keys, brass, etc.).
+Guitar, Bass, Drums, Vocals, Shared — band-level templates for new songs; leaders can add/remove parts per song and mark required vs optional for readiness.
 
 ### Files
 
@@ -426,9 +426,11 @@ Upload and attach song-part files through Bandie into the leader’s Dropbox son
 
 Metadata in Bandie: name, type, part folder, uploader, date, version label, status (`current` / `draft` / `reference` / `superseded` / `archived` / `unavailable`).
 
-**Leader actions:** connect/reconnect Dropbox, initialise band song-parts root, upload, attach existing Dropbox file (scoped to band root), mark status, remove attachment from Bandie (MVP: does not delete Dropbox file).
+**Leader actions:** connect/reconnect Dropbox, initialise band song-parts root, add songs, soft-delete/restore songs, manage part templates and per-song folders, upload, attach existing Dropbox file (scoped to band root), mark status, remove attachment from Bandie (MVP: does not delete Dropbox file).
 
-**Member actions:** view, upload (where permitted), preview, download through Bandie.
+**Member actions:** view repertoire, preview PDFs in-app, download through Bandie.
+
+**Soft delete:** Leaders delete songs from the edit modal (`is_deleted`); deleted songs hidden from the dashboard unless “Show deleted songs” is enabled; leaders can restore.
 
 **Health states:** disconnected, needs reconnect, folder missing — songs and setlists remain usable; only file access is affected.
 

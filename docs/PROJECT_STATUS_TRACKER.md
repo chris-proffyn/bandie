@@ -2,8 +2,8 @@
 
 **Document status:** Live project tracker  
 **Product:** Bandie  
-**Phase:** Phase 6 in progress (songs & repertoire — configurable part folders)
-**Last updated:** 29 June 2026 (configurable band/song part folders)
+**Phase:** Phase 6 in progress (songs & repertoire — MVP core shipped; setlists next)
+**Last updated:** 29 June 2026 (soft delete, leader-only uploads, in-app PDF viewer, part templates)
 
 ---
 
@@ -18,7 +18,7 @@
 | Web app scaffold (Vite + React + TypeScript) | Complete |
 | Bandie homepage (Phase 1) | Complete |
 | Mobile app | Not started (placeholder only) |
-| Supabase schema / migrations | Platform + Bandie bootstrap through organiser venues (`20260628300000`); apply with `supabase db push` |
+| Supabase schema / migrations | Platform + Bandie through songs soft delete (`20260629150000`); apply with `supabase db push` |
 | Authentication & band membership (Phase 2) | Complete |
 | Public band profile (Phase 3) | Complete |
 | Band directory (Phase 4) | Complete |
@@ -29,8 +29,8 @@
 | Workspace communications | Partial — unified hub at `/app/communications` (invites, player outreach, messages with replies) |
 | Booking enquiries | Partial — structured enquiry form on public band profile sends direct message to primary contact |
 | Organiser venues | Complete — `/app/venues` in organiser workspace mode |
-| Song-part file storage | Planned — **Dropbox** (leader-owned OAuth); spec: `bandie_dropbox_song_part_storage_spec.md` |
-| Songs & repertoire (Phase 6) | In progress — foundation schema, Dropbox connect, band storage settings UI |
+| Song-part file storage | **Dropbox** — leader OAuth, band song-parts root, upload/preview/download via Netlify (`bandie_dropbox_song_part_storage_spec.md`) |
+| Songs & repertoire (Phase 6) | In progress — dashboard, song folder, Dropbox uploads, configurable part templates, in-app PDF view, soft delete; setlists deferred |
 
 ## Active constraints
 
@@ -45,7 +45,7 @@
 
 ## Current focus
 
-**Next capability:** Songs and repertoire with Dropbox song-part storage (Phase 6)
+**Next capability:** Setlist management (Phase 7) — songs MVP core complete on web
 
 Reference documents:
 - `docs/project/product-functional-requirements.md` §7–8, §8b
@@ -68,7 +68,7 @@ Auth & membership         ██████████  signup, login, bands, 
 Public profile & dir      ██████████  profiles + searchable directory
 Player profiles & dir     ██████████  musician profiles + /players directory
 Private workspace shell   ██████████  overview, leader, lineup parts, recruitment, invites
-Songs & repertoire        ░░░░░░░░░░  Phase 6 — next up (Dropbox song-part files)
+Songs & repertoire        ████████░░  Phase 6 — dashboard, Dropbox files, templates, soft delete (setlists next)
 Mobile app                ░░░░░░░░░░  Phase 12 (deferred)
 Release verification      ░░░░░░░░░░  production smoke + a11y pass
 ```
@@ -202,6 +202,9 @@ Release verification      ░░░░░░░░░░  production smoke + a11
 - [x] 6.8 Upload song-part files to Dropbox via Bandie; metadata in `bandie_song_part_files`
 - [x] 6.9 Preview/download through Bandie-controlled endpoints (members without Dropbox access)
 - [x] 6.10 File status, activity log, disconnect/reconnect error states (upload/preview unavailable when storage inactive)
+- [x] 6.11 In-app PDF viewer for song-part files (browser-native modal; PDF only in v1)
+- [x] 6.12 Song soft delete and restore (`is_deleted`, `deleted_at`; leaders only)
+- [x] 6.13 Leader-only part folder management, templates, and file uploads (members view/download)
 
 ### 6b. Dropbox song-part storage (detail)
 
@@ -261,6 +264,22 @@ Authoritative spec: `docs/project/bandie_dropbox_song_part_storage_spec.md`
 ---
 
 ## Session notes
+
+**29 June 2026 — Song soft delete**
+- `bandie_songs.is_deleted` + `deleted_at`; partial unique slug for active songs only
+- Leaders delete from edit modal; deleted songs hidden from list; checkbox to show and restore
+- Trigger enforces leader-only delete/restore
+
+**29 June 2026 — Song parts leader-only**
+- Reverted member template seeding RPC; part folder create/update/delete restricted to band leaders (RLS)
+- Upload endpoint and UI: leaders only; members see leader guidance message
+- Shared `SONG_PARTS_LEADER_ONLY_MESSAGE` in `@bandie/data`
+
+**29 June 2026 — In-app PDF viewer for song parts**
+- PDF **View** opens `SongPartFileViewerModal` with browser-native iframe renderer (Dropbox temp URL); no new npm deps
+- View shown only for PDFs (`canPreviewSongPartFile`); other types remain download-only
+- Escape to close, focus trap, **Open in new tab** fallback; activity log unchanged via preview API
+- If iframe still forces download on Safari/iOS, next step is blob stream for files under ~5 MB (not proxied 25 MB files)
 
 **29 June 2026 — Configurable song part folders**
 - Migration `20260629120000_bandie_band_song_part_templates.sql`: `bandie_band_song_part_templates`; band leaders manage default folders for new songs

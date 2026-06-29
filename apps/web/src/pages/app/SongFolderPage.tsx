@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
+  canPreviewSongPartFile,
   checkBandSongPartStorageHealth,
   downloadSongPartFile,
   formatSongDuration,
@@ -8,7 +9,7 @@ import {
   formatSongReadinessStatus,
   getBandSong,
   getSongPartDisplay,
-  getSongPartFilePreviewUrl,
+  isBandLeaderRole,
   listSongPartFiles,
   listSongPartFolders,
   type SongPartFile,
@@ -18,6 +19,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { SongPartFoldersEditor } from '../../components/songs/SongPartFoldersEditor';
 import { EditSongDialog } from '../../components/songs/EditSongDialog';
+import { SongPartFileViewerModal } from '../../components/songs/SongPartFileViewerModal';
 import { SongPartUploadPanel } from '../../components/songs/SongPartUploadPanel';
 import { SongsBandContextBar } from '../../components/songs/SongsBandContextBar';
 import '../../styles/songs.css';
@@ -33,9 +35,11 @@ function fileTypeLabel(file: SongPartFile): string {
 
 export function SongFolderPage() {
   const { bandId, songId } = useParams();
+  const navigate = useNavigate();
   const { bands, adminModeActive } = useAuth();
   const membership = bands.find((item) => item.id === bandId);
   const canAccessBand = Boolean(membership) || adminModeActive;
+  const canManageSongParts = adminModeActive || isBandLeaderRole(membership?.member_role);
 
   const [song, setSong] = useState<SongWithReadiness | null>(null);
   const [partFolders, setPartFolders] = useState<SongPartFolderWithStats[]>([]);
@@ -46,6 +50,7 @@ export function SongFolderPage() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionId, setActionId] = useState<string | null>(null);
   const [showEditSong, setShowEditSong] = useState(false);
+  const [viewerFile, setViewerFile] = useState<{ file: SongPartFile; partLabel: string } | null>(null);
 
   const folderLabelById = useMemo(() => {
     const map = new Map<string, string>();
@@ -88,25 +93,6 @@ export function SongFolderPage() {
   useEffect(() => {
     void loadSongWorkspace();
   }, [loadSongWorkspace]);
-
-  async function handlePreview(file: SongPartFile) {
-    if (!bandId) {
-      return;
-    }
-
-    setActionId(file.id);
-    setActionError(null);
-
-    try {
-      const preview = await getSongPartFilePreviewUrl(bandId, file.id);
-      window.open(preview.previewUrl, '_blank', 'noopener,noreferrer');
-      await loadSongWorkspace();
-    } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Unable to preview file.');
-    } finally {
-      setActionId(null);
-    }
-  }
 
   async function handleDownload(file: SongPartFile) {
     if (!bandId) {
@@ -230,7 +216,7 @@ export function SongFolderPage() {
             bandId={bandId}
             songId={songId}
             partFolders={partFolders}
-            canManage={canAccessBand}
+            canManage={canManageSongParts}
             onChanged={() => void loadSongWorkspace()}
           />
         </div>
@@ -293,6 +279,7 @@ export function SongFolderPage() {
             songId={songId}
             partFolders={partFolders}
             storageActive={storageActive}
+            canManage={canManageSongParts}
             onUploaded={() => void loadSongWorkspace()}
           />
         </aside>
@@ -302,7 +289,7 @@ export function SongFolderPage() {
         <div className="songs-side-card-header">
           <div>
             <h2>Files in this song</h2>
-            <p>Grouped by part. Preview or download through Bandie — no Dropbox account needed.</p>
+            <p>View PDFs in Bandie or download any file — no Dropbox account needed.</p>
           </div>
         </div>
 
@@ -336,14 +323,21 @@ export function SongFolderPage() {
                   {formatSongPartFileStatus(file.status)}
                 </span>
                 <div style={{ display: 'flex', gap: '0.45rem' }}>
-                  <button
-                    type="button"
-                    className="directory-btn directory-btn-secondary"
-                    disabled={actionId === file.id || file.status === 'unavailable'}
-                    onClick={() => void handlePreview(file)}
-                  >
-                    View
-                  </button>
+                  {canPreviewSongPartFile(file) ? (
+                    <button
+                      type="button"
+                      className="directory-btn directory-btn-secondary"
+                      disabled={file.status === 'unavailable'}
+                      onClick={() =>
+                        setViewerFile({
+                          file,
+                          partLabel,
+                        })
+                      }
+                    >
+                      View
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     className="directory-btn directory-btn-secondary"
@@ -359,12 +353,25 @@ export function SongFolderPage() {
         )}
       </section>
 
+      {viewerFile ? (
+        <SongPartFileViewerModal
+          bandId={bandId}
+          fileId={viewerFile.file.id}
+          displayName={viewerFile.file.display_name}
+          partLabel={viewerFile.partLabel}
+          onClose={() => setViewerFile(null)}
+          onPreviewed={() => void loadSongWorkspace()}
+        />
+      ) : null}
+
       {showEditSong ? (
         <EditSongDialog
           bandId={bandId}
           song={song}
+          canManage={canManageSongParts}
           onClose={() => setShowEditSong(false)}
           onSaved={() => void loadSongWorkspace()}
+          onDeleted={() => navigate(`/app/${bandId}/songs`)}
         />
       ) : null}
     </div>

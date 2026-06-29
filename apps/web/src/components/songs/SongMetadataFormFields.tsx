@@ -33,7 +33,7 @@ export function SongMetadataFormFields({
         </label>
       </div>
 
-      <div className="songs-form-grid">
+      <div className="songs-form-grid songs-form-grid--compact">
         <label>
           Key
           <input
@@ -42,27 +42,25 @@ export function SongMetadataFormFields({
             placeholder="E, Am, etc."
           />
         </label>
-        <div className="songs-form-grid">
-          <label>
-            Length (min)
-            <input
-              type="number"
-              min="0"
-              value={values.durationMinutes}
-              onChange={(event) => onChange({ durationMinutes: event.target.value })}
-            />
-          </label>
-          <label>
-            Length (sec)
-            <input
-              type="number"
-              min="0"
-              max="59"
-              value={values.durationSeconds}
-              onChange={(event) => onChange({ durationSeconds: event.target.value })}
-            />
-          </label>
-        </div>
+        <label>
+          Length (min)
+          <input
+            type="number"
+            min="0"
+            value={values.durationMinutes}
+            onChange={(event) => onChange({ durationMinutes: event.target.value })}
+          />
+        </label>
+        <label>
+          Length (sec)
+          <input
+            type="number"
+            min="0"
+            max="59"
+            value={values.durationSeconds}
+            onChange={(event) => onChange({ durationSeconds: event.target.value })}
+          />
+        </label>
       </div>
 
       <label>

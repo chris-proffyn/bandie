@@ -1,15 +1,16 @@
 import { useState } from 'react';
-import { createBandSong } from '@bandie/data';
+import { createBandSong, SONG_PARTS_LEADER_ONLY_MESSAGE } from '@bandie/data';
 import { EMPTY_SONG_METADATA, parseDurationFromForm, type SongMetadataFormValues } from '../../lib/songMetadataForm';
 import { SongMetadataFormFields } from './SongMetadataFormFields';
 
 type AddSongDialogProps = {
   bandId: string;
+  canManage: boolean;
   onClose: () => void;
   onCreated: () => void;
 };
 
-export function AddSongDialog({ bandId, onClose, onCreated }: AddSongDialogProps) {
+export function AddSongDialog({ bandId, canManage, onClose, onCreated }: AddSongDialogProps) {
   const [values, setValues] = useState<SongMetadataFormValues>(EMPTY_SONG_METADATA);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,6 +21,11 @@ export function AddSongDialog({ bandId, onClose, onCreated }: AddSongDialogProps
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
+    if (!canManage) {
+      setError(SONG_PARTS_LEADER_ONLY_MESSAGE);
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
 

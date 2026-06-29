@@ -12,6 +12,8 @@ import {
   isBandLeaderRole,
   listBandSongs,
   listRecentSongPartActivity,
+  restoreBandSong,
+  SONG_PARTS_LEADER_ONLY_MESSAGE,
   songTitleInitials,
   type SongListFilters,
   type SongPartFileActivity,
@@ -51,6 +53,8 @@ export function SongsDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showAddSong, setShowAddSong] = useState(false);
+  const [showDeleted, setShowDeleted] = useState(false);
+  const [restoringId, setRestoringId] = useState<string | null>(null);
   const [filters, setFilters] = useState<SongListFilters>({
     search: '',
     genre: 'all',
@@ -69,7 +73,7 @@ export function SongsDashboardPage() {
 
     try {
       const [songRows, activityRows] = await Promise.all([
-        listBandSongs(bandId, filters),
+        listBandSongs(bandId, { ...filters, includeDeleted: showDeleted }),
         listRecentSongPartActivity(bandId),
       ]);
       setSongs(songRows);
@@ -81,16 +85,36 @@ export function SongsDashboardPage() {
     } finally {
       setLoading(false);
     }
-  }, [bandId, filters]);
+  }, [bandId, filters, showDeleted]);
 
   useEffect(() => {
     void loadDashboard();
   }, [loadDashboard]);
 
-  const metrics = useMemo(() => computeSongDashboardMetrics(songs), [songs]);
-  const snapshots = useMemo(() => computeReadinessSnapshots(songs), [songs]);
-  const genres = useMemo(() => collectSongGenres(songs), [songs]);
-  const keys = useMemo(() => collectSongKeys(songs), [songs]);
+  async function handleRestoreSong(songId: string) {
+    if (!bandId) {
+      return;
+    }
+
+    setRestoringId(songId);
+    setLoadError(null);
+
+    try {
+      await restoreBandSong(bandId, songId);
+      await loadDashboard();
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : 'Unable to restore song.');
+    } finally {
+      setRestoringId(null);
+    }
+  }
+
+  const activeSongCount = useMemo(() => songs.filter((song) => !song.is_deleted).length, [songs]);
+
+  const metrics = useMemo(() => computeSongDashboardMetrics(songs.filter((song) => !song.is_deleted)), [songs]);
+  const snapshots = useMemo(() => computeReadinessSnapshots(songs.filter((song) => !song.is_deleted)), [songs]);
+  const genres = useMemo(() => collectSongGenres(songs.filter((song) => !song.is_deleted)), [songs]);
+  const keys = useMemo(() => collectSongKeys(songs.filter((song) => !song.is_deleted)), [songs]);
 
   if (!bandId) {
     return null;
@@ -123,15 +147,21 @@ export function SongsDashboardPage() {
           <Link to={`/app/${bandId}`} className="directory-btn directory-btn-secondary">
             Band overview
           </Link>
-          <button
-            type="button"
-            className="directory-btn directory-btn-primary"
-            onClick={() => setShowAddSong(true)}
-          >
-            Add song
-          </button>
+          {canManageParts ? (
+            <button
+              type="button"
+              className="directory-btn directory-btn-primary"
+              onClick={() => setShowAddSong(true)}
+            >
+              Add song
+            </button>
+          ) : null}
         </div>
       </header>
+
+      {!canManageParts ? (
+        <p className="my-bands-lead songs-leader-only-note">{SONG_PARTS_LEADER_ONLY_MESSAGE}</p>
+      ) : null}
 
       {loadError ? <div className="songs-error">{loadError}</div> : null}
 
@@ -238,21 +268,49 @@ export function SongsDashboardPage() {
               <option value="played">Sort: Most played</option>
               <option value="readiness">Sort: Readiness</option>
             </select>
+            <label className="songs-show-deleted-checkbox">
+              <input
+                type="checkbox"
+                checked={showDeleted}
+                onChange={(event) => setShowDeleted(event.target.checked)}
+              />
+              Show deleted songs
+            </label>
           </div>
 
           {loading ? (
             <p>Loading songs…</p>
-          ) : songs.length === 0 ? (
+          ) : activeSongCount === 0 && !showDeleted ? (
             <div className="directory-empty-state">
               <strong>No songs yet</strong>
               <p>Add your first song to start building the band repertoire and part folders.</p>
-              <button
-                type="button"
-                className="directory-btn directory-btn-primary"
-                onClick={() => setShowAddSong(true)}
-              >
-                Add your first song
-              </button>
+              {canManageParts ? (
+                <button
+                  type="button"
+                  className="directory-btn directory-btn-primary"
+                  onClick={() => setShowAddSong(true)}
+                >
+                  Add your first song
+                </button>
+              ) : null}
+            </div>
+          ) : songs.length === 0 ? (
+            <div className="directory-empty-state">
+              <strong>No songs yet</strong>
+              <p>
+                {showDeleted
+                  ? 'There are no songs in this band songbook.'
+                  : 'Add your first song to start building the band repertoire and part folders.'}
+              </p>
+              {canManageParts && !showDeleted ? (
+                <button
+                  type="button"
+                  className="directory-btn directory-btn-primary"
+                  onClick={() => setShowAddSong(true)}
+                >
+                  Add your first song
+                </button>
+              ) : null}
             </div>
           ) : (
             <div className="songs-table-wrap">
@@ -266,19 +324,31 @@ export function SongsDashboardPage() {
                     <th className="songs-hide-sm">Length</th>
                     <th className="songs-hide-sm">Key</th>
                     <th>Parts</th>
+                    {showDeleted ? <th>Actions</th> : null}
                   </tr>
                 </thead>
                 <tbody>
                   {songs.map((song) => (
-                    <tr key={song.id}>
+                    <tr key={song.id} className={song.is_deleted ? 'songs-table-row-deleted' : undefined}>
                       <td>
-                        <Link className="songs-table-link" to={`/app/${bandId}/songs/${song.id}`}>
-                          <span className="songs-art">{songTitleInitials(song.title)}</span>
-                          <span>
-                            {song.title}
-                            {song.artist ? <small className="songs-artist">{song.artist}</small> : null}
-                          </span>
-                        </Link>
+                        {song.is_deleted ? (
+                          <div className="songs-table-link songs-table-link-static">
+                            <span className="songs-art">{songTitleInitials(song.title)}</span>
+                            <span>
+                              {song.title}
+                              {song.artist ? <small className="songs-artist">{song.artist}</small> : null}
+                              <small className="songs-artist">Deleted</small>
+                            </span>
+                          </div>
+                        ) : (
+                          <Link className="songs-table-link" to={`/app/${bandId}/songs/${song.id}`}>
+                            <span className="songs-art">{songTitleInitials(song.title)}</span>
+                            <span>
+                              {song.title}
+                              {song.artist ? <small className="songs-artist">{song.artist}</small> : null}
+                            </span>
+                          </Link>
+                        )}
                       </td>
                       <td className="songs-hide-sm">
                         {song.genre ? <span className="songs-pill blue">{song.genre}</span> : '—'}
@@ -299,6 +369,22 @@ export function SongsDashboardPage() {
                             : '—'}
                         </span>
                       </td>
+                      {showDeleted ? (
+                        <td>
+                          {song.is_deleted && canManageParts ? (
+                            <button
+                              type="button"
+                              className="songs-card-btn"
+                              disabled={restoringId === song.id}
+                              onClick={() => void handleRestoreSong(song.id)}
+                            >
+                              {restoringId === song.id ? 'Restoring…' : 'Restore'}
+                            </button>
+                          ) : (
+                            '—'
+                          )}
+                        </td>
+                      ) : null}
                     </tr>
                   ))}
                 </tbody>
@@ -359,6 +445,7 @@ export function SongsDashboardPage() {
       {showAddSong ? (
         <AddSongDialog
           bandId={bandId}
+          canManage={canManageParts}
           onClose={() => setShowAddSong(false)}
           onCreated={() => void loadDashboard()}
         />

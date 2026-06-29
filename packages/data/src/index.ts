@@ -376,6 +376,8 @@ export type {
 
 export {
   getSongPartDisplay,
+  canPreviewSongPartFile,
+  SONG_PARTS_LEADER_ONLY_MESSAGE,
   formatSongPartFileStatus,
 } from './songParts';
 export type {
@@ -412,6 +414,8 @@ export {
   getBandSong,
   createBandSong,
   updateBandSong,
+  softDeleteBandSong,
+  restoreBandSong,
   listSongPartFolders,
   listSongPartFiles,
   listRecentSongPartActivity,
