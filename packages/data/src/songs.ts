@@ -2,12 +2,15 @@ import { slugifyBandName } from '@bandie/utils';
 import { getBandieClient } from './context';
 import { getCurrentSession } from './auth';
 import {
-  STANDARD_SONG_PARTS,
   type SongPartFile,
   type SongPartFileActivity,
   type SongPartFolder,
   type SongPartFolderWithStats,
 } from './songParts';
+import {
+  ensureBandSongPartTemplates,
+  templateRowsForSongFolders,
+} from './songPartTemplates';
 
 export type SongReadinessStatus = 'not_started' | 'in_progress' | 'ready' | 'needs_review';
 
@@ -331,19 +334,267 @@ async function resolveUniqueSongSlug(
 
 async function createDefaultPartFolders(bandId: string, songId: string): Promise<void> {
   const client = getBandieClient();
-  const rows = STANDARD_SONG_PARTS.map((part) => ({
+  const templates = await ensureBandSongPartTemplates(bandId);
+  const rows = templateRowsForSongFolders(templates, bandId, songId);
+
+  const { error } = await client.from('bandie_song_part_folders').insert(rows);
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+async function resolveUniqueSongPartKey(
+  bandId: string,
+  songId: string,
+  label: string,
+  excludeFolderId?: string,
+): Promise<string> {
+  const client = getBandieClient();
+  const base = slugifyBandName(label) || 'part';
+  let candidate = base;
+  let suffix = 2;
+
+  while (true) {
+    const { data, error } = await client
+      .from('bandie_song_part_folders')
+      .select('id')
+      .eq('band_id', bandId)
+      .eq('song_id', songId)
+      .eq('part_key', candidate)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    if (!data || data.id === excludeFolderId) {
+      return candidate;
+    }
+
+    candidate = `${base}-${suffix}`;
+    suffix += 1;
+  }
+}
+
+export async function recalculateSongReadiness(bandId: string, songId: string): Promise<void> {
+  const client = getBandieClient();
+  const [{ data: folders }, { data: files }, { data: song }] = await Promise.all([
+    client
+      .from('bandie_song_part_folders')
+      .select('id, required_for_readiness')
+      .eq('band_id', bandId)
+      .eq('song_id', songId),
+    client
+      .from('bandie_song_part_files')
+      .select('song_part_folder_id, status')
+      .eq('band_id', bandId)
+      .eq('song_id', songId),
+    client
+      .from('bandie_songs')
+      .select('readiness_status')
+      .eq('band_id', bandId)
+      .eq('id', songId)
+      .maybeSingle(),
+  ]);
+
+  if (!song) {
+    return;
+  }
+
+  const readiness = computeSongReadiness(
+    (folders ?? []) as PartFolderRow[],
+    (files ?? []) as PartFileRow[],
+  );
+
+  let readinessStatus = song.readiness_status as SongReadinessStatus;
+  if (readinessStatus !== 'needs_review') {
+    if (readiness.readinessPercent >= 100) {
+      readinessStatus = 'ready';
+    } else if (readiness.readinessPercent > 0) {
+      readinessStatus = 'in_progress';
+    } else {
+      readinessStatus = 'not_started';
+    }
+  }
+
+  await client
+    .from('bandie_songs')
+    .update({
+      readiness_status: readinessStatus,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', songId);
+}
+
+export type CreateSongPartFolderInput = {
+  bandId: string;
+  songId: string;
+  partLabel: string;
+  requiredForReadiness?: boolean;
+};
+
+export async function createSongPartFolder(input: CreateSongPartFolderInput): Promise<SongPartFolder> {
+  const label = input.partLabel.trim();
+  if (!label) {
+    throw new Error('Part label is required.');
+  }
+
+  const client = getBandieClient();
+  const { data: existing } = await client
+    .from('bandie_song_part_folders')
+    .select('sort_order')
+    .eq('band_id', input.bandId)
+    .eq('song_id', input.songId)
+    .order('sort_order', { ascending: false })
+    .limit(1);
+
+  const nextSort = ((existing?.[0]?.sort_order as number | undefined) ?? -1) + 1;
+  const partKey = await resolveUniqueSongPartKey(input.bandId, input.songId, label);
+
+  const { data, error } = await client
+    .from('bandie_song_part_folders')
+    .insert({
+      band_id: input.bandId,
+      song_id: input.songId,
+      part_key: partKey,
+      part_label: label,
+      sort_order: nextSort,
+      required_for_readiness: input.requiredForReadiness ?? true,
+    })
+    .select('*')
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  await recalculateSongReadiness(input.bandId, input.songId);
+  return data as SongPartFolder;
+}
+
+export type UpdateSongPartFolderInput = {
+  partLabel?: string;
+  requiredForReadiness?: boolean;
+};
+
+export async function updateSongPartFolder(
+  bandId: string,
+  songId: string,
+  folderId: string,
+  input: UpdateSongPartFolderInput,
+): Promise<SongPartFolder> {
+  const client = getBandieClient();
+  const updates: Record<string, unknown> = {};
+
+  if (input.partLabel !== undefined) {
+    const label = input.partLabel.trim();
+    if (!label) {
+      throw new Error('Part label cannot be empty.');
+    }
+    updates.part_label = label;
+  }
+
+  if (input.requiredForReadiness !== undefined) {
+    updates.required_for_readiness = input.requiredForReadiness;
+  }
+
+  if (Object.keys(updates).length === 0) {
+    const { data } = await client
+      .from('bandie_song_part_folders')
+      .select('*')
+      .eq('id', folderId)
+      .maybeSingle();
+    if (!data) {
+      throw new Error('Song part folder not found.');
+    }
+    return data as SongPartFolder;
+  }
+
+  const { data, error } = await client
+    .from('bandie_song_part_folders')
+    .update(updates)
+    .eq('band_id', bandId)
+    .eq('song_id', songId)
+    .eq('id', folderId)
+    .select('*')
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  await recalculateSongReadiness(bandId, songId);
+  return data as SongPartFolder;
+}
+
+export async function deleteSongPartFolder(
+  bandId: string,
+  songId: string,
+  folderId: string,
+): Promise<void> {
+  const client = getBandieClient();
+  const { count, error: countError } = await client
+    .from('bandie_song_part_files')
+    .select('id', { count: 'exact', head: true })
+    .eq('song_part_folder_id', folderId);
+
+  if (countError) {
+    throw new Error(countError.message);
+  }
+
+  if ((count ?? 0) > 0) {
+    throw new Error('Remove or reassign files before deleting this part folder.');
+  }
+
+  const { error } = await client
+    .from('bandie_song_part_folders')
+    .delete()
+    .eq('band_id', bandId)
+    .eq('song_id', songId)
+    .eq('id', folderId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  await recalculateSongReadiness(bandId, songId);
+}
+
+export async function applyBandTemplatesToSong(bandId: string, songId: string): Promise<void> {
+  const client = getBandieClient();
+  const templates = await ensureBandSongPartTemplates(bandId);
+  const { data: folders, error: foldersError } = await client
+    .from('bandie_song_part_folders')
+    .select('id, part_key')
+    .eq('band_id', bandId)
+    .eq('song_id', songId);
+
+  if (foldersError) {
+    throw new Error(foldersError.message);
+  }
+
+  const existingKeys = new Set((folders ?? []).map((folder) => folder.part_key as string));
+  const missing = templates.filter((template) => !existingKeys.has(template.part_key));
+
+  if (missing.length === 0) {
+    return;
+  }
+
+  const rows = missing.map((template) => ({
     band_id: bandId,
     song_id: songId,
-    part_key: part.partKey,
-    part_label: part.partLabel,
-    sort_order: part.sortOrder,
-    required_for_readiness: part.requiredForReadiness,
+    part_key: template.part_key,
+    part_label: template.part_label,
+    sort_order: template.sort_order,
+    required_for_readiness: template.required_for_readiness,
   }));
 
   const { error } = await client.from('bandie_song_part_folders').insert(rows);
   if (error) {
     throw new Error(error.message);
   }
+
+  await recalculateSongReadiness(bandId, songId);
 }
 
 async function loadReadinessContext(bandId: string, songIds: string[]) {

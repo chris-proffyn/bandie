@@ -90,7 +90,6 @@
 
 .songs-metric small {
   display: block;
-  color: #6b7280;
   font-weight: 700;
   font-size: 0.78rem;
 }
@@ -100,7 +99,6 @@
   margin-top: 0.35rem;
   font-size: 1.75rem;
   letter-spacing: -0.04em;
-  color: #121826;
 }
 
 .songs-metric span {
@@ -283,6 +281,19 @@
   margin-bottom: 0.85rem;
 }
 
+.songs-side-card-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.songs-metadata-edit-btn {
+  min-height: 32px;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.82rem;
+}
+
 .songs-list-item {
   border: 1px solid #dfe4f1;
   border-radius: 15px;
@@ -305,7 +316,7 @@
 }
 
 .songs-list-item small {
-  color: #6b7280;
+  display: block;
 }
 
 .songs-side-card.dark .songs-list-item small {
@@ -340,7 +351,7 @@
 }
 
 .songs-timeline-item small {
-  color: #6b7280;
+  display: block;
 }
 
 .songs-folder-grid {
@@ -375,9 +386,13 @@
 
 .songs-folder-card p {
   margin: 0 0 0.65rem;
-  color: #6b7280;
   font-size: 0.88rem;
   line-height: 1.4;
+}
+
+.songs-upload-zone h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
 }
 
 .songs-upload-zone {
@@ -390,7 +405,6 @@
 
 .songs-upload-zone p {
   margin: 0.35rem 0 0.85rem;
-  color: #6b7280;
 }
 
 .songs-file-row {
@@ -414,6 +428,92 @@
   color: #4338ca;
 }
 
+.songs-folder-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.75rem;
+}
+
+.songs-templates-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.songs-template-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.songs-template-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 16px;
+  border: 1px solid #edf2f7;
+}
+
+.songs-template-row-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-width: min(100%, 240px);
+}
+
+.songs-template-row-main .songs-folder-icon {
+  margin-bottom: 0;
+  width: 2.4rem;
+  height: 2.1rem;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.songs-template-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.songs-template-add-form {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.songs-template-add-form label {
+  display: grid;
+  gap: 0.35rem;
+  color: #d8d2c6;
+  font-weight: 700;
+}
+
+.songs-template-add-form input {
+  width: 100%;
+  border: 1px solid #dfe4f1;
+  background: #fff;
+  border-radius: 12px;
+  padding: 0.7rem 0.8rem;
+  color: #121826;
+  font: inherit;
+}
+
+.songs-template-checkbox {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.5rem;
+  color: #d8d2c6 !important;
+  font-weight: 600 !important;
+}
+
+.songs-part-folders-editor {
+  display: grid;
+  gap: 1rem;
+}
+
 .songs-dialog-backdrop {
   position: fixed;
   inset: 0;
@@ -430,54 +530,27 @@
   border-radius: 18px;
   padding: 1.25rem;
   box-shadow: 0 24px 60px rgba(12, 16, 38, 0.28);
-  color: #121826;
-  color-scheme: light;
-}
-
-.songs-dialog h2 {
-  margin: 0 0 0.35rem;
-  color: #121826;
-  letter-spacing: -0.03em;
 }
 
 .songs-dialog p {
   margin: 0 0 1rem;
-  color: #4b5563;
   line-height: 1.5;
 }
 
 .songs-form label {
   display: grid;
   gap: 0.4rem;
-  color: #1f2937;
-  font-weight: 700;
   font-size: 0.9rem;
-}
-
-.songs-dialog .songs-error {
-  color: #991b1b;
-  background: #fee2e2;
-  border-color: #fecaca;
-}
-
-.songs-dialog .directory-btn-secondary {
-  background: #fff;
-  border-color: #d1d5db;
-  color: #111827;
-}
-
-.songs-dialog .directory-btn-secondary:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
-}
-
-.songs-dialog .directory-btn-primary {
-  color: #fff;
 }
 
 .songs-form input::placeholder,
 .songs-form textarea::placeholder {
   color: #6b7280;
+}
+
+.songs-dialog h2 {
+  margin: 0 0 0.35rem;
+  letter-spacing: -0.03em;
 }
 
 .songs-form {

@@ -1,16 +1,21 @@
 import { useState } from 'react';
-import { createBandSong } from '@bandie/data';
-import { EMPTY_SONG_METADATA, parseDurationFromForm, type SongMetadataFormValues } from '../../lib/songMetadataForm';
+import { updateBandSong, type SongWithReadiness } from '@bandie/data';
+import {
+  parseDurationFromForm,
+  songToMetadataFormValues,
+  type SongMetadataFormValues,
+} from '../../lib/songMetadataForm';
 import { SongMetadataFormFields } from './SongMetadataFormFields';
 
-type AddSongDialogProps = {
+type EditSongDialogProps = {
   bandId: string;
+  song: SongWithReadiness;
   onClose: () => void;
-  onCreated: () => void;
+  onSaved: () => void;
 };
 
-export function AddSongDialog({ bandId, onClose, onCreated }: AddSongDialogProps) {
-  const [values, setValues] = useState<SongMetadataFormValues>(EMPTY_SONG_METADATA);
+export function EditSongDialog({ bandId, song, onClose, onSaved }: EditSongDialogProps) {
+  const [values, setValues] = useState<SongMetadataFormValues>(() => songToMetadataFormValues(song));
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,22 +29,19 @@ export function AddSongDialog({ bandId, onClose, onCreated }: AddSongDialogProps
     setError(null);
 
     try {
-      const totalSeconds = parseDurationFromForm(values.durationMinutes, values.durationSeconds);
-
-      await createBandSong({
-        bandId,
+      await updateBandSong(bandId, song.id, {
         title: values.title,
-        artist: values.artist || undefined,
-        genre: values.genre || undefined,
-        songKey: values.songKey || undefined,
-        durationSeconds: totalSeconds ?? undefined,
-        notes: values.notes || undefined,
+        artist: values.artist || null,
+        genre: values.genre || null,
+        songKey: values.songKey || null,
+        durationSeconds: parseDurationFromForm(values.durationMinutes, values.durationSeconds),
+        notes: values.notes || null,
       });
 
-      onCreated();
+      onSaved();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to add song.');
+      setError(err instanceof Error ? err.message : 'Unable to update song.');
     } finally {
       setSubmitting(false);
     }
@@ -51,11 +53,11 @@ export function AddSongDialog({ bandId, onClose, onCreated }: AddSongDialogProps
         className="songs-dialog surface-light"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="add-song-title"
+        aria-labelledby="edit-song-title"
         onClick={(event) => event.stopPropagation()}
       >
-        <h2 id="add-song-title">Add song</h2>
-        <p>Add a new song to the band repertoire. Part folders are created automatically.</p>
+        <h2 id="edit-song-title">Edit song details</h2>
+        <p>Update title, key, duration and other metadata for this song.</p>
 
         {error ? <div className="songs-error">{error}</div> : null}
 
@@ -67,7 +69,7 @@ export function AddSongDialog({ bandId, onClose, onCreated }: AddSongDialogProps
               Cancel
             </button>
             <button type="submit" className="directory-btn directory-btn-primary" disabled={submitting}>
-              {submitting ? 'Adding…' : 'Add song'}
+              {submitting ? 'Saving…' : 'Save changes'}
             </button>
           </div>
         </form>

@@ -7,8 +7,8 @@ import {
   formatSongPartFileStatus,
   formatSongReadinessStatus,
   getBandSong,
+  getSongPartDisplay,
   getSongPartFilePreviewUrl,
-  getStandardSongPart,
   listSongPartFiles,
   listSongPartFolders,
   type SongPartFile,
@@ -16,10 +16,9 @@ import {
   type SongWithReadiness,
 } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
-import {
-  SongPartFolderGrid,
-  SongPartUploadPanel,
-} from '../../components/songs/SongPartUploadPanel';
+import { SongPartFoldersEditor } from '../../components/songs/SongPartFoldersEditor';
+import { EditSongDialog } from '../../components/songs/EditSongDialog';
+import { SongPartUploadPanel } from '../../components/songs/SongPartUploadPanel';
 import { SongsBandContextBar } from '../../components/songs/SongsBandContextBar';
 import '../../styles/songs.css';
 
@@ -46,6 +45,7 @@ export function SongFolderPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionId, setActionId] = useState<string | null>(null);
+  const [showEditSong, setShowEditSong] = useState(false);
 
   const folderLabelById = useMemo(() => {
     const map = new Map<string, string>();
@@ -179,6 +179,13 @@ export function SongFolderPage() {
           </p>
         </div>
         <div className="songs-header-actions">
+          <button
+            type="button"
+            className="directory-btn directory-btn-secondary"
+            onClick={() => setShowEditSong(true)}
+          >
+            Edit details
+          </button>
           <Link to={`/app/${bandId}/songs`} className="directory-btn directory-btn-secondary">
             Back to songs
           </Link>
@@ -189,22 +196,22 @@ export function SongFolderPage() {
       {actionError ? <div className="songs-error">{actionError}</div> : null}
 
       <section className="songs-metrics" aria-label="Song metrics">
-        <article className="songs-metric">
+        <article className="songs-metric surface-light">
           <small>Gig readiness</small>
           <strong>{song.readinessPercent}%</strong>
           <span>{formatSongReadinessStatus(song.readiness_status)}</span>
         </article>
-        <article className="songs-metric">
+        <article className="songs-metric surface-light">
           <small>Times played</small>
           <strong>{song.times_played}</strong>
           <span>Band history</span>
         </article>
-        <article className="songs-metric">
+        <article className="songs-metric surface-light">
           <small>Song length</small>
           <strong>{formatSongDuration(song.duration_seconds)}</strong>
           <span>Setlist safe</span>
         </article>
-        <article className="songs-metric">
+        <article className="songs-metric surface-light">
           <small>Current key</small>
           <strong>{song.song_key ?? '—'}</strong>
           <span>Arrangement key</span>
@@ -219,14 +226,41 @@ export function SongFolderPage() {
               <p>Each member can upload files for their part. Required parts count toward gig readiness.</p>
             </div>
           </div>
-          <SongPartFolderGrid partFolders={partFolders} />
+          <SongPartFoldersEditor
+            bandId={bandId}
+            songId={songId}
+            partFolders={partFolders}
+            canManage={canAccessBand}
+            onChanged={() => void loadSongWorkspace()}
+          />
         </div>
 
         <aside className="songs-side-stack">
           <div className="songs-side-card dark">
             <div className="songs-side-card-header">
               <h2>Song metadata</h2>
-              <span className="songs-pill green">{formatSongReadinessStatus(song.readiness_status)}</span>
+              <div className="songs-side-card-header-actions">
+                <button
+                  type="button"
+                  className="directory-btn directory-btn-secondary songs-metadata-edit-btn"
+                  onClick={() => setShowEditSong(true)}
+                >
+                  Edit
+                </button>
+                <span className="songs-pill green">{formatSongReadinessStatus(song.readiness_status)}</span>
+              </div>
+            </div>
+            <div className="songs-list-item">
+              <div>
+                <strong>Key</strong>
+                <small>{song.song_key ?? 'Not set'}</small>
+              </div>
+            </div>
+            <div className="songs-list-item">
+              <div>
+                <strong>Duration</strong>
+                <small>{formatSongDuration(song.duration_seconds)}</small>
+              </div>
             </div>
             <div className="songs-list-item">
               <div>
@@ -277,9 +311,8 @@ export function SongFolderPage() {
         ) : (
           files.map((file) => {
             const partLabel = folderLabelById.get(file.song_part_folder_id) ?? 'Part';
-            const standard = getStandardSongPart(
-              partFolders.find((folder) => folder.id === file.song_part_folder_id)?.part_key ?? '',
-            );
+            const folder = partFolders.find((item) => item.id === file.song_part_folder_id);
+            const display = getSongPartDisplay(folder?.part_key ?? '', partLabel);
 
             return (
               <div key={file.id} className="songs-file-row">
@@ -288,8 +321,7 @@ export function SongFolderPage() {
                   <div>
                     {file.display_name}
                     <small className="songs-artist">
-                      {standard?.icon ? `${standard.icon} ` : ''}
-                      {partLabel}
+                      {display.icon} {partLabel}
                     </small>
                   </div>
                 </div>
@@ -326,6 +358,15 @@ export function SongFolderPage() {
           })
         )}
       </section>
+
+      {showEditSong ? (
+        <EditSongDialog
+          bandId={bandId}
+          song={song}
+          onClose={() => setShowEditSong(false)}
+          onSaved={() => void loadSongWorkspace()}
+        />
+      ) : null}
     </div>
   );
 }

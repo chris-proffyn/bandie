@@ -9,6 +9,7 @@ import {
   formatSongDuration,
   formatSongPartActivityLabel,
   formatSongReadinessStatus,
+  isBandLeaderRole,
   listBandSongs,
   listRecentSongPartActivity,
   songTitleInitials,
@@ -18,6 +19,7 @@ import {
 } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
 import { AddSongDialog } from '../../components/songs/AddSongDialog';
+import { BandSongPartTemplatesPanel } from '../../components/songs/BandSongPartTemplatesPanel';
 import { SongsBandContextBar } from '../../components/songs/SongsBandContextBar';
 import '../../styles/songs.css';
 
@@ -42,6 +44,7 @@ export function SongsDashboardPage() {
   const { bands, adminModeActive } = useAuth();
   const membership = bands.find((item) => item.id === bandId);
   const canAccessBand = Boolean(membership) || adminModeActive;
+  const canManageParts = adminModeActive || isBandLeaderRole(membership?.member_role);
 
   const [songs, setSongs] = useState<SongWithReadiness[]>([]);
   const [activity, setActivity] = useState<SongPartFileActivity[]>([]);
@@ -132,8 +135,10 @@ export function SongsDashboardPage() {
 
       {loadError ? <div className="songs-error">{loadError}</div> : null}
 
+      <BandSongPartTemplatesPanel bandId={bandId} canManage={canManageParts} />
+
       <section className="songs-metrics" aria-label="Song metrics">
-        <article className="songs-metric">
+        <article className="songs-metric surface-light">
           <small>Total songs</small>
           <strong>{metrics.totalSongs}</strong>
           {metrics.songsAddedThisMonth > 0 ? (
@@ -142,7 +147,7 @@ export function SongsDashboardPage() {
             <span>{metrics.repertoireReadinessPercent}% avg readiness</span>
           )}
         </article>
-        <article className="songs-metric">
+        <article className="songs-metric surface-light">
           <small>Gig ready</small>
           <strong>{metrics.gigReadyCount}</strong>
           <span>
@@ -151,7 +156,7 @@ export function SongsDashboardPage() {
               : 'No songs yet'}
           </span>
         </article>
-        <article className="songs-metric">
+        <article className="songs-metric surface-light">
           <small>Missing parts</small>
           <strong>{metrics.missingPartsCount}</strong>
           {metrics.missingPartsCount > 0 ? (
@@ -160,7 +165,7 @@ export function SongsDashboardPage() {
             <span>All parts covered</span>
           )}
         </article>
-        <article className="songs-metric">
+        <article className="songs-metric surface-light">
           <small>Gig-ready duration</small>
           <strong>{snapshots.totalPlayableMinutes}m</strong>
           <span>From gig-ready songs</span>
@@ -328,7 +333,7 @@ export function SongsDashboardPage() {
             </div>
           </div>
 
-          <div className="songs-side-card">
+          <div className="songs-side-card surface-light">
             <div className="songs-side-card-header">
               <h2>Recent activity</h2>
             </div>

@@ -2,8 +2,8 @@
 
 **Document status:** Live project tracker  
 **Product:** Bandie  
-**Phase:** Phase 6.1 in progress (songs foundation + Dropbox integration)
-**Last updated:** 29 June 2026 (Phase 6.1 foundation — songs schema, Dropbox OAuth, storage settings UI)
+**Phase:** Phase 6 in progress (songs & repertoire — configurable part folders)
+**Last updated:** 29 June 2026 (configurable band/song part folders)
 
 ---
 
@@ -195,7 +195,7 @@ Release verification      ░░░░░░░░░░  production smoke + a11
 - [x] 6.1 Songs data model (`bandie_songs`, integration and storage tables)
 - [x] 6.2 Songs dashboard (search, filter, metrics)
 - [x] 6.3 Song folder / workspace UI
-- [x] 6.4 Song part folders (lead guitar, rhythm, bass, drums, vocals, shared)
+- [x] 6.4 Song part folders — band-level templates (default: Guitar, Bass, Drums, Vocals, Shared); per-song add/remove/toggle required
 - [x] 6.5 Readiness tracking (part completeness from current files per spec §6.7)
 - [x] 6.6 Dropbox OAuth connect/callback and token storage (`bandie_user_integrations` + secrets table)
 - [x] 6.7 Band song-part storage setup (`bandie_band_song_part_storage`, health checks)
@@ -261,6 +261,12 @@ Authoritative spec: `docs/project/bandie_dropbox_song_part_storage_spec.md`
 ---
 
 ## Session notes
+
+**29 June 2026 — Configurable song part folders**
+- Migration `20260629120000_bandie_band_song_part_templates.sql`: `bandie_band_song_part_templates`; band leaders manage default folders for new songs
+- Default template uses single **Guitar** folder (not lead/rhythm split); Bass, Drums, Vocals, Shared
+- `@bandie/data` `songPartTemplates` module; folder CRUD on `songs` (`createSongPartFolder`, `updateSongPartFolder`, `deleteSongPartFolder`, `recalculateSongReadiness`)
+- UI: `BandSongPartTemplatesPanel` on songs dashboard; `SongPartFoldersEditor` on song folder page (add/remove parts, toggle required for readiness)
 
 **29 June 2026 — Phase 6.2+ songs dashboard, song folder, uploads**
 - Migration `20260629110000_bandie_song_part_folders_files.sql`: `bandie_song_part_folders`, `bandie_song_part_files`, `bandie_song_part_file_activity` (RLS applied to remote)

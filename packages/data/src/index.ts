@@ -375,8 +375,7 @@ export type {
 } from './playerDirectory';
 
 export {
-  STANDARD_SONG_PARTS,
-  getStandardSongPart,
+  getSongPartDisplay,
   formatSongPartFileStatus,
 } from './songParts';
 export type {
@@ -390,6 +389,24 @@ export type {
 } from './songParts';
 
 export {
+  DEFAULT_BAND_SONG_PART_TEMPLATES,
+  listBandSongPartTemplates,
+  ensureBandSongPartTemplates,
+  createBandSongPartTemplate,
+  updateBandSongPartTemplate,
+  deleteBandSongPartTemplate,
+  createDefaultBandSongPartTemplates,
+  songPartIcon,
+  songPartDescription,
+} from './songPartTemplates';
+export type {
+  BandSongPartTemplate,
+  SongPartTemplateDefinition,
+  CreateBandSongPartTemplateInput,
+  UpdateBandSongPartTemplateInput,
+} from './songPartTemplates';
+
+export {
   listBandSongs,
   getBandSongDashboardMetrics,
   getBandSong,
@@ -399,6 +416,11 @@ export {
   listSongPartFiles,
   listRecentSongPartActivity,
   uploadSongPartFile,
+  createSongPartFolder,
+  updateSongPartFolder,
+  deleteSongPartFolder,
+  applyBandTemplatesToSong,
+  recalculateSongReadiness,
   formatSongDuration,
   songTitleInitials,
   formatSongReadinessStatus,
@@ -422,6 +444,8 @@ export type {
   CreateSongInput,
   UpdateSongInput,
   UploadSongPartFileInput,
+  CreateSongPartFolderInput,
+  UpdateSongPartFolderInput,
 } from './songs';
 
 export {

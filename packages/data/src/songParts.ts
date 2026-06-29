@@ -133,6 +133,25 @@ export function getStandardSongPart(partKey: string): StandardSongPartDefinition
   return STANDARD_SONG_PARTS.find((part) => part.partKey === partKey);
 }
 
+export function getSongPartDisplay(partKey: string, partLabel: string) {
+  const standard = getStandardSongPart(partKey);
+  return {
+    partLabel,
+    icon: standard?.icon ?? songPartIconFromKey(partKey),
+    description: standard?.description ?? `Files and notes for ${partLabel.toLowerCase()}.`,
+  };
+}
+
+function songPartIconFromKey(partKey: string): string {
+  const key = partKey.toLowerCase();
+  if (key.includes('drum')) return '🥁';
+  if (key.includes('vocal') || key.includes('singer')) return '🎤';
+  if (key.includes('share') || key.includes('ref')) return '📎';
+  if (key.includes('guitar') || key.includes('bass')) return '🎸';
+  if (key.includes('key')) return '🎹';
+  return '📁';
+}
+
 export function formatSongPartFileStatus(status: SongPartFileStatus): string {
   switch (status) {
     case 'current':

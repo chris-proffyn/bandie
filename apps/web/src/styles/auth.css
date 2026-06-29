@@ -439,6 +439,72 @@
   color: #bbb6aa;
 }
 
+/**
+ * Light surfaces inside the dark app shell must reset inherited cream text (#f6f3ea).
+ * Add .surface-light to any card, modal, or panel with a white/near-white background.
+ */
+.app-main .surface-light {
+  color: #1f2937;
+  color-scheme: light;
+}
+
+/* Modals rendered inside the app shell but outside .app-main */
+.app-shell .surface-light {
+  color: #1f2937;
+  color-scheme: light;
+}
+
+.app-main .surface-light :is(h1, h2, h3, h4, h5, h6, strong),
+.app-shell .surface-light :is(h1, h2, h3, h4, h5, h6, strong) {
+  color: #111827;
+}
+
+.app-main .surface-light p,
+.app-shell .surface-light p {
+  color: #4b5563;
+}
+
+.app-main .surface-light small,
+.app-shell .surface-light small {
+  color: #6b7280;
+}
+
+.app-main .surface-light label,
+.app-shell .surface-light label {
+  color: #1f2937;
+  font-weight: 700;
+}
+
+.app-main .surface-light .directory-btn-secondary,
+.app-shell .surface-light .directory-btn-secondary {
+  background: #fff;
+  border-color: #d1d5db;
+  color: #111827;
+}
+
+.app-main .surface-light .directory-btn-secondary:hover,
+.app-shell .surface-light .directory-btn-secondary:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.app-main .surface-light .directory-btn-primary,
+.app-shell .surface-light .directory-btn-primary {
+  color: #fff;
+}
+
+.app-main .surface-light .songs-error,
+.app-shell .surface-light .songs-error {
+  color: #991b1b;
+  background: #fee2e2;
+  border-color: #fecaca;
+}
+
+.app-main .surface-light a:not([class]),
+.app-shell .surface-light a:not([class]) {
+  color: #1d4ed8;
+}
+
 .invite-list {
   list-style: none;
   padding: 0;

@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import {
-  getStandardSongPart,
+  getSongPartDisplay,
   uploadSongPartFile,
   type SongPartFolderWithStats,
 } from '@bandie/data';
@@ -90,7 +90,7 @@ export function SongPartUploadPanel({
   }
 
   return (
-    <div className="songs-side-card">
+    <div className="songs-side-card surface-light">
       <div className="songs-side-card-header">
         <h2>Upload file</h2>
       </div>
@@ -99,7 +99,7 @@ export function SongPartUploadPanel({
       {message ? <div className="songs-success" style={{ marginBottom: '0.75rem' }}>{message}</div> : null}
 
       <div
-        className="songs-upload-zone"
+        className="songs-upload-zone surface-light"
         onDragOver={(event) => event.preventDefault()}
         onDrop={(event) => {
           event.preventDefault();
@@ -145,7 +145,7 @@ export function SongPartFolderGrid({ partFolders }: { partFolders: SongPartFolde
   return (
     <div className="songs-folder-grid">
       {partFolders.map((folder) => {
-        const standard = getStandardSongPart(folder.part_key);
+        const display = getSongPartDisplay(folder.part_key, folder.part_label);
         const pillClass = folder.hasCurrentFile
           ? 'songs-pill green'
           : folder.required_for_readiness
@@ -153,10 +153,10 @@ export function SongPartFolderGrid({ partFolders }: { partFolders: SongPartFolde
             : 'songs-pill blue';
 
         return (
-          <article key={folder.id} className="songs-folder-card">
-            <div className="songs-folder-icon">{standard?.icon ?? '📁'}</div>
-            <h3>{folder.part_label}</h3>
-            <p>{standard?.description ?? 'Song-part files for this role.'}</p>
+          <article key={folder.id} className="songs-folder-card surface-light">
+            <div className="songs-folder-icon">{display.icon}</div>
+            <h3>{display.partLabel}</h3>
+            <p>{display.description}</p>
             <span className={pillClass}>
               {folder.hasCurrentFile
                 ? `${folder.currentFileCount} file${folder.currentFileCount === 1 ? '' : 's'}`
