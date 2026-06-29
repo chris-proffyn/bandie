@@ -7,7 +7,6 @@ type SongPartFileViewerModalProps = {
   displayName: string;
   partLabel: string;
   onClose: () => void;
-  onPreviewed?: () => void;
 };
 
 export function SongPartFileViewerModal({
@@ -16,7 +15,6 @@ export function SongPartFileViewerModal({
   displayName,
   partLabel,
   onClose,
-  onPreviewed,
 }: SongPartFileViewerModalProps) {
   const titleId = useId();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -26,9 +24,6 @@ export function SongPartFileViewerModal({
   const [rendering, setRendering] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
-  const onPreviewedRef = useRef(onPreviewed);
-  onPreviewedRef.current = onPreviewed;
 
   const revokeBlobUrl = useCallback(() => {
     if (blobUrlRef.current) {
@@ -49,7 +44,6 @@ export function SongPartFileViewerModal({
       blobUrlRef.current = preview.blobUrl;
       setPreviewUrl(preview.blobUrl);
       setRendering(true);
-      onPreviewedRef.current?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load PDF preview.');
     } finally {

@@ -60,12 +60,14 @@ export function SongFolderPage() {
     return map;
   }, [partFolders]);
 
-  const loadSongWorkspace = useCallback(async () => {
+  const loadSongWorkspace = useCallback(async (options?: { silent?: boolean }) => {
     if (!bandId || !songId) {
       return;
     }
 
-    setLoading(true);
+    if (!options?.silent) {
+      setLoading(true);
+    }
     setLoadError(null);
 
     try {
@@ -86,7 +88,9 @@ export function SongFolderPage() {
       setFiles([]);
       setLoadError(err instanceof Error ? err.message : 'Unable to load song workspace.');
     } finally {
-      setLoading(false);
+      if (!options?.silent) {
+        setLoading(false);
+      }
     }
   }, [bandId, songId]);
 
@@ -126,7 +130,7 @@ export function SongFolderPage() {
     );
   }
 
-  if (loading) {
+  if (loading && !viewerFile) {
     return (
       <div className="songs-page">
         <div className="panel">
@@ -359,8 +363,10 @@ export function SongFolderPage() {
           fileId={viewerFile.file.id}
           displayName={viewerFile.file.display_name}
           partLabel={viewerFile.partLabel}
-          onClose={() => setViewerFile(null)}
-          onPreviewed={() => void loadSongWorkspace()}
+          onClose={() => {
+            setViewerFile(null);
+            void loadSongWorkspace({ silent: true });
+          }}
         />
       ) : null}
 
