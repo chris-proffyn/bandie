@@ -113,9 +113,9 @@ This document defines **delivery phases, sequencing, and dependencies**. It is a
 
 **Dependencies:** Phase 2, Phase 3 (profile/settings integration).
 
-**Status:** Workspace shell and overview complete. **Songs MVP (web):** dashboard, song folder, Dropbox OAuth + upload/preview/download, band part templates, readiness, in-app PDF viewer, soft delete/restore, leader-only folder/upload management. Setlists and calendar/gigs navigation remain deferred.
+**Status:** Workspace shell and overview complete. **Songs MVP (web):** dashboard, song folder, Dropbox OAuth + upload/preview/download, band part templates, readiness, in-app PDF viewer, soft delete/restore, leader-only folder/upload management. **Setlists (web):** library, builder with drag reorder, metrics, duplicate/archive. Calendar/gigs navigation remains deferred.
 
-**Exit criteria (songs):** Met for repertoire + Dropbox file workflow. Setlist builder still required for full Phase 4 exit.
+**Exit criteria (songs + setlists):** Met — band can manage repertoire, upload files, build and save a setlist.
 
 ---
 
@@ -230,6 +230,6 @@ Phases 0–5 constitute the **MVP** as defined in `PRODUCT_REQUIREMENTS.md`. Pha
 ## Current position
 
 **Completed:** Phases 0–5; Phase 3 booking enquiry partial; Phase 6 partial (workspace communications + **songs/Dropbox MVP on web**); organiser venues; multiple band leaders; directory area filters; brand logo assets  
-**Next:** Setlist management (tracker Phase 7); calendar and gigs (Phases 8–9)
+**Next:** Calendar and availability (tracker Phases 8–9); mobile app (Phase 12)
 
 See `docs/PROJECT_STATUS_TRACKER.md` for item-level checklist (Phases 6–12 in tracker map to workspace features, calendar, gigs, etc.).

@@ -1058,6 +1058,49 @@ export async function getSongPartFilePreviewUrl(
   };
 }
 
+export async function loadSongPartFileInlinePreview(
+  bandId: string,
+  fileId: string,
+): Promise<{ blobUrl: string; displayName: string; mimeType: string | null }> {
+  const session = await getCurrentSession();
+  if (!session?.access_token) {
+    throw new Error('Sign in to preview song-part files.');
+  }
+
+  const response = await fetch(
+    `/api/bands/song-part-files/preview?bandId=${encodeURIComponent(bandId)}&fileId=${encodeURIComponent(fileId)}&inline=1`,
+    {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    },
+  );
+
+  const contentType = response.headers.get('content-type') ?? '';
+
+  if (!response.ok) {
+    if (contentType.includes('application/json')) {
+      const payload = (await response.json()) as { error?: string };
+      throw new Error(payload.error ?? 'Unable to preview song-part file.');
+    }
+
+    throw new Error('Unable to preview song-part file.');
+  }
+
+  const blob = await response.blob();
+  const mimeType = blob.type || contentType || 'application/pdf';
+  const blobUrl = URL.createObjectURL(blob);
+
+  const disposition = response.headers.get('content-disposition') ?? '';
+  const filenameMatch = disposition.match(/filename="([^"]+)"/i);
+  const displayName = filenameMatch?.[1] ?? 'File';
+
+  return {
+    blobUrl,
+    displayName,
+    mimeType,
+  };
+}
+
 export function getSongPartFileDownloadUrl(bandId: string, fileId: string): string {
   return `/api/bands/song-part-files/download?bandId=${encodeURIComponent(bandId)}&fileId=${encodeURIComponent(fileId)}`;
 }

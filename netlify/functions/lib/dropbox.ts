@@ -244,6 +244,24 @@ export async function uploadDropboxFile(
   return (await response.json()) as DropboxFileMetadata;
 }
 
+export async function downloadDropboxFile(accessToken: string, path: string): Promise<Buffer> {
+  const response = await fetch('https://content.dropboxapi.com/2/files/download', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Dropbox-API-Arg': JSON.stringify({ path }),
+    },
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(`Dropbox file download failed: ${detail}`);
+  }
+
+  const arrayBuffer = await response.arrayBuffer();
+  return Buffer.from(arrayBuffer);
+}
+
 export async function getDropboxTemporaryLink(
   accessToken: string,
   path: string,

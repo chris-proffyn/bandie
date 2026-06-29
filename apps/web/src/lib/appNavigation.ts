@@ -36,6 +36,7 @@ export function getAppNavItems({
     if (bandId) {
       items.push({ label: 'Band overview', to: `/app/${bandId}`, end: true });
       items.push({ label: 'Songs', to: `/app/${bandId}/songs` });
+      items.push({ label: 'Setlists', to: `/app/${bandId}/setlists` });
     }
 
     return items;
@@ -64,6 +65,7 @@ export function getAppNavItems({
   if (bandId) {
     items.push({ label: 'Band overview', to: `/app/${bandId}`, end: true });
     items.push({ label: 'Songs', to: `/app/${bandId}/songs` });
+    items.push({ label: 'Setlists', to: `/app/${bandId}/setlists` });
   }
 
   return items;

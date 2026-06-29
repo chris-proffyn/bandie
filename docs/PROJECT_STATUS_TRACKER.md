@@ -2,8 +2,8 @@
 
 **Document status:** Live project tracker  
 **Product:** Bandie  
-**Phase:** Phase 6 in progress (songs & repertoire — MVP core shipped; setlists next)
-**Last updated:** 29 June 2026 (soft delete, leader-only uploads, in-app PDF viewer, part templates)
+**Phase:** Phase 7 complete (setlist management); Phase 8 next (calendar & availability)
+**Last updated:** 29 June 2026 (setlist library, builder, drag reorder, metrics)
 
 ---
 
@@ -18,7 +18,7 @@
 | Web app scaffold (Vite + React + TypeScript) | Complete |
 | Bandie homepage (Phase 1) | Complete |
 | Mobile app | Not started (placeholder only) |
-| Supabase schema / migrations | Platform + Bandie through songs soft delete (`20260629150000`); apply with `supabase db push` |
+| Supabase schema / migrations | Platform + Bandie through setlists (`20260629160000`); apply with `supabase db push` |
 | Authentication & band membership (Phase 2) | Complete |
 | Public band profile (Phase 3) | Complete |
 | Band directory (Phase 4) | Complete |
@@ -30,7 +30,8 @@
 | Booking enquiries | Partial — structured enquiry form on public band profile sends direct message to primary contact |
 | Organiser venues | Complete — `/app/venues` in organiser workspace mode |
 | Song-part file storage | **Dropbox** — leader OAuth, band song-parts root, upload/preview/download via Netlify (`bandie_dropbox_song_part_storage_spec.md`) |
-| Songs & repertoire (Phase 6) | In progress — dashboard, song folder, Dropbox uploads, configurable part templates, in-app PDF view, soft delete; setlists deferred |
+| Songs & repertoire (Phase 6) | Complete — dashboard, song folder, Dropbox uploads, part templates, in-app PDF view, soft delete |
+| Setlist management (Phase 7) | Complete — library, builder with drag reorder, live metrics, leader-only edit |
 
 ## Active constraints
 
@@ -45,7 +46,7 @@
 
 ## Current focus
 
-**Next capability:** Setlist management (Phase 7) — songs MVP core complete on web
+**Next capability:** Calendar and availability (Phase 8) — setlist management complete on web
 
 Reference documents:
 - `docs/project/product-functional-requirements.md` §7–8, §8b
@@ -68,7 +69,8 @@ Auth & membership         ██████████  signup, login, bands, 
 Public profile & dir      ██████████  profiles + searchable directory
 Player profiles & dir     ██████████  musician profiles + /players directory
 Private workspace shell   ██████████  overview, leader, lineup parts, recruitment, invites
-Songs & repertoire        ████████░░  Phase 6 — dashboard, Dropbox files, templates, soft delete (setlists next)
+Songs & repertoire        ██████████  Phase 6 — dashboard, Dropbox files, templates, soft delete
+Setlists                  ██████████  Phase 7 — library, builder, drag reorder, metrics
 Mobile app                ░░░░░░░░░░  Phase 12 (deferred)
 Release verification      ░░░░░░░░░░  production smoke + a11y pass
 ```
@@ -221,10 +223,10 @@ Authoritative spec: `docs/project/bandie_dropbox_song_part_storage_spec.md`
 
 ### 7. Setlist management
 
-- [ ] 7.1 Setlist data model
-- [ ] 7.2 Setlist library
-- [ ] 7.3 Setlist builder (drag/reorder)
-- [ ] 7.4 Setlist metrics and status
+- [x] 7.1 Setlist data model
+- [x] 7.2 Setlist library
+- [x] 7.3 Setlist builder (drag/reorder)
+- [x] 7.4 Setlist metrics and status
 
 ### 8. Calendar and availability
 
@@ -264,6 +266,12 @@ Authoritative spec: `docs/project/bandie_dropbox_song_part_storage_spec.md`
 ---
 
 ## Session notes
+
+**29 June 2026 — Setlist management (Phase 7)**
+- Migration `20260629160000_bandie_setlists.sql`: `bandie_setlists`, `bandie_setlist_items`, member read / leader write RLS
+- `@bandie/data` `setlists.ts`: CRUD, duplicate, archive, reorder, computed metrics and status helpers
+- Web routes `/app/:bandId/setlists` (library) and `/app/:bandId/setlists/:setlistId` (builder with drag reorder)
+- Setlists nav item in band workspace; leader-only create/edit aligned with functional requirements §9
 
 **29 June 2026 — Song soft delete**
 - `bandie_songs.is_deleted` + `deleted_at`; partial unique slug for active songs only

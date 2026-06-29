@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
-import { getSongPartFilePreviewUrl } from '@bandie/data';
+import { loadSongPartFileInlinePreview } from '@bandie/data';
 
 type SongPartFileViewerModalProps = {
   bandId: string;
@@ -21,32 +21,47 @@ export function SongPartFileViewerModal({
   const titleId = useId();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
+  const blobUrlRef = useRef<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [rendering, setRendering] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const onPreviewedRef = useRef(onPreviewed);
   onPreviewedRef.current = onPreviewed;
 
+  const revokeBlobUrl = useCallback(() => {
+    if (blobUrlRef.current) {
+      URL.revokeObjectURL(blobUrlRef.current);
+      blobUrlRef.current = null;
+    }
+  }, []);
+
   const loadPreview = useCallback(async () => {
     setLoading(true);
+    setRendering(false);
     setError(null);
+    revokeBlobUrl();
     setPreviewUrl(null);
 
     try {
-      const preview = await getSongPartFilePreviewUrl(bandId, fileId);
-      setPreviewUrl(preview.previewUrl);
+      const preview = await loadSongPartFileInlinePreview(bandId, fileId);
+      blobUrlRef.current = preview.blobUrl;
+      setPreviewUrl(preview.blobUrl);
+      setRendering(true);
       onPreviewedRef.current?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load PDF preview.');
     } finally {
       setLoading(false);
     }
-  }, [bandId, fileId]);
+  }, [bandId, fileId, revokeBlobUrl]);
 
   useEffect(() => {
     void loadPreview();
   }, [loadPreview]);
+
+  useEffect(() => revokeBlobUrl, [revokeBlobUrl]);
 
   useEffect(() => {
     closeButtonRef.current?.focus();
@@ -131,11 +146,17 @@ export function SongPartFileViewerModal({
               </button>
             </div>
           ) : previewUrl ? (
-            <iframe
-              title={displayName}
-              src={previewUrl}
-              className="songs-pdf-viewer"
-            />
+            <>
+              {rendering ? (
+                <p className="songs-file-viewer-status songs-file-viewer-status-overlay">Rendering PDF…</p>
+              ) : null}
+              <iframe
+                title={displayName}
+                src={previewUrl}
+                className="songs-pdf-viewer"
+                onLoad={() => setRendering(false)}
+              />
+            </>
           ) : null}
         </div>
       </div>
