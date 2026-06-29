@@ -17,6 +17,11 @@ import {
   type ReceivedPlayerOutreach,
   type SentPlayerOutreach,
 } from './playerOutreach';
+import {
+  countUnreadGigInviteNotifications,
+  listMyGigInviteCommunications,
+  type GigInviteCommunication,
+} from './gigInviteCommunications';
 import { isResolvedInviteStatus } from './invitationStatus';
 
 export type CommunicationFilter = 'all' | 'invites' | 'messages' | 'enquiries';
@@ -26,6 +31,7 @@ export type CommunicationSummary = {
   pendingPlayerOutreach: number;
   unreadMessages: number;
   unreadBookingEnquiries: number;
+  unreadGigInvites: number;
   total: number;
 };
 
@@ -78,20 +84,38 @@ export type BookingEnquiryCommunication = {
   enquiry: BookingEnquiry;
 };
 
+export type GigInviteCommunicationItem = {
+  kind: 'gig_invitation';
+  id: string;
+  created_at: string;
+  invite: GigInviteCommunication;
+};
+
+export type SentGigInviteCommunicationItem = {
+  kind: 'sent_gig_invitation';
+  id: string;
+  created_at: string;
+  invite: GigInviteCommunication;
+};
+
 export type CommunicationItem =
   | BandInvitationCommunication
   | PlayerOutreachCommunication
   | MessageCommunication
   | SentBandInvitationCommunication
   | SentPlayerOutreachCommunication
-  | BookingEnquiryCommunication;
+  | BookingEnquiryCommunication
+  | GigInviteCommunicationItem
+  | SentGigInviteCommunicationItem;
 
 export async function getCommunicationSummary(): Promise<CommunicationSummary> {
-  const [invitations, playerOutreach, unreadMessages, unreadBookingEnquiries] = await Promise.all([
+  const [invitations, playerOutreach, unreadMessages, unreadBookingEnquiries, unreadGigInvites] =
+    await Promise.all([
     listPendingInvitationsForCurrentUser(),
     countMyPendingPlayerOutreach(),
     countUnreadMessages(),
     countUnreadBookingEnquiries(),
+    countUnreadGigInviteNotifications(),
   ]);
 
   const pendingInvitations = invitations.length;
@@ -101,12 +125,18 @@ export async function getCommunicationSummary(): Promise<CommunicationSummary> {
     pendingPlayerOutreach: playerOutreach,
     unreadMessages,
     unreadBookingEnquiries,
-    total: pendingInvitations + playerOutreach + unreadMessages + unreadBookingEnquiries,
+    unreadGigInvites,
+    total:
+      pendingInvitations +
+      playerOutreach +
+      unreadMessages +
+      unreadBookingEnquiries +
+      unreadGigInvites,
   };
 }
 
 export async function listCommunications(): Promise<CommunicationItem[]> {
-  const [invitations, playerOutreach, sentInvitations, sentOutreach, messages, enquiries] =
+  const [invitations, playerOutreach, sentInvitations, sentOutreach, messages, enquiries, gigInvites] =
     await Promise.all([
     listMyReceivedBandInvitations(),
     listMyReceivedPlayerOutreach(),
@@ -114,9 +144,11 @@ export async function listCommunications(): Promise<CommunicationItem[]> {
     listMySentPlayerOutreach(),
     listMyMessages(),
     listMyBookingEnquiries(),
+    listMyGigInviteCommunications(),
   ]);
 
   const enquiryMessageIds = new Set(enquiries.map((enquiry) => enquiry.message_id));
+  const gigInviteMessageIds = new Set(gigInvites.map((invite) => invite.message_id));
 
   const items: CommunicationItem[] = [
     ...invitations.map(
@@ -152,7 +184,7 @@ export async function listCommunications(): Promise<CommunicationItem[]> {
       }),
     ),
     ...messages
-      .filter((message) => !enquiryMessageIds.has(message.id))
+      .filter((message) => !enquiryMessageIds.has(message.id) && !gigInviteMessageIds.has(message.id))
       .map(
       (message): MessageCommunication => ({
         kind: 'message',
@@ -169,6 +201,23 @@ export async function listCommunications(): Promise<CommunicationItem[]> {
         enquiry,
       }),
     ),
+    ...gigInvites.map((invite): GigInviteCommunicationItem | SentGigInviteCommunicationItem => {
+      if (invite.direction === 'sent') {
+        return {
+          kind: 'sent_gig_invitation',
+          id: invite.gig_band_id,
+          created_at: invite.invited_at,
+          invite,
+        };
+      }
+
+      return {
+        kind: 'gig_invitation',
+        id: invite.gig_band_id,
+        created_at: invite.invited_at,
+        invite,
+      };
+    }),
   ];
 
   return items.sort(
@@ -190,7 +239,9 @@ export function filterCommunications(
         item.kind === 'band_invitation' ||
         item.kind === 'player_outreach' ||
         item.kind === 'sent_band_invitation' ||
-        item.kind === 'sent_player_outreach',
+        item.kind === 'sent_player_outreach' ||
+        item.kind === 'gig_invitation' ||
+        item.kind === 'sent_gig_invitation',
     );
   }
 
@@ -224,6 +275,14 @@ export function filterResolvedSentCommunications(
 
     if (item.kind === 'sent_player_outreach') {
       return !isResolvedInviteStatus(item.outreach.status);
+    }
+
+    if (item.kind === 'gig_invitation') {
+      return item.invite.invite_status === 'pending';
+    }
+
+    if (item.kind === 'sent_gig_invitation') {
+      return item.invite.invite_status === 'pending';
     }
 
     return true;

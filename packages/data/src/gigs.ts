@@ -52,6 +52,8 @@ export type OrganiserGig = {
   calendar_event_id: string | null;
   notes: string | null;
   fee_notes: string | null;
+  slot_count: number | null;
+  default_slot_duration_minutes: number | null;
   created_by: string;
   created_at: string;
   updated_at: string;
@@ -63,6 +65,7 @@ export type GigBandInvite = {
   band_id: string;
   invite_status: GigInviteStatus;
   running_order: number | null;
+  slot_duration_minutes: number | null;
   setlist_id: string | null;
   invited_at: string;
   responded_at: string | null;
@@ -74,8 +77,25 @@ export type GigBandInvite = {
 export type GigBandInviteWithBand = GigBandInvite & {
   bandName: string;
   bandSlug: string;
+  bandLogoUrl: string | null;
+  bandHeroImageUrl: string | null;
+  bandTagline: string | null;
   setlistTitle: string | null;
   setlistMetrics: SetlistMetrics | null;
+};
+
+export type GigSlotScheduleEntry = {
+  invite: GigBandInviteWithBand;
+  slotNumber: number;
+  durationMinutes: number;
+  startsAt: Date;
+  endsAt: Date;
+};
+
+export type GigWorkflowStep = {
+  id: string;
+  label: string;
+  complete: boolean;
 };
 
 export type BandGigInvitation = {
@@ -98,12 +118,27 @@ export type CreateOrganiserGigInput = {
   venueName?: string | null;
   venueAddress?: string | null;
   status?: GigStatus;
+  slotCount?: number | null;
+  defaultSlotDurationMinutes?: number | null;
   calendarEventId?: string | null;
   notes?: string | null;
   feeNotes?: string | null;
 };
 
 export type UpdateOrganiserGigInput = Partial<CreateOrganiserGigInput & { status: GigStatus }>;
+
+export type InviteBandToGigInput = {
+  bandId: string;
+  slotNumber?: number | null;
+  slotDurationMinutes?: number | null;
+  personalMessage?: string | null;
+};
+
+export type UpdateGigBandSlotInput = {
+  gigBandId: string;
+  slotNumber?: number | null;
+  slotDurationMinutes?: number | null;
+};
 
 export function formatGigStatus(status: GigStatus): string {
   switch (status) {
@@ -145,6 +180,81 @@ export function gigStatusPillClass(status: GigStatus): string {
 
 export function gigInviteStatusPillClass(status: GigInviteStatus): string {
   return `gig-invite-status gig-invite-status-${status}`;
+}
+
+export function formatSlotDuration(minutes: number): string {
+  if (minutes < 60) {
+    return `${minutes} min`;
+  }
+  const hours = Math.floor(minutes / 60);
+  const remainder = minutes % 60;
+  return remainder ? `${hours}h ${remainder}m` : `${hours}h`;
+}
+
+export function formatSlotTimeRange(startsAt: Date, endsAt: Date): string {
+  const timeOptions: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit' };
+  return `${startsAt.toLocaleTimeString('en-GB', timeOptions)} – ${endsAt.toLocaleTimeString('en-GB', timeOptions)}`;
+}
+
+export function buildGigSlotSchedule(
+  gig: Pick<OrganiserGig, 'starts_at' | 'default_slot_duration_minutes'>,
+  bands: GigBandInviteWithBand[],
+): GigSlotScheduleEntry[] {
+  const defaultDuration = gig.default_slot_duration_minutes ?? 45;
+  const sorted = [...bands]
+    .filter((invite) => invite.running_order != null && invite.invite_status !== 'cancelled')
+    .sort((a, b) => (a.running_order ?? 0) - (b.running_order ?? 0));
+
+  let cursor = new Date(gig.starts_at);
+  return sorted.map((invite) => {
+    const durationMinutes = invite.slot_duration_minutes ?? defaultDuration;
+    const startsAt = new Date(cursor);
+    const endsAt = new Date(cursor.getTime() + durationMinutes * 60_000);
+    cursor = endsAt;
+    return {
+      invite,
+      slotNumber: invite.running_order as number,
+      durationMinutes,
+      startsAt,
+      endsAt,
+    };
+  });
+}
+
+export function buildGigWorkflowSteps(gig: OrganiserGig, bands: GigBandInviteWithBand[]): GigWorkflowStep[] {
+  const activeBands = bands.filter((band) => band.invite_status !== 'cancelled');
+  const hasVenue = Boolean(gig.venue_id || gig.venue_name?.trim());
+  const hasStructure = Boolean(
+    gig.ends_at && gig.slot_count && gig.slot_count > 0 && gig.default_slot_duration_minutes,
+  );
+  const hasInvites = activeBands.length > 0;
+  const allResponded =
+    activeBands.length > 0 &&
+    activeBands.every((band) => band.invite_status === 'accepted' || band.invite_status === 'rejected');
+  const hasAccepted = activeBands.some((band) => band.invite_status === 'accepted');
+  const isConfirmed = gig.status === 'confirmed';
+
+  return [
+    { id: 'placeholder', label: 'Create placeholder', complete: Boolean(gig.title.trim() && gig.starts_at) },
+    { id: 'venue', label: 'Identify venue', complete: hasVenue },
+    { id: 'structure', label: 'Design gig structure', complete: hasStructure },
+    { id: 'invites', label: 'Invite bands', complete: hasInvites },
+    { id: 'responses', label: 'Band responses', complete: hasInvites && allResponded },
+    { id: 'running-order', label: 'Running order', complete: hasAccepted && activeBands.some((b) => b.running_order) },
+    { id: 'confirmed', label: 'Confirmed', complete: isConfirmed },
+  ];
+}
+
+export function canConfirmOrganiserGig(gig: OrganiserGig, bands: GigBandInviteWithBand[]): boolean {
+  if (gig.status === 'confirmed' || gig.status === 'archived' || gig.status === 'cancelled') {
+    return false;
+  }
+  const accepted = bands.filter((band) => band.invite_status === 'accepted');
+  return (
+    Boolean(gig.title.trim() && gig.starts_at && gig.ends_at && gig.slot_count && gig.default_slot_duration_minutes) &&
+    accepted.length > 0 &&
+    accepted.every((band) => band.running_order != null)
+  );
 }
 
 function normalizeGigRow(row: Record<string, unknown>): OrganiserGig {
@@ -215,7 +325,7 @@ export async function getOrganiserGig(gigId: string): Promise<OrganiserGigDetail
 
   const { data: inviteRows, error: inviteError } = await client
     .from('bandie_gig_bands')
-    .select('*, band:bandie_bands(name, slug)')
+    .select('*, band:bandie_bands(name, slug, logo_url, hero_image_url, tagline)')
     .eq('gig_id', gigId)
     .order('running_order', { ascending: true, nullsFirst: false });
 
@@ -226,12 +336,17 @@ export async function getOrganiserGig(gigId: string): Promise<OrganiserGigDetail
   const bands: GigBandInviteWithBand[] = [];
   for (const row of inviteRows ?? []) {
     const invite = normalizeInviteRow(row as Record<string, unknown>);
-    const bandMeta = (row as { band?: { name?: string; slug?: string } }).band;
+    const bandMeta = (row as {
+      band?: { name?: string; slug?: string; logo_url?: string | null; hero_image_url?: string | null; tagline?: string | null };
+    }).band;
     const setlistContext = await hydrateInviteSetlist(invite.band_id, invite);
     bands.push({
       ...invite,
       bandName: bandMeta?.name ?? 'Band',
       bandSlug: bandMeta?.slug ?? '',
+      bandLogoUrl: bandMeta?.logo_url ?? null,
+      bandHeroImageUrl: bandMeta?.hero_image_url ?? null,
+      bandTagline: bandMeta?.tagline ?? null,
       ...setlistContext,
     });
   }
@@ -267,6 +382,8 @@ export async function createOrganiserGig(input: CreateOrganiserGigInput): Promis
       calendar_event_id: input.calendarEventId ?? null,
       notes: input.notes?.trim() || null,
       fee_notes: input.feeNotes?.trim() || null,
+      slot_count: input.slotCount ?? null,
+      default_slot_duration_minutes: input.defaultSlotDurationMinutes ?? null,
       created_by: session.user.id,
     })
     .select('*')
@@ -301,6 +418,10 @@ export async function updateOrganiserGig(
   if (input.calendarEventId !== undefined) patch.calendar_event_id = input.calendarEventId;
   if (input.notes !== undefined) patch.notes = input.notes?.trim() || null;
   if (input.feeNotes !== undefined) patch.fee_notes = input.feeNotes?.trim() || null;
+  if (input.slotCount !== undefined) patch.slot_count = input.slotCount;
+  if (input.defaultSlotDurationMinutes !== undefined) {
+    patch.default_slot_duration_minutes = input.defaultSlotDurationMinutes;
+  }
 
   const { data, error } = await client
     .from('bandie_gigs')
@@ -321,23 +442,144 @@ export async function archiveOrganiserGig(gigId: string): Promise<void> {
   await updateOrganiserGig(gigId, { status: 'archived' });
 }
 
-export async function inviteBandToGig(gigId: string, bandId: string): Promise<GigBandInvite> {
+export async function confirmOrganiserGig(gigId: string): Promise<OrganiserGig> {
+  const detail = await getOrganiserGig(gigId);
+  if (!detail) {
+    throw new Error('Gig not found.');
+  }
+  if (!canConfirmOrganiserGig(detail, detail.bands)) {
+    throw new Error('Add structure, accepted bands, and slot positions before confirming.');
+  }
+  return updateOrganiserGig(gigId, { status: 'confirmed' });
+}
+
+export async function reopenOrganiserGig(gigId: string): Promise<OrganiserGig> {
+  const detail = await getOrganiserGig(gigId);
+  if (!detail) {
+    throw new Error('Gig not found.');
+  }
+  if (detail.status !== 'confirmed') {
+    throw new Error('Only confirmed gigs can be re-opened for planning.');
+  }
+  return updateOrganiserGig(gigId, { status: 'proposed' });
+}
+
+export async function inviteBandToGig(
+  gigId: string,
+  input: InviteBandToGigInput | string,
+): Promise<GigBandInvite> {
+  const payload = typeof input === 'string' ? { bandId: input } : input;
   const client = getBandieClient();
-  const { data, error } = await client
-    .from('bandie_gig_bands')
-    .insert({
-      gig_id: gigId,
-      band_id: bandId,
-      invite_status: 'pending',
-    })
-    .select('*')
-    .single();
+  const { data, error } = await client.rpc('bandie_organiser_invite_band_to_gig', {
+    p_gig_id: gigId,
+    p_band_id: payload.bandId,
+    p_running_order: payload.slotNumber ?? null,
+    p_slot_duration_minutes: payload.slotDurationMinutes ?? null,
+    p_personal_message: payload.personalMessage?.trim() || null,
+  });
 
   if (error) {
     throw new Error(error.message);
   }
 
   return normalizeInviteRow(data as Record<string, unknown>);
+}
+
+export function formatGigInviteNotificationBody(input: {
+  gig: Pick<
+    OrganiserGig,
+    | 'title'
+    | 'starts_at'
+    | 'ends_at'
+    | 'venue_name'
+    | 'venue_address'
+    | 'fee_notes'
+    | 'notes'
+    | 'default_slot_duration_minutes'
+  >;
+  organiser: {
+    displayName: string;
+    username?: string | null;
+    email?: string | null;
+    contactPhone?: string | null;
+  };
+  slotNumber?: number | null;
+  slotDurationMinutes?: number | null;
+  personalMessage?: string | null;
+}): string {
+  const lines: string[] = [];
+  const when = new Date(input.gig.starts_at).toLocaleString('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+  lines.push('You have been invited to play a gig on Bandie.', '');
+  lines.push(`Gig: ${input.gig.title}`);
+  lines.push(`Date & time: ${when}`);
+
+  if (input.gig.ends_at) {
+    lines.push(
+      `Show end: ${new Date(input.gig.ends_at).toLocaleString('en-GB', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })}`,
+    );
+  }
+
+  if (input.gig.venue_name?.trim()) {
+    lines.push(`Venue: ${input.gig.venue_name.trim()}`);
+  }
+
+  if (input.gig.venue_address?.trim()) {
+    lines.push(`Address: ${input.gig.venue_address.trim()}`);
+  }
+
+  if (input.slotNumber != null) {
+    lines.push(`Proposed slot: ${input.slotNumber}`);
+  }
+
+  const duration = input.slotDurationMinutes ?? input.gig.default_slot_duration_minutes;
+  if (duration != null) {
+    lines.push(`Slot duration: ${duration} minutes`);
+  }
+
+  if (input.gig.fee_notes?.trim()) {
+    lines.push(`Fee notes: ${input.gig.fee_notes.trim()}`);
+  }
+
+  if (input.gig.notes?.trim()) {
+    lines.push(`Notes: ${input.gig.notes.trim()}`);
+  }
+
+  lines.push('', 'Organiser contact');
+  lines.push(`Name: ${input.organiser.displayName}`);
+
+  if (input.organiser.username?.trim()) {
+    lines.push(`Username: @${input.organiser.username.trim()}`);
+  }
+
+  if (input.organiser.email?.trim()) {
+    lines.push(`Email: ${input.organiser.email.trim()}`);
+  }
+
+  if (input.organiser.contactPhone?.trim()) {
+    lines.push(`Phone: ${input.organiser.contactPhone.trim()}`);
+  }
+
+  if (input.personalMessage?.trim()) {
+    lines.push('', 'Message from organiser:', input.personalMessage.trim());
+  }
+
+  lines.push('', 'Respond from Gig invites in your band workspace or from Bandie communications.');
+  return lines.join('\n');
 }
 
 export async function cancelGigBandInvite(gigBandId: string): Promise<void> {
@@ -352,22 +594,33 @@ export async function cancelGigBandInvite(gigBandId: string): Promise<void> {
   }
 }
 
+export async function updateGigBandSlot(
+  gigId: string,
+  input: UpdateGigBandSlotInput,
+): Promise<void> {
+  const client = getBandieClient();
+  const patch: Record<string, unknown> = {};
+  if (input.slotNumber !== undefined) patch.running_order = input.slotNumber;
+  if (input.slotDurationMinutes !== undefined) patch.slot_duration_minutes = input.slotDurationMinutes;
+
+  const { error } = await client
+    .from('bandie_gig_bands')
+    .update(patch)
+    .eq('id', input.gigBandId)
+    .eq('gig_id', gigId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+/** @deprecated Use updateGigBandSlot */
 export async function updateGigBandRunningOrder(
   gigId: string,
   orders: Array<{ gigBandId: string; runningOrder: number | null }>,
 ): Promise<void> {
-  const client = getBandieClient();
-
   for (const item of orders) {
-    const { error } = await client
-      .from('bandie_gig_bands')
-      .update({ running_order: item.runningOrder })
-      .eq('id', item.gigBandId)
-      .eq('gig_id', gigId);
-
-    if (error) {
-      throw new Error(error.message);
-    }
+    await updateGigBandSlot(gigId, { gigBandId: item.gigBandId, slotNumber: item.runningOrder });
   }
 }
 

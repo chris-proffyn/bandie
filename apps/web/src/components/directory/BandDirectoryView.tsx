@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { BandieLogo } from '../brand/BandieLogo';
 import {
@@ -33,15 +33,20 @@ import {
   saveDirectoryHideTestData,
   showDirectoryTestDataToggle,
 } from '../../lib/directoryTestDataPreference';
+import type { FindGigContext } from '../../lib/findGigNavigation';
 
 type BandDirectoryViewProps = {
   variant: 'public' | 'workspace';
   initialFilters?: DirectoryFilters;
+  findGigContext?: FindGigContext | null;
+  directoryBackLink?: ReactNode;
 };
 
 export function BandDirectoryView({
   variant,
   initialFilters = DEFAULT_DIRECTORY_FILTERS,
+  findGigContext = null,
+  directoryBackLink = null,
 }: BandDirectoryViewProps) {
   const { session } = useAuth();
   const [bands, setBands] = useState<DirectoryBandListing[]>([]);
@@ -125,14 +130,29 @@ export function BandDirectoryView({
     <section className={isWorkspace ? 'workspace-directory-hero' : 'directory-shell directory-hero'}>
       <div>
         <div className={isWorkspace ? 'my-bands-eyebrow' : 'directory-eyebrow'}>
-          {isWorkspace ? 'Find bands to book' : 'Bandie directory for event organisers'}
+          {findGigContext
+            ? 'Find bands for your gig'
+            : isWorkspace
+              ? 'Find bands to book'
+              : 'Bandie directory for event organisers'}
         </div>
-        <h1>{isWorkspace ? 'Band directory' : 'Find the right band for the right night.'}</h1>
+        <h1>
+          {findGigContext
+            ? findGigContext.gigTitle?.trim() || 'Band directory'
+            : isWorkspace
+              ? 'Band directory'
+              : 'Find the right band for the right night.'}
+        </h1>
         <p className={isWorkspace ? 'my-bands-lead' : 'directory-lead'}>
-          {isWorkspace
-            ? 'Search local bands by genre, location, price and availability. Compare profiles and send booking enquiries from one place.'
-            : 'Search local bands by genre, location, price and availability. Compare profiles and send booking enquiries from one place.'}
+          {findGigContext
+            ? 'Search published bands, open profiles, and send gig invites with your contact and venue details.'
+            : isWorkspace
+              ? 'Search local bands by genre, location, price and availability. Compare profiles and send booking enquiries from one place.'
+              : 'Search local bands by genre, location, price and availability. Compare profiles and send booking enquiries from one place.'}
         </p>
+        {findGigContext && directoryBackLink ? (
+          <div className="workspace-directory-context-actions">{directoryBackLink}</div>
+        ) : null}
       </div>
       <aside className="directory-stats" aria-label="Directory summary">
         <div className="directory-stat">
@@ -225,7 +245,12 @@ export function BandDirectoryView({
         ) : (
           <div className="directory-band-grid directory-band-listing-grid">
             {filteredBands.map((band) => (
-              <DirectoryBandCard key={band.id} band={band} variant={variant} />
+              <DirectoryBandCard
+                key={band.id}
+                band={band}
+                variant={variant}
+                findGigContext={findGigContext}
+              />
             ))}
           </div>
         )}

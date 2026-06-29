@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  GIG_STATUS_OPTIONS,
   computeGigDashboardMetrics,
   createOrganiserGig,
   createOrganiserVenue,
@@ -10,7 +9,6 @@ import {
   gigStatusPillClass,
   listMyOrganiserVenues,
   listOrganiserGigs,
-  type GigStatus,
   type OrganiserGig,
   type OrganiserVenue,
 } from '@bandie/data';
@@ -33,7 +31,6 @@ export function OrganiserGigsDashboardPage() {
     venueChoice: '' as VenueChoice,
     newVenueName: '',
     newVenueAddress: '',
-    status: 'enquiry' as GigStatus,
   });
 
   const loadGigs = useCallback(async () => {
@@ -117,7 +114,7 @@ export function OrganiserGigsDashboardPage() {
         venueId,
         venueName,
         venueAddress,
-        status: form.status,
+        status: 'enquiry',
       });
       setShowCreate(false);
       setForm({
@@ -126,7 +123,6 @@ export function OrganiserGigsDashboardPage() {
         venueChoice: '',
         newVenueName: '',
         newVenueAddress: '',
-        status: 'enquiry',
       });
       navigate(`/app/gigs/${gig.id}`);
     } catch (err) {
@@ -176,7 +172,10 @@ export function OrganiserGigsDashboardPage() {
 
       {showCreate ? (
         <section className="panel gigs-create-panel">
-          <h2>New gig</h2>
+          <h2>New gig placeholder</h2>
+          <p className="workspace-empty-note">
+            Start with a title and date. You&apos;ll add venue, slots, and band invites on the next screen.
+          </p>
           <form className="auth-form" onSubmit={handleCreate}>
             <div className="auth-field">
               <label htmlFor="organiser-gig-title">Title</label>
@@ -254,25 +253,6 @@ export function OrganiserGigsDashboardPage() {
                 {formatOrganiserVenueAddress(selectedVenue) ?? 'No address saved for this venue.'}
               </p>
             ) : null}
-            <div className="auth-field">
-              <label htmlFor="organiser-gig-status">Status</label>
-              <select
-                id="organiser-gig-status"
-                value={form.status}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    status: event.target.value as GigStatus,
-                  }))
-                }
-              >
-                {GIG_STATUS_OPTIONS.map((status) => (
-                  <option key={status} value={status}>
-                    {formatGigStatus(status)}
-                  </option>
-                ))}
-              </select>
-            </div>
             {formError ? <div className="auth-message auth-message-error">{formError}</div> : null}
             <div className="gigs-form-actions">
               <button

@@ -601,9 +601,17 @@ export {
   createOrganiserGig,
   updateOrganiserGig,
   archiveOrganiserGig,
+  confirmOrganiserGig,
+  reopenOrganiserGig,
   inviteBandToGig,
   cancelGigBandInvite,
+  updateGigBandSlot,
   updateGigBandRunningOrder,
+  buildGigSlotSchedule,
+  buildGigWorkflowSteps,
+  canConfirmOrganiserGig,
+  formatSlotDuration,
+  formatSlotTimeRange,
   listBandGigInvitations,
   getBandGigInvitation,
   respondToGigInvitation,
@@ -612,6 +620,7 @@ export {
   computeBandGigInviteMetrics,
   formatGigStatus,
   formatGigInviteStatus,
+  formatGigInviteNotificationBody,
   gigStatusPillClass,
   gigInviteStatusPillClass,
   GIG_STATUS_OPTIONS,
@@ -626,10 +635,14 @@ export type {
   GigInviteStatus,
   GigBandInvite,
   GigBandInviteWithBand,
+  GigSlotScheduleEntry,
+  GigWorkflowStep,
   BandGigInvitation,
   OrganiserGigDetail,
   CreateOrganiserGigInput,
   UpdateOrganiserGigInput,
+  InviteBandToGigInput,
+  UpdateGigBandSlotInput,
 } from './gigs';
 
 export {
@@ -642,6 +655,15 @@ export {
   BOOKING_ENQUIRY_STATUS_LABELS,
 } from './bookingEnquiries';
 export type { BookingEnquiry, BookingEnquiryStatus, SendBookingEnquiryInput } from './bookingEnquiries';
+
+export {
+  listMyGigInviteCommunications,
+  listReceivedGigInviteCommunications,
+  listSentGigInviteCommunications,
+  countUnreadGigInviteNotifications,
+  markGigInviteNotificationRead,
+} from './gigInviteCommunications';
+export type { GigInviteCommunication } from './gigInviteCommunications';
 
 export {
   trackMetricEvent,

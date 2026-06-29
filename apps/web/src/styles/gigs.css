@@ -189,3 +189,220 @@
 .gig-readonly-details dd {
   margin: 0;
 }
+
+.gig-workflow-panel {
+  overflow-x: auto;
+}
+
+.gig-workflow-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.gig-workflow-steps li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.gig-workflow-step-complete {
+  color: var(--text-primary, inherit);
+}
+
+.gig-workflow-step-marker {
+  display: inline-flex;
+  width: 1.25rem;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.gig-invite-toolbar {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-bottom: 1rem;
+}
+
+.gig-slot-preview {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.gig-slot-preview ol {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.gig-band-summary {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.gig-band-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.gig-band-logo-large {
+  width: 56px;
+  height: 56px;
+}
+
+.gig-band-logo-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  font-weight: 700;
+}
+
+.gig-branding-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.gig-branding-card {
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.gig-branding-hero {
+  width: 100%;
+  height: 96px;
+  object-fit: cover;
+  display: block;
+}
+
+.gig-branding-body {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.9rem 1rem;
+}
+
+.gig-branding-body p {
+  margin: 0.25rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.gig-find-bands-panel {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.gig-find-bands-panel .auth-button {
+  width: fit-content;
+}
+
+.gig-invite-panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.gigs-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.gigs-dialog {
+  width: min(640px, 100%);
+  max-height: min(90vh, 900px);
+  overflow: auto;
+  border-radius: 16px;
+  padding: 1.25rem 1.35rem 1.35rem;
+}
+
+.gigs-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.gigs-dialog-header h2 {
+  margin: 0;
+}
+
+.gigs-dialog-close {
+  border: none;
+  background: transparent;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  color: inherit;
+}
+
+.gigs-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.gig-invite-modal-summary h3,
+.gig-invite-modal-preview h3 {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+}
+
+.gig-invite-modal-summary {
+  margin: 1rem 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+}
+
+.gig-invite-modal-summary p {
+  margin: 0.25rem 0 0;
+}
+
+.gig-invite-modal-fields {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.gig-invite-modal-preview pre {
+  margin: 0.5rem 0 0;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.04);
+  white-space: pre-wrap;
+  font-family: inherit;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.workspace-directory-context-actions {
+  margin-top: 1rem;
+}

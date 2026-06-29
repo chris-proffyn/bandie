@@ -6,8 +6,10 @@ import {
   formatGigInviteStatus,
   formatGigStatus,
   formatSetlistDuration,
+  formatSlotDuration,
   getBandGigInvitation,
   gigInviteStatusPillClass,
+  gigStatusPillClass,
   isBandLeaderRole,
   listBandSetlists,
   respondToGigInvitation,
@@ -138,7 +140,8 @@ export function GigDetailPage() {
           <p className="my-bands-eyebrow">Gig invitation</p>
           <h1>{gig.title}</h1>
           <p className="my-bands-lead">
-            {formatGigStatus(gig.status)} ·{' '}
+            <span className={gigStatusPillClass(gig.status)}>{formatGigStatus(gig.status)}</span>
+            {' · '}
             <span className={gigInviteStatusPillClass(invite.invite_status)}>
               {formatGigInviteStatus(invite.invite_status)}
             </span>
@@ -178,6 +181,17 @@ export function GigDetailPage() {
             <div>
               <dt>Address</dt>
               <dd>{gig.venue_address}</dd>
+            </div>
+          ) : null}
+          {invite.running_order ? (
+            <div>
+              <dt>Your slot</dt>
+              <dd>
+                Slot {invite.running_order}
+                {invite.slot_duration_minutes || gig.default_slot_duration_minutes
+                  ? ` · ${formatSlotDuration(invite.slot_duration_minutes ?? gig.default_slot_duration_minutes ?? 45)}`
+                  : ''}
+              </dd>
             </div>
           ) : null}
           {gig.notes ? (

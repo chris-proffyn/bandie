@@ -12,7 +12,7 @@ These are the various different elements we will build for Bandie. Status as of 
 — Venues an organiser manages or is associated with (pubs, clubs, festival sites). **Done** (`/app/venues` in organiser workspace mode); linked to organiser gigs and booking enquiry venue picker.
 
 ## Organiser Gig Management
-— Event planning for organisers: create gigs, pick venues, invite bands from the directory, set running order. **Done** (`/app/gigs`, `/app/gigs/:gigId` in organiser workspace mode). Bands receive invites at `/app/:bandId/gigs`; leaders accept/reject and assign setlists.
+— Event planning for organisers through an eight-step workflow: placeholder → venue → structure (slots/duration) → invite bands with slot positions → track acceptances → adjust running order → confirm (re-openable) → show band branding when confirmed. **Done** (`/app/gigs`, `/app/gigs/:gigId` in organiser workspace mode). Bands receive invites at `/app/:bandId/gigs`; leaders accept/reject and assign setlists.
 
 ## Band Directory 
 — A searchable public directory where event organisers can find bands by genre, location, price, rating and availability. **Done** (`/bands`)
@@ -39,7 +39,7 @@ These are the various different elements we will build for Bandie. Status as of 
 — A shared availability planner for rehearsals and potential gig dates. **Done** (`/app/:bandId/calendar`) — rehearsal + gig availability modes, member voting, public profile sync for confirmed/provisional gigs.
 
 ## Gig Invitations (band side)
-— Band view of organiser gig invitations: accept/reject and assign setlists from the band library. **Done** (`/app/:bandId/gigs`) — read-only event details; setlist readiness on accepted invites. Organisers create and manage gigs at `/app/gigs` (see Organiser Gig Management above).
+— Band view of organiser gig invitations: accept/reject, see assigned slot and duration, assign setlists from the band library. **Done** (`/app/:bandId/gigs`) — read-only event details; setlist readiness on accepted invites. Organisers create and manage gigs at `/app/gigs` (see Organiser Gig Management above).
 
 ## Booking Enquiries 
 — A workflow for event organisers to contact bands and for bands to manage inbound booking interest. **Done** — structured form on public profiles; dedicated **Booking enquiries** inbox in `/app/communications`; entitlement rate limits when enforcing.

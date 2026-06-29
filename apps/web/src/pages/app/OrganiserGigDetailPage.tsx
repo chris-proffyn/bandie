@@ -1,38 +1,45 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
-  GIG_STATUS_OPTIONS,
   archiveOrganiserGig,
+  buildGigSlotSchedule,
+  buildGigWorkflowSteps,
+  canConfirmOrganiserGig,
   cancelGigBandInvite,
-  filterDirectoryBands,
+  confirmOrganiserGig,
   formatGigInviteStatus,
   formatGigStatus,
   formatOrganiserVenueAddress,
+  formatSlotDuration,
+  formatSlotTimeRange,
   getOrganiserGig,
   gigInviteStatusPillClass,
-  inviteBandToGig,
+  gigStatusPillClass,
   listMyOrganiserVenues,
-  listPublishedBandsForDirectory,
-  DEFAULT_DIRECTORY_FILTERS,
-  updateGigBandRunningOrder,
+  reopenOrganiserGig,
+  updateGigBandSlot,
   updateOrganiserGig,
-  type DirectoryBandListing,
-  type GigStatus,
   type OrganiserGigDetail,
   type OrganiserVenue,
 } from '@bandie/data';
+import { buildFindGigUrl } from '../../lib/findGigNavigation';
 import '../../styles/gigs.css';
+
+function toDatetimeLocalValue(iso: string | null | undefined): string {
+  if (!iso) {
+    return '';
+  }
+  const value = new Date(iso);
+  return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}-${String(value.getDate()).padStart(2, '0')}T${String(value.getHours()).padStart(2, '0')}:${String(value.getMinutes()).padStart(2, '0')}`;
+}
 
 export function OrganiserGigDetailPage() {
   const { gigId: resolvedGigId } = useParams();
 
   const [gig, setGig] = useState<OrganiserGigDetail | null>(null);
   const [venues, setVenues] = useState<OrganiserVenue[]>([]);
-  const [directoryBands, setDirectoryBands] = useState<DirectoryBandListing[]>([]);
-  const [bandSearch, setBandSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [inviting, setInviting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const loadGig = useCallback(async () => {
@@ -44,14 +51,12 @@ export function OrganiserGigDetailPage() {
     setError(null);
 
     try {
-      const [gigRow, venueRows, bandRows] = await Promise.all([
+      const [gigRow, venueRows] = await Promise.all([
         getOrganiserGig(resolvedGigId),
         listMyOrganiserVenues(),
-        listPublishedBandsForDirectory(),
       ]);
       setGig(gigRow);
       setVenues(venueRows);
-      setDirectoryBands(bandRows);
     } catch (err) {
       setGig(null);
       setError(err instanceof Error ? err.message : 'Unable to load gig.');
@@ -64,23 +69,20 @@ export function OrganiserGigDetailPage() {
     void loadGig();
   }, [loadGig]);
 
-  const invitedBandIds = useMemo(
-    () => new Set((gig?.bands ?? []).map((item) => item.band_id)),
-    [gig?.bands],
+  const workflowSteps = useMemo(
+    () => (gig ? buildGigWorkflowSteps(gig, gig.bands) : []),
+    [gig],
   );
 
-  const bandOptions = useMemo(() => {
-    const available = directoryBands.filter((band) => !invitedBandIds.has(band.id));
-    if (!bandSearch.trim()) {
-      return available.slice(0, 12);
-    }
-    return filterDirectoryBands(available, {
-      ...DEFAULT_DIRECTORY_FILTERS,
-      name: bandSearch.trim(),
-    }).slice(0, 12);
-  }, [bandSearch, directoryBands, invitedBandIds]);
+  const slotSchedule = useMemo(
+    () => (gig ? buildGigSlotSchedule(gig, gig.bands) : []),
+    [gig],
+  );
 
-  async function handleSave(event: FormEvent<HTMLFormElement>) {
+  const confirmReady = gig ? canConfirmOrganiserGig(gig, gig.bands) : false;
+  const isConfirmed = gig?.status === 'confirmed';
+
+  async function handleSaveBasics(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!resolvedGigId || !gig) {
       return;
@@ -102,9 +104,9 @@ export function OrganiserGigDetailPage() {
         venueAddress:
           (selectedVenue ? formatOrganiserVenueAddress(selectedVenue) : null) ??
           String(formData.get('venueAddress') ?? ''),
-        status: String(formData.get('status')) as GigStatus,
         notes: String(formData.get('notes') ?? ''),
         feeNotes: String(formData.get('feeNotes') ?? ''),
+        status: gig.status === 'confirmed' ? 'confirmed' : 'enquiry',
       });
       await loadGig();
     } catch (err) {
@@ -114,22 +116,50 @@ export function OrganiserGigDetailPage() {
     }
   }
 
-  async function handleInviteBand(bandId: string) {
+  async function handleSaveStructure(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!resolvedGigId || !gig) {
+      return;
+    }
+
+    const formData = new FormData(event.currentTarget);
+    setSaving(true);
+    setError(null);
+
+    try {
+      await updateOrganiserGig(resolvedGigId, {
+        startsAt: new Date(String(formData.get('showStartsAt'))).toISOString(),
+        endsAt: new Date(String(formData.get('showEndsAt'))).toISOString(),
+        slotCount: Number(formData.get('slotCount')),
+        defaultSlotDurationMinutes: Number(formData.get('defaultSlotDurationMinutes')),
+        status: gig.status === 'confirmed' ? 'confirmed' : 'proposed',
+      });
+      await loadGig();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to save structure.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleSlotUpdate(
+    gigBandId: string,
+    slotNumber: string,
+    slotDuration: string,
+  ) {
     if (!resolvedGigId) {
       return;
     }
 
-    setInviting(true);
-    setError(null);
-
     try {
-      await inviteBandToGig(resolvedGigId, bandId);
-      setBandSearch('');
+      await updateGigBandSlot(resolvedGigId, {
+        gigBandId,
+        slotNumber: slotNumber ? Number(slotNumber) : null,
+        slotDurationMinutes: slotDuration ? Number(slotDuration) : null,
+      });
       await loadGig();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to invite band.');
-    } finally {
-      setInviting(false);
+      setError(err instanceof Error ? err.message : 'Unable to update slot.');
     }
   }
 
@@ -146,17 +176,29 @@ export function OrganiserGigDetailPage() {
     }
   }
 
-  async function handleRunningOrderChange(gigBandId: string, value: string) {
+  async function handleConfirm() {
     if (!resolvedGigId) {
       return;
     }
 
-    const runningOrder = value ? Number(value) : null;
     try {
-      await updateGigBandRunningOrder(resolvedGigId, [{ gigBandId, runningOrder }]);
+      await confirmOrganiserGig(resolvedGigId);
       await loadGig();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to update running order.');
+      setError(err instanceof Error ? err.message : 'Unable to confirm gig.');
+    }
+  }
+
+  async function handleReopen() {
+    if (!resolvedGigId) {
+      return;
+    }
+
+    try {
+      await reopenOrganiserGig(resolvedGigId);
+      await loadGig();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to re-open gig.');
     }
   }
 
@@ -188,16 +230,15 @@ export function OrganiserGigDetailPage() {
     );
   }
 
-  const startsLocal = new Date(gig.starts_at);
-  const startsValue = `${startsLocal.getFullYear()}-${String(startsLocal.getMonth() + 1).padStart(2, '0')}-${String(startsLocal.getDate()).padStart(2, '0')}T${String(startsLocal.getHours()).padStart(2, '0')}:${String(startsLocal.getMinutes()).padStart(2, '0')}`;
-
   return (
     <div className="gigs-page">
       <header className="gigs-header">
         <div>
-          <p className="my-bands-eyebrow">Gig detail</p>
+          <p className="my-bands-eyebrow">Gig planning</p>
           <h1>{gig.title}</h1>
-          <p className="my-bands-lead">{formatGigStatus(gig.status)}</p>
+          <p className="my-bands-lead">
+            <span className={gigStatusPillClass(gig.status)}>{formatGigStatus(gig.status)}</span>
+          </p>
         </div>
         <Link to="/app/gigs" className="directory-btn directory-btn-secondary">
           Back to gigs
@@ -206,153 +247,325 @@ export function OrganiserGigDetailPage() {
 
       {error ? <div className="auth-message auth-message-error">{error}</div> : null}
 
+      <section className="panel gig-workflow-panel">
+        <h2>Planning workflow</h2>
+        <ol className="gig-workflow-steps">
+          {workflowSteps.map((step) => (
+            <li key={step.id} className={step.complete ? 'gig-workflow-step-complete' : ''}>
+              <span className="gig-workflow-step-marker" aria-hidden="true">
+                {step.complete ? '✓' : '○'}
+              </span>
+              <span>{step.label}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
       <section className="panel">
-        <h2>Event details</h2>
-        <form className="auth-form" onSubmit={handleSave}>
+        <h2>1. Gig placeholder</h2>
+        <p className="workspace-empty-note">Start with a title and event date. You can refine show times in step 3.</p>
+        <form className="auth-form" onSubmit={handleSaveBasics}>
           <div className="gig-detail-grid">
             <div className="auth-field">
               <label htmlFor="gig-title">Title</label>
-              <input id="gig-title" name="title" defaultValue={gig.title} />
+              <input id="gig-title" name="title" defaultValue={gig.title} disabled={isConfirmed} />
             </div>
             <div className="auth-field">
-              <label htmlFor="gig-starts">Starts</label>
-              <input id="gig-starts" name="startsAt" type="datetime-local" defaultValue={startsValue} />
-            </div>
-            <div className="auth-field">
-              <label htmlFor="gig-status">Status</label>
-              <select id="gig-status" name="status" defaultValue={gig.status}>
-                {GIG_STATUS_OPTIONS.map((status) => (
-                  <option key={status} value={status}>
-                    {formatGigStatus(status)}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="auth-field">
-              <label htmlFor="gig-venue-id">Saved venue</label>
-              <select id="gig-venue-id" name="venueId" defaultValue={gig.venue_id ?? ''}>
-                <option value="">No saved venue</option>
-                {venues.map((venue) => (
-                  <option key={venue.id} value={venue.id}>
-                    {venue.name}
-                  </option>
-                ))}
-              </select>
+              <label htmlFor="gig-starts">Event date / show start</label>
+              <input
+                id="gig-starts"
+                name="startsAt"
+                type="datetime-local"
+                defaultValue={toDatetimeLocalValue(gig.starts_at)}
+                disabled={isConfirmed}
+              />
             </div>
           </div>
-
-          <div className="auth-field">
-            <label htmlFor="gig-venue">Venue name</label>
-            <input id="gig-venue" name="venueName" defaultValue={gig.venue_name ?? ''} />
-          </div>
-          <div className="auth-field">
-            <label htmlFor="gig-address">Venue address</label>
-            <input id="gig-address" name="venueAddress" defaultValue={gig.venue_address ?? ''} />
-          </div>
-          <div className="auth-field">
-            <label htmlFor="gig-notes">Notes</label>
-            <textarea id="gig-notes" name="notes" rows={3} defaultValue={gig.notes ?? ''} />
-          </div>
-          <div className="auth-field">
-            <label htmlFor="gig-fee-notes">Fee notes</label>
-            <textarea id="gig-fee-notes" name="feeNotes" rows={2} defaultValue={gig.fee_notes ?? ''} />
-          </div>
-
-          <div className="gig-detail-actions">
-            <button type="submit" className="auth-button" disabled={saving}>
-              {saving ? 'Saving…' : 'Save changes'}
-            </button>
-            <button type="button" className="auth-button auth-button-secondary" onClick={() => void handleArchive()}>
-              Archive gig
-            </button>
-          </div>
+          {!isConfirmed ? (
+            <div className="gig-detail-actions">
+              <button type="submit" className="auth-button" disabled={saving}>
+                {saving ? 'Saving…' : 'Save placeholder'}
+              </button>
+            </div>
+          ) : null}
         </form>
       </section>
 
       <section className="panel">
-        <h2>Bands and running order</h2>
+        <h2>2. Venue</h2>
+        <form className="auth-form" onSubmit={handleSaveBasics}>
+          <div className="auth-field">
+            <label htmlFor="gig-venue-id">Saved venue</label>
+            <select id="gig-venue-id" name="venueId" defaultValue={gig.venue_id ?? ''} disabled={isConfirmed}>
+              <option value="">No saved venue</option>
+              {venues.map((venue) => (
+                <option key={venue.id} value={venue.id}>
+                  {venue.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="auth-field">
+            <label htmlFor="gig-venue">Venue name</label>
+            <input id="gig-venue" name="venueName" defaultValue={gig.venue_name ?? ''} disabled={isConfirmed} />
+          </div>
+          <div className="auth-field">
+            <label htmlFor="gig-address">Venue address</label>
+            <input id="gig-address" name="venueAddress" defaultValue={gig.venue_address ?? ''} disabled={isConfirmed} />
+          </div>
+          <input type="hidden" name="title" value={gig.title} />
+          <input type="hidden" name="startsAt" value={toDatetimeLocalValue(gig.starts_at)} />
+          {!isConfirmed ? (
+            <div className="gig-detail-actions">
+              <button type="submit" className="auth-button" disabled={saving}>
+                {saving ? 'Saving…' : 'Save venue'}
+              </button>
+              <Link to="/app/venues" className="directory-btn directory-btn-secondary">
+                Manage venues
+              </Link>
+            </div>
+          ) : null}
+        </form>
+      </section>
+
+      <section className="panel">
+        <h2>3. Gig structure</h2>
+        <p className="workspace-empty-note">Set show start/end, number of slots, and default slot duration.</p>
+        <form className="auth-form" onSubmit={handleSaveStructure}>
+          <div className="gig-detail-grid">
+            <div className="auth-field">
+              <label htmlFor="show-starts">Show start</label>
+              <input
+                id="show-starts"
+                name="showStartsAt"
+                type="datetime-local"
+                defaultValue={toDatetimeLocalValue(gig.starts_at)}
+                disabled={isConfirmed}
+                required
+              />
+            </div>
+            <div className="auth-field">
+              <label htmlFor="show-ends">Show end</label>
+              <input
+                id="show-ends"
+                name="showEndsAt"
+                type="datetime-local"
+                defaultValue={toDatetimeLocalValue(gig.ends_at)}
+                disabled={isConfirmed}
+                required
+              />
+            </div>
+            <div className="auth-field">
+              <label htmlFor="slot-count">Number of slots</label>
+              <input
+                id="slot-count"
+                name="slotCount"
+                type="number"
+                min={1}
+                defaultValue={gig.slot_count ?? ''}
+                disabled={isConfirmed}
+                required
+              />
+            </div>
+            <div className="auth-field">
+              <label htmlFor="slot-duration">Default slot duration (minutes)</label>
+              <input
+                id="slot-duration"
+                name="defaultSlotDurationMinutes"
+                type="number"
+                min={5}
+                step={5}
+                defaultValue={gig.default_slot_duration_minutes ?? 45}
+                disabled={isConfirmed}
+                required
+              />
+            </div>
+          </div>
+          {!isConfirmed ? (
+            <button type="submit" className="auth-button" disabled={saving}>
+              {saving ? 'Saving…' : 'Save structure'}
+            </button>
+          ) : null}
+        </form>
+      </section>
+
+      <section className="panel">
+        <h2>4–6. Bands, responses and running order</h2>
         <p className="workspace-empty-note">
-          Invite bands from the directory. Band leaders accept or reject; they assign setlists after accepting.
+          Invite bands, assign slot positions, track accept/reject status, and adjust durations.
         </p>
 
-        <div className="auth-field">
-          <label htmlFor="band-search">Find band to invite</label>
-          <input
-            id="band-search"
-            value={bandSearch}
-            onChange={(event) => setBandSearch(event.target.value)}
-            placeholder="Search by band name"
-          />
-        </div>
-
-        {bandOptions.length > 0 ? (
-          <ul className="gigs-band-picker">
-            {bandOptions.map((band) => (
-              <li key={band.id}>
-                <div>
-                  <strong>{band.name}</strong>
-                  {band.location ? <p>{band.location}</p> : null}
-                </div>
-                <button
-                  type="button"
-                  className="directory-btn directory-btn-secondary"
-                  disabled={inviting}
-                  onClick={() => void handleInviteBand(band.id)}
-                >
-                  Invite
-                </button>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="workspace-empty-note">No matching bands to invite.</p>
-        )}
+        {!isConfirmed ? (
+          <div className="gig-find-bands-panel">
+            <p className="workspace-empty-note">
+              Search the band directory, open profiles, and send invites with your contact and venue
+              details. The band leader is notified in their communications.
+            </p>
+            <Link
+              to={buildFindGigUrl({ gigId: gig.id, gigTitle: gig.title })}
+              className="auth-button"
+            >
+              Find bands in directory
+            </Link>
+          </div>
+        ) : null}
 
         {gig.bands.length === 0 ? (
           <p className="workspace-empty-note">No bands invited yet.</p>
         ) : (
           <ul className="gigs-list gigs-invite-list">
-            {gig.bands.map((invite) => (
-              <li key={invite.id}>
-                <div className="gigs-invite-row">
-                  <div>
-                    <strong>{invite.bandName}</strong>
-                    <p>
+            {gig.bands.map((invite) => {
+              const schedule = slotSchedule.find((entry) => entry.invite.id === invite.id);
+              return (
+                <li key={invite.id}>
+                  <div className="gigs-invite-row">
+                    <div className="gig-band-summary">
+                      {isConfirmed && invite.bandLogoUrl ? (
+                        <img src={invite.bandLogoUrl} alt="" className="gig-band-logo" />
+                      ) : null}
+                      <div>
+                        <strong>{invite.bandName}</strong>
+                        <p>
+                          {formatGigInviteStatus(invite.invite_status)}
+                          {schedule
+                            ? ` · ${formatSlotTimeRange(schedule.startsAt, schedule.endsAt)} (${formatSlotDuration(schedule.durationMinutes)})`
+                            : ''}
+                          {invite.setlistTitle ? ` · Setlist: ${invite.setlistTitle}` : ''}
+                        </p>
+                      </div>
+                    </div>
+                    <span className={gigInviteStatusPillClass(invite.invite_status)}>
                       {formatGigInviteStatus(invite.invite_status)}
-                      {invite.setlistTitle ? ` · Setlist: ${invite.setlistTitle}` : ''}
-                    </p>
+                    </span>
                   </div>
-                  <span className={gigInviteStatusPillClass(invite.invite_status)}>
-                    {formatGigInviteStatus(invite.invite_status)}
-                  </span>
-                </div>
-                <div className="gigs-invite-controls">
-                  <label>
-                    Running order
-                    <input
-                      type="number"
-                      min={1}
-                      defaultValue={invite.running_order ?? ''}
-                      onBlur={(event) =>
-                        void handleRunningOrderChange(invite.id, event.target.value)
-                      }
-                    />
-                  </label>
-                  {invite.invite_status === 'pending' ? (
-                    <button
-                      type="button"
-                      className="auth-button auth-button-secondary"
-                      onClick={() => void handleCancelInvite(invite.id)}
-                    >
-                      Cancel invite
-                    </button>
+                  {!isConfirmed ? (
+                    <div className="gigs-invite-controls">
+                      <label>
+                        Slot
+                        <input
+                          type="number"
+                          min={1}
+                          max={gig.slot_count ?? undefined}
+                          defaultValue={invite.running_order ?? ''}
+                          onBlur={(event) =>
+                            void handleSlotUpdate(
+                              invite.id,
+                              event.target.value,
+                              String(invite.slot_duration_minutes ?? ''),
+                            )
+                          }
+                        />
+                      </label>
+                      <label>
+                        Duration (min)
+                        <input
+                          type="number"
+                          min={5}
+                          step={5}
+                          defaultValue={invite.slot_duration_minutes ?? gig.default_slot_duration_minutes ?? ''}
+                          onBlur={(event) =>
+                            void handleSlotUpdate(
+                              invite.id,
+                              String(invite.running_order ?? ''),
+                              event.target.value,
+                            )
+                          }
+                        />
+                      </label>
+                      {invite.invite_status === 'pending' ? (
+                        <button
+                          type="button"
+                          className="auth-button auth-button-secondary"
+                          onClick={() => void handleCancelInvite(invite.id)}
+                        >
+                          Cancel invite
+                        </button>
+                      ) : null}
+                    </div>
                   ) : null}
-                </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
         )}
+
+        {slotSchedule.length > 0 ? (
+          <div className="gig-slot-preview">
+            <h3>Running order preview</h3>
+            <ol>
+              {slotSchedule.map((entry) => (
+                <li key={entry.invite.id}>
+                  <strong>{entry.invite.bandName}</strong> — slot {entry.slotNumber},{' '}
+                  {formatSlotTimeRange(entry.startsAt, entry.endsAt)} ({formatSlotDuration(entry.durationMinutes)})
+                </li>
+              ))}
+            </ol>
+          </div>
+        ) : null}
       </section>
+
+      <section className="panel">
+        <h2>7. Confirm gig</h2>
+        {isConfirmed ? (
+          <>
+            <p className="workspace-empty-note">This gig is confirmed. Re-open it to change structure or lineup.</p>
+            <div className="gig-detail-actions">
+              <button type="button" className="auth-button auth-button-secondary" onClick={() => void handleReopen()}>
+                Re-open for planning
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="workspace-empty-note">
+              Confirm when venue, structure, accepted bands, and slot positions are ready.
+            </p>
+            <div className="gig-detail-actions">
+              <button
+                type="button"
+                className="auth-button"
+                disabled={!confirmReady}
+                onClick={() => void handleConfirm()}
+              >
+                Mark as confirmed
+              </button>
+              <button type="button" className="auth-button auth-button-secondary" onClick={() => void handleArchive()}>
+                Archive gig
+              </button>
+            </div>
+          </>
+        )}
+      </section>
+
+      {isConfirmed ? (
+        <section className="panel">
+          <h2>8. Band branding</h2>
+          <p className="workspace-empty-note">Branding is pulled from each band&apos;s public profile.</p>
+          <ul className="gig-branding-grid">
+            {gig.bands
+              .filter((band) => band.invite_status === 'accepted')
+              .map((band) => (
+                <li key={band.id} className="gig-branding-card">
+                  {band.bandHeroImageUrl ? (
+                    <img src={band.bandHeroImageUrl} alt="" className="gig-branding-hero" />
+                  ) : null}
+                  <div className="gig-branding-body">
+                    {band.bandLogoUrl ? (
+                      <img src={band.bandLogoUrl} alt="" className="gig-band-logo gig-band-logo-large" />
+                    ) : (
+                      <span className="gig-band-logo-fallback">{band.bandName.slice(0, 1)}</span>
+                    )}
+                    <div>
+                      <strong>{band.bandName}</strong>
+                      {band.bandTagline ? <p>{band.bandTagline}</p> : null}
+                      {band.running_order ? <p>Slot {band.running_order}</p> : null}
+                    </div>
+                  </div>
+                </li>
+              ))}
+          </ul>
+        </section>
+      ) : null}
     </div>
   );
 }

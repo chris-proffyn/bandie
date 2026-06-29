@@ -17,6 +17,10 @@ export type BackNavigationState = {
     partTitle?: string;
     instrument?: string;
   };
+  findGig?: {
+    gigId: string;
+    gigTitle?: string;
+  };
 };
 
 export function resolveBackPath(
@@ -53,7 +57,8 @@ export function backNavigationState(locationState: unknown): BackNavigationState
     !state?.workspaceContext &&
     !state?.playerFilters &&
     !state?.playerSort &&
-    !state?.findPlayers
+    !state?.findPlayers &&
+    !state?.findGig
   ) {
     return undefined;
   }
@@ -64,6 +69,7 @@ export function backNavigationState(locationState: unknown): BackNavigationState
     playerFilters: state.playerFilters,
     playerSort: state.playerSort,
     findPlayers: state.findPlayers,
+    findGig: state.findGig,
   };
 }
 
@@ -76,6 +82,7 @@ export function directoryLinkState(
     playerFilters?: PlayerDirectoryFilters;
     playerSort?: PlayerDirectorySort;
     findPlayers?: BackNavigationState['findPlayers'];
+    findGig?: BackNavigationState['findGig'];
   },
 ): BackNavigationState {
   return {
@@ -85,5 +92,6 @@ export function directoryLinkState(
     playerFilters: options.playerFilters,
     playerSort: options.playerSort,
     findPlayers: options.findPlayers,
+    findGig: options.findGig,
   };
 }

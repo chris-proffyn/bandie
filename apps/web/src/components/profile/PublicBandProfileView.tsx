@@ -19,14 +19,27 @@ import {
 import { useBandNameFont } from '../../lib/useBandNameFont';
 import { BandSetFeesFields } from '../band/BandSetFeesFields';
 import { TestDataBadge } from '../common/TestDataBadge';
+import { GigInvitePanel } from '../gigs/GigInvitePanel';
+import type { FindGigContext } from '../../lib/findGigNavigation';
+import { buildFindGigUrl } from '../../lib/findGigNavigation';
+import type { GigBandInviteWithBand } from '@bandie/data';
 import type { CSSProperties } from 'react';
 
 type PublicBandProfileViewProps = {
   profile: PublicBandProfile;
   variant?: 'public' | 'workspace';
+  findGig?: FindGigContext | null;
+  existingGigInvite?: GigBandInviteWithBand | null;
+  onGigInvited?: () => void;
 };
 
-export function PublicBandProfileView({ profile, variant = 'public' }: PublicBandProfileViewProps) {
+export function PublicBandProfileView({
+  profile,
+  variant = 'public',
+  findGig = null,
+  existingGigInvite = null,
+  onGigInvited,
+}: PublicBandProfileViewProps) {
   const isWorkspace = variant === 'workspace';
   const tagline = formatBandSubtitle(profile);
   const locationLabel = formatBandLocation(profile);
@@ -63,7 +76,7 @@ export function PublicBandProfileView({ profile, variant = 'public' }: PublicBan
       <div className="band-profile-shell">
         <BackLink
           fallbackTo="/bands"
-          workspaceFallbackTo="/app/bands"
+          workspaceFallbackTo={findGig ? buildFindGigUrl(findGig) : '/app/bands'}
           label="Back to band directory"
         />
 
@@ -226,6 +239,16 @@ export function PublicBandProfileView({ profile, variant = 'public' }: PublicBan
           setOffers={profile.setOffers}
           dynamicFeeOffers={profile.dynamicFeeOffers}
         />
+
+        {isWorkspace && findGig ? (
+          <GigInvitePanel
+            bandId={profile.id}
+            bandName={profile.name}
+            findGig={findGig}
+            existingInvite={existingGigInvite}
+            onInvited={onGigInvited}
+          />
+        ) : null}
       </div>
 
       <footer className="band-profile-shell band-profile-footer">

@@ -7,11 +7,13 @@ import {
   type DirectoryBandListing,
 } from '@bandie/data';
 import { directoryLinkState } from '../../lib/backNavigation';
+import type { FindGigContext } from '../../lib/findGigNavigation';
 import { BandCard } from '../bands/BandCard';
 
 type DirectoryBandCardProps = {
   band: DirectoryBandListing;
   variant?: 'public' | 'workspace';
+  findGigContext?: FindGigContext | null;
 };
 
 function availabilityDotClass(status: DirectoryBandListing['availability_status']): string {
@@ -20,7 +22,11 @@ function availabilityDotClass(status: DirectoryBandListing['availability_status'
   return '';
 }
 
-export function DirectoryBandCard({ band, variant = 'public' }: DirectoryBandCardProps) {
+export function DirectoryBandCard({
+  band,
+  variant = 'public',
+  findGigContext = null,
+}: DirectoryBandCardProps) {
   const location = useLocation();
   const profilePath =
     variant === 'workspace' ? `/app/bands/${band.slug}` : `/bands/${band.slug}`;
@@ -39,9 +45,10 @@ export function DirectoryBandCard({ band, variant = 'public' }: DirectoryBandCar
         <Link
           className="directory-btn directory-btn-dark"
           to={profilePath}
-          state={directoryLinkState(location.pathname, {
+          state={directoryLinkState(location.pathname + location.search, {
             variant,
             directory: 'bands',
+            findGig: findGigContext ?? undefined,
           })}
         >
           View profile

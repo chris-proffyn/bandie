@@ -305,6 +305,11 @@ Reference: `product-functional-requirements.md` §11. Capability keys: `gig.crea
 - [x] 10.5 Gig status workflow — enquiry through archived
 - [x] 10.6 Entitlements moved to organiser plans (`gig.create`, `gigs.active_max_count` per organiser user)
 - [x] 10.7 Organiser nav and workspace routing — `/app/gigs` in organiser mode nav; `isPlayerWorkspaceRoute` excludes organiser segments; reserved `:bandId` segments in `bandRoutes.ts`
+- [x] 10.8 Gig structure fields — `slot_count`, `default_slot_duration_minutes`, per-band `slot_duration_minutes` (migration `20260630240000`)
+- [x] 10.9 Eight-step organiser workflow UI — placeholder create, venue, structure, invites with slot assignment, running order, confirm/re-open, branding when confirmed
+- [x] 10.10 Band invite detail — slot number and duration on `/app/:bandId/gigs/:gigId`
+- [x] 10.11 Data helpers — `buildGigSlotSchedule`, `buildGigWorkflowSteps`, `canConfirmOrganiserGig`, `confirmOrganiserGig`, `reopenOrganiserGig`, `updateGigBandSlot`
+- [x] 10.12 Directory-based band discovery for gig invites — `/app/bands?forGig=…`, profile invite modal, communications notification to band primary contact
 
 ### 11. Booking enquiries
 
@@ -396,6 +401,17 @@ Authoritative spec: entitlements spec §35 Phase E. Deferred until admin portal 
 ---
 
 ## Session notes
+
+**30 June 2026 — Gig invite via band directory**
+- Organisers find bands from gig detail via `/app/bands?forGig=…`; invite from band profile modal with gig, venue, and organiser contact preview
+- Migration `20260630250000` — `bandie_organiser_invite_band_to_gig` RPC, notification message to band primary contact, communications feed item
+
+**30 June 2026 — Gig creation workflow (eight steps)**
+- Migration `20260630240000_bandie_gig_structure.sql` — slot count, default slot duration, per-band slot duration override
+- Organiser create simplified to placeholder (title + date/time; always `enquiry`); full workflow on gig detail
+- Confirm / re-open gig; band branding (logo, hero, tagline) when `confirmed`
+- Band gig detail shows assigned slot and duration
+- Docs: product functional requirements §11 (eight-step workflow)
 
 **30 June 2026 — Organiser-owned gigs and `/app/gigs` routing**
 - Migration `20260630220000_bandie_organiser_gigs.sql` applied to remote — `bandie_gig_bands` invites, organiser-owned `bandie_gigs`, band-leader RPCs (`bandie_respond_gig_invite`, `bandie_assign_gig_setlist`)

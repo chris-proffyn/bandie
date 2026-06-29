@@ -1,14 +1,17 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   acceptBandInvitation,
   declineBandInvitation,
   filterCommunications,
   filterResolvedSentCommunications,
   formatBandMemberRoleLabel,
+  formatGigInviteStatus,
   formatInvitationStatusLabel,
   formatUserWithEmail,
   isInvitationAwaitingResponse,
   listCommunications,
+  markGigInviteNotificationRead,
   playerOutreachTypeLabel,
   markMessageRead,
   markBookingEnquiryRead,
@@ -243,6 +246,75 @@ function FeedItem({
             </button>
           </div>
         ) : null}
+      </li>
+    );
+  }
+
+  if (item.kind === 'gig_invitation') {
+    const invite = item.invite;
+    const isUnread = invite.invite_status === 'pending' && !invite.message_read_at;
+
+    return (
+      <li
+        className={`communications-feed-item ${isUnread ? 'communications-message-item-unread' : ''}`}
+      >
+        <div className="communications-feed-head">
+          <span className="communications-type-badge">Gig invitation</span>
+          <span className="communications-item-meta">{formatTimestamp(item.created_at)}</span>
+        </div>
+        <strong>{invite.gig_title}</strong>
+        <p className="communications-item-meta">
+          {invite.band_name} · {formatGigInviteStatus(invite.invite_status)}
+          {invite.venue_name ? ` · ${invite.venue_name}` : ''}
+        </p>
+        <p className="communications-message-body">{invite.message_body}</p>
+        {error ? <div className="auth-message auth-message-error">{error}</div> : null}
+        <div className="communications-item-actions">
+          {isUnread ? (
+            <button
+              type="button"
+              className="auth-button auth-button-secondary"
+              disabled={acting}
+              onClick={() => {
+                void runAction(async () => {
+                  await markGigInviteNotificationRead(invite);
+                });
+              }}
+            >
+              Mark read
+            </button>
+          ) : null}
+          <Link
+            to={`/app/${invite.band_id}/gigs/${invite.gig_id}`}
+            className="directory-btn directory-btn-secondary"
+          >
+            View gig invite
+          </Link>
+        </div>
+      </li>
+    );
+  }
+
+  if (item.kind === 'sent_gig_invitation') {
+    const invite = item.invite;
+
+    return (
+      <li className="communications-feed-item">
+        <div className="communications-feed-head">
+          <span className="communications-type-badge communications-type-badge-sent">Sent</span>
+          <span className="communications-type-badge">Gig invitation</span>
+          <span className="communications-item-meta">{formatTimestamp(item.created_at)}</span>
+        </div>
+        <strong>{invite.band_name}</strong>
+        <p className="communications-item-meta">
+          {invite.gig_title} · {formatGigInviteStatus(invite.invite_status)}
+        </p>
+        <p className="communications-message-body">{invite.message_body}</p>
+        <div className="communications-item-actions">
+          <Link to={`/app/gigs/${invite.gig_id}`} className="directory-btn directory-btn-secondary">
+            View gig
+          </Link>
+        </div>
       </li>
     );
   }

@@ -229,7 +229,7 @@ A registered user can create a band, becoming band leader. Band receives a priva
 | `/app/bands` | Band directory (authenticated workspace view) |
 | `/app/venues` | Organiser venues list and editor (organiser workspace mode) |
 | `/app/gigs` | Organiser gig list and create (organiser workspace mode) |
-| `/app/gigs/:gigId` | Organiser gig detail — venue, invite bands, running order |
+| `/app/gigs/:gigId` | Organiser gig detail — eight-step workflow (placeholder → venue → structure → invites → confirm → branding) |
 | `/app/:bandId/gigs` | Band gig invitations (all members view; leaders accept/reject) |
 | `/app/:bandId/gigs/:gigId` | Band gig invitation detail — setlist assignment (leaders only) |
 | `/app/profiles/:profileId/edit` | Admin edit any player profile |
@@ -537,23 +537,41 @@ Monthly view, event cards, member availability grid, summary counts.
 
 **Status:** Implemented (web MVP) — organisers: `/app/gigs`, `/app/gigs/:gigId`; bands: `/app/:bandId/gigs`, `/app/:bandId/gigs/:gigId`
 
-Gigs are **organiser-owned** events. Organisers create gigs, choose venues, invite bands and set running order. Band leaders **accept or reject** invites and **assign a setlist** from their band library (setlists are created in the setlists screen). All band members can view gig invitations and details.
+Gigs are **organiser-owned** events. Organisers plan gigs through an eight-step workflow on the gig detail screen. Band leaders **accept or reject** invites and **assign a setlist** from their band library (setlists are created in the setlists screen). All band members can view gig invitations and details.
+
+### Organiser workflow (eight steps)
+
+1. **Create placeholder** — Title and start date/time (`enquiry` status). Optional venue on create or on detail.
+2. **Identify venue** — Saved organiser venue or ad hoc name/address; may be combined with step 1.
+3. **Design structure** — End time (optional), number of slots, default slot duration (minutes). Moves planning toward `proposed`.
+4. **Invite bands** — Open the band directory from the gig detail screen, search profiles, and send invites from the band profile with a preview of gig, venue, and organiser contact details. Optional slot assignment in the invite modal. Band leaders receive a communications notification.
+5. **Band responses** — Invited bands accept or reject; organiser sees per-band invite status on the gig.
+6. **Running order** — Adjust slot position and slot duration for invited bands; slot schedule preview shows computed start/end per slot.
+7. **Confirm gig** — When structure and at least one accepted band are in place, organiser confirms (`confirmed`). **Re-open** returns the gig to `proposed` for further edits.
+8. **Band branding** — When `confirmed`, display each accepted band’s profile branding (logo, hero image, tagline) on the organiser gig detail.
 
 ### Organiser responsibilities
 
-Create gig, venue (saved venue or ad hoc), date/time, status, notes, fee notes. Invite bands from the directory. Set running order for accepted bands. Manage gig pipeline (enquiry through archived).
+Create gig placeholder, venue, structure (slots/duration), notes, fee notes. Invite bands and manage running order. Confirm or re-open the gig. Archive or cancel as needed.
 
 ### Band leader responsibilities
 
-Respond to pending invites (accept/reject). Assign or change linked setlist after acceptance. View setlist readiness in gig context.
+Respond to pending invites (accept/reject). Assign or change linked setlist after acceptance. View assigned slot number and duration on the invitation detail.
 
 ### Gig data
 
-Name, venue, address, date/times, fee notes, organiser notes, status, linked venue record, invited bands with running order. Per-band setlist assignment on the invite record.
+Title, venue (linked record or ad hoc), start/end times, slot count, default slot duration, fee notes, organiser notes, status. Invited bands with running order, optional per-band slot duration, invite status, and linked setlist.
 
 ### Statuses
 
-Enquiry, proposed, confirmed, cancelled, completed, archived.
+| Status | Meaning |
+|---|---|
+| `enquiry` | Placeholder created; venue/structure may be incomplete |
+| `proposed` | Structure and/or invites in progress; editable |
+| `confirmed` | Locked for show day; band branding visible; re-openable |
+| `cancelled` | Gig cancelled |
+| `completed` | Gig finished |
+| `archived` | Removed from active organiser list |
 
 ### Invite statuses (per band)
 
@@ -561,7 +579,7 @@ Pending, accepted, rejected, cancelled.
 
 ### Context
 
-Show setlist readiness, missing parts context via linked setlist metrics in band gig detail.
+Show setlist readiness and missing-parts context via linked setlist metrics in band gig detail. Organiser slot preview derives times from gig start, slot order, and durations.
 
 ---
 
