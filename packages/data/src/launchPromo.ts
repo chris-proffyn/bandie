@@ -61,16 +61,16 @@ let expireLaunchTrialsPromise: Promise<void> | null = null;
 
 export async function ensureLaunchTrialsExpired(): Promise<void> {
   if (!expireLaunchTrialsPromise) {
-    expireLaunchTrialsPromise = getBandieClient()
-      .rpc('bandie_expire_launch_trials')
-      .then(({ error }) => {
+    expireLaunchTrialsPromise = (async () => {
+      try {
+        const { error } = await getBandieClient().rpc('bandie_expire_launch_trials');
         if (error) {
           throw new Error(error.message);
         }
-      })
-      .finally(() => {
+      } finally {
         expireLaunchTrialsPromise = null;
-      });
+      }
+    })();
   }
 
   await expireLaunchTrialsPromise;
