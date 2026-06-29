@@ -2,8 +2,8 @@
 
 **Document status:** Live project tracker  
 **Product:** Bandie  
-**Phase:** Phases 9–14 complete (calendar through entitlement admin); Phase 15 next (billing — not started)
-**Last updated:** 29 June 2026 (calendar, gigs, booking inbox, admin portal, metrics, entitlement enforcement)
+**Phase:** Phases 8–14 complete; **Phase 15 (billing)** next  
+**Last updated:** 30 June 2026 (post-commit `ec8b41c`; docs synced)
 
 ---
 
@@ -18,14 +18,14 @@
 | Web app scaffold (Vite + React + TypeScript) | Complete |
 | Bandie homepage (Phase 1) | Complete |
 | Mobile app (Phase 18) | Not started (placeholder only) |
-| Supabase schema / migrations | Platform + Bandie through admin/metrics/entitlements (`20260630150000`); apply with `supabase db push` |
+| Supabase schema / migrations | Platform + Bandie through `20260630150000`; applied to remote (`supabase db push`) |
 | Authentication & band membership (Phase 2) | Complete |
 | Public band profile (Phase 3) | Complete |
 | Band directory (Phase 4) | Complete |
 | Musician / player profile | Complete |
 | Player directory | Complete |
 | Directory area filters | Complete — country + region on `/bands`, `/players`, `/app/bands`, `/app/players`; geo-detected default country |
-| Private workspace shell (Phase 5) | Complete — tabbed overview (Members / Band details), leader contact, lineup parts, player recruitment, member actions, invitations; songs/setlists deferred |
+| Private workspace shell (Phase 5) | Complete — tabbed overview, leader contact, lineup parts, recruitment, invitations |
 | Workspace communications | Complete — unified hub at `/app/communications` (invites, outreach, messages, booking enquiries) |
 | Booking enquiries | Complete — public form, structured inbox, entitlement rate limits when enforcing |
 | Organiser venues | Complete — `/app/venues` in organiser workspace mode |
@@ -50,17 +50,17 @@
 
 ## Current focus
 
-**Next capability:** Calendar and availability (Phase 9) — wire new create paths through `checkBandLeaderCapability()` / `assertCanPerform()`
+**Next capability:** Billing integration (Phase 15) — Stripe checkout, webhooks, subscription sync to `bandie_subscriptions`
 
-**Immediate task:** Phase 9.1 — calendar data model (`bandie_calendar_events`, `bandie_availability_votes`)
+**Immediate task:** Phase 15.1 — map Stripe products/prices to `bandie_plans`
 
-**Then:** Phase 9 calendar & availability (wire new create paths through `canPerform()` from the start)
+**Before turning on enforcement in production:** smoke-test calendar, gigs, booking inbox, and `/admin`; decide env vs platform toggle for `entitlements_enforced`
 
 Reference documents:
 - `docs/project/bandie_entitlements_admin_portal_functional_technical_spec.md` — authoritative for Phases 8, 12–15, 17
-- `docs/project/product-functional-requirements.md` §10–11 (calendar, gigs)
+- `docs/project/product-functional-requirements.md` §10–12 (calendar, gigs, booking)
 - `docs/project/bandie_dropbox_song_part_storage_spec.md`
-- `docs/project/product-technical-requirements.md` §6–7, §16
+- `docs/project/product-technical-requirements.md`
 
 ## Phase roadmap (unified)
 
@@ -69,14 +69,14 @@ Single numbering for product features, monetisation, admin, and mobile. Sub-phas
 | Phase | Name | Status | Notes |
 |---|---|---|---|
 | 0–7 | Foundations through setlists | Complete | Homepage, auth, directories, workspace, songs, Dropbox, setlists |
-| **8** | **Entitlement framework** | **Complete** | Plans, `canPerform()`, gate hooks; `VITE_BANDIE_ENFORCE_ENTITLEMENTS` default off |
-| **9** | **Calendar and availability** | **Next** | Rehearsal + gig availability modes, voting, public publish |
-| 10 | Gig management | Not started | Gig records, setlist linking, status workflow; gate via Phase 8 |
-| 11 | Booking enquiries | Partial | Public form done; dedicated inbox + notifications deferred |
-| 12 | Admin portal foundation | Not started | `/admin`, RBAC, audit log, account search |
-| 13 | Platform metrics | Not started | Event tracking, daily snapshots, DAU/WAU/MAU, tier distribution |
-| 14 | Entitlement admin | Not started | Plan matrix, draft/publish limits, overrides, trials, enforcement on existing features |
-| 15 | Billing integration | Not started | Stripe checkout, webhooks, subscription sync, billing settings |
+| **8** | **Entitlement framework** | **Complete** | Plans, `canPerform()`, gate hooks; enforcement off by default |
+| **9** | **Calendar and availability** | **Complete** | Rehearsal + gig availability, voting, public publish sync |
+| **10** | **Gig management** | **Complete** | Gig records, setlist linking, status workflow |
+| **11** | **Booking enquiries** | **Complete** | Public form, structured inbox, entitlement rate limits when enforcing |
+| **12** | **Admin portal foundation** | **Complete** | `/admin`, audit log, account search, overview shell |
+| **13** | **Platform metrics** | **Complete** | Event tracking, daily snapshots, DAU/WAU/MAU, CSV export |
+| **14** | **Entitlement admin** | **Complete** | Plan matrix, draft/publish, overrides, gate logs, enforcement toggle |
+| **15** | **Billing integration** | **Next** | Stripe checkout, webhooks, subscription sync, billing settings |
 | 16 | Activity, notifications & polish | Partial | Comms hub done; activity feed, push, release verification |
 | 17 | Open mic & event packs | Not started | `bandie_open_mic_jam_night_spec.md`; add-on entitlements |
 | 18 | Mobile app | Not started | Expo scaffold; core member flows |
@@ -103,8 +103,9 @@ Private workspace shell   ██████████  overview, leader, line
 Songs & repertoire        ██████████  Phase 6 — dashboard, Dropbox files, templates, soft delete
 Setlists                  ██████████  Phase 7 — library, builder, drag reorder, metrics
 Entitlements              ██████████  Phase 8 — schema, seeds, service, gate hooks
-Calendar & gigs           ░░░░░░░░░░  Phases 9–10 (next)
-Admin & billing           ░░░░░░░░░░  Phases 12–15
+Calendar & gigs           ██████████  Phases 9–10 — calendar, voting, gigs, setlist link
+Booking & admin           ██████████  Phases 11–14 — enquiry inbox, /admin, metrics, enforcement toggle
+Billing                   ░░░░░░░░░░  Phase 15 (next)
 Mobile app                ░░░░░░░░░░  Phase 18 (deferred)
 Release verification      ░░░░░░░░░░  Phase 16 — production smoke + a11y pass
 ```
@@ -388,6 +389,11 @@ Authoritative spec: entitlements spec §35 Phase E. Deferred until admin portal 
 ---
 
 ## Session notes
+
+**30 June 2026 — Docs sync after Phases 8–14 commit**
+- Committed and pushed `ec8b41c` to `main` — entitlements, calendar/gigs, booking inbox, admin portal
+- Migrations `20260630100000`–`20260630150000` applied to remote Supabase
+- Tracker, delivery map, and product docs aligned to unified phase roadmap
 
 **29 June 2026 — Phases 9–14 (calendar, gigs, booking, admin, enforcement)**
 - Migrations `20260630120000`–`20260630150000`: calendar, gigs, booking enquiries, audit, metrics, entitlement drafts, platform settings

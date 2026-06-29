@@ -2,9 +2,9 @@
 
 **Document status:** Structural delivery plan (no progress tracking)  
 **Product:** Bandie  
-**Last updated:** 29 June 2026 (aligned with tracker phase renumbering)
+**Last updated:** 30 June 2026 (aligned with tracker Phases 8–14 complete)
 
-**Progress tracking:** Use `docs/PROJECT_STATUS_TRACKER.md` for live status. The tracker uses finer-grained phases (e.g. band directory and player directory as separate phases) than this map.
+**Progress tracking:** Use `docs/PROJECT_STATUS_TRACKER.md` for live status. The tracker uses finer-grained phases (0–19) than this map; see tracker §Phase roadmap for the authoritative numbering.
 
 ---
 
@@ -93,7 +93,7 @@ This document defines **delivery phases, sequencing, and dependencies**. It is a
 
 **Dependencies:** Phase 2.
 
-**Status:** Complete except dedicated booking enquiry inbox (enquiries delivered as direct messages).
+**Status:** Complete — including structured booking enquiry inbox in communications (tracker Phase 11).
 
 ---
 
@@ -113,9 +113,7 @@ This document defines **delivery phases, sequencing, and dependencies**. It is a
 
 **Dependencies:** Phase 2, Phase 3 (profile/settings integration).
 
-**Status:** Workspace shell and overview complete. **Songs MVP (web):** dashboard, song folder, Dropbox OAuth + upload/preview/download, band part templates, readiness, in-app PDF viewer, soft delete/restore, leader-only folder/upload management. **Setlists (web):** library, builder with drag reorder, metrics, duplicate/archive. Calendar/gigs navigation remains deferred.
-
-**Exit criteria (songs + setlists):** Met — band can manage repertoire, upload files, build and save a setlist.
+**Status:** Complete — songs MVP (dashboard, Dropbox, templates, PDF viewer, soft delete), setlists (library, builder, metrics).
 
 ---
 
@@ -133,9 +131,9 @@ This document defines **delivery phases, sequencing, and dependencies**. It is a
 
 **Exit criteria:** Band can propose dates, members vote, confirmed dates appear on public profile; gig record links to setlist.
 
-**Dependencies:** Phase 4.
+**Dependencies:** Phase 4, Phase 8 entitlement hooks (tracker).
 
-**Status:** Not started.
+**Status:** Complete (tracker Phases 9–10). MVP calendar UI is functional; richer monthly grid vs mockup may follow in polish (Phase 16).
 
 ---
 
@@ -153,7 +151,7 @@ This document defines **delivery phases, sequencing, and dependencies**. It is a
 
 **Dependencies:** Phases 4–5.
 
-**Status:** Partial — `/app/communications` ships unified communications (band invitations with accept/decline, player outreach inbox, direct messages with replies); activity feed, review tasks, and push remain deferred. Band overview UX polish (tabbed members/details, compact card actions, multiple leaders, primary contact) and shared brand mark shipped alongside communications work.
+**Status:** Partial — `/app/communications` ships unified communications (invitations, player outreach, direct messages, **booking enquiries**); activity feed, review tasks, and push remain deferred (tracker Phase 16).
 
 ---
 
@@ -172,7 +170,7 @@ This document defines **delivery phases, sequencing, and dependencies**. It is a
 
 **Dependencies:** Phases 2–5 stable on web.
 
-**Status:** Not started.
+**Status:** Not started (tracker Phase 18).
 
 ---
 
@@ -181,14 +179,15 @@ This document defines **delivery phases, sequencing, and dependencies**. It is a
 **Goal:** Operational tooling for platform management.
 
 **Deliverables:**
-- Admin portal skeleton per `RSD_ADMIN_PORTAL_GUIDE.md`
-- User management, content moderation, usage visibility
+- Admin portal per `RSD_ADMIN_PORTAL_GUIDE.md` and `bandie_entitlements_admin_portal_functional_technical_spec.md`
+- User/band search, metrics, entitlement admin, audit log
+- Content moderation, system health (deferred)
 
-**Exit criteria:** Admin can view users and moderate reported content.
+**Exit criteria:** Admin can view users, operate entitlements, and audit commercial changes.
 
-**Dependencies:** Phase 2+.
+**Dependencies:** Phase 2+, entitlement framework (tracker Phase 8).
 
-**Status:** Not started.
+**Status:** Partial — `/admin` portal shipped (overview, accounts, metrics, entitlements, audit); billing admin (Phase 15), moderation and system health (Phase 19) deferred.
 
 ---
 
@@ -209,7 +208,7 @@ Phase 3 (Public)   Phase 4 (Workspace core)
     │                  │
     └────────┬─────────┘
              ▼
-      Phase 5 (Calendar + Gigs)
+      Phase 5 (Calendar + Gigs)  ← requires entitlement hooks (tracker Phase 8)
              │
              ▼
       Phase 6 (Activity)
@@ -223,13 +222,16 @@ Phase 7 (Mobile)  Phase 8 (Admin)
 
 ## MVP boundary
 
-Phases 0–5 constitute the **MVP** as defined in `PRODUCT_REQUIREMENTS.md`. Phases 6–8 are post-MVP or parallel where resources allow.
+Phases 0–5 constitute the **core product MVP** as defined in `PRODUCT_REQUIREMENTS.md`. Entitlement enforcement, billing, mobile, and full admin operations extend beyond MVP.
+
+**Monetisation path (tracker):** Phase 8 entitlements → Phase 14 enforcement admin → Phase 15 Stripe billing.
 
 ---
 
 ## Current position
 
-**Completed:** Phases 0–5; Phase 3 booking enquiry partial; Phase 6 partial (workspace communications + **songs/Dropbox MVP on web**); organiser venues; multiple band leaders; directory area filters; brand logo assets; **Phase 7 setlists**  
-**Next:** Phase 9 calendar and availability; admin Phases 12–15; mobile Phase 18
+**Completed:** Delivery map Phases 0–5; Phase 6 partial (communications); Phase 8 partial (admin portal foundation)  
+**Tracker alignment:** Phases 0–14 complete on web; remote DB migrated through `20260630150000`  
+**Next:** Phase 15 billing (Stripe); then Phase 16 polish, Phase 17 open mic, Phase 18 mobile
 
 See `docs/PROJECT_STATUS_TRACKER.md` for the unified phase roadmap and item-level checklist (Phases 0–19).

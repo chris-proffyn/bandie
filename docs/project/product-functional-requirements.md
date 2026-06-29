@@ -2,7 +2,7 @@
 
 **Document status:** Authoritative functional requirements  
 **Product:** Bandie  
-**Last updated:** 28 June 2026
+**Last updated:** 30 June 2026
 
 **Source documents:** `bandie_product_description.md`, `bandie_build_elements.md`, feature specs in `docs/project/`
 
@@ -79,8 +79,8 @@ Signed-in organisers submit a structured enquiry from the public profile **Book*
 
 - Only intentionally published content is visible
 - Private songs, files, notes, and internal availability are never exposed
-- Confirmed/provisional gig availability may appear on public calendar
-- Booking enquiries arrive in the primary contact's `/app/communications` messages feed
+- Confirmed/provisional gig availability may appear on public calendar (synced from calendar gig-availability events when leader tier is full)
+- Booking enquiries arrive in `/app/communications` under **Booking enquiries** (structured inbox with status)
 
 ---
 
@@ -321,9 +321,21 @@ Bandie app admins (`is_app_admin`) can enable **admin mode** from `/app/profile`
 
 Admin mode is a client-side flag (`setBandieAdminModeActive`); RLS still enforces server-side permissions via `bandie_current_user_is_app_admin()`.
 
-### Workspace navigation (planned)
+### Platform admin portal (implemented)
 
-Songs Dashboard, Setlists, Song Folder, Calendar, Gigs — deferred to later phases.
+Bandie app admins (`is_app_admin`) also have a dedicated **`/admin`** portal (separate from in-app admin mode):
+
+- Overview counts (users, bands, songs, setlists, gigs)
+- User and band search
+- Platform metrics (DAU/WAU/MAU, content totals, tier distribution) with CSV export
+- Entitlement admin (plan catalogue, draft/publish, overrides, gate logs, enforcement toggle)
+- Audit log
+
+Authoritative spec: `bandie_entitlements_admin_portal_functional_technical_spec.md`.
+
+### Workspace navigation (implemented)
+
+Band workspace nav includes **Songs**, **Setlists**, **Calendar**, and **Gigs** at `/app/:bandId/...`. Create flows are gated via `canPerform()` / `assertCanPerform()` when entitlements are enforced.
 
 ---
 
@@ -468,7 +480,8 @@ Rock, jazz, punk, post-punk, funk, acoustic, high energy, etc.
 
 ## 10. Calendar and availability
 
-**Mockup:** `bandie_calendar_mockup.html`
+**Status:** Implemented (web MVP) — `/app/:bandId/calendar`  
+**Mockup:** `bandie_calendar_mockup.html` (richer monthly grid may follow in polish)
 
 Two modes: **Rehearsal** (internal only) and **Gig availability** (may publish publicly).
 
@@ -494,6 +507,8 @@ Monthly view, event cards, member availability grid, summary counts.
 
 ## 11. Gig management
 
+**Status:** Implemented (web MVP) — `/app/:bandId/gigs`, `/app/:bandId/gigs/:gigId`
+
 Dedicated area for actual performance events (not just availability proposals).
 
 ### Gig data
@@ -514,11 +529,11 @@ Show setlist readiness, missing parts, member confirmation in gig context.
 
 ### Public (implemented)
 
-Organiser submits structured enquiry from band profile **Book** section: date, time, set duration, venue, budget, notes. Requires sign-in. Delivered as direct message to band primary contact.
+Organiser submits structured enquiry from band profile **Book** section: date, time, set duration, venue, budget, notes. Requires sign-in. Creates `bandie_booking_enquiries` record and direct message to band primary contact. Rate limits apply when entitlements are enforced (`booking_enquiry.send`).
 
-### Private
+### Private (implemented)
 
-Primary contact receives enquiry in `/app/communications` messages. Dedicated enquiry inbox and status workflow deferred.
+Primary contact and sender see enquiries in `/app/communications` → **Booking enquiries** filter. Status: new, read, replied, archived. Reply via message thread.
 
 ---
 

@@ -11,7 +11,8 @@ type AppHeaderProps = {
 };
 
 export function AppHeader({ bandId }: AppHeaderProps) {
-  const { displayName, logout, adminModeActive, workspaceMode, canSwitchWorkspaceMode, session } = useAuth();
+  const { displayName, logout, adminModeActive, workspaceMode, canSwitchWorkspaceMode, session, isAppAdmin } =
+    useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
   const navItems = getAppNavItems({
@@ -76,6 +77,11 @@ export function AppHeader({ bandId }: AppHeaderProps) {
 
         <div className={`app-header-account ${menuOpen ? 'app-header-account-open' : ''}`}>
           {adminModeActive ? <span className="app-admin-badge">Admin mode</span> : null}
+          {isAppAdmin ? (
+            <Link to="/admin" className="app-header-nav-link" onClick={() => setMenuOpen(false)}>
+              Admin portal
+            </Link>
+          ) : null}
           {!adminModeActive && canSwitchWorkspaceMode ? (
             <span className="app-workspace-mode-badge">{WORKSPACE_MODE_LABELS[workspaceMode]}</span>
           ) : null}

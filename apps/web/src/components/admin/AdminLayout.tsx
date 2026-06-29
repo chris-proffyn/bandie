@@ -11,9 +11,9 @@ const ADMIN_NAV = [
 ];
 
 export function AdminLayout() {
-  const { isAppAdmin, loading } = useAuth();
+  const { isAppAdmin, loading, membershipResolved } = useAuth();
 
-  if (loading) {
+  if (loading || !membershipResolved) {
     return <p className="workspace-empty-note">Loading admin portal…</p>;
   }
 

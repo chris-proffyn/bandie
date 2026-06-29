@@ -1,4 +1,5 @@
 import type { WorkspaceMode } from '@bandie/data';
+import { bandRouteIdFromParam } from './bandRoutes';
 
 export type AppNavItem = {
   label: string;
@@ -20,6 +21,16 @@ export function getAppNavItems({
   adminModeActive = false,
   notificationCount = 0,
 }: AppNavOptions): AppNavItem[] {
+  const resolvedBandId = bandRouteIdFromParam(bandId);
+  const inBandContext = Boolean(resolvedBandId);
+
+  const directoryItems: AppNavItem[] = inBandContext
+    ? []
+    : [
+        { label: 'Band directory', to: '/app/bands' },
+        { label: 'Player directory', to: '/app/players' },
+      ];
+
   if (adminModeActive) {
     const items: AppNavItem[] = [
       { label: 'My bands', to: '/app', end: true },
@@ -29,16 +40,15 @@ export function getAppNavItems({
         badge: notificationCount || undefined,
       },
       { label: 'My profile', to: '/app/profile' },
-      { label: 'Band directory', to: '/app/bands' },
-      { label: 'Player directory', to: '/app/players' },
+      ...directoryItems,
     ];
 
-    if (bandId) {
-      items.push({ label: 'Band overview', to: `/app/${bandId}`, end: true });
-      items.push({ label: 'Songs', to: `/app/${bandId}/songs` });
-      items.push({ label: 'Setlists', to: `/app/${bandId}/setlists` });
-      items.push({ label: 'Calendar', to: `/app/${bandId}/calendar` });
-      items.push({ label: 'Gigs', to: `/app/${bandId}/gigs` });
+    if (resolvedBandId) {
+      items.push({ label: 'Band overview', to: `/app/${resolvedBandId}`, end: true });
+      items.push({ label: 'Songs', to: `/app/${resolvedBandId}/songs` });
+      items.push({ label: 'Setlists', to: `/app/${resolvedBandId}/setlists` });
+      items.push({ label: 'Calendar', to: `/app/${resolvedBandId}/calendar` });
+      items.push({ label: 'Gigs', to: `/app/${resolvedBandId}/gigs` });
     }
 
     return items;
@@ -60,16 +70,15 @@ export function getAppNavItems({
       badge: notificationCount || undefined,
     },
     { label: 'My profile', to: '/app/profile' },
-    { label: 'Band directory', to: '/app/bands' },
-    { label: 'Player directory', to: '/app/players' },
+    ...directoryItems,
   ];
 
-  if (bandId) {
-    items.push({ label: 'Band overview', to: `/app/${bandId}`, end: true });
-    items.push({ label: 'Songs', to: `/app/${bandId}/songs` });
-    items.push({ label: 'Setlists', to: `/app/${bandId}/setlists` });
-    items.push({ label: 'Calendar', to: `/app/${bandId}/calendar` });
-    items.push({ label: 'Gigs', to: `/app/${bandId}/gigs` });
+  if (resolvedBandId) {
+    items.push({ label: 'Band overview', to: `/app/${resolvedBandId}`, end: true });
+    items.push({ label: 'Songs', to: `/app/${resolvedBandId}/songs` });
+    items.push({ label: 'Setlists', to: `/app/${resolvedBandId}/setlists` });
+    items.push({ label: 'Calendar', to: `/app/${resolvedBandId}/calendar` });
+    items.push({ label: 'Gigs', to: `/app/${resolvedBandId}/gigs` });
   }
 
   return items;

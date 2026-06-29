@@ -1,7 +1,8 @@
-import { Navigate, Route, Routes, useParams } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import { GuestRoute, ProtectedRoute } from './components/auth/ProtectedRoute';
 import { WorkspaceModeRoute } from './components/auth/WorkspaceModeRoute';
 import { AppLayout } from './components/app/AppLayout';
+import { BandScopedRoute } from './components/app/BandScopedRoute';
 import { AcceptInvitePage } from './pages/app/AcceptInvitePage';
 import { AppEntryPage } from './pages/app/AppEntryPage';
 import { AdminUserProfileEditPage } from './pages/app/AdminUserProfileEditPage';
@@ -52,6 +53,12 @@ function RedirectToWorkspacePlayerDirectory() {
 function RedirectToWorkspacePlayerProfile() {
   const { profileId } = useParams();
   return <Navigate to={`/app/players/${profileId ?? ''}`} replace />;
+}
+
+function RedirectAppAdminToPortal() {
+  const location = useLocation();
+  const suffix = location.pathname.replace(/^\/app\/admin\/?/, '');
+  return <Navigate to={suffix ? `/admin/${suffix}` : '/admin'} replace />;
 }
 
 export default function App() {
@@ -139,94 +146,97 @@ export default function App() {
                 </WorkspaceModeRoute>
               }
             />
-            <Route
-              path=":bandId/calendar"
-              element={
-                <WorkspaceModeRoute mode="player">
-                  <CalendarPage />
-                </WorkspaceModeRoute>
-              }
-            />
-            <Route
-              path=":bandId/gigs/:gigId"
-              element={
-                <WorkspaceModeRoute mode="player">
-                  <GigDetailPage />
-                </WorkspaceModeRoute>
-              }
-            />
-            <Route
-              path=":bandId/gigs"
-              element={
-                <WorkspaceModeRoute mode="player">
-                  <GigsDashboardPage />
-                </WorkspaceModeRoute>
-              }
-            />
-            <Route
-              path=":bandId/setlists/:setlistId"
-              element={
-                <WorkspaceModeRoute mode="player">
-                  <SetlistBuilderPage />
-                </WorkspaceModeRoute>
-              }
-            />
-            <Route
-              path=":bandId/setlists"
-              element={
-                <WorkspaceModeRoute mode="player">
-                  <SetlistsDashboardPage />
-                </WorkspaceModeRoute>
-              }
-            />
-            <Route
-              path=":bandId/songs/:songId/parts/:partFolderId"
-              element={
-                <WorkspaceModeRoute mode="player">
-                  <SongPartFolderPage />
-                </WorkspaceModeRoute>
-              }
-            />
-            <Route
-              path=":bandId/songs/:songId"
-              element={
-                <WorkspaceModeRoute mode="player">
-                  <SongFolderPage />
-                </WorkspaceModeRoute>
-              }
-            />
-            <Route
-              path=":bandId/songs"
-              element={
-                <WorkspaceModeRoute mode="player">
-                  <SongsDashboardPage />
-                </WorkspaceModeRoute>
-              }
-            />
-            <Route
-              path=":bandId"
-              element={
-                <WorkspaceModeRoute mode="player">
-                  <WorkspaceHomePage />
-                </WorkspaceModeRoute>
-              }
-            />
-            <Route
-              path=":bandId/members"
-              element={
-                <WorkspaceModeRoute mode="player">
-                  <RedirectToBandOverview />
-                </WorkspaceModeRoute>
-              }
-            />
-            <Route
-              path=":bandId/profile"
-              element={
-                <WorkspaceModeRoute mode="player">
-                  <RedirectToBandOverview />
-                </WorkspaceModeRoute>
-              }
-            />
+            <Route path="admin/*" element={<RedirectAppAdminToPortal />} />
+            <Route path=":bandId" element={<BandScopedRoute />}>
+              <Route
+                index
+                element={
+                  <WorkspaceModeRoute mode="player">
+                    <WorkspaceHomePage />
+                  </WorkspaceModeRoute>
+                }
+              />
+              <Route
+                path="calendar"
+                element={
+                  <WorkspaceModeRoute mode="player">
+                    <CalendarPage />
+                  </WorkspaceModeRoute>
+                }
+              />
+              <Route
+                path="gigs/:gigId"
+                element={
+                  <WorkspaceModeRoute mode="player">
+                    <GigDetailPage />
+                  </WorkspaceModeRoute>
+                }
+              />
+              <Route
+                path="gigs"
+                element={
+                  <WorkspaceModeRoute mode="player">
+                    <GigsDashboardPage />
+                  </WorkspaceModeRoute>
+                }
+              />
+              <Route
+                path="setlists/:setlistId"
+                element={
+                  <WorkspaceModeRoute mode="player">
+                    <SetlistBuilderPage />
+                  </WorkspaceModeRoute>
+                }
+              />
+              <Route
+                path="setlists"
+                element={
+                  <WorkspaceModeRoute mode="player">
+                    <SetlistsDashboardPage />
+                  </WorkspaceModeRoute>
+                }
+              />
+              <Route
+                path="songs/:songId/parts/:partFolderId"
+                element={
+                  <WorkspaceModeRoute mode="player">
+                    <SongPartFolderPage />
+                  </WorkspaceModeRoute>
+                }
+              />
+              <Route
+                path="songs/:songId"
+                element={
+                  <WorkspaceModeRoute mode="player">
+                    <SongFolderPage />
+                  </WorkspaceModeRoute>
+                }
+              />
+              <Route
+                path="songs"
+                element={
+                  <WorkspaceModeRoute mode="player">
+                    <SongsDashboardPage />
+                  </WorkspaceModeRoute>
+                }
+              />
+              <Route
+                path="members"
+                element={
+                  <WorkspaceModeRoute mode="player">
+                    <RedirectToBandOverview />
+                  </WorkspaceModeRoute>
+                }
+              />
+              <Route
+                path="profile"
+                element={
+                  <WorkspaceModeRoute mode="player">
+                    <RedirectToBandOverview />
+                  </WorkspaceModeRoute>
+                }
+              />
+            </Route>
           </Route>
 
           <Route path="/admin" element={<AdminLayout />}>

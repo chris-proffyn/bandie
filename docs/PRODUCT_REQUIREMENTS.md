@@ -2,7 +2,7 @@
 
 **Document status:** Authoritative product requirements summary  
 **Product:** Bandie  
-**Last updated:** 29 June 2026
+**Last updated:** 30 June 2026
 
 ---
 
@@ -56,9 +56,9 @@ Individual musicians in multiple bands, band leaders, dep/substitute musicians, 
 - Player directory (deputy and member search modes)
 - Public band profiles (mini-sites)
 - Public player profiles
-- Structured booking enquiry on public band profiles (sends direct message to primary contact)
+- Structured booking enquiry on public band profiles (creates enquiry record + message to primary contact)
 - Organiser venue management in workspace (organiser mode)
-- Public calendar availability (confirmed/provisional gigs — planned)
+- Public calendar availability (confirmed/provisional gigs from calendar sync)
 
 ### 4.2 Private band workspace
 
@@ -74,14 +74,13 @@ Member-only area scoped to a selected band:
 - Player recruitment invites (audition or join band)
 - Musician / player profile (`/app/profile`) with username and workspace mode (player / organiser / both)
 - Organiser venues (`/app/venues`)
-- Workspace communications (`/app/communications`) — invitations, player outreach, direct messages with replies
-- Songs dashboard and song folders with **Dropbox song-part storage** — **done (web MVP)** — leader OAuth, upload, in-app PDF preview, download; leader-only folder management and uploads
-- Setlist management (planned)
-- Calendar (rehearsal + gig availability) (planned)
-- Gig management (planned)
-- Booking enquiry inbox (planned — enquiries currently arrive as direct messages)
-- Activity feed (planned)
-- In-app communications — **partial** (unified hub at `/app/communications`: band invitations, player outreach invites, direct messages with replies; activity feed and push deferred)
+- Workspace communications (`/app/communications`) — invitations, player outreach, direct messages, **booking enquiries**
+- Songs dashboard and song folders with **Dropbox song-part storage** — **done (web MVP)**
+- Setlist management — **done (web)** — library, builder, drag reorder, metrics
+- Calendar (rehearsal + gig availability) — **done (web)** — `/app/:bandId/calendar`
+- Gig management — **done (web)** — `/app/:bandId/gigs`, setlist linking
+- Activity feed — **planned** (Phase 16)
+- Platform admin portal — **done** — `/admin` for app admins (metrics, entitlements, audit); separate from in-app admin mode
 
 ---
 
@@ -105,6 +104,7 @@ See `docs/project/bandie_build_elements.md` for the full list. Summary:
 | 12 | Media, Links and External Content |
 | 13 | Mobile / Performance Mode |
 | 14 | Administration and Platform Foundations |
+| 15 | Entitlements and Billing (monetisation) |
 
 ---
 
@@ -119,13 +119,15 @@ See `docs/project/bandie_build_elements.md` for the full list. Summary:
 5. Band directory with search/filter — **done**
 6. Songs dashboard — **done (web)**
 7. Song folder with part folders and **Dropbox song-part file storage** — **done (web MVP)** — configurable band templates (default Guitar/Bass/Drums/Vocals/Shared), readiness, soft delete/restore, in-app PDF viewer
-8. Setlist management — **not started**
-9. Calendar availability (rehearsal + gig modes) — **not started**
-10. Basic booking enquiry route — **partial** (public profile form → direct message to primary contact)
+8. Setlist management — **done (web)**
+9. Calendar availability (rehearsal + gig modes) — **done (web)**
+10. Gig management — **done (web)**
+11. Booking enquiry route — **done** (public form + structured inbox; entitlement limits when enforcing)
+12. Entitlement framework — **done** (enforcement off by default until Phase 15 billing or admin toggle)
 
 ### Out of scope (MVP)
 
-- Payments and invoicing
+- Payments and invoicing (Stripe billing — Phase 15, next)
 - Contract generation
 - Full review/ratings marketplace
 - AI setlist generation
@@ -170,7 +172,7 @@ Example band in mockups: **Skin Condition** (post-punk / new wave covers, London
 
 See `docs/DELIVERY_TASK_MAP.md` for phased delivery order.
 
-**Current focus:** Setlist management — see `docs/PROJECT_STATUS_TRACKER.md`. Songs and Dropbox song-part storage MVP is shipped on web.
+**Current focus:** Billing integration (Phase 15) — see `docs/PROJECT_STATUS_TRACKER.md`. Core web MVP (Phases 0–14) is shipped; enforcement remains off by default.
 
 ---
 

@@ -76,6 +76,7 @@ type AuthContextValue = {
   workspaceMode: WorkspaceMode;
   canSwitchWorkspaceMode: boolean;
   loading: boolean;
+  membershipResolved: boolean;
   refreshBands: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   setAdminModeActive: (active: boolean) => Promise<void>;
@@ -95,6 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [adminModeEnabled, setAdminModeEnabled] = useState(false);
   const [workspaceMode, setWorkspaceModeState] = useState<WorkspaceMode>('player');
   const [loading, setLoading] = useState(true);
+  const [membershipResolved, setMembershipResolved] = useState(false);
 
   const refreshProfile = useCallback(async () => {
     if (!session) {
@@ -159,9 +161,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setAdminModeEnabled(false);
       setWorkspaceModeState('player');
       setBandieAdminModeActive(false);
+      setMembershipResolved(true);
       return;
     }
 
+    setMembershipResolved(false);
     ensureAppMembership()
       .then(async (membership) => {
         const appAdmin = isPlatformAppAdminRole(membership.role);
@@ -185,6 +189,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setAdminModeEnabled(false);
         setWorkspaceModeState('player');
         setBandieAdminModeActive(false);
+      })
+      .finally(() => {
+        setMembershipResolved(true);
       });
   }, [session, refreshBands, refreshProfile]);
 
@@ -300,6 +307,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       workspaceMode,
       canSwitchWorkspaceMode: canSwitchModes,
       loading,
+      membershipResolved,
       refreshBands,
       refreshProfile,
       setAdminModeActive,
@@ -318,6 +326,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       workspaceMode,
       canSwitchModes,
       loading,
+      membershipResolved,
       refreshBands,
       refreshProfile,
       setAdminModeActive,

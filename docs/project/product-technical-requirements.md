@@ -2,7 +2,7 @@
 
 **Document status:** Authoritative technical requirements  
 **Product:** Bandie  
-**Last updated:** 28 June 2026
+**Last updated:** 30 June 2026
 
 ---
 
@@ -149,18 +149,30 @@ All tables prefixed `bandie_`. Full schema to be defined in migrations. Conceptu
 | `bandie_band_media` | Band photos, videos, tracks (URLs) |
 | `bandie_band_social_links` | Social platform links |
 | `bandie_band_public_dates` | Manual public availability dates |
-| `bandie_songs` | Repertoire entries (planned) |
-| `bandie_song_part_folders` | Logical part folders per song; optional Dropbox path mapping (planned) |
-| `bandie_song_part_files` | Song-part file metadata; bytes in Dropbox (planned) |
-| `bandie_song_part_file_activity` | Audit log for song-part file actions (planned) |
-| `bandie_user_integrations` | Leader OAuth connections to external providers — Dropbox MVP (planned) |
-| `bandie_band_song_part_storage` | Per-band Dropbox song-parts root folder mapping (planned) |
-| `bandie_setlists` | Setlist definitions (planned) |
-| `bandie_setlist_songs` | Songs in setlist order (planned) |
-| `bandie_calendar_events` | Rehearsals and availability windows (planned) |
-| `bandie_availability_votes` | Member votes on events (planned) |
-| `bandie_gigs` | Confirmed/proposed performances (planned) |
-| `bandie_booking_enquiries` | Inbound organiser enquiries (planned — currently direct messages) |
+| `bandie_songs` | Repertoire entries |
+| `bandie_song_part_folders` | Logical part folders per song; optional Dropbox path mapping |
+| `bandie_song_part_files` | Song-part file metadata; bytes in Dropbox |
+| `bandie_song_part_file_activity` | Audit log for song-part file actions |
+| `bandie_user_integrations` | Leader OAuth connections — Dropbox |
+| `bandie_band_song_part_storage` | Per-band Dropbox song-parts root folder mapping |
+| `bandie_setlists` | Setlist definitions |
+| `bandie_setlist_items` | Songs in setlist order |
+| `bandie_calendar_events` | Rehearsals and availability windows |
+| `bandie_availability_votes` | Member votes on calendar events |
+| `bandie_gigs` | Gig records (enquiry through archived) |
+| `bandie_booking_enquiries` | Structured booking enquiry metadata (links to `bandie_user_messages`) |
+| `bandie_plans` | Subscription plan catalogue |
+| `bandie_capabilities` | Entitlement capability definitions |
+| `bandie_plan_entitlements` | Plan → capability values |
+| `bandie_subscriptions` | User subscriptions (`plan_scope`: leader \| organiser) |
+| `bandie_usage_meters` | Usage counters for limit enforcement |
+| `bandie_entitlement_overrides` | Manual admin overrides |
+| `bandie_audit_events` | Admin audit log |
+| `bandie_metric_events` | Product analytics events |
+| `bandie_daily_metric_snapshots` | Aggregated daily metrics |
+| `bandie_gate_decision_logs` | Entitlement gate decisions (especially denials) |
+| `bandie_entitlement_drafts` / `bandie_entitlement_draft_items` | Staged entitlement changes |
+| `bandie_platform_settings` | Platform config (e.g. `entitlements_enforced`) |
 
 Plus platform tables from multi-tenant guide (`platform_apps`, `platform_app_memberships`, etc.).
 
@@ -170,8 +182,9 @@ RLS policies must enforce band membership for all private data.
 - `listPendingInvitationsForCurrentUser`, `acceptBandInvitation`, `declineBandInvitation`, `acceptAllPendingInvitations` — band invitations
 - `listMyPendingPlayerOutreach`, `respondToPlayerOutreach`, `countMyPendingPlayerOutreach` — player outreach inbox
 - `listMyMessages`, `sendDirectMessage`, `replyToMessage`, `markMessageRead`, `countUnreadMessages` — direct messages
-- `listCommunications`, `filterCommunications`, `getCommunicationSummary`, `getNotificationSummary` — unified feed and nav badge
-- RPCs: `bandie_list_my_pending_invitations`, `bandie_decline_invitation`, `bandie_list_my_pending_player_outreach`, `bandie_respond_to_player_outreach`, `bandie_list_my_messages`, `bandie_count_my_unread_messages`
+- `listCommunications`, `filterCommunications`, `getCommunicationSummary`, `getNotificationSummary` — unified feed and nav badge (includes booking enquiries)
+- `listMyBookingEnquiries`, `sendBookingEnquiry`, `markBookingEnquiryRead` — structured booking enquiries
+- RPCs: `bandie_list_my_pending_invitations`, `bandie_decline_invitation`, `bandie_list_my_pending_player_outreach`, `bandie_respond_to_player_outreach`, `bandie_list_my_messages`, `bandie_count_my_unread_messages`, `bandie_list_my_booking_enquiries`, `bandie_count_booking_enquiries_sent_this_month`
 
 **Band overview data access (`@bandie/data`):**
 - `getBandLeaderContact`, `listBandLeaders` — RPCs for primary and all leader contact details
@@ -192,6 +205,22 @@ RLS policies must enforce band membership for all private data.
 **Admin mode (`@bandie/data`):**
 - `isCurrentUserAppAdmin`, `setBandieAdminModeActive`, `isBandieAdminModeActive` — client-side admin mode flag; admins bypass membership checks when active
 
+**Entitlements (`@bandie/data`):**
+- `canPerform`, `assertCanPerform`, `checkBandLeaderCapability`, `checkUserOrganiserCapability`
+- `isEntitlementEnforcementEnabled` — env (`VITE_BANDIE_ENFORCE_ENTITLEMENTS`) OR platform setting (`entitlements_enforced`)
+- `loadPlatformEntitlementEnforcement`, `setEntitlementsEnforced` — platform toggle (admin)
+
+**Calendar, gigs, booking (`@bandie/data`):**
+- `calendar.ts` — events, votes, `calendar.use` tier
+- `gigs.ts` — CRUD, setlist context, `gig.create` limits
+- `bookingEnquiries.ts` — send, inbox, `booking_enquiry.send` limits
+
+**Platform admin (`@bandie/data`):**
+- `adminPortal.ts` — search, audit, overview counts
+- `metrics.ts` — `trackMetricEvent`, snapshots, aggregation RPC
+- `entitlementAdmin.ts` — plan matrix, drafts, overrides, publish
+- `gateLogs.ts` — gate decision logging
+
 **Usernames (`@bandie/data`):**
 - `normalizeUsername`, `validateUsernameInput`, `ensureProfileUsername`
 - Login accepts email or username (`signInWithEmailOrUsername`)
@@ -202,7 +231,7 @@ RLS policies must enforce band membership for all private data.
 - `matchesAreaFilter`, `inferDefaultCountryCode` — client-side filter matching and geo defaults
 - `bandie_bands.country_id` / `region_id` and `bandie_profiles.country_id` / `region_id` — optional FKs; text location fallback via region `search_keywords`
 
-**Dropbox song-part storage (planned — Phase 6):**
+**Dropbox song-part storage (implemented — Phase 6):**
 
 Authoritative spec: `docs/project/bandie_dropbox_song_part_storage_spec.md`
 
@@ -320,6 +349,18 @@ Breakpoints: mobile 0–639px, tablet 640–1023px, desktop 1024px+.
 | `/app/bands/new` | Protected | Create band |
 | `/app/venues` | Protected (organiser mode) | Organiser venues |
 | `/app/profiles/:profileId/edit` | Protected (admin mode) | Admin edit player profile |
+| `/app/:bandId/songs` | Protected | Songs dashboard |
+| `/app/:bandId/songs/:songId` | Protected | Song folder |
+| `/app/:bandId/setlists` | Protected | Setlist library |
+| `/app/:bandId/setlists/:setlistId` | Protected | Setlist builder |
+| `/app/:bandId/calendar` | Protected | Calendar and availability |
+| `/app/:bandId/gigs` | Protected | Gig list |
+| `/app/:bandId/gigs/:gigId` | Protected | Gig detail |
+| `/admin` | Protected (app admin) | Platform admin overview |
+| `/admin/accounts` | Protected (app admin) | User/band search |
+| `/admin/metrics` | Protected (app admin) | Platform metrics |
+| `/admin/entitlements` | Protected (app admin) | Entitlement admin and enforcement toggle |
+| `/admin/audit` | Protected (app admin) | Admin audit log |
 | `/app/:bandId` | Protected | Band workspace overview (Members / Band details tabs) |
 
 Legacy routes `/app/:bandId/profile` and `/app/:bandId/members` redirect to overview.
@@ -361,7 +402,7 @@ Supabase migrations applied via `supabase db push` to `proff-rsd-mt-1`.
 - RLS on all band-scoped tables
 - Private file URLs must not be guessable; use signed URLs where appropriate
 - Input validation on all public forms (booking enquiry)
-- Rate limiting on enquiry submission (future Edge Function)
+- Rate limiting on enquiry submission via entitlement service when enforcing (`booking_enquiry.send`, `booking_enquiries.monthly_max_count`)
 - No secrets in client bundle or repository
 
 ---
@@ -374,7 +415,7 @@ Supabase migrations applied via `supabase db push` to `proff-rsd-mt-1`.
 | Vitest vs Jest | Vitest fits Vite; Jest per RSD | First test pack |
 | Song-part file hosting | ~~Supabase Storage~~ vs Dropbox vs multi-provider | **Resolved — Dropbox for MVP** (`bandie_dropbox_song_part_storage_spec.md`) |
 | Song-part file size / types | Spec §6.6 | **Resolved — 25 MB; PDF, images, text, ChordPro, Guitar Pro** |
-| Real-time (Supabase Realtime) | Availability voting live updates | Calendar feature |
+| Real-time (Supabase Realtime) | Availability voting live updates | Optional polish — calendar polls on save today |
 | SSR/prerender for SEO | Vite plugin vs Next.js | Public profile launch |
 | Additional storage providers | Google Drive, OneDrive, Box, Bandie native | Post-MVP |
 
