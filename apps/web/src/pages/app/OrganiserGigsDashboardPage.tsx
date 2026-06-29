@@ -4,17 +4,24 @@ import {
   GIG_STATUS_OPTIONS,
   computeGigDashboardMetrics,
   createOrganiserGig,
+  createOrganiserVenue,
   formatGigStatus,
+  formatOrganiserVenueAddress,
   gigStatusPillClass,
+  listMyOrganiserVenues,
   listOrganiserGigs,
   type GigStatus,
   type OrganiserGig,
+  type OrganiserVenue,
 } from '@bandie/data';
 import '../../styles/gigs.css';
+
+type VenueChoice = '' | 'new' | string;
 
 export function OrganiserGigsDashboardPage() {
   const navigate = useNavigate();
   const [gigs, setGigs] = useState<OrganiserGig[]>([]);
+  const [venues, setVenues] = useState<OrganiserVenue[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
@@ -23,7 +30,9 @@ export function OrganiserGigsDashboardPage() {
   const [form, setForm] = useState({
     title: '',
     startsAt: '',
-    venueName: '',
+    venueChoice: '' as VenueChoice,
+    newVenueName: '',
+    newVenueAddress: '',
     status: 'enquiry' as GigStatus,
   });
 
@@ -42,11 +51,31 @@ export function OrganiserGigsDashboardPage() {
     }
   }, []);
 
+  const loadVenues = useCallback(async () => {
+    try {
+      const rows = await listMyOrganiserVenues();
+      setVenues(rows);
+    } catch {
+      setVenues([]);
+    }
+  }, []);
+
   useEffect(() => {
     void loadGigs();
   }, [loadGigs]);
 
+  useEffect(() => {
+    if (showCreate) {
+      void loadVenues();
+    }
+  }, [showCreate, loadVenues]);
+
   const metrics = useMemo(() => computeGigDashboardMetrics(gigs), [gigs]);
+
+  const selectedVenue = useMemo(
+    () => venues.find((venue) => venue.id === form.venueChoice) ?? null,
+    [form.venueChoice, venues],
+  );
 
   async function handleCreate(event: FormEvent) {
     event.preventDefault();
@@ -54,17 +83,51 @@ export function OrganiserGigsDashboardPage() {
       return;
     }
 
+    if (form.venueChoice === 'new' && !form.newVenueName.trim()) {
+      setFormError('Enter a name for the new venue or choose a saved venue.');
+      return;
+    }
+
     setSubmitting(true);
     setFormError(null);
 
     try {
+      let venueId: string | null = null;
+      let venueName: string | null = null;
+      let venueAddress: string | null = null;
+
+      if (form.venueChoice === 'new') {
+        const venue = await createOrganiserVenue({
+          name: form.newVenueName.trim(),
+          address_line1: form.newVenueAddress.trim() || null,
+        });
+        venueId = venue.id;
+        venueName = venue.name;
+        venueAddress = formatOrganiserVenueAddress(venue);
+        await loadVenues();
+      } else if (selectedVenue) {
+        venueId = selectedVenue.id;
+        venueName = selectedVenue.name;
+        venueAddress = formatOrganiserVenueAddress(selectedVenue);
+      }
+
       const gig = await createOrganiserGig({
         title: form.title,
         startsAt: new Date(form.startsAt).toISOString(),
-        venueName: form.venueName,
+        venueId,
+        venueName,
+        venueAddress,
         status: form.status,
       });
       setShowCreate(false);
+      setForm({
+        title: '',
+        startsAt: '',
+        venueChoice: '',
+        newVenueName: '',
+        newVenueAddress: '',
+        status: 'enquiry',
+      });
       navigate(`/app/gigs/${gig.id}`);
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Unable to create gig.');
@@ -138,15 +201,59 @@ export function OrganiserGigsDashboardPage() {
             </div>
             <div className="auth-field">
               <label htmlFor="organiser-gig-venue">Venue (optional)</label>
-              <input
+              <select
                 id="organiser-gig-venue"
-                value={form.venueName}
+                value={form.venueChoice}
                 onChange={(event) =>
-                  setForm((current) => ({ ...current, venueName: event.target.value }))
+                  setForm((current) => ({
+                    ...current,
+                    venueChoice: event.target.value as VenueChoice,
+                  }))
                 }
-                placeholder="Or pick a saved venue on the gig detail page"
-              />
+              >
+                <option value="">No venue yet</option>
+                {venues.map((venue) => (
+                  <option key={venue.id} value={venue.id}>
+                    {venue.name}
+                    {venue.city ? ` · ${venue.city}` : ''}
+                  </option>
+                ))}
+                <option value="new">Add new venue…</option>
+              </select>
             </div>
+            {form.venueChoice === 'new' ? (
+              <>
+                <div className="auth-field">
+                  <label htmlFor="organiser-gig-new-venue-name">New venue name</label>
+                  <input
+                    id="organiser-gig-new-venue-name"
+                    value={form.newVenueName}
+                    onChange={(event) =>
+                      setForm((current) => ({ ...current, newVenueName: event.target.value }))
+                    }
+                    required
+                  />
+                </div>
+                <div className="auth-field">
+                  <label htmlFor="organiser-gig-new-venue-address">Address (optional)</label>
+                  <input
+                    id="organiser-gig-new-venue-address"
+                    value={form.newVenueAddress}
+                    onChange={(event) =>
+                      setForm((current) => ({ ...current, newVenueAddress: event.target.value }))
+                    }
+                    placeholder="Street, city or postcode"
+                  />
+                </div>
+                <p className="workspace-empty-note">
+                  The venue will be saved to My venues and linked to this gig.
+                </p>
+              </>
+            ) : selectedVenue ? (
+              <p className="workspace-empty-note">
+                {formatOrganiserVenueAddress(selectedVenue) ?? 'No address saved for this venue.'}
+              </p>
+            ) : null}
             <div className="auth-field">
               <label htmlFor="organiser-gig-status">Status</label>
               <select

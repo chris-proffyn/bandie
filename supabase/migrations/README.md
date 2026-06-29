@@ -77,6 +77,7 @@ Song-part file bytes live in **Dropbox** (leader OAuth), not Supabase Storage. A
 - `20260630120000_bandie_calendar.sql` — calendar events, availability votes, public date sync
 - `20260630130000_bandie_gigs.sql` — gig records (legacy band-scoped; superseded by organiser model)
 - `20260630220000_bandie_organiser_gigs.sql` — organiser-owned gigs, `bandie_gig_bands` invites, band leader RPCs, organiser entitlements
+- `20260630230000_bandie_gigs_organiser_insert_rls.sql` — relax gig insert/select RLS to organiser ownership (not `is_organiser()` flag)
 - `20260630140000_bandie_booking_enquiries.sql` — booking enquiry metadata + list RPC
 - `20260630150000_bandie_admin_metrics_entitlements.sql` — audit, metrics, drafts, gate logs, admin search, aggregation RPC
 - `20260630160000_bandie_plan_display_names.sql` — legacy display name rename (superseded by code alignment)
