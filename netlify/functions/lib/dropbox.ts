@@ -194,3 +194,80 @@ export async function resolveDropboxAccessToken(
 export function bandSongPartsRootPath(bandSlug: string): string {
   return `/Bandie/bands/${bandSlug}/song-parts`;
 }
+
+export function bandSongFolderPath(bandSlug: string, songSlug: string): string {
+  return `${bandSongPartsRootPath(bandSlug)}/${songSlug}`;
+}
+
+export function bandSongPartFolderPath(
+  bandSlug: string,
+  songSlug: string,
+  partKey: string,
+): string {
+  return `${bandSongFolderPath(bandSlug, songSlug)}/${partKey}`;
+}
+
+export type DropboxFileMetadata = {
+  id: string;
+  path_lower: string;
+  path_display: string;
+  rev: string;
+  content_hash?: string;
+  size?: number;
+};
+
+export async function uploadDropboxFile(
+  accessToken: string,
+  path: string,
+  content: Buffer,
+): Promise<DropboxFileMetadata> {
+  const response = await fetch('https://content.dropboxapi.com/2/files/upload', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/octet-stream',
+      'Dropbox-API-Arg': JSON.stringify({
+        path,
+        mode: 'add',
+        autorename: true,
+        mute: false,
+      }),
+    },
+    body: content,
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(`Dropbox file upload failed: ${detail}`);
+  }
+
+  return (await response.json()) as DropboxFileMetadata;
+}
+
+export async function getDropboxTemporaryLink(
+  accessToken: string,
+  path: string,
+): Promise<string> {
+  const response = await fetch(`${DROPBOX_API_RPC}/files/get_temporary_link`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ path }),
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(`Dropbox temporary link failed: ${detail}`);
+  }
+
+  const payload = (await response.json()) as { link: string };
+  return payload.link;
+}
+
+export function isPathUnderRoot(pathLower: string, rootPathLower: string): boolean {
+  const normalizedRoot = rootPathLower.toLowerCase().replace(/\/+$/, '');
+  const normalizedPath = pathLower.toLowerCase();
+  return normalizedPath === normalizedRoot || normalizedPath.startsWith(`${normalizedRoot}/`);
+}

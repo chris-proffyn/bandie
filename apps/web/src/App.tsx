@@ -10,6 +10,8 @@ import { CommunicationsPage } from './pages/app/CommunicationsPage';
 import { PendingInvitesPage } from './pages/app/PendingInvitesPage';
 import { CreateBandPage } from './pages/app/CreateBandPage';
 import { WorkspaceHomePage } from './pages/app/WorkspaceHomePage';
+import { SongsDashboardPage } from './pages/app/SongsDashboardPage';
+import { SongFolderPage } from './pages/app/SongFolderPage';
 import { WorkspaceBandDirectoryPage } from './pages/app/WorkspaceBandDirectoryPage';
 import { WorkspaceBandProfilePage } from './pages/app/WorkspaceBandProfilePage';
 import { WorkspacePlayerDirectoryPage } from './pages/app/WorkspacePlayerDirectoryPage';
@@ -122,6 +124,22 @@ export default function App() {
               element={
                 <WorkspaceModeRoute mode="player">
                   <WorkspacePlayerDirectoryPage />
+                </WorkspaceModeRoute>
+              }
+            />
+            <Route
+              path=":bandId/songs/:songId"
+              element={
+                <WorkspaceModeRoute mode="player">
+                  <SongFolderPage />
+                </WorkspaceModeRoute>
+              }
+            />
+            <Route
+              path=":bandId/songs"
+              element={
+                <WorkspaceModeRoute mode="player">
+                  <SongsDashboardPage />
                 </WorkspaceModeRoute>
               }
             />

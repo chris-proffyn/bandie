@@ -58,18 +58,14 @@ supabase link --project-ref cjmgrsvbrcgozgjxbriz
 supabase db push
 ```
 
-## Planned (Phase 6 — songs & Dropbox)
+## Phase 6 — songs & Dropbox (applied)
 
-Song-part file bytes live in **Dropbox** (leader OAuth), not Supabase Storage. Next migrations (see `docs/project/bandie_dropbox_song_part_storage_spec.md` §6.3):
+Song-part file bytes live in **Dropbox** (leader OAuth), not Supabase Storage. Applied migrations:
 
-- `bandie_songs`
-- `bandie_user_integrations` (encrypted OAuth tokens — server-side access only)
-- `bandie_band_song_part_storage`
-- `bandie_song_part_folders`
-- `bandie_song_part_files`
-- `bandie_song_part_file_activity`
+- `20260629100000_bandie_songs_dropbox_foundation.sql` — `bandie_songs`, integrations, storage
+- `20260629110000_bandie_song_part_folders_files.sql` — part folders, file metadata, activity
 
-OAuth and Dropbox API routes will run server-side (Netlify functions or equivalent); tokens must not be client-readable.
+OAuth and Dropbox API routes run server-side (Netlify functions); tokens are not client-readable.
 
 ## RLS requirement
 

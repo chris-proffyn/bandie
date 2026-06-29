@@ -37,6 +37,21 @@
   to = "/.netlify/functions/band-song-part-storage-health"
   status = 200
 
+[[redirects]]
+  from = "/api/bands/song-part-files/upload"
+  to = "/.netlify/functions/song-part-file-upload"
+  status = 200
+
+[[redirects]]
+  from = "/api/bands/song-part-files/preview"
+  to = "/.netlify/functions/song-part-file-preview"
+  status = 200
+
+[[redirects]]
+  from = "/api/bands/song-part-files/download"
+  to = "/.netlify/functions/song-part-file-download"
+  status = 200
+
 # SPA fallback — production/deploy only (skipped during netlify dev)
 [[redirects]]
   from = "/*"

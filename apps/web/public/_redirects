@@ -3,4 +3,7 @@
 /api/integrations/dropbox/disconnect /.netlify/functions/dropbox-disconnect 200
 /api/bands/song-part-storage/dropbox/setup /.netlify/functions/band-song-part-storage-setup 200
 /api/bands/song-part-storage/dropbox/health /.netlify/functions/band-song-part-storage-health 200
+/api/bands/song-part-files/upload /.netlify/functions/song-part-file-upload 200
+/api/bands/song-part-files/preview /.netlify/functions/song-part-file-preview 200
+/api/bands/song-part-files/download /.netlify/functions/song-part-file-download 200
 /*    /index.html   200

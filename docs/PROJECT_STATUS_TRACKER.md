@@ -193,15 +193,15 @@ Release verification      ░░░░░░░░░░  production smoke + a11
 ### 6. Songs and repertoire
 
 - [x] 6.1 Songs data model (`bandie_songs`, integration and storage tables)
-- [ ] 6.2 Songs dashboard (search, filter, metrics)
-- [ ] 6.3 Song folder / workspace UI
-- [ ] 6.4 Song part folders (lead guitar, rhythm, bass, drums, vocals, shared)
-- [ ] 6.5 Readiness tracking (part completeness from current files per spec §6.7)
+- [x] 6.2 Songs dashboard (search, filter, metrics)
+- [x] 6.3 Song folder / workspace UI
+- [x] 6.4 Song part folders (lead guitar, rhythm, bass, drums, vocals, shared)
+- [x] 6.5 Readiness tracking (part completeness from current files per spec §6.7)
 - [x] 6.6 Dropbox OAuth connect/callback and token storage (`bandie_user_integrations` + secrets table)
 - [x] 6.7 Band song-part storage setup (`bandie_band_song_part_storage`, health checks)
-- [ ] 6.8 Upload song-part files to Dropbox via Bandie; metadata in `bandie_song_part_files`
-- [ ] 6.9 Preview/download through Bandie-controlled endpoints (members without Dropbox access)
-- [ ] 6.10 File status, activity log, disconnect/reconnect error states
+- [x] 6.8 Upload song-part files to Dropbox via Bandie; metadata in `bandie_song_part_files`
+- [x] 6.9 Preview/download through Bandie-controlled endpoints (members without Dropbox access)
+- [x] 6.10 File status, activity log, disconnect/reconnect error states (upload/preview unavailable when storage inactive)
 
 ### 6b. Dropbox song-part storage (detail)
 
@@ -212,9 +212,9 @@ Authoritative spec: `docs/project/bandie_dropbox_song_part_storage_spec.md`
 **MVP build order (from spec §9):**
 1. Foundation — OAuth, token storage, settings UI — **done (29 Jun 2026)**
 2. Band folder setup — initialise `/Bandie/bands/{bandSlug}/song-parts/…` — **done (setup endpoint + auto-init after OAuth)**
-3. Song part uploads — lazy part folders, upload, metadata, activity
-4. Preview and download — permission-controlled endpoints
-5. Readiness integration — part completeness → song readiness metrics
+3. Song part uploads — lazy part folders, upload, metadata, activity — **done (29 Jun 2026)**
+4. Preview and download — permission-controlled endpoints — **done (29 Jun 2026)**
+5. Readiness integration — part completeness → song readiness metrics — **done (29 Jun 2026)**
 
 ### 7. Setlist management
 
@@ -261,6 +261,14 @@ Authoritative spec: `docs/project/bandie_dropbox_song_part_storage_spec.md`
 ---
 
 ## Session notes
+
+**29 June 2026 — Phase 6.2+ songs dashboard, song folder, uploads**
+- Migration `20260629110000_bandie_song_part_folders_files.sql`: `bandie_song_part_folders`, `bandie_song_part_files`, `bandie_song_part_file_activity` (RLS applied to remote)
+- `@bandie/data` `songs` + `songParts` modules: CRUD, filters, metrics, readiness, upload/preview/download clients
+- Netlify Functions: `song-part-file-upload`, `song-part-file-preview`, `song-part-file-download`
+- UI: `/app/:bandId/songs` dashboard (search, filter, metrics, activity); `/app/:bandId/songs/:songId` song folder (part folders, upload, file list)
+- Default part folders created on song add; readiness recalculated server-side after upload
+- Web upload limit 4 MB (Netlify request body); spec 25 MB deferred to chunked upload
 
 **29 June 2026 — Phase 6.1 foundation (songs + Dropbox)**
 - Migration `20260629100000_bandie_songs_dropbox_foundation.sql`: `bandie_songs`, `bandie_user_integrations`, `bandie_user_integration_secrets`, `bandie_integration_oauth_states`, `bandie_band_song_part_storage`
