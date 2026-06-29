@@ -124,6 +124,12 @@
   box-shadow: 0 18px 45px rgba(12, 16, 38, 0.12);
 }
 
+.setlists-card.surface-light {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  color: #1f2937;
+}
+
 .setlists-card-top {
   display: flex;
   justify-content: space-between;
@@ -136,17 +142,18 @@
   font-weight: 900;
   font-size: 1.2rem;
   letter-spacing: -0.04em;
-  color: #121826;
+  color: #111827;
   text-decoration: none;
 }
 
-.setlists-card-title:hover {
-  color: #7c3aed;
+.setlists-card-title:hover,
+.setlists-card-title:focus-visible {
+  color: #6d28d9;
 }
 
 .setlists-card p {
   margin: 0.35rem 0 0;
-  color: #6b7280;
+  color: #4b5563;
   line-height: 1.45;
 }
 
@@ -244,7 +251,7 @@
   padding-top: 0.35rem;
   border-top: 1px solid #eef2f7;
   font-size: 0.85rem;
-  color: #6b7280;
+  color: #4b5563;
 }
 
 .setlists-card-btn {
