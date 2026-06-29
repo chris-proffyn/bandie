@@ -1,38 +1,153 @@
-.entitlements-dialog-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 1200;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  background: rgb(0 0 0 / 55%);
+.billing-panel {
+  margin: 1.5rem 0;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+  color: #1f2937;
 }
 
-.entitlements-dialog {
-  width: min(100%, 28rem);
-  padding: 1.25rem 1.5rem 1.5rem;
-  border-radius: 1rem;
-}
-
-.entitlements-dialog h2 {
-  margin: 0 0 0.5rem;
-}
-
-.entitlements-dialog p {
+.billing-panel h2 {
   margin: 0 0 0.75rem;
+  color: #111827;
+}
+
+.billing-panel-intro,
+.billing-current-plan,
+.billing-notice {
+  color: #374151;
   line-height: 1.5;
 }
 
-.entitlements-dialog-meta {
-  color: #4a4a4a;
+.billing-current-plan strong {
+  color: #111827;
+}
+
+.billing-notice {
+  padding: 0.75rem 0.9rem;
+  border-radius: 12px;
+  background: #ecfdf5;
+  border: 1px solid #6ee7b7;
+  color: #065f46;
+}
+
+.billing-launch-promo-notice {
+  background: #fffbeb;
+  border-color: #fcd34d;
+  color: #78350f;
+}
+
+.billing-scope-panel {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.billing-scope-panel h3 {
+  margin: 0 0 0.5rem;
+  color: #111827;
+}
+
+.billing-plan-list {
+  list-style: none;
+  margin: 0.75rem 0 1rem;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.billing-plan-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  background: #ffffff;
+  color: #111827;
+}
+
+.billing-plan-item strong {
+  color: #111827;
+}
+
+.billing-plan-item.current {
+  border: 2px solid #6366f1;
+  background: #eef2ff;
+}
+
+.billing-plan-item p {
+  margin: 0.35rem 0 0;
+  color: #374151;
   font-size: 0.92rem;
 }
 
-.entitlements-dialog-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  justify-content: flex-end;
-  margin-top: 1rem;
+.billing-plan-price {
+  display: inline-block;
+  margin-left: 0.5rem;
+  color: #374151;
+  font-weight: 700;
+}
+
+.billing-plan-badge {
+  align-self: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #312e81;
+  background: #e0e7ff;
+  border: 1px solid #a5b4fc;
+  border-radius: 999px;
+  padding: 0.28rem 0.55rem;
+  white-space: nowrap;
+}
+
+.billing-upgrade-button,
+.billing-manage-button {
+  align-self: center;
+  white-space: nowrap;
+  min-height: 44px;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+
+.billing-upgrade-button {
+  border: none;
+  background: #ffcc33;
+  color: #101014;
+}
+
+.billing-upgrade-button:disabled,
+.billing-manage-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.billing-manage-button {
+  background: #f3f4f6;
+  border: 1px solid #94a3b8;
+  color: #111827;
+}
+
+.billing-manage-button:hover:not(:disabled) {
+  background: #e5e7eb;
+  border-color: #64748b;
+}
+
+.billing-panel .workspace-empty-note {
+  color: #374151;
+}
+
+.billing-panel .form-error {
+  color: #991b1b;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  padding: 0.75rem 0.9rem;
 }

@@ -180,14 +180,14 @@ This document defines **delivery phases, sequencing, and dependencies**. It is a
 
 **Deliverables:**
 - Admin portal per `RSD_ADMIN_PORTAL_GUIDE.md` and `bandie_entitlements_admin_portal_functional_technical_spec.md`
-- User/band search, metrics, entitlement admin, audit log
+- User/band search, metrics, editable plan catalogue (Player Free, Player Plus, Player Pro, Organiser Free, Organiser Plus), entitlement admin, audit log
 - Content moderation, system health (deferred)
 
 **Exit criteria:** Admin can view users, operate entitlements, and audit commercial changes.
 
 **Dependencies:** Phase 2+, entitlement framework (tracker Phase 8).
 
-**Status:** Partial — `/admin` portal shipped (overview, accounts, metrics, entitlements, audit); billing admin (Phase 15), moderation and system health (Phase 19) deferred.
+**Status:** Partial — `/admin` portal shipped (overview, accounts, metrics, editable plan catalogue, entitlements draft/publish, overrides, gate logs, audit); billing admin (Phase 15), moderation and system health (Phase 19) deferred.
 
 ---
 

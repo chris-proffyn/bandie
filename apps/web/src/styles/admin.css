@@ -60,20 +60,137 @@
   gap: 1rem;
 }
 
-.admin-plan-block {
-  margin-top: 1rem;
+.admin-plan-catalogue {
+  display: grid;
+  gap: 1.25rem;
 }
 
-.admin-plan-block summary {
-  cursor: pointer;
+.admin-plan-picker {
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-plan-picker-group {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.admin-plan-picker-label {
+  margin: 0;
+  font-size: 0.78rem;
   font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.admin-plan-picker-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.admin-plan-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 44px;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: var(--surface-elevated);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.admin-plan-pill:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.admin-plan-pill.is-selected {
+  border-color: rgba(255, 204, 51, 0.55);
+  background: rgba(255, 204, 51, 0.14);
+  color: #ffcc33;
+}
+
+.admin-plan-pill-name {
+  font-weight: 700;
+}
+
+.admin-plan-status-badge {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.18rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+}
+
+.admin-plan-pill.is-selected .admin-plan-status-badge {
+  border-color: rgba(255, 204, 51, 0.35);
+  color: #f6f3ea;
+}
+
+.admin-plan-status-badge.status-active {
+  border-color: rgba(110, 231, 183, 0.35);
+  color: #6ee7b7;
+}
+
+.admin-plan-status-badge.status-draft {
+  border-color: rgba(147, 197, 253, 0.35);
+  color: #93c5fd;
+}
+
+.admin-plan-status-badge.status-retired {
+  border-color: rgba(248, 113, 113, 0.35);
+  color: #f87171;
+}
+
+.admin-plan-detail {
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 1.25rem;
+  background: var(--surface-elevated);
+}
+
+.admin-plan-detail-header {
+  margin-bottom: 1rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.admin-plan-detail-title {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.admin-plan-detail-meta {
+  margin: 0.35rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.admin-plan-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+  font-size: 0.82rem;
+}
+
+.admin-plan-entitlements h5,
+.admin-plan-add-entitlement h5 {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
 }
 
 .admin-plan-meta-grid {
   display: grid;
   gap: 0.75rem;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  margin: 1rem 0;
+  margin-bottom: 1.25rem;
 }
 
 .admin-plan-description-field {
@@ -88,7 +205,8 @@
 .admin-capability-key {
   margin-top: 0.2rem;
   color: var(--text-muted);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
 }
 
 .admin-plan-row-actions {
@@ -99,13 +217,16 @@
 }
 
 .admin-plan-add-entitlement {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.admin-plan-add-entitlement-fields {
   display: grid;
   gap: 0.75rem;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   align-items: end;
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border-subtle);
 }
 
 .admin-plan-catalogue input,
@@ -113,6 +234,20 @@
 .admin-plan-catalogue textarea {
   width: 100%;
   box-sizing: border-box;
+  color: #f6f3ea;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+}
+
+.admin-plan-catalogue input::placeholder,
+.admin-plan-catalogue textarea::placeholder {
+  color: #8f8a7f;
+}
+
+.admin-plan-catalogue input:disabled {
+  opacity: 0.55;
 }
 
 .admin-metrics-grid,
@@ -147,6 +282,215 @@
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.admin-search-bar .auth-field {
+  flex: 1 1 200px;
+  min-width: 0;
+  margin: 0;
+}
+
+/* Billing admin — compact controls, mobile-friendly without full-bleed buttons */
+.admin-billing-page {
+  max-width: 52rem;
+}
+
+.admin-billing-header h1 {
+  margin: 0.15rem 0 0.5rem;
+  font-size: clamp(1.35rem, 4vw, 1.75rem);
+  letter-spacing: -0.04em;
+}
+
+.admin-billing-eyebrow {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.admin-billing-intro,
+.admin-billing-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.admin-billing-section {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.admin-billing-section h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.admin-billing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.admin-billing-alert {
+  margin: 0;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  background: rgba(255, 204, 51, 0.12);
+  border: 1px solid rgba(255, 204, 51, 0.28);
+}
+
+.admin-billing-alert-error {
+  background: rgba(248, 113, 113, 0.12);
+  border-color: rgba(248, 113, 113, 0.35);
+  color: #fecaca;
+}
+
+.admin-compact-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0.4rem 0.9rem;
+  border: none;
+  border-radius: 999px;
+  background: #ffcc33;
+  color: #101014;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 800;
+  cursor: pointer;
+  width: auto;
+  flex: 0 0 auto;
+}
+
+.admin-compact-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.admin-compact-field {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.admin-compact-field > span {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.admin-compact-field input,
+.admin-compact-field select {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 40px;
+  padding: 0.45rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  background: rgba(0, 0, 0, 0.28);
+  color: #f6f3ea;
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.admin-compact-field input:focus-visible,
+.admin-compact-field select:focus-visible {
+  outline: 2px solid #ffcc33;
+  outline-offset: 1px;
+}
+
+.admin-user-lookup-form {
+  margin: 0;
+}
+
+.admin-user-lookup-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.55rem 0.65rem;
+}
+
+.admin-user-lookup-filters .admin-compact-field {
+  flex: 1 1 9.5rem;
+  max-width: 100%;
+}
+
+.admin-user-lookup-select {
+  max-width: 100%;
+}
+
+@media (min-width: 640px) {
+  .admin-user-lookup-filters .admin-compact-field {
+    flex: 0 1 12.5rem;
+  }
+
+  .admin-user-lookup-select {
+    max-width: 28rem;
+  }
+}
+
+.admin-subscription-results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.admin-subscription-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.65rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  background: var(--surface-elevated);
+  font-size: 0.88rem;
+}
+
+.admin-subscription-meta {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.admin-subscription-link {
+  margin-left: auto;
+  color: #ffcc33;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.admin-subscription-link:hover {
+  text-decoration: underline;
+}
+
+.admin-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-table-compact th,
+.admin-table-compact td {
+  padding: 0.45rem 0.4rem;
+  font-size: 0.85rem;
+}
+
+.admin-inline-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+  font-size: 0.78rem;
+  word-break: break-all;
 }
 
 @media (max-width: 900px) {
@@ -156,5 +500,9 @@
 
   .admin-sidebar {
     position: static;
+  }
+
+  .admin-subscription-link {
+    margin-left: 0;
   }
 }

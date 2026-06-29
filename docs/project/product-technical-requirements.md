@@ -209,17 +209,28 @@ RLS policies must enforce band membership for all private data.
 - `canPerform`, `assertCanPerform`, `checkBandLeaderCapability`, `checkUserOrganiserCapability`
 - `isEntitlementEnforcementEnabled` — env (`VITE_BANDIE_ENFORCE_ENTITLEMENTS`) OR platform setting (`entitlements_enforced`)
 - `loadPlatformEntitlementEnforcement`, `setEntitlementsEnforced` — platform toggle (admin)
+- **Plan catalogue (display names in `bandie_plans.name`, codes stable):**
 
-**Calendar, gigs, booking (`@bandie/data`):**
-- `calendar.ts` — events, votes, `calendar.use` tier
-- `gigs.ts` — CRUD, setlist context, `gig.create` limits
-- `bookingEnquiries.ts` — send, inbox, `booking_enquiry.send` limits
+| Code | Display name | Scope |
+|---|---|---|
+| `player_free` | Player Free | Band leader (default) |
+| `player_plus` | Player Plus | Band leader (paid) |
+| `player_pro` | Player Pro | Band leader (paid) |
+| `organiser_free` | Organiser Free | Organiser (default) |
+| `organiser_plus` | Organiser Plus | Organiser (paid) |
+
+Band workspace limits resolve from the **primary leader’s** active subscription (`plan_scope = leader`). Upgrade prompt labels use `PLAN_DISPLAY_NAMES` for known codes; live plan names also load from the DB on subscription join.
 
 **Platform admin (`@bandie/data`):**
 - `adminPortal.ts` — search, audit, overview counts
 - `metrics.ts` — `trackMetricEvent`, snapshots, aggregation RPC
-- `entitlementAdmin.ts` — plan matrix, drafts, overrides, publish
+- `entitlementAdmin.ts` — editable plan catalogue, plan matrix, drafts, overrides, publish (`updatePlanCatalogueEntry`, `updatePlanEntitlement`, `removePlanEntitlement`, …)
 - `gateLogs.ts` — gate decision logging
+
+**Calendar, gigs, booking (`@bandie/data`):**
+- `calendar.ts` — events, votes, `calendar.use` tier (`basic` on Player Free leader; `full` on Player Plus / Player Pro)
+- `gigs.ts` — CRUD, setlist context, `gig.create` limits
+- `bookingEnquiries.ts` — send, inbox, `booking_enquiry.send` limits
 
 **Usernames (`@bandie/data`):**
 - `normalizeUsername`, `validateUsernameInput`, `ensureProfileUsername`

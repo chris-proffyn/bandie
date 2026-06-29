@@ -18,6 +18,7 @@ import {
   isPlatformAppAdminRole,
   isPlayerWorkspaceRoute,
   listUserBands,
+  ensureLaunchTrialsExpired,
   loadPlatformEntitlementEnforcement,
   onAuthStateChange,
   resolveDisplayName,
@@ -179,6 +180,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           refreshBands(),
           refreshProfile(),
           loadPlatformEntitlementEnforcement(),
+          ensureLaunchTrialsExpired(),
           trackSessionActive(),
         ]);
       })

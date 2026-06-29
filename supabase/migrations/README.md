@@ -70,16 +70,33 @@ Song-part file bytes live in **Dropbox** (leader OAuth), not Supabase Storage. A
 - `20260629150000_bandie_songs_soft_delete.sql` — `is_deleted`, `deleted_at`, leader-only delete/restore trigger
 - `20260629160000_bandie_setlists.sql` — `bandie_setlists`, `bandie_setlist_items`, member read / leader write RLS
 
-## Phase 8 — entitlements (in progress)
+## Phase 8 — entitlements (applied)
 
 - `20260630100000_bandie_entitlements_foundation.sql` — plan catalogue, capabilities, subscriptions, usage meters, overrides (RLS + `bandie_set_usage_meter` RPC)
-- `20260630110000_bandie_entitlements_seed.sql` — plan/capability seeds, `plan_scope`, default subscriptions, profile trigger
+- `20260630110000_bandie_entitlements_seed.sql` — five-plan catalogue (`player_free`, `player_plus`, `player_pro`, `organiser_free`, `organiser_plus`), capability seeds, `plan_scope`, default subscriptions, profile trigger
 - `20260630120000_bandie_calendar.sql` — calendar events, availability votes, public date sync
 - `20260630130000_bandie_gigs.sql` — gig records with setlist link
 - `20260630140000_bandie_booking_enquiries.sql` — booking enquiry metadata + list RPC
 - `20260630150000_bandie_admin_metrics_entitlements.sql` — audit, metrics, drafts, gate logs, admin search, aggregation RPC
+- `20260630160000_bandie_plan_display_names.sql` — legacy display name rename (superseded by code alignment)
+- `20260630170000_bandie_plan_code_align_names.sql` — plan codes aligned with display names (`player_plus`, `player_pro`)
 
-OAuth and Dropbox API routes run server-side (Netlify functions); tokens are not client-readable.
+- `20260630180000_bandie_billing_stripe.sql` — Stripe customer on profiles, webhook idempotency log, subscription grace period
+- `20260630190000_bandie_player_plan_entitlements.sql` — Player Free read-only member model; Plus 1 band / 20 songs / 3 setlists; Pro 999 songs & setlists
+- `20260630210000_bandie_launch_promo_trials.sql` — 30-day launch promo (`launch_promo_ends_at`); Player Pro / Organiser Plus trials; expiry RPC
+
+## Phase 15 — billing (implemented)
+
+Requires Netlify env: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`. After deploy, platform admin runs **Sync Stripe plans** at `/admin/billing` once (creates test/live products and writes `stripe_*` IDs to `bandie_plans`).
+
+**Launch promo:** migration `20260630210000` sets `bandie_platform_settings.launch_promo_ends_at` to 30 days from apply time. New and existing (non-Stripe) users receive Player Pro / Organiser Plus trials until that date. Enable **Enforce entitlements** in `/admin/entitlements` at launch. Adjust end date via platform settings if needed.
+
+Local webhook forwarding:
+
+```bash
+stripe listen --forward-to localhost:8888/api/billing/stripe-webhook
+```
+
 
 ## RLS requirement
 

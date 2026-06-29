@@ -5,6 +5,8 @@
 
 [functions]
   node_bundler = "esbuild"
+  # Stripe ships ESM; bundling it breaks netlify dev — load from node_modules at runtime.
+  external_node_modules = ["stripe"]
 
 [dev]
   command = "npm run dev --workspace=@bandie/web"
@@ -50,6 +52,26 @@
 [[redirects]]
   from = "/api/bands/song-part-files/download"
   to = "/.netlify/functions/song-part-file-download"
+  status = 200
+
+[[redirects]]
+  from = "/api/billing/create-checkout"
+  to = "/.netlify/functions/billing-create-checkout"
+  status = 200
+
+[[redirects]]
+  from = "/api/billing/create-portal"
+  to = "/.netlify/functions/billing-create-portal"
+  status = 200
+
+[[redirects]]
+  from = "/api/billing/stripe-webhook"
+  to = "/.netlify/functions/billing-stripe-webhook"
+  status = 200
+
+[[redirects]]
+  from = "/api/billing/setup-stripe-plans"
+  to = "/.netlify/functions/billing-setup-stripe-plans"
   status = 200
 
 # SPA fallback — production/deploy only (skipped during netlify dev)

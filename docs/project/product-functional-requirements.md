@@ -79,7 +79,7 @@ Signed-in organisers submit a structured enquiry from the public profile **Book*
 
 - Only intentionally published content is visible
 - Private songs, files, notes, and internal availability are never exposed
-- Confirmed/provisional gig availability may appear on public calendar (synced from calendar gig-availability events when leader tier is full)
+- Confirmed/provisional gig availability may appear on public calendar (synced from calendar gig-availability events when the band leader’s plan includes full calendar — **Player Plus** or **Player Pro** / `calendar.use = full`)
 - Booking enquiries arrive in `/app/communications` under **Booking enquiries** (structured inbox with status)
 
 ---
@@ -328,10 +328,12 @@ Bandie app admins (`is_app_admin`) also have a dedicated **`/admin`** portal (se
 - Overview counts (users, bands, songs, setlists, gigs)
 - User and band search
 - Platform metrics (DAU/WAU/MAU, content totals, tier distribution) with CSV export
-- Entitlement admin (plan catalogue, draft/publish, overrides, gate logs, enforcement toggle)
+- Entitlement admin — **editable plan catalogue** (five plans: **Player Free**, **Player Plus**, **Player Pro**, **Organiser Free**, **Organiser Plus**; plan codes unchanged), draft/publish workflow, manual overrides, gate decision logs, enforcement toggle
 - Audit log
 
-Authoritative spec: `bandie_entitlements_admin_portal_functional_technical_spec.md`.
+Plan display names are stored in `bandie_plans.name` and surfaced in upgrade prompts via `PLAN_DISPLAY_NAMES` for known plan codes. Authoritative limits remain in `bandie_plan_entitlements`.
+
+Authoritative spec: `bandie_entitlements_admin_portal_functional_technical_spec.md` §20.2.
 
 ### Workspace navigation (implemented)
 

@@ -673,5 +673,29 @@ export {
   isEntitlementsEnforcedOnPlatform,
 } from './platformSettings';
 
+export {
+  LAUNCH_PROMO_ENDS_AT_KEY,
+  buildLaunchPromoStatus,
+  ensureLaunchTrialsExpired,
+  formatLaunchPromoEndDate,
+  getLaunchPromoStatus,
+  isLaunchPromoSubscription,
+  isLaunchTrialExpired,
+  parseLaunchPromoEndsAt,
+  setLaunchPromoEndsAt,
+} from './launchPromo';
+export type { LaunchPromoStatus } from './launchPromo';
+
 export { logGateDecision, listGateDecisionLogs } from './gateLogs';
 export type { GateDecisionLog } from './gateLogs';
+
+export {
+  listUserSubscriptions,
+  listPublicPlanOffers,
+  startPlanCheckout,
+  openBillingPortal,
+  syncStripePlanCatalogueAsAdmin,
+  listStripeWebhookEvents,
+  formatPlanDisplayName,
+} from './billing';
+export type { UserSubscriptionSummary, PublicPlanOffer } from './billing';

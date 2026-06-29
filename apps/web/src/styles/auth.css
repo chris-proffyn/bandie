@@ -621,6 +621,36 @@
   color: #374151;
 }
 
+.app-main .surface-light.billing-panel,
+.app-shell .surface-light.billing-panel {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #1f2937;
+}
+
+.app-main .surface-light .billing-scope-panel,
+.app-shell .surface-light .billing-scope-panel {
+  border-top-color: #e5e7eb;
+}
+
+.app-main .surface-light .billing-plan-item,
+.app-shell .surface-light .billing-plan-item {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #111827;
+}
+
+.app-main .surface-light .billing-plan-item.current,
+.app-shell .surface-light .billing-plan-item.current {
+  background: #eef2ff;
+  border-color: #6366f1;
+}
+
+.app-main .surface-light .workspace-empty-note,
+.app-shell .surface-light .workspace-empty-note {
+  color: #374151;
+}
+
 .invite-list {
   list-style: none;
   padding: 0;

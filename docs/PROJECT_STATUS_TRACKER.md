@@ -2,8 +2,8 @@
 
 **Document status:** Live project tracker  
 **Product:** Bandie  
-**Phase:** Phases 8–14 complete; **Phase 15 (billing)** next  
-**Last updated:** 30 June 2026 (post-commit `ec8b41c`; docs synced)
+**Phase:** Phase 15 (billing) implemented — configure Stripe env vars and sync plans  
+**Last updated:** 30 June 2026 (Phase 15 Stripe billing: checkout, webhooks, profile billing UI)
 
 ---
 
@@ -18,7 +18,7 @@
 | Web app scaffold (Vite + React + TypeScript) | Complete |
 | Bandie homepage (Phase 1) | Complete |
 | Mobile app (Phase 18) | Not started (placeholder only) |
-| Supabase schema / migrations | Platform + Bandie through `20260630150000`; applied to remote (`supabase db push`) |
+| Supabase schema / migrations | Platform + Bandie through `20260630160000` (plan display names); applied to remote (`supabase db push`) |
 | Authentication & band membership (Phase 2) | Complete |
 | Public band profile (Phase 3) | Complete |
 | Band directory (Phase 4) | Complete |
@@ -34,8 +34,8 @@
 | Setlist management (Phase 7) | Complete — library, builder with drag reorder, live metrics, leader-only edit |
 | Entitlement framework (Phase 8) | Complete — schema, seeds, service, gate hooks; enforcement off by default |
 | Calendar & gigs (Phases 9–10) | Complete — `/app/:bandId/calendar`, `/app/:bandId/gigs` |
-| Admin portal & metrics (Phases 12–14) | Complete — `/admin` (overview, accounts, metrics, entitlements, audit); enforcement toggle |
-| Billing (Phase 15) | Not started — Stripe; after calendar/gigs and entitlement admin |
+| Admin portal & metrics (Phases 12–14) | Complete — `/admin` (overview, accounts, metrics, editable plan catalogue, audit); enforcement toggle |
+| Billing (Phase 15) | Implemented — Stripe checkout, webhooks, `/app/profile` billing, `/admin/billing`; requires env vars + plan sync |
 
 ## Active constraints
 
@@ -50,11 +50,13 @@
 
 ## Current focus
 
-**Next capability:** Billing integration (Phase 15) — Stripe checkout, webhooks, subscription sync to `bandie_subscriptions`
+**Next capability:** Configure Stripe in Netlify and smoke-test checkout (Phase 15 deployment)
 
-**Immediate task:** Phase 15.1 — map Stripe products/prices to `bandie_plans`
+**Immediate task:** Run `supabase db push` for launch promo migration; enable **Enforce entitlements** at `/admin/entitlements`; confirm launch end date at `/admin/billing`
 
-**Before turning on enforcement in production:** smoke-test calendar, gigs, booking inbox, and `/admin`; decide env vs platform toggle for `entitlements_enforced`
+**Launch promo (Option 2):** 30-day Player Pro / Organiser Plus trials via `bandie_subscriptions` (`source: launch_promo`); no Stripe until promo ends. See `/admin/billing` and `/app/profile` billing panel.
+
+**Before turning on enforcement in production:** smoke-test calendar, gigs, booking inbox, and `/admin`; turn on platform toggle for `entitlements_enforced` at launch
 
 Reference documents:
 - `docs/project/bandie_entitlements_admin_portal_functional_technical_spec.md` — authoritative for Phases 8, 12–15, 17
@@ -75,8 +77,8 @@ Single numbering for product features, monetisation, admin, and mobile. Sub-phas
 | **11** | **Booking enquiries** | **Complete** | Public form, structured inbox, entitlement rate limits when enforcing |
 | **12** | **Admin portal foundation** | **Complete** | `/admin`, audit log, account search, overview shell |
 | **13** | **Platform metrics** | **Complete** | Event tracking, daily snapshots, DAU/WAU/MAU, CSV export |
-| **14** | **Entitlement admin** | **Complete** | Plan matrix, draft/publish, overrides, gate logs, enforcement toggle |
-| **15** | **Billing integration** | **Next** | Stripe checkout, webhooks, subscription sync, billing settings |
+| **14** | **Entitlement admin** | **Complete** | Editable plan catalogue, draft/publish, overrides, gate logs, enforcement toggle |
+| **15** | **Billing integration** | **Implemented** | Stripe checkout, webhooks, portal, admin billing page; env + plan sync required |
 | 16 | Activity, notifications & polish | Partial | Comms hub done; activity feed, push, release verification |
 | 17 | Open mic & event packs | Not started | `bandie_open_mic_jam_night_spec.md`; add-on entitlements |
 | 18 | Mobile app | Not started | Expo scaffold; core member flows |
@@ -273,7 +275,7 @@ Authoritative spec: `docs/project/bandie_entitlements_admin_portal_functional_te
 
 - [x] 8.1 Document resolved product decisions (§20) — authoritative in `bandie_entitlements_admin_portal_functional_technical_spec.md` §20.1–§20.2
 - [x] 8.2 Schema — `bandie_plans`, `bandie_capabilities`, `bandie_plan_entitlements`, `bandie_subscriptions`, `bandie_usage_meters`, `bandie_entitlement_overrides` (RLS on all); migration `20260630100000`
-- [x] 8.3 Seed plans — `player_free`, `band_standard`, `band_pro`, `organiser_free`, `organiser_plus`; capabilities per §18.2; migration `20260630110000`
+- [x] 8.3 Seed plans — `player_free` (**Player Free**), `player_plus` (**Player Plus**), `player_pro` (**Player Pro**), `organiser_free` (**Organiser Free**), `organiser_plus` (**Organiser Plus**); capabilities per §20.2; migrations `20260630110000`, code alignment `20260630170000`
 - [x] 8.4 `@bandie/data` entitlement service — `canPerform()`, plan resolution, usage summary, `EntitlementGateError`
 - [x] 8.5 Dev-mode permissive defaults — `VITE_BANDIE_ENFORCE_ENTITLEMENTS=false` by default (enforcement in Phase 14)
 - [x] 8.6 Gate pattern for new features — `checkBandLeaderCapability()` / `assertCanPerform()` exported for calendar/gigs
@@ -334,7 +336,7 @@ Authoritative spec: entitlements spec §35 Phase C, §7.6–7.8 (overrides, tria
 
 Turn on freemium limits for features built in Phases 6–11. Avoid full pricing console until tiers stabilise (spec §16.2).
 
-- [x] 14.1 Plan catalogue and entitlement matrix views
+- [x] 14.1 Plan catalogue and entitlement matrix views — **editable** plan metadata and entitlement values in `/admin/entitlements` (audit logged)
 - [x] 14.2 Draft/publish workflow for entitlement and limit changes
 - [x] 14.3 Usage limit editor with impact preview
 - [x] 14.4 Entitlement inspector and gate decision logs
@@ -345,11 +347,12 @@ Turn on freemium limits for features built in Phases 6–11. Avoid full pricing 
 
 Authoritative spec: entitlements spec §15, §21 Phase 2, §35 Phase D (support/billing admin).
 
-- [ ] 15.1 Stripe products and prices mapped to `bandie_plans`
-- [ ] 15.2 Checkout session creation and workspace billing settings page
-- [ ] 15.3 Webhook handlers — idempotent subscription state sync
-- [ ] 15.4 Grace period, downgrade and over-limit behaviour (preserve content; block new over-limit creation)
-- [ ] 15.5 Admin subscription dashboard, Stripe links, webhook status and reconciliation trigger
+- [x] 15.1 Stripe products and prices mapped to `bandie_plans` — auto-sync via `/admin/billing` (`ensureStripePlanCatalogue`; £4 / £10 / £15 GBP monthly)
+- [x] 15.2 Checkout session creation and workspace billing settings page — `/app/profile` Billing & plans panel; Stripe Customer Portal
+- [x] 15.3 Webhook handlers — idempotent subscription state sync (`bandie_stripe_webhook_events`)
+- [x] 15.4 Grace period, downgrade and over-limit behaviour — `past_due` + 7-day grace; cancel reverts to free plan; content preserved (entitlements spec §20.1 #9)
+- [x] 15.5 Admin subscription dashboard — `/admin/billing` webhook log, plan sync, Stripe dashboard links
+- [x] 15.6 Launch promo — 30-day Player Pro / Organiser Plus trials (`launch_promo_ends_at`, backfill, expiry RPC, billing banner)
 
 ### 16. Activity, notifications and platform polish
 
@@ -390,6 +393,21 @@ Authoritative spec: entitlements spec §35 Phase E. Deferred until admin portal 
 
 ## Session notes
 
+**30 June 2026 — Phase 15 Stripe billing**
+- Implemented checkout, Customer Portal, webhooks, `/app/profile` billing panel, `/admin/billing`
+- GBP pricing: Player Plus £4/mo, Player Pro £10/mo, Organiser Plus £15/mo
+- Migration `20260630180000` applied to remote
+
+**30 June 2026 — Plan code alignment with display names**
+- Renamed plan codes to match `bandie_plans.name` (snake_case): `band_standard` → `player_plus`, `band_pro` → `player_pro`; migration `20260630170000`
+- Updated `@bandie/data` `PLAN_CODES` (`PLAYER_PLUS`, `PLAYER_PRO`), seed migration, and docs
+
+**30 June 2026 — Plan catalogue names and admin editing**
+- Renamed paid band-leader plan display names to **Player Plus** / **Player Pro**; migration `20260630160000` (display names; superseded by code alignment above)
+- `/admin/entitlements`: inline edit plan metadata and entitlement values; draft/publish and overrides retained
+- Commits: `47199a7` (admin typography), `9ebcd17` (admin routing), `d3159a6` (editable catalogue + plan names)
+- Docs synced to §20.2 naming across entitlements spec, tracker, delivery map, migrations README, product docs (`PRODUCT_REQUIREMENTS`, `product-functional-requirements`, `product-technical-requirements`, `bandie_build_elements`); legacy `band_free` code references corrected to `player_free`
+
 **30 June 2026 — Docs sync after Phases 8–14 commit**
 - Committed and pushed `ec8b41c` to `main` — entitlements, calendar/gigs, booking inbox, admin portal
 - Migrations `20260630100000`–`20260630150000` applied to remote Supabase
@@ -413,11 +431,12 @@ Authoritative spec: entitlements spec §35 Phase E. Deferred until admin portal 
 **29 June 2026 — Phase 8.1 product decisions (confirmed)**
 - Stakeholder review locked §20.1–§20.2 in entitlements spec
 - **Player-centric billing:** leader’s subscription unlocks band features; not per-band workspace plans
-- **Player Free:** 1 band, 6 songs, 1 setlist; full song folders; no Bandie Dropbox byte metering
+- **Player Free (updated):** profile + join bands by invite; view songs/setlists only — no band/song/setlist/upload creates
+- **Player Plus:** 1 band, 20 songs, 3 setlists; full song folders and calendar
+- **Player Pro:** unlimited bands; 999 songs and 999 setlists per band
 - **Organiser Free:** 1 venue, 20 enquiries/month; open mic trial + event packs
 - **Downgrade:** keep content, block new over-limit creates; admin overrides platform admins only
-- **Band-leader tiers:** Player Free = 1 band, Player Plus (`band_standard`) = 3 bands, Player Pro (`band_pro`) = unlimited
-- Open: whether 999 songs is final paid ceiling on Player Plus / Player Pro
+- Migration: `20260630190000_bandie_player_plan_entitlements.sql`
 
 **29 June 2026 — Unified phase roadmap (entitlements + admin + billing)**
 - Renumbered post–Phase 7 work: **8** entitlement framework, **9** calendar, **10** gigs, **11** booking, **12–14** admin portal and entitlement admin, **15** billing, **16** activity/polish, **17** open mic packs, **18** mobile, **19** system health

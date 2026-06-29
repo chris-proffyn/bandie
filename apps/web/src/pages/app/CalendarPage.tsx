@@ -171,7 +171,7 @@ export function CalendarPage() {
           <p className="my-bands-lead">
             Propose rehearsals internally or gig date windows for the band to vote on.
             {calendarTier === 'basic'
-              ? ` Public calendar publishing unlocks on ${PLAN_DISPLAY_NAMES[PLAN_CODES.BAND_STANDARD]} when entitlements are enforced.`
+              ? ` Public calendar publishing unlocks on ${PLAN_DISPLAY_NAMES[PLAN_CODES.PLAYER_PLUS]} when entitlements are enforced.`
               : ' Confirmed and provisional gig availability can publish to your public profile.'}
           </p>
         </div>

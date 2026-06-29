@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { getCurrentUserProfile, type UserProfile } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
 import { AdminModePanel } from '../../components/profile/AdminModePanel';
+import { BillingPanel } from '../../components/profile/BillingPanel';
 import { WorkspaceModePanel } from '../../components/profile/WorkspaceModePanel';
 import { UserProfileEditor } from '../../components/profile/UserProfileEditor';
 import '../../styles/bandProfile.css';
@@ -35,8 +36,20 @@ function profilePageIntro(profile: UserProfile): string {
 
 export function UserProfilePage() {
   const { user, profile, refreshProfile, isAppAdmin, workspaceMode } = useAuth();
+  const [searchParams] = useSearchParams();
   const [formProfile, setFormProfile] = useState<UserProfile | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const billingNotice = useMemo(() => {
+    const result = searchParams.get('billing');
+    if (result === 'success') {
+      return 'Payment received. Your plan will update shortly once Stripe confirms the subscription.';
+    }
+    if (result === 'cancelled') {
+      return 'Checkout was cancelled. No charge was made.';
+    }
+    return null;
+  }, [searchParams]);
 
   useEffect(() => {
     getCurrentUserProfile()
@@ -97,6 +110,12 @@ export function UserProfilePage() {
 
         {isAppAdmin ? <AdminModePanel /> : null}
         <WorkspaceModePanel />
+
+        <BillingPanel
+          showLeaderPlans={formProfile.is_player !== false}
+          showOrganiserPlans={Boolean(formProfile.is_organiser)}
+          billingNotice={billingNotice}
+        />
 
         <UserProfileEditor
           variant="self"

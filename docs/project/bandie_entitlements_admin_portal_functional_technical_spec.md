@@ -4,7 +4,7 @@
 **Product:** Bandie  
 **Area:** Monetisation, subscriptions, feature gating, usage limits, entitlement control, admin operations and platform metrics  
 **Intended use:** Source document for product, design, engineering, admin tooling and Cursor-led implementation  
-**Last updated:** 29 June 2026  
+**Last updated:** 30 June 2026 (plan display names: Player Plus / Player Pro; editable admin plan catalogue)  
 
 ---
 
@@ -14,7 +14,7 @@ Bandie needs a flexible way to control which users and accounts can access which
 
 The objective is to avoid hard-coding pricing tiers directly into product logic. Instead, Bandie should implement a configurable entitlement and usage-limit framework that allows administrators to:
 
-- Define tiers such as Free Player, Player Plus, Free Band, Bandie Band, Bandie Pro Band, Free Organiser and Organiser Plus.
+- Define tiers such as **Player Free**, **Player Plus**, **Player Pro**, **Organiser Free**, and **Organiser Plus** (plan codes in §20.2).
 - Attach features to tiers.
 - Attach usage limits to tiers.
 - Move features between tiers without changing application code.
@@ -100,7 +100,7 @@ These may be added later.
 Feature and limit rules should be stored in database tables or structured configuration. Application code should ask the entitlement service whether an action is allowed, rather than embedding logic such as:
 
 ```ts
-if (plan === 'band_pro') {
+if (plan === 'player_pro') {
   allowSongFolderCreation();
 }
 ```
@@ -136,9 +136,9 @@ A user may have a role such as:
 
 A workspace may have a plan such as:
 
-- Band Free
-- Bandie Band
-- Bandie Pro Band
+- Player Free
+- Player Plus
+- Player Pro
 - Organiser Free
 - Organiser Plus
 
@@ -146,7 +146,7 @@ Roles determine what the user can do within an account. Plans determine which ca
 
 Example:
 
-- A band may be on Bandie Pro.
+- A band whose primary leader is on **Player Pro** inherits that tier’s band capabilities.
 - A drummer may be a normal band member.
 - The drummer still should not be able to delete the band just because the band is on a paid plan.
 
@@ -187,7 +187,7 @@ Examples:
 
 ## 6. Proposed Tier Model
 
-The following tier model is illustrative. It should be configurable and not hard-coded.
+The following tier model is illustrative. **Authoritative plan codes and limits are in §20.2** — codes are snake_case of display names (`player_free`, `player_plus`, `player_pro`, `organiser_free`, `organiser_plus`). Product code must read entitlements from data, not these section headings.
 
 ## 6.1 Player Tiers
 
@@ -209,7 +209,7 @@ Purpose: maximise network growth and allow players to participate in bands.
 | Send outbound band recruitment messages | Limited or No |
 | Promote player profile | No |
 
-### Player Plus — optional future tier
+### Enhanced player profile (future — separate from leader **Player Plus** / `player_plus`)
 
 Purpose: support players looking for gigs, dep work or enhanced visibility.
 
@@ -227,7 +227,7 @@ Note: Player Plus should not be required for a player to be a useful band member
 
 ## 6.2 Band Tiers
 
-### Band Free
+### Player Free
 
 Purpose: allow bands to create a profile, seed the directory and experience workspace value.
 
@@ -247,7 +247,7 @@ Purpose: allow bands to create a profile, seed the directory and experience work
 | Custom URL / branding | No |
 | Analytics | No |
 
-### Bandie Band
+### Player Plus
 
 Purpose: main paid tier for ordinary amateur bands.
 
@@ -268,7 +268,7 @@ Purpose: main paid tier for ordinary amateur bands.
 | Mobile/performance mode | Basic |
 | Poster generator | Standard |
 
-### Bandie Pro Band
+### Player Pro
 
 Purpose: gigging bands that want better promotion, booking and professional presentation.
 
@@ -343,8 +343,8 @@ Bandie must support a catalogue of plans.
 
 Each plan should have:
 
-- Internal code, e.g. `band_free`, `band_standard`, `band_pro`.
-- Display name, e.g. “Bandie Pro Band”.
+- Internal code, e.g. `player_free`, `player_plus`, `player_pro`, `organiser_free`, `organiser_plus`.
+- Display name, e.g. “Player Pro”.
 - User-facing description.
 - Subject type, e.g. `player`, `band`, `organiser`, `venue`, `event`.
 - Billing interval, e.g. monthly, annual, one-off, free.
@@ -427,11 +427,11 @@ Examples:
 
 ### Feature locked
 
-> Song folders are available on Bandie Band and above. Upgrade to organise parts, files and notes by song.
+> Song folders are available on Player Plus and above. Upgrade to organise parts, files and notes by song.
 
 ### Limit reached
 
-> Your free band workspace includes 6 songs. Upgrade to Bandie Band to add up to 100 songs and unlock song folders.
+> Your free band workspace includes 6 songs. Upgrade to Player Plus to add up to 100 songs and unlock song folders.
 
 ### Organiser venue limit reached
 
@@ -455,7 +455,7 @@ Override types:
 |---|---|
 | Feature override | Allow song folders on a specific free band |
 | Limit override | Increase songs limit from 6 to 20 |
-| Trial override | Give Bandie Pro for 30 days |
+| Trial override | Give Player Pro for 30 days |
 | Custom plan | Assign non-public plan to a workspace |
 | Manual comp | Free paid-tier access for partner/early adopter |
 
@@ -482,7 +482,7 @@ Trial requirements:
 
 Example:
 
-A band on Free starts a 14-day Bandie Band trial. During the trial it creates 20 songs and 5 setlists. When the trial expires, the band reverts to Free. The songs and setlists remain visible, but the band cannot add more songs or setlists until it upgrades.
+A band whose leader is on **Player Free** starts a 14-day **Player Plus** trial. During the trial it creates 20 songs and 5 setlists. When the trial expires, the leader reverts to **Player Free**. The songs and setlists remain visible, but the band cannot add more songs or setlists until the leader upgrades.
 
 ## 7.8 Grandfathering
 
@@ -628,7 +628,7 @@ Stores the plan catalogue.
 | Column | Type | Notes |
 |---|---|---|
 | `id` | uuid | Primary key |
-| `code` | text | Unique internal code, e.g. `band_free` |
+| `code` | text | Unique internal code, e.g. `player_free` |
 | `name` | text | Display name |
 | `description` | text | User-facing description |
 | `subject_type` | text | `user`, `band`, `organiser`, `event` |
@@ -675,13 +675,13 @@ Example rows:
 
 | Plan | Capability | Value |
 |---|---|---:|
-| `band_free` | `song.create` | `true` |
-| `band_free` | `songs.max_count` | `6` |
-| `band_free` | `setlists.max_count` | `1` |
-| `band_free` | `song_folder.create` | `false` |
+| `player_free` | `song.create` | `true` |
+| `player_free` | `songs.max_count` | `6` |
+| `player_free` | `setlists.max_count` | `1` |
+| `player_free` | `song_folder.create` | `true` |
 | `organiser_free` | `venues.max_count` | `1` |
-| `band_standard` | `song_folder.create` | `true` |
-| `band_standard` | `songs.max_count` | `100` |
+| `player_plus` | `song_folder.create` | `true` |
+| `player_plus` | `songs.max_count` | `100` |
 
 ### `bandie_subscriptions`
 
@@ -870,9 +870,9 @@ Example denied response:
 {
   "allowed": false,
   "reasonCode": "limit_reached",
-  "message": "Your free band workspace includes 6 songs. Upgrade to Bandie Band to add more songs.",
-  "currentPlan": "band_free",
-  "requiredPlan": "band_standard",
+  "message": "Your free band workspace includes 6 songs. Upgrade to Player Plus to add more songs.",
+  "currentPlan": "player_free",
+  "requiredPlan": "player_plus",
   "usage": 6,
   "limit": 6,
   "upgradeUrl": "/bands/abc/settings/billing"
@@ -933,7 +933,7 @@ If a resource is soft-deleted, it should normally stop counting against the acti
 
 Example:
 
-- Band Free has 6 songs.
+- Player Free has 6 songs.
 - Band creates 6 songs.
 - Band deletes 1 song.
 - Band can create 1 more song.
@@ -986,9 +986,9 @@ Response:
 {
   "allowed": false,
   "reasonCode": "limit_reached",
-  "message": "Your free band workspace includes 6 songs. Upgrade to Bandie Band to add more songs.",
-  "currentPlan": "band_free",
-  "requiredPlan": "band_standard",
+  "message": "Your free band workspace includes 6 songs. Upgrade to Player Plus to add more songs.",
+  "currentPlan": "player_free",
+  "requiredPlan": "player_plus",
   "usage": 6,
   "limit": 6
 }
@@ -1006,7 +1006,7 @@ Response:
 
 ```json
 {
-  "plan": "band_free",
+  "plan": "player_free",
   "usage": [
     {
       "meterKey": "songs.count",
@@ -1053,7 +1053,7 @@ Request:
 {
   "subjectType": "band",
   "subjectId": "band_123",
-  "targetPlanCode": "band_standard"
+  "targetPlanCode": "player_plus"
 }
 ```
 
@@ -1080,7 +1080,7 @@ Example:
   subjectType="band"
   subjectId={band.id}
   capability="song_folder.create"
-  fallback={<UpgradeCard feature="Song folders" requiredPlan="Bandie Band" />}
+  fallback={<UpgradeCard feature="Song folders" requiredPlan="Player Plus" />}
 >
   <CreateSongFolderButton />
 </FeatureGate>
@@ -1162,7 +1162,7 @@ Examples:
 
 1. Organiser tries to create second venue.
 2. Backend checks `venue.create` and `venues.max_count`.
-3. If organiser is on Free and already has one venue, request is denied.
+3. If organiser is on **Organiser Free** and already has one venue, request is denied.
 4. API returns structured upgrade response.
 
 ## 13.1 Transaction Safety
@@ -1385,9 +1385,8 @@ These events will help refine pricing.
 Initial seed data should create:
 
 - `player_free`
-- `band_free`
-- `band_standard`
-- `band_pro`
+- `player_plus`
+- `player_pro`
 - `organiser_free`
 - `organiser_plus`
 - Optional `open_mic_event_pack`
@@ -1442,7 +1441,7 @@ Suggested initial capability keys:
 
 ## 19. Example User Journeys
 
-## 19.1 Free Player Tries to Create a Band
+## 19.1 Player Free Leader Tries to Create a Second Band
 
 1. Player creates free profile.
 2. Player clicks “Create a band”.
@@ -1450,30 +1449,30 @@ Suggested initial capability keys:
 4. Free tier does not include `band.create`.
 5. User sees upgrade prompt:
 
-> Creating a band workspace is available on Bandie Band plans. Upgrade to create a band, invite members and manage songs, setlists and gigs.
+> Creating a band workspace is available on Player Plus plans. Upgrade to create a band, invite members and manage songs, setlists and gigs.
 
-Alternative commercial decision: Bandie may allow free band creation but restrict usage. If so, `band.create` should be enabled on Player Free, and the created band should default to Band Free.
+Alternative commercial decision: Bandie may allow free band creation but restrict usage. If so, `band.create` should be enabled on Player Free, and the created band should default to Player Free.
 
-## 19.2 Free Band Reaches Song Limit
+## 19.2 Player Free band Reaches Song Limit
 
-1. Band Free has 6 songs.
+1. Player Free has 6 songs.
 2. Band owner clicks “Add song”.
 3. Backend checks `song.create` and `songs.max_count`.
 4. Usage is 6 and limit is 6.
 5. Request is denied.
 6. UI shows:
 
-> Your free band workspace includes 6 songs. Upgrade to Bandie Band to add up to 100 songs and unlock song folders.
+> Your free band workspace includes 6 songs. Upgrade to Player Plus to add up to 100 songs and unlock song folders.
 
 ## 19.3 Paid Band Creates Song Folder
 
-1. Bandie Band account opens a song.
+1. Player Plus account opens a song.
 2. User clicks “Create song folder”.
 3. Backend checks `song_folder.create`.
 4. Plan includes feature.
 5. Song folder is created.
 
-## 19.4 Free Organiser Adds Second Venue
+## 19.4 Organiser Free Adds Second Venue
 
 1. Organiser Free has one venue.
 2. User clicks “Add venue”.
@@ -1502,9 +1501,9 @@ Alternative commercial decision: Bandie may allow free band creation but restric
 The following decisions should be resolved before implementation:
 
 1. Can a free player create a free band, or is band creation paid from the start?
-2. Should Band Free include song folders as locked preview, or no access at all?
-3. Should Free Band allow 6 songs or a different number?
-4. Should Free Band allow 1 setlist or 3 setlists?
+2. Should Player Free include song folders as locked preview, or no access at all?
+3. Should Player Free band allow 6 songs or a different number?
+4. Should Player Free band allow 1 setlist or 3 setlists?
 5. Should organiser enquiries be capped or unlimited fair use?
 6. Should Open Mic be a one-off purchase, organiser subscription feature, or both?
 7. Should paid band plans be per band or per member seat?
@@ -1516,7 +1515,7 @@ Recommended MVP answers:
 
 | Decision | Recommendation |
 |---|---|
-| Free player create band? | Yes, but created band starts on Band Free with limits |
+| Free player create band? | Yes, but created band starts on Player Free with limits |
 | Free songs limit | 6 |
 | Free setlist limit | 1 |
 | Free song folders | Locked, visible upgrade prompt |
@@ -1530,8 +1529,8 @@ Recommended MVP answers:
 
 | # | Question | **Decision** | Notes |
 |---|---|---|---|
-| 1 | Free player create band? | **Yes, with player-level cap.** Three **band-leader tiers** govern how many bands a user may create/own as primary leader: **Player Free = 1**, **Player Plus = 3**, **Player Pro = unlimited**. Player Free bands also have **up to 6 songs** and **1 setlist** per band. | See §20.2 band-leader tier table. Plan codes: `player_free`, `band_standard` (Player Plus), `band_pro` (Player Pro). |
-| 2 | Band Free song folders | **Full access.** Song part folders, uploads and Dropbox integration are available on Player Free bands. Limits are song/setlist/band count only — not folder gating. | Supersedes spec §6.2 “song folders: no or limited preview”. |
+| 1 | Free player create band? | **Yes, with player-level cap.** Three **band-leader tiers** govern how many bands a user may create/own as primary leader: **Player Free = 1**, **Player Plus = 3**, **Player Pro = unlimited**. Player Free bands also have **up to 6 songs** and **1 setlist** per band. | See §20.2 band-leader tier table. Plan codes: `player_free`, `player_plus` (Player Plus), `player_pro` (Player Pro). |
+| 2 | Player Free song folders | **Full access.** Song part folders, uploads and Dropbox integration are available on Player Free bands. Limits are song/setlist/band count only — not folder gating. | Supersedes spec §6.2 “song folders: no or limited preview”. |
 | 3 | Free song limit | **6 active songs** per band (`songs.max_count`). Soft-deleted songs do not count. | Applies to bands led by a Player Free user unless overridden by leader tier. |
 | 4 | Free setlist limit | **1 setlist** per band (`setlists.max_count`). | |
 | 5 | Organiser booking enquiries | **Capped.** Organiser Free: **20 outbound enquiries per calendar month** (`booking_enquiries.monthly_max_count`). Organiser Plus: unlimited. Receiving enquiries on band profiles is not gated. | |
@@ -1550,12 +1549,12 @@ Recommended MVP answers:
 | Tier | Plan code | Display name | `bands.max_count` |
 |---|---|---|---:|
 | Free | `player_free` | Player Free | 1 |
-| Player Plus | `band_standard` | Player Plus | 3 |
-| Player Pro | `band_pro` | Player Pro | null (unlimited) |
+| Player Plus | `player_plus` | Player Plus | 3 |
+| Player Pro | `player_pro` | Player Pro | null (unlimited) |
 
 #### Capability limits by plan
 
-| Capability key | Player Free | Player Plus (`band_standard`) | Player Pro (`band_pro`) | Organiser Free | Organiser Plus |
+| Capability key | Player Free | Player Plus (`player_plus`) | Player Pro (`player_pro`) | Organiser Free | Organiser Plus |
 |---|---:|---:|---:|---:|---:|
 | `bands.max_count` | 1 | 3 | null (unlimited) | — | — |
 | `songs.max_count` (per band led) | 6 | 999 | 999 | — | — |
@@ -1651,23 +1650,23 @@ Build:
 
 ## 22.1 Feature Entitlement
 
-- A Free Band cannot create a song folder if `song_folder.create = false`.
-- A Bandie Band account can create a song folder if `song_folder.create = true`.
+- A Player Free band cannot create a song folder if `song_folder.create = false`.
+- A Player Plus account can create a song folder if `song_folder.create = true`.
 - The frontend displays locked state for unavailable features.
 - Direct API calls are blocked for unavailable features.
 
 ## 22.2 Usage Limits
 
-- A Free Band with fewer than 6 songs can create another song.
-- A Free Band with 6 songs cannot create a 7th song.
-- A Free Band with 1 setlist cannot create a 2nd setlist.
-- A Free Organiser with 1 venue cannot create a 2nd venue.
+- A Player Free band with fewer than 6 songs can create another song.
+- A Player Free band with 6 songs cannot create a 7th song.
+- A Player Free band with 1 setlist cannot create a 2nd setlist.
+- An **Organiser Free** account with 1 venue cannot create a 2nd venue.
 - Upgrade prompts explain the relevant limit and required plan.
 
 ## 22.3 Plan Changes
 
-- Upgrading a band from Free to Bandie Band immediately unlocks paid features.
-- Downgrading from Bandie Band to Free preserves existing content.
+- Upgrading a band from Free to Player Plus immediately unlocks paid features.
+- Downgrading from Player Plus to Free preserves existing content.
 - Downgraded accounts over free limits cannot create additional limited resources.
 - Retired plans continue to work for existing subscribers.
 
@@ -1705,10 +1704,9 @@ Build:
 
 For the first commercial implementation, build only the capabilities required to support the immediate model:
 
-- Free Player.
-- Band Free.
-- Bandie Band.
-- Bandie Pro Band.
+- Player Free.
+- Player Plus.
+- Player Pro.
 - Organiser Free.
 - Organiser Plus.
 - Feature gates for song folders, poster generator, analytics, custom URL, open mic.
@@ -1724,7 +1722,7 @@ Avoid building a complex admin pricing console until the tier structure has stab
 
 Bandie should implement a flexible entitlement framework based on configurable plans, capabilities, limits, usage meters, subscriptions, add-ons and overrides.
 
-The key design decision is to avoid embedding pricing logic directly inside product features. Product code should ask the entitlement service whether an action is allowed. This allows Bandie to change commercial packaging over time — for example, moving song folders from Pro to Bandie Band, increasing the free song limit from 6 to 10, or letting organisers register two free venues instead of one — without rewriting core product logic.
+The key design decision is to avoid embedding pricing logic directly inside product features. Product code should ask the entitlement service whether an action is allowed. This allows Bandie to change commercial packaging over time — for example, moving song folders from Pro to Player Plus, increasing the free song limit from 6 to 10, or letting organisers register two free venues instead of one — without rewriting core product logic.
 
 The MVP should focus on the highest-value gates:
 
@@ -2031,7 +2029,7 @@ Examples:
 | Segment | Metrics |
 |---|---|
 | Players | Free, Plus, unknown/no tier |
-| Bands | Free, Bandie Band, Bandie Pro, custom, trialing |
+| Bands | Player Free, Player Plus, Player Pro, custom, trialing |
 | Organisers | Free, Plus, custom, event-pack users |
 | Add-ons | Open mic packs, storage packs, featured boosts |
 
@@ -2142,7 +2140,7 @@ The admin portal should provide a feature matrix where rows are capabilities and
 
 Example:
 
-| Capability | Band Free | Bandie Band | Bandie Pro |
+| Capability | Player Free | Player Plus | Player Pro |
 |---|---:|---:|---:|
 | `song.create` | Yes | Yes | Yes |
 | `songs.max_count` | 6 | 100 | Unlimited |
@@ -2179,7 +2177,7 @@ Requirements:
 
 Example impact preview:
 
-> Changing `songs.max_count` for Band Free from 6 to 10 will affect 842 free band workspaces. 217 are currently at the old limit. 0 will become over-limit.
+> Changing `songs.max_count` for Player Free from 6 to 10 will affect 842 free band workspaces. 217 are currently at the old limit. 0 will become over-limit.
 
 For limit reductions:
 
@@ -2603,7 +2601,7 @@ Stores aggregated daily metrics for fast dashboards.
 | `metric_date` | date | Snapshot date |
 | `metric_key` | text | e.g. `dau`, `songs_total` |
 | `segment_type` | text | e.g. `global`, `user_type`, `plan`, `subject_type` |
-| `segment_key` | text | e.g. `band_free`, `organiser_plus` |
+| `segment_key` | text | e.g. `player_free`, `organiser_plus` |
 | `value` | numeric | Metric value |
 | `metadata` | jsonb | Optional |
 | `created_at` | timestamptz | Insert time |
@@ -2924,7 +2922,7 @@ Example entitlement publish event:
   "event_type": "admin.entitlement_published",
   "actor_id": "user_admin_123",
   "subject_type": "plan",
-  "subject_id": "plan_band_free",
+  "subject_id": "plan_player_free",
   "metadata": {
     "draft_id": "draft_456",
     "changes": [
@@ -3034,7 +3032,7 @@ Plan: Bandie Free
 Status: Active
 Usage: 6/6 songs, 1/1 setlists, 4/5 members, 180MB/250MB storage
 Recent gate denial: song.create denied because songs limit reached
-Recommended action: Upgrade to Bandie Band or grant temporary override
+Recommended action: Upgrade to Player Plus or grant temporary override
 ```
 
 This gives support admins enough context to answer user questions quickly.
@@ -3082,20 +3080,20 @@ This gives support admins enough context to answer user questions quickly.
   "subjectType": "band",
   "tiers": [
     {
-      "planCode": "band_free",
-      "planName": "Band Free",
+      "planCode": "player_free",
+      "planName": "Player Free",
       "count": 1822,
       "percentage": 85.1
     },
     {
-      "planCode": "band_standard",
-      "planName": "Bandie Band",
+      "planCode": "player_plus",
+      "planName": "Player Plus",
       "count": 260,
       "percentage": 12.1
     },
     {
-      "planCode": "band_pro",
-      "planName": "Bandie Pro Band",
+      "planCode": "player_pro",
+      "planName": "Player Pro",
       "count": 58,
       "percentage": 2.7
     }
@@ -3120,8 +3118,8 @@ This gives support admins enough context to answer user questions quickly.
     "name": "Skin Condition"
   },
   "plan": {
-    "code": "band_free",
-    "name": "Band Free"
+    "code": "player_free",
+    "name": "Player Free"
   },
   "capability": {
     "key": "song.create",
@@ -3133,10 +3131,10 @@ This gives support admins enough context to answer user questions quickly.
     "limit": 6
   },
   "requiredPlan": {
-    "code": "band_standard",
-    "name": "Bandie Band"
+    "code": "player_plus",
+    "name": "Player Plus"
   },
-  "message": "Your free band workspace includes 6 songs. Upgrade to Bandie Band to add more songs."
+  "message": "Your free band workspace includes 6 songs. Upgrade to Player Plus to add more songs."
 }
 ```
 

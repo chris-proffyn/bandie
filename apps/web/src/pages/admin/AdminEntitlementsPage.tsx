@@ -197,7 +197,8 @@ export function AdminEntitlementsPage() {
       <section className="panel">
         <h3>Plan catalogue</h3>
         <p className="my-bands-lead">
-          Edit plan details and entitlement values directly. Changes are saved immediately and audit logged.
+          Choose a plan, then edit its details and capability values. Changes save immediately and are
+          audit logged.
         </p>
         <div className="auth-field">
           <label htmlFor="catalogue-change-reason">Change reason (optional, for audit)</label>

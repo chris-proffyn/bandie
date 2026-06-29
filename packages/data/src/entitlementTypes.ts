@@ -49,8 +49,8 @@ export type UsageSummary = {
 
 export const PLAN_CODES = {
   PLAYER_FREE: 'player_free',
-  BAND_STANDARD: 'band_standard',
-  BAND_PRO: 'band_pro',
+  PLAYER_PLUS: 'player_plus',
+  PLAYER_PRO: 'player_pro',
   ORGANISER_FREE: 'organiser_free',
   ORGANISER_PLUS: 'organiser_plus',
 } as const;
@@ -59,8 +59,8 @@ export type PlanCode = (typeof PLAN_CODES)[keyof typeof PLAN_CODES];
 
 export const PLAN_DISPLAY_NAMES: Record<PlanCode, string> = {
   player_free: 'Player Free',
-  band_standard: 'Player Plus',
-  band_pro: 'Player Pro',
+  player_plus: 'Player Plus',
+  player_pro: 'Player Pro',
   organiser_free: 'Organiser Free',
   organiser_plus: 'Organiser Plus',
 };

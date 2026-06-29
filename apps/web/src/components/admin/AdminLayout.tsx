@@ -9,6 +9,7 @@ const ADMIN_NAV = [
   { label: 'Accounts', to: '/admin/accounts' },
   { label: 'Metrics', to: '/admin/metrics' },
   { label: 'Entitlements', to: '/admin/entitlements' },
+  { label: 'Billing', to: '/admin/billing' },
   { label: 'Audit log', to: '/admin/audit' },
 ];
 

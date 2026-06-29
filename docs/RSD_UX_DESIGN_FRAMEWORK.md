@@ -227,6 +227,8 @@ Pale status pills (e.g. `#eef2ff` fill, `#dbeafe` fill) **without borders** disa
 
 **Check before shipping:** squint test — pills and stat boxes must remain clearly separated from the card background without relying on shadow alone.
 
+**Billing and plan cards:** use the same light-surface rules. The billing panel is a nested `surface-light` card inside the profile page — never combine `panel` (dark translucent) with `surface-light`. Plan rows use white `#ffffff` shells; the current plan row uses `#eef2ff` fill with `#6366f1` border and `#111827` text (not dark fill with dark text).
+
 ---
 
 ## 7. Reusable Component Library

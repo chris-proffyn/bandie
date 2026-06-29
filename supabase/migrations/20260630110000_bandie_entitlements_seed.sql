@@ -78,7 +78,7 @@ values
     10
   ),
   (
-    'band_standard',
+    'player_plus',
     'Player Plus',
     'Lead up to three bands with expanded repertoire and calendar features.',
     'user',
@@ -88,7 +88,7 @@ values
     20
   ),
   (
-    'band_pro',
+    'player_pro',
     'Player Pro',
     'Unlimited bands and fair-use repertoire for active gigging leaders.',
     'user',
@@ -173,41 +173,41 @@ select public.bandie_seed_plan_entitlement('player_free', 'band_profile.publish'
 select public.bandie_seed_plan_entitlement('player_free', 'band_directory.list', 'true');
 select public.bandie_seed_plan_entitlement('player_free', 'booking_enquiry.receive', 'true');
 
-select public.bandie_seed_plan_entitlement('band_standard', 'band.create', 'true');
-select public.bandie_seed_plan_entitlement('band_standard', 'bands.max_count', '3');
-select public.bandie_seed_plan_entitlement('band_standard', 'songs.max_count', '999');
-select public.bandie_seed_plan_entitlement('band_standard', 'setlists.max_count', '50');
-select public.bandie_seed_plan_entitlement('band_standard', 'song.create', 'true');
-select public.bandie_seed_plan_entitlement('band_standard', 'setlist.create', 'true');
-select public.bandie_seed_plan_entitlement('band_standard', 'song_folder.create', 'true');
-select public.bandie_seed_plan_entitlement('band_standard', 'song_file.upload', 'true');
-select public.bandie_seed_plan_entitlement('band_standard', 'band_members.max_count', '10');
-select public.bandie_seed_plan_entitlement('band_standard', 'band_members.invite', 'true');
-select public.bandie_seed_plan_entitlement('band_standard', 'gigs.active_max_count', '50');
-select public.bandie_seed_plan_entitlement('band_standard', 'calendar.use', '"full"');
-select public.bandie_seed_plan_entitlement('band_standard', 'band_profile.publish', 'true');
-select public.bandie_seed_plan_entitlement('band_standard', 'band_directory.list', 'true');
-select public.bandie_seed_plan_entitlement('band_standard', 'booking_enquiry.receive', 'true');
-select public.bandie_seed_plan_entitlement('band_standard', 'poster.generate', 'true');
+select public.bandie_seed_plan_entitlement('player_plus', 'band.create', 'true');
+select public.bandie_seed_plan_entitlement('player_plus', 'bands.max_count', '3');
+select public.bandie_seed_plan_entitlement('player_plus', 'songs.max_count', '999');
+select public.bandie_seed_plan_entitlement('player_plus', 'setlists.max_count', '50');
+select public.bandie_seed_plan_entitlement('player_plus', 'song.create', 'true');
+select public.bandie_seed_plan_entitlement('player_plus', 'setlist.create', 'true');
+select public.bandie_seed_plan_entitlement('player_plus', 'song_folder.create', 'true');
+select public.bandie_seed_plan_entitlement('player_plus', 'song_file.upload', 'true');
+select public.bandie_seed_plan_entitlement('player_plus', 'band_members.max_count', '10');
+select public.bandie_seed_plan_entitlement('player_plus', 'band_members.invite', 'true');
+select public.bandie_seed_plan_entitlement('player_plus', 'gigs.active_max_count', '50');
+select public.bandie_seed_plan_entitlement('player_plus', 'calendar.use', '"full"');
+select public.bandie_seed_plan_entitlement('player_plus', 'band_profile.publish', 'true');
+select public.bandie_seed_plan_entitlement('player_plus', 'band_directory.list', 'true');
+select public.bandie_seed_plan_entitlement('player_plus', 'booking_enquiry.receive', 'true');
+select public.bandie_seed_plan_entitlement('player_plus', 'poster.generate', 'true');
 
-select public.bandie_seed_plan_entitlement('band_pro', 'band.create', 'true');
-select public.bandie_seed_plan_entitlement('band_pro', 'bands.max_count', 'null');
-select public.bandie_seed_plan_entitlement('band_pro', 'songs.max_count', '999');
-select public.bandie_seed_plan_entitlement('band_pro', 'setlists.max_count', 'null');
-select public.bandie_seed_plan_entitlement('band_pro', 'song.create', 'true');
-select public.bandie_seed_plan_entitlement('band_pro', 'setlist.create', 'true');
-select public.bandie_seed_plan_entitlement('band_pro', 'song_folder.create', 'true');
-select public.bandie_seed_plan_entitlement('band_pro', 'song_file.upload', 'true');
-select public.bandie_seed_plan_entitlement('band_pro', 'band_members.max_count', '20');
-select public.bandie_seed_plan_entitlement('band_pro', 'band_members.invite', 'true');
-select public.bandie_seed_plan_entitlement('band_pro', 'gigs.active_max_count', 'null');
-select public.bandie_seed_plan_entitlement('band_pro', 'calendar.use', '"full"');
-select public.bandie_seed_plan_entitlement('band_pro', 'band_profile.publish', 'true');
-select public.bandie_seed_plan_entitlement('band_pro', 'band_profile.custom_url', 'true');
-select public.bandie_seed_plan_entitlement('band_pro', 'band_directory.list', 'true');
-select public.bandie_seed_plan_entitlement('band_pro', 'booking_enquiry.receive', 'true');
-select public.bandie_seed_plan_entitlement('band_pro', 'poster.generate', 'true');
-select public.bandie_seed_plan_entitlement('band_pro', 'analytics.view', 'true');
+select public.bandie_seed_plan_entitlement('player_pro', 'band.create', 'true');
+select public.bandie_seed_plan_entitlement('player_pro', 'bands.max_count', 'null');
+select public.bandie_seed_plan_entitlement('player_pro', 'songs.max_count', '999');
+select public.bandie_seed_plan_entitlement('player_pro', 'setlists.max_count', 'null');
+select public.bandie_seed_plan_entitlement('player_pro', 'song.create', 'true');
+select public.bandie_seed_plan_entitlement('player_pro', 'setlist.create', 'true');
+select public.bandie_seed_plan_entitlement('player_pro', 'song_folder.create', 'true');
+select public.bandie_seed_plan_entitlement('player_pro', 'song_file.upload', 'true');
+select public.bandie_seed_plan_entitlement('player_pro', 'band_members.max_count', '20');
+select public.bandie_seed_plan_entitlement('player_pro', 'band_members.invite', 'true');
+select public.bandie_seed_plan_entitlement('player_pro', 'gigs.active_max_count', 'null');
+select public.bandie_seed_plan_entitlement('player_pro', 'calendar.use', '"full"');
+select public.bandie_seed_plan_entitlement('player_pro', 'band_profile.publish', 'true');
+select public.bandie_seed_plan_entitlement('player_pro', 'band_profile.custom_url', 'true');
+select public.bandie_seed_plan_entitlement('player_pro', 'band_directory.list', 'true');
+select public.bandie_seed_plan_entitlement('player_pro', 'booking_enquiry.receive', 'true');
+select public.bandie_seed_plan_entitlement('player_pro', 'poster.generate', 'true');
+select public.bandie_seed_plan_entitlement('player_pro', 'analytics.view', 'true');
 
 select public.bandie_seed_plan_entitlement('organiser_free', 'organiser_profile.create', 'true');
 select public.bandie_seed_plan_entitlement('organiser_free', 'venue.create', 'true');

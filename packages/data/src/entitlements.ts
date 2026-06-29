@@ -1,5 +1,6 @@
 import { getBandieClient } from './context';
 import { isEntitlementEnforcementEnabled } from './entitlementEnforcement';
+import { isLaunchTrialExpired } from './launchPromo';
 import { logGateDecision } from './gateLogs';
 import { EntitlementGateError } from './entitlementErrors';
 import type {
@@ -38,13 +39,13 @@ const CREATE_CAPABILITY_LIMITS: Record<string, string> = {
 };
 
 const REQUIRED_UPGRADE_PLAN: Record<string, PlanCode> = {
-  'bands.max_count': PLAN_CODES.BAND_STANDARD,
-  'songs.max_count': PLAN_CODES.BAND_STANDARD,
-  'setlists.max_count': PLAN_CODES.BAND_STANDARD,
-  'band_members.max_count': PLAN_CODES.BAND_STANDARD,
+  'bands.max_count': PLAN_CODES.PLAYER_PLUS,
+  'songs.max_count': PLAN_CODES.PLAYER_PLUS,
+  'setlists.max_count': PLAN_CODES.PLAYER_PLUS,
+  'band_members.max_count': PLAN_CODES.PLAYER_PLUS,
   'venues.max_count': PLAN_CODES.ORGANISER_PLUS,
   'booking_enquiries.monthly_max_count': PLAN_CODES.ORGANISER_PLUS,
-  'gigs.active_max_count': PLAN_CODES.BAND_STANDARD,
+  'gigs.active_max_count': PLAN_CODES.PLAYER_PLUS,
 };
 
 function allowedDecision(partial: Partial<GateDecision> = {}): GateDecision {
@@ -140,6 +141,33 @@ async function getBandPrimaryLeaderUserId(bandId: string): Promise<string | null
   return (data?.owner_user_id as string | undefined) ?? null;
 }
 
+async function loadFreePlanSubscription(
+  planScope: EntitlementPlanScope,
+): Promise<ActiveSubscription | null> {
+  const client = getBandieClient();
+  const freeCode = planScope === 'organiser' ? PLAN_CODES.ORGANISER_FREE : PLAN_CODES.PLAYER_FREE;
+  const { data, error } = await client
+    .from('bandie_plans')
+    .select('id, code, name')
+    .eq('code', freeCode)
+    .eq('status', 'active')
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  return {
+    planId: data.id as string,
+    planCode: data.code as string,
+    planName: data.name as string,
+  };
+}
+
 async function loadActiveSubscription(
   userId: string,
   planScope: EntitlementPlanScope,
@@ -147,7 +175,9 @@ async function loadActiveSubscription(
   const client = getBandieClient();
   const { data, error } = await client
     .from('bandie_subscriptions')
-    .select('plan_id, bandie_plans!inner(code, name)')
+    .select(
+      'plan_id, status, grace_period_ends_at, trial_end, stripe_subscription_id, bandie_plans!inner(code, name)',
+    )
     .eq('subject_type', 'user')
     .eq('subject_id', userId)
     .eq('plan_scope', planScope)
@@ -159,7 +189,23 @@ async function loadActiveSubscription(
   }
 
   if (!data) {
-    return null;
+    return loadFreePlanSubscription(planScope);
+  }
+
+  if (
+    isLaunchTrialExpired(
+      data.trial_end as string | null,
+      data.stripe_subscription_id as string | null,
+    )
+  ) {
+    return loadFreePlanSubscription(planScope);
+  }
+
+  if (data.status === 'past_due') {
+    const graceEnds = data.grace_period_ends_at as string | null;
+    if (graceEnds && new Date(graceEnds).getTime() <= Date.now()) {
+      return loadFreePlanSubscription(planScope);
+    }
   }
 
   const plan = data.bandie_plans as { code: string; name: string } | { code: string; name: string }[];
@@ -285,7 +331,7 @@ async function evaluateLimitCapability(
   const limit = entitlementValue;
 
   if (usage + requestedAmount > limit) {
-    const requiredPlan = REQUIRED_UPGRADE_PLAN[capabilityKey] ?? PLAN_CODES.BAND_STANDARD;
+    const requiredPlan = REQUIRED_UPGRADE_PLAN[capabilityKey] ?? PLAN_CODES.PLAYER_PLUS;
     return deniedDecision({
       reasonCode: 'limit_reached',
       message: formatLimitMessage(
@@ -321,7 +367,7 @@ async function evaluateBooleanCapability(
 ): Promise<GateDecision> {
   const enabled = entitlementValue === true;
   if (!enabled) {
-    const requiredPlan = REQUIRED_UPGRADE_PLAN[capabilityKey] ?? PLAN_CODES.BAND_STANDARD;
+    const requiredPlan = REQUIRED_UPGRADE_PLAN[capabilityKey] ?? PLAN_CODES.PLAYER_PLUS;
     return deniedDecision({
       reasonCode: 'feature_locked',
       message: `This feature is not included on your ${subscription.planName} plan. Upgrade to ${PLAN_DISPLAY_NAMES[requiredPlan]} to unlock it.`,

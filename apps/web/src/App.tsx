@@ -24,6 +24,7 @@ import { AdminOverviewPage } from './pages/admin/AdminOverviewPage';
 import { AdminAccountsPage } from './pages/admin/AdminAccountsPage';
 import { AdminMetricsPage } from './pages/admin/AdminMetricsPage';
 import { AdminEntitlementsPage } from './pages/admin/AdminEntitlementsPage';
+import { AdminBillingPage } from './pages/admin/AdminBillingPage';
 import { AdminAuditPage } from './pages/admin/AdminAuditPage';
 import { WorkspaceBandDirectoryPage } from './pages/app/WorkspaceBandDirectoryPage';
 import { WorkspaceBandProfilePage } from './pages/app/WorkspaceBandProfilePage';
@@ -244,6 +245,7 @@ export default function App() {
             <Route path="accounts" element={<AdminAccountsPage />} />
             <Route path="metrics" element={<AdminMetricsPage />} />
             <Route path="entitlements" element={<AdminEntitlementsPage />} />
+            <Route path="billing" element={<AdminBillingPage />} />
             <Route path="audit" element={<AdminAuditPage />} />
           </Route>
         </Route>

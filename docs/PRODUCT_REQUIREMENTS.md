@@ -80,7 +80,7 @@ Member-only area scoped to a selected band:
 - Calendar (rehearsal + gig availability) — **done (web)** — `/app/:bandId/calendar`
 - Gig management — **done (web)** — `/app/:bandId/gigs`, setlist linking
 - Activity feed — **planned** (Phase 16)
-- Platform admin portal — **done** — `/admin` for app admins (metrics, entitlements, audit); separate from in-app admin mode
+- Platform admin portal — **done** — `/admin` for app admins (metrics, editable plan catalogue, entitlements draft/publish, overrides, gate logs, audit); separate from in-app admin mode
 
 ---
 

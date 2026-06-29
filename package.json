@@ -8,6 +8,7 @@
     "packages/*"
   ],
   "scripts": {
+    "predev": "node scripts/ensure-netlify-dev.mjs",
     "dev": "netlify dev --filter @bandie/web",
     "dev:vite": "npm run dev --workspace=@bandie/web",
     "build": "npm run build --workspace=@bandie/web",
@@ -20,7 +21,8 @@
   },
   "dependencies": {
     "@netlify/functions": "^2.8.2",
-    "@supabase/supabase-js": "^2.49.1"
+    "@supabase/supabase-js": "^2.49.1",
+    "stripe": "^17.7.0"
   },
   "devDependencies": {
     "netlify-cli": "^23.0.0"
