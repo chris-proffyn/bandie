@@ -26,6 +26,7 @@ export function WorkspaceBandCard({ band }: WorkspaceBandCardProps) {
   return (
     <BandCard
       band={band}
+      testUser={band.test_user}
       badgeLabel={roleLabel}
       badgeVariant="role"
       meta={meta}

@@ -68,6 +68,17 @@
   max-width: none;
 }
 
+.band-profile-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.band-profile-title-row .band-profile-name-lead {
+  padding-top: 1.25rem;
+}
+
 .band-profile-intro {
   padding: 1.25rem 0 0.5rem;
   text-align: left;

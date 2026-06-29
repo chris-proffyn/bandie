@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { bandCardGradient } from '../../lib/directoryHelpers';
 import { bandInitials } from '../../lib/profileHelpers';
+import { TestDataBadge } from '../common/TestDataBadge';
 
 export type BandCardVisual = {
   name: string;
@@ -19,6 +20,7 @@ type BandCardProps = {
   footerLabel: string;
   footerValue: string;
   actions: ReactNode;
+  testUser?: boolean | null;
 };
 
 export function BandCard({
@@ -31,6 +33,7 @@ export function BandCard({
   footerLabel,
   footerValue,
   actions,
+  testUser,
 }: BandCardProps) {
   const heroStyle = band.hero_image_url
     ? { backgroundImage: `url(${band.hero_image_url})` }
@@ -56,6 +59,7 @@ export function BandCard({
       <div className="directory-band-body">
         <div className="directory-band-title-row">
           <h3>{band.name}</h3>
+          <TestDataBadge testUser={testUser} />
         </div>
         <p className="directory-band-meta">{meta}</p>
         {band.description ? <p className="directory-band-desc">{band.description}</p> : null}

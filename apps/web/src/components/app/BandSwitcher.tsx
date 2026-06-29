@@ -42,7 +42,7 @@ export function BandSwitcher({
       >
         {bands.map((band) => (
           <option key={band.id} value={band.id}>
-            {band.name}
+            {band.test_user ? `${band.name} · Test data` : band.name}
           </option>
         ))}
       </select>

@@ -165,8 +165,6 @@ export function SongsDashboardPage() {
 
       {loadError ? <div className="songs-error">{loadError}</div> : null}
 
-      <BandSongPartTemplatesPanel bandId={bandId} canManage={canManageParts} />
-
       <section className="songs-metrics" aria-label="Song metrics">
         <article className="songs-metric surface-light">
           <small>Total songs</small>
@@ -441,6 +439,8 @@ export function SongsDashboardPage() {
           </div>
         </aside>
       </section>
+
+      <BandSongPartTemplatesPanel bandId={bandId} canManage={canManageParts} />
 
       {showAddSong ? (
         <AddSongDialog

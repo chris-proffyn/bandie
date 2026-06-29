@@ -33,6 +33,7 @@ export type UserProfile = {
   contact_email: string | null;
   contact_phone: string | null;
   onboarding_complete: boolean;
+  test_user: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -88,6 +89,7 @@ const profileSelect = `
   contact_email,
   contact_phone,
   onboarding_complete,
+  test_user,
   created_at,
   updated_at
 `;
@@ -177,12 +179,7 @@ export async function getCurrentUserProfile(): Promise<UserProfile | null> {
     return null;
   }
 
-  return {
-    ...data,
-    genres: data.genres ?? [],
-    instruments: data.instruments ?? [],
-    gear_items: data.gear_items ?? [],
-  };
+  return normalizeProfileRow(data as Record<string, unknown>);
 }
 
 function normalizeProfileRow(data: Record<string, unknown>): UserProfile {
@@ -191,6 +188,7 @@ function normalizeProfileRow(data: Record<string, unknown>): UserProfile {
     genres: (data.genres as string[]) ?? [],
     instruments: (data.instruments as string[]) ?? [],
     gear_items: (data.gear_items as string[]) ?? [],
+    test_user: Boolean(data.test_user),
     is_player: data.is_player !== false,
     is_organiser: Boolean(data.is_organiser),
   };

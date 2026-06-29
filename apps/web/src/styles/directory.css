@@ -482,11 +482,22 @@
   padding: 1.25rem;
 }
 
+.directory-band-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
 .directory-band-title-row h3 {
   margin: 0;
   font-size: 1.55rem;
   line-height: 1.02;
   letter-spacing: -0.045em;
+}
+
+.directory-band-title-row h1 {
+  margin: 0;
 }
 
 .directory-band-meta {
@@ -519,6 +530,21 @@
   padding: 0.35rem 0.55rem;
   font-size: 0.75rem;
   font-weight: 850;
+}
+
+.test-data-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.28rem 0.55rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+  white-space: nowrap;
 }
 
 .directory-band-footer {

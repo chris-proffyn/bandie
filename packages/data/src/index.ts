@@ -9,6 +9,8 @@ export {
   includeTestData,
   filterTestRows,
   isHiddenTestRow,
+  isTestDataEntity,
+  TEST_DATA_BADGE_LABEL,
   resolveBandieDataMode,
 } from './testDataMode';
 export type { BandieDataMode } from './testDataMode';

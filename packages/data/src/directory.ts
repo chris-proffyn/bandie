@@ -25,6 +25,7 @@ export type DirectoryBandListing = {
   fee_guidance_max: number | null;
   availability_status: 'available' | 'limited' | 'unavailable';
   band_size: number | null;
+  test_user: boolean;
   created_at: string;
 };
 
@@ -89,9 +90,10 @@ export async function listPublishedBandsForDirectory(): Promise<DirectoryBandLis
     throw new Error(error.message);
   }
 
-  return filterTestRows(data ?? []).map(({ test_user: _testUser, ...band }) => ({
+  return filterTestRows(data ?? []).map((band) => ({
     ...band,
     genres: band.genres ?? [],
+    test_user: Boolean(band.test_user),
   }));
 }
 

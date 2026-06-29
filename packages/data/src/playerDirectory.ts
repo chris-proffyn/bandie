@@ -28,6 +28,7 @@ export type PlayerDirectoryListing = {
   deputy_fee_guidance_max: number | null;
   open_to_deputy_invites: boolean;
   open_to_member_invites: boolean;
+  test_user: boolean;
   created_at: string;
 };
 
@@ -104,10 +105,11 @@ export async function listPublishedPlayersForDirectory(): Promise<PlayerDirector
     throw new Error(error.message);
   }
 
-  return filterTestRows(data ?? []).map(({ test_user: _testUser, ...row }) => ({
+  return filterTestRows(data ?? []).map((row) => ({
     ...row,
     genres: row.genres ?? [],
     instruments: row.instruments ?? [],
+    test_user: Boolean(row.test_user),
   }));
 }
 
@@ -135,12 +137,11 @@ export async function getPublicPlayerProfileById(
     return null;
   }
 
-  const { test_user: _testUser, ...row } = data;
-
   return {
-    ...row,
-    genres: row.genres ?? [],
-    instruments: row.instruments ?? [],
+    ...data,
+    genres: data.genres ?? [],
+    instruments: data.instruments ?? [],
+    test_user: Boolean(data.test_user),
   };
 }
 

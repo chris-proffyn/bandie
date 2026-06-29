@@ -28,6 +28,7 @@ export function DirectoryBandCard({ band, variant = 'public' }: DirectoryBandCar
   return (
     <BandCard
       band={band}
+      testUser={band.test_user}
       badgeLabel={directoryAvailabilityBadge(band.availability_status)}
       badgeDotClass={availabilityDotClass(band.availability_status)}
       meta={directoryBandMeta(band)}

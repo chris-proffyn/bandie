@@ -14,6 +14,7 @@ import {
 import { directoryLinkState } from '../../lib/backNavigation';
 import { bandCardGradient } from '../../lib/directoryHelpers';
 import { bandInitials } from '../../lib/profileHelpers';
+import { TestDataBadge } from '../common/TestDataBadge';
 
 import type { FindPlayersContext } from '../../lib/findPlayersNavigation';
 
@@ -66,6 +67,7 @@ export function DirectoryPlayerCard({
       <div className="directory-band-body">
         <div className="directory-band-title-row">
           <h3>{name}</h3>
+          <TestDataBadge testUser={player.test_user} />
         </div>
         <p className="directory-band-meta">{playerDirectoryMeta(player)}</p>
         {travelLabel ? <p className="directory-player-travel">{travelLabel}</p> : null}

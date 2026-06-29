@@ -28,6 +28,7 @@ export type Band = {
   availability_note: string | null;
   owner_user_id: string;
   public_profile_enabled: boolean;
+  test_user: boolean;
   created_at: string;
 };
 
@@ -62,6 +63,7 @@ function mapBandRow(band: Record<string, unknown>, memberRole: string, memberSta
     equipment_notes: (band.equipment_notes as string | null) ?? null,
     availability_status: (band.availability_status as Band['availability_status']) ?? 'available',
     availability_note: (band.availability_note as string | null) ?? null,
+    test_user: Boolean(band.test_user),
     member_role: memberRole,
     member_status: memberStatus,
   };
@@ -130,7 +132,15 @@ export async function getBandById(bandId: string): Promise<Band | null> {
     throw new Error(error.message);
   }
 
-  return data;
+  if (!data) {
+    return null;
+  }
+
+  return {
+    ...(data as Band),
+    genres: (data.genres as string[]) ?? [],
+    test_user: Boolean(data.test_user),
+  };
 }
 
 async function uniqueSlug(baseSlug: string): Promise<string> {

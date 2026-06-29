@@ -29,3 +29,9 @@ export function filterTestRows<T extends { test_user?: boolean | null }>(rows: T
 export function isHiddenTestRow(testUser: boolean | null | undefined): boolean {
   return !includeTestData() && Boolean(testUser);
 }
+
+export const TEST_DATA_BADGE_LABEL = 'Test data';
+
+export function isTestDataEntity(testUser: boolean | null | undefined): boolean {
+  return Boolean(testUser);
+}

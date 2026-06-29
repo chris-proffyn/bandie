@@ -67,6 +67,7 @@ export type BandProfileFields = {
   availability_note: string | null;
   public_profile_enabled: boolean;
   owner_user_id: string;
+  test_user: boolean;
   created_at: string;
 };
 

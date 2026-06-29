@@ -174,6 +174,7 @@ export async function getPublicBandProfileBySlug(slug: string): Promise<PublicBa
     genres: band.genres ?? [],
     name_font: resolveBandNameFont(band.name_font),
     color_palette: resolveBandColorPalette(band.color_palette),
+    test_user: Boolean(band.test_user),
     ...relations,
     ...publicExtras,
   };

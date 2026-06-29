@@ -18,6 +18,7 @@ import {
 } from '../../lib/profileHelpers';
 import { useBandNameFont } from '../../lib/useBandNameFont';
 import { BandSetFeesFields } from '../band/BandSetFeesFields';
+import { TestDataBadge } from '../common/TestDataBadge';
 import type { CSSProperties } from 'react';
 
 type PublicBandProfileViewProps = {
@@ -66,13 +67,16 @@ export function PublicBandProfileView({ profile, variant = 'public' }: PublicBan
           label="Back to band directory"
         />
 
-        <h1
-          id="band-profile-title"
-          className="band-profile-name band-profile-name-lead"
-          style={{ fontFamily: bandNameFontFamily(profile.name_font) }}
-        >
-          {profile.name}
-        </h1>
+        <div className="band-profile-title-row">
+          <h1
+            id="band-profile-title"
+            className="band-profile-name band-profile-name-lead"
+            style={{ fontFamily: bandNameFontFamily(profile.name_font) }}
+          >
+            {profile.name}
+          </h1>
+          <TestDataBadge testUser={profile.test_user} />
+        </div>
 
         <BandProfileHeroStage
           bandName={profile.name}

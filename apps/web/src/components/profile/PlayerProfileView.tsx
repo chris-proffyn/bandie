@@ -30,6 +30,7 @@ import {
 } from '../../lib/playerDirectoryNavigation';
 import { bandCardGradient } from '../../lib/directoryHelpers';
 import { bandInitials } from '../../lib/profileHelpers';
+import { TestDataBadge } from '../common/TestDataBadge';
 import '../../styles/directory.css';
 
 type PlayerProfileViewProps = {
@@ -57,6 +58,7 @@ function userProfileToDirectoryListing(profile: UserProfile): PlayerDirectoryLis
     open_to_deputy_invites: profile.open_to_deputy_invites,
     open_to_member_invites: profile.open_to_member_invites,
     created_at: profile.created_at,
+    test_user: profile.test_user,
   };
 }
 
@@ -213,7 +215,10 @@ export function PlayerProfileView({ profileId, variant }: PlayerProfileViewProps
           </div>
         </div>
         <div>
-          <h1>{name}</h1>
+          <div className="directory-band-title-row">
+            <h1>{name}</h1>
+            <TestDataBadge testUser={player.test_user} />
+          </div>
           <p className="directory-player-profile-meta">{playerDirectoryMeta(player)}</p>
           {genderLabel ? <p className="directory-player-profile-meta">{genderLabel}</p> : null}
           {travelLabel ? <p className="directory-player-travel">{travelLabel}</p> : null}
