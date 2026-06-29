@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { PlanCatalogueEditor } from '../../components/admin/PlanCatalogueEditor';
 import {
   addEntitlementDraftItem,
   buildEntitlementImpactPreview,
@@ -32,6 +33,7 @@ export function AdminEntitlementsPage() {
   const [error, setError] = useState<string | null>(null);
   const [draftName, setDraftName] = useState('');
   const [publishReason, setPublishReason] = useState('');
+  const [catalogueChangeReason, setCatalogueChangeReason] = useState('');
 
   const [overrideForm, setOverrideForm] = useState({
     subjectType: 'user',
@@ -194,32 +196,25 @@ export function AdminEntitlementsPage() {
 
       <section className="panel">
         <h3>Plan catalogue</h3>
-        {loading ? <p className="workspace-empty-note">Loading plans…</p> : null}
-        {plans.map((plan) => (
-          <details key={plan.id} className="admin-plan-block">
-            <summary>
-              {plan.name} <code>{plan.code}</code>
-            </summary>
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Capability</th>
-                  <th>Value</th>
-                </tr>
-              </thead>
-              <tbody>
-                {plan.entitlements.map((entitlement) => (
-                  <tr key={entitlement.capability_key}>
-                    <td>{entitlement.capability_name}</td>
-                    <td>
-                      <code>{JSON.stringify(entitlement.value)}</code>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </details>
-        ))}
+        <p className="my-bands-lead">
+          Edit plan details and entitlement values directly. Changes are saved immediately and audit logged.
+        </p>
+        <div className="auth-field">
+          <label htmlFor="catalogue-change-reason">Change reason (optional, for audit)</label>
+          <input
+            id="catalogue-change-reason"
+            value={catalogueChangeReason}
+            onChange={(event) => setCatalogueChangeReason(event.target.value)}
+            placeholder="e.g. Adjust free tier song limit for launch"
+          />
+        </div>
+        <PlanCatalogueEditor
+          plans={plans}
+          loading={loading}
+          changeReason={catalogueChangeReason}
+          onChanged={loadAll}
+          onError={setError}
+        />
       </section>
 
       <section className="panel">

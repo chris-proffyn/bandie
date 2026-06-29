@@ -6,13 +6,24 @@ export type PlanWithEntitlements = {
   id: string;
   code: string;
   name: string;
+  description: string | null;
   status: string;
+  subject_type: string;
+  billing_interval: string;
+  display_order: number;
   entitlements: Array<{
     capability_key: string;
     value: unknown;
     capability_name: string;
     value_type: string;
   }>;
+};
+
+export type CapabilityDefinition = {
+  key: string;
+  name: string;
+  value_type: string;
+  default_value: unknown;
 };
 
 export type EntitlementDraft = {
@@ -55,7 +66,7 @@ export async function listPlansWithEntitlements(): Promise<PlanWithEntitlements[
 
   const { data: plans, error: plansError } = await client
     .from('bandie_plans')
-    .select('id, code, name, status')
+    .select('id, code, name, description, status, subject_type, billing_interval, display_order')
     .order('display_order', { ascending: true });
 
   if (plansError) {
@@ -88,9 +99,200 @@ export async function listPlansWithEntitlements(): Promise<PlanWithEntitlements[
     id: plan.id as string,
     code: plan.code as string,
     name: plan.name as string,
+    description: (plan.description as string | null) ?? null,
     status: plan.status as string,
+    subject_type: plan.subject_type as string,
+    billing_interval: plan.billing_interval as string,
+    display_order: plan.display_order as number,
     entitlements: byPlan.get(plan.id as string) ?? [],
   }));
+}
+
+export async function listCapabilities(): Promise<CapabilityDefinition[]> {
+  const client = getBandieClient();
+  const { data, error } = await client
+    .from('bandie_capabilities')
+    .select('key, name, value_type, default_value')
+    .order('category', { ascending: true })
+    .order('key', { ascending: true });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data ?? []).map((row) => ({
+    key: row.key as string,
+    name: row.name as string,
+    value_type: row.value_type as string,
+    default_value: row.default_value,
+  }));
+}
+
+export function formatEntitlementValueForInput(value: unknown, valueType: string): string {
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  if (valueType === 'boolean') {
+    return value === true || value === 'true' ? 'true' : 'false';
+  }
+
+  if (valueType === 'text' && typeof value === 'string') {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  return JSON.stringify(value);
+}
+
+export function parseEntitlementInputValue(raw: string, valueType: string): unknown {
+  const trimmed = raw.trim();
+
+  if (!trimmed) {
+    throw new Error('Value is required.');
+  }
+
+  switch (valueType) {
+    case 'boolean':
+      if (trimmed === 'true') {
+        return true;
+      }
+      if (trimmed === 'false') {
+        return false;
+      }
+      throw new Error('Boolean values must be true or false.');
+    case 'integer': {
+      const parsed = Number(trimmed);
+      if (!Number.isInteger(parsed)) {
+        throw new Error('Enter a whole number.');
+      }
+      return parsed;
+    }
+    case 'text':
+      if (trimmed.startsWith('"')) {
+        return JSON.parse(trimmed) as unknown;
+      }
+      return trimmed;
+    default:
+      return JSON.parse(trimmed) as unknown;
+  }
+}
+
+export async function updatePlanCatalogueEntry(input: {
+  planId: string;
+  planCode: string;
+  name?: string;
+  description?: string | null;
+  status?: 'draft' | 'active' | 'retired';
+  displayOrder?: number;
+  reason?: string;
+}): Promise<void> {
+  const updates: Record<string, unknown> = {};
+
+  if (input.name !== undefined) {
+    updates.name = input.name.trim();
+  }
+  if (input.description !== undefined) {
+    updates.description = input.description?.trim() || null;
+  }
+  if (input.status !== undefined) {
+    updates.status = input.status;
+  }
+  if (input.displayOrder !== undefined) {
+    updates.display_order = input.displayOrder;
+  }
+
+  if (!Object.keys(updates).length) {
+    return;
+  }
+
+  const client = getBandieClient();
+  const { error } = await client.from('bandie_plans').update(updates).eq('id', input.planId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  await logAdminAuditEvent({
+    eventType: 'plan_catalogue.updated',
+    subjectType: 'plan',
+    subjectId: input.planId,
+    metadata: {
+      plan_code: input.planCode,
+      updates,
+      reason: input.reason ?? null,
+    },
+  });
+}
+
+export async function updatePlanEntitlement(input: {
+  planId: string;
+  planCode: string;
+  capabilityKey: string;
+  value: unknown;
+  oldValue?: unknown;
+  reason?: string;
+}): Promise<void> {
+  const client = getBandieClient();
+  const { error } = await client.from('bandie_plan_entitlements').upsert(
+    {
+      plan_id: input.planId,
+      capability_key: input.capabilityKey,
+      value: input.value,
+    },
+    { onConflict: 'plan_id,capability_key' },
+  );
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  await logAdminAuditEvent({
+    eventType: 'plan_entitlement.updated',
+    subjectType: 'plan',
+    subjectId: input.planId,
+    metadata: {
+      plan_code: input.planCode,
+      capability_key: input.capabilityKey,
+      old_value: input.oldValue ?? null,
+      new_value: input.value,
+      reason: input.reason ?? null,
+    },
+  });
+}
+
+export async function removePlanEntitlement(input: {
+  planId: string;
+  planCode: string;
+  capabilityKey: string;
+  oldValue?: unknown;
+  reason?: string;
+}): Promise<void> {
+  const client = getBandieClient();
+  const { error } = await client
+    .from('bandie_plan_entitlements')
+    .delete()
+    .eq('plan_id', input.planId)
+    .eq('capability_key', input.capabilityKey);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  await logAdminAuditEvent({
+    eventType: 'plan_entitlement.removed',
+    subjectType: 'plan',
+    subjectId: input.planId,
+    metadata: {
+      plan_code: input.planCode,
+      capability_key: input.capabilityKey,
+      old_value: input.oldValue ?? null,
+      reason: input.reason ?? null,
+    },
+  });
 }
 
 export async function listEntitlementDrafts(): Promise<EntitlementDraft[]> {

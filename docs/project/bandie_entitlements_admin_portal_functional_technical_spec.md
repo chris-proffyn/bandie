@@ -1530,7 +1530,7 @@ Recommended MVP answers:
 
 | # | Question | **Decision** | Notes |
 |---|---|---|---|
-| 1 | Free player create band? | **Yes, with player-level cap.** Three **band-leader tiers** govern how many bands a user may create/own as primary leader: **Free = 1**, **Level 1 = 3**, **Level 2 = unlimited**. Player Free bands also have **up to 6 songs** and **1 setlist** per band. | See §20.2 band-leader tier table. Plan codes: `player_free`, `band_standard` (Level 1), `band_pro` (Level 2). |
+| 1 | Free player create band? | **Yes, with player-level cap.** Three **band-leader tiers** govern how many bands a user may create/own as primary leader: **Player Free = 1**, **Player Plus = 3**, **Player Pro = unlimited**. Player Free bands also have **up to 6 songs** and **1 setlist** per band. | See §20.2 band-leader tier table. Plan codes: `player_free`, `band_standard` (Player Plus), `band_pro` (Player Pro). |
 | 2 | Band Free song folders | **Full access.** Song part folders, uploads and Dropbox integration are available on Player Free bands. Limits are song/setlist/band count only — not folder gating. | Supersedes spec §6.2 “song folders: no or limited preview”. |
 | 3 | Free song limit | **6 active songs** per band (`songs.max_count`). Soft-deleted songs do not count. | Applies to bands led by a Player Free user unless overridden by leader tier. |
 | 4 | Free setlist limit | **1 setlist** per band (`setlists.max_count`). | |
@@ -1550,12 +1550,12 @@ Recommended MVP answers:
 | Tier | Plan code | Display name | `bands.max_count` |
 |---|---|---|---:|
 | Free | `player_free` | Player Free | 1 |
-| Level 1 | `band_standard` | Bandie Level 1 | 3 |
-| Level 2 | `band_pro` | Bandie Level 2 | null (unlimited) |
+| Player Plus | `band_standard` | Player Plus | 3 |
+| Player Pro | `band_pro` | Player Pro | null (unlimited) |
 
 #### Capability limits by plan
 
-| Capability key | Player Free | Level 1 (`band_standard`) | Level 2 (`band_pro`) | Organiser Free | Organiser Plus |
+| Capability key | Player Free | Player Plus (`band_standard`) | Player Pro (`band_pro`) | Organiser Free | Organiser Plus |
 |---|---:|---:|---:|---:|---:|
 | `bands.max_count` | 1 | 3 | null (unlimited) | — | — |
 | `songs.max_count` (per band led) | 6 | 999 | 999 | — | — |
@@ -1568,13 +1568,13 @@ Recommended MVP answers:
 | `booking_enquiries.monthly_max_count` | — | — | — | 20 | null (unlimited) |
 | `open_mic.create` (trial) | — | — | — | 1 (lifetime trial) | included |
 
-**Calendar tier behaviour:** `calendar.use = basic` while primary leader is Player Free = rehearsal + internal gig proposals only; **no public calendar publish**. `full` when leader on Level 1 or Level 2.
+**Calendar tier behaviour:** `calendar.use = basic` while primary leader is Player Free = rehearsal + internal gig proposals only; **no public calendar publish**. `full` when leader on Player Plus or Player Pro.
 
 **Storage:** No `storage.max_bytes` enforcement for Dropbox song parts (§20.1 #8). Upload failures due to Dropbox quota are surfaced as integration errors, not Bandie upgrade prompts.
 
 **Enforcement timing:** Phase 8 ships permissive dev defaults (8.5); Phase 14 turns on enforcement.
 
-**Open for later confirmation:** whether **999 songs** on Level 1 / Level 2 is the final paid ceiling or placeholder for “unlimited fair use”.
+**Open for later confirmation:** whether **999 songs** on Player Plus / Player Pro is the final paid ceiling or placeholder for “unlimited fair use”.
 
 ---
 

@@ -416,8 +416,8 @@ Authoritative spec: entitlements spec §35 Phase E. Deferred until admin portal 
 - **Player Free:** 1 band, 6 songs, 1 setlist; full song folders; no Bandie Dropbox byte metering
 - **Organiser Free:** 1 venue, 20 enquiries/month; open mic trial + event packs
 - **Downgrade:** keep content, block new over-limit creates; admin overrides platform admins only
-- **Band-leader tiers:** Free = 1 band, Level 1 (`band_standard`) = 3 bands, Level 2 (`band_pro`) = unlimited
-- Open: whether 999 songs is final paid ceiling on Level 1 / Level 2
+- **Band-leader tiers:** Player Free = 1 band, Player Plus (`band_standard`) = 3 bands, Player Pro (`band_pro`) = unlimited
+- Open: whether 999 songs is final paid ceiling on Player Plus / Player Pro
 
 **29 June 2026 — Unified phase roadmap (entitlements + admin + billing)**
 - Renumbered post–Phase 7 work: **8** entitlement framework, **9** calendar, **10** gigs, **11** booking, **12–14** admin portal and entitlement admin, **15** billing, **16** activity/polish, **17** open mic packs, **18** mobile, **19** system health

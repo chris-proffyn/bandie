@@ -640,6 +640,12 @@ export type { AdminSearchUser, AdminSearchBand, AuditEvent, AdminOverviewCounts 
 
 export {
   listPlansWithEntitlements,
+  listCapabilities,
+  formatEntitlementValueForInput,
+  parseEntitlementInputValue,
+  updatePlanCatalogueEntry,
+  updatePlanEntitlement,
+  removePlanEntitlement,
   listEntitlementDrafts,
   listEntitlementDraftItems,
   createEntitlementDraft,
@@ -652,6 +658,7 @@ export {
 } from './entitlementAdmin';
 export type {
   PlanWithEntitlements,
+  CapabilityDefinition,
   EntitlementDraft,
   EntitlementDraftItem,
   EntitlementOverride,

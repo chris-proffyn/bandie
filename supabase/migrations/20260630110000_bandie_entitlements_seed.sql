@@ -79,7 +79,7 @@ values
   ),
   (
     'band_standard',
-    'Bandie Level 1',
+    'Player Plus',
     'Lead up to three bands with expanded repertoire and calendar features.',
     'user',
     'monthly',
@@ -89,7 +89,7 @@ values
   ),
   (
     'band_pro',
-    'Bandie Level 2',
+    'Player Pro',
     'Unlimited bands and fair-use repertoire for active gigging leaders.',
     'user',
     'monthly',

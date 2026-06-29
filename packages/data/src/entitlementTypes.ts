@@ -59,8 +59,8 @@ export type PlanCode = (typeof PLAN_CODES)[keyof typeof PLAN_CODES];
 
 export const PLAN_DISPLAY_NAMES: Record<PlanCode, string> = {
   player_free: 'Player Free',
-  band_standard: 'Bandie Level 1',
-  band_pro: 'Bandie Level 2',
+  band_standard: 'Player Plus',
+  band_pro: 'Player Pro',
   organiser_free: 'Organiser Free',
   organiser_plus: 'Organiser Plus',
 };
