@@ -2,7 +2,7 @@
 
 **Document status:** Structural delivery plan (no progress tracking)  
 **Product:** Bandie  
-**Last updated:** 28 June 2026
+**Last updated:** 29 June 2026 (aligned with tracker phase renumbering)
 
 **Progress tracking:** Use `docs/PROJECT_STATUS_TRACKER.md` for live status. The tracker uses finer-grained phases (e.g. band directory and player directory as separate phases) than this map.
 
@@ -229,7 +229,7 @@ Phases 0–5 constitute the **MVP** as defined in `PRODUCT_REQUIREMENTS.md`. Pha
 
 ## Current position
 
-**Completed:** Phases 0–5; Phase 3 booking enquiry partial; Phase 6 partial (workspace communications + **songs/Dropbox MVP on web**); organiser venues; multiple band leaders; directory area filters; brand logo assets  
-**Next:** Calendar and availability (tracker Phases 8–9); mobile app (Phase 12)
+**Completed:** Phases 0–5; Phase 3 booking enquiry partial; Phase 6 partial (workspace communications + **songs/Dropbox MVP on web**); organiser venues; multiple band leaders; directory area filters; brand logo assets; **Phase 7 setlists**  
+**Next:** Phase 9 calendar and availability; admin Phases 12–15; mobile Phase 18
 
-See `docs/PROJECT_STATUS_TRACKER.md` for item-level checklist (Phases 6–12 in tracker map to workspace features, calendar, gigs, etc.).
+See `docs/PROJECT_STATUS_TRACKER.md` for the unified phase roadmap and item-level checklist (Phases 0–19).

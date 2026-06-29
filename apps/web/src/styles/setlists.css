@@ -46,11 +46,11 @@
 }
 
 .setlists-metric {
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.68);
+  background: #ffffff;
+  border: 1px solid #d1d5db;
   border-radius: 18px;
   padding: 1rem 1.1rem;
-  box-shadow: 0 18px 45px rgba(12, 16, 38, 0.12);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
 }
 
 .setlists-metric small {
@@ -70,9 +70,10 @@
   display: inline-block;
   margin-top: 0.55rem;
   font-size: 0.75rem;
-  font-weight: 700;
-  color: #166534;
-  background: #dcfce7;
+  font-weight: 800;
+  color: #14532d;
+  background: #bbf7d0;
+  border: 1px solid #4ade80;
   padding: 0.25rem 0.55rem;
   border-radius: 999px;
 }
@@ -125,9 +126,14 @@
 }
 
 .setlists-card.surface-light {
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.68);
+  background: #ffffff;
+  border: 1px solid #d1d5db;
   color: #1f2937;
+}
+
+.setlists-metric.surface-light {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
 }
 
 .setlists-card-top {
@@ -164,7 +170,8 @@
 }
 
 .setlists-stat {
-  background: #f4f6fb;
+  background: #e5e7eb;
+  border: 1px solid #cbd5e1;
   border-radius: 13px;
   padding: 0.65rem 0.75rem;
 }
@@ -189,30 +196,35 @@
   border-radius: 999px;
   padding: 0.35rem 0.65rem;
   font-size: 0.75rem;
-  font-weight: 750;
-  background: #eef2ff;
-  color: #4338ca;
+  font-weight: 800;
+  border: 1px solid #a5b4fc;
+  background: #e0e7ff;
+  color: #312e81;
   white-space: nowrap;
 }
 
 .setlists-pill.green {
-  background: #dcfce7;
-  color: #166534;
+  background: #bbf7d0;
+  color: #14532d;
+  border-color: #4ade80;
 }
 
 .setlists-pill.amber {
-  background: #fef3c7;
-  color: #92400e;
+  background: #fde68a;
+  color: #78350f;
+  border-color: #fbbf24;
 }
 
 .setlists-pill.blue {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: #bfdbfe;
+  color: #1e3a8a;
+  border-color: #60a5fa;
 }
 
 .setlists-pill.slate {
-  background: #e2e8f0;
-  color: #334155;
+  background: #cbd5e1;
+  color: #1e293b;
+  border-color: #94a3b8;
 }
 
 .setlists-song-stack {
@@ -225,8 +237,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  background: #f8fafc;
-  border: 1px solid #edf2f7;
+  background: #f3f4f6;
+  border: 1px solid #cbd5e1;
   border-radius: 12px;
   padding: 0.65rem 0.75rem;
   font-size: 0.88rem;
@@ -249,26 +261,27 @@
   gap: 0.6rem;
   justify-content: space-between;
   padding-top: 0.35rem;
-  border-top: 1px solid #eef2f7;
+  border-top: 1px solid #d1d5db;
   font-size: 0.85rem;
-  color: #4b5563;
+  color: #374151;
 }
 
 .setlists-card-btn {
-  border: 1px solid #dfe4f1;
-  background: #fff;
+  border: 1px solid #94a3b8;
+  background: #f3f4f6;
   border-radius: 10px;
   padding: 0.45rem 0.7rem;
   font-weight: 700;
   font-size: 0.82rem;
   cursor: pointer;
-  color: #121826;
+  color: #111827;
   text-decoration: none;
 }
 
 .setlists-card-btn:hover {
-  border-color: #c7d2fe;
-  color: #4338ca;
+  border-color: #64748b;
+  background: #e5e7eb;
+  color: #111827;
 }
 
 .setlists-side-card-header {
@@ -284,11 +297,11 @@
 }
 
 .setlists-light-panel {
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.68);
+  background: #ffffff;
+  border: 1px solid #d1d5db;
   border-radius: 18px;
   padding: 1.25rem;
-  box-shadow: 0 18px 45px rgba(12, 16, 38, 0.12);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
   color: #1f2937;
 }
 

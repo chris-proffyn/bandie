@@ -1,5 +1,6 @@
 import { slugifyBandName } from '@bandie/utils';
 import { resolveBandColorPalette } from './bandColorPalettes';
+import { assertCanPerform } from './entitlements';
 import { getBandieClient } from './context';
 import { isBandieAdminModeActive } from './adminMode';
 import { isCurrentUserAppAdmin, PLATFORM_ADMIN_BAND_LIST_ROLE } from './membership';
@@ -169,6 +170,13 @@ export async function createBand(input: CreateBandInput): Promise<Band> {
   if (!user) {
     throw new Error('Must be signed in to create a band.');
   }
+
+  await assertCanPerform({
+    capability: 'band.create',
+    subjectType: 'user',
+    subjectId: user.id,
+    planScope: 'leader',
+  });
 
   const baseSlug = slugifyBandName(input.slug || input.name);
   const slug = await uniqueSlug(baseSlug);

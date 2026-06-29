@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   listMyOrganiserVenues,
-  sendDirectMessageToUser,
+  sendBookingEnquiry,
   type BandDynamicFeeOffer,
   type BandSetOffer,
   type OrganiserVenue,
@@ -20,6 +20,7 @@ import {
 import { bandInitials } from '../../lib/profileHelpers';
 
 type BandBookingContactCardProps = {
+  bandId: string;
   bandName: string;
   primaryContact: PublicBandPrimaryContact | null;
   setOffers?: BandSetOffer[];
@@ -27,6 +28,7 @@ type BandBookingContactCardProps = {
 };
 
 export function BandBookingContactCard({
+  bandId,
   bandName,
   primaryContact,
   setOffers = [],
@@ -147,10 +149,19 @@ export function BandBookingContactCard({
     setError(null);
 
     try {
-      await sendDirectMessageToUser(
-        primaryContact.user_id,
-        composeBookingEnquiryMessage(bandName, form, sender, selectedVenue),
-      );
+      const durationMatch = form.setDuration.match(/(\d+)\s*min/i);
+      await sendBookingEnquiry({
+        bandId,
+        recipientUserId: primaryContact.user_id,
+        body: composeBookingEnquiryMessage(bandName, form, sender, selectedVenue),
+        preferredDate: form.eventDate || null,
+        venueSummary: form.venue.trim() || selectedVenue?.name || null,
+        setDurationMinutes: durationMatch ? Number(durationMatch[1]) : null,
+        metadata: {
+          event_time: form.eventTime || null,
+          budget: form.budget || null,
+        },
+      });
       setSent(true);
       setForm(emptyBookingEnquiryForm());
     } catch (err) {

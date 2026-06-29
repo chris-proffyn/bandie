@@ -10,6 +10,8 @@ import {
 import { slugifyBandName } from '@bandie/utils';
 import { useAuth } from '../../context/AuthContext';
 import { BandColorPalettePicker } from '../../components/profile/BandColorPalettePicker';
+import { UpgradePromptModal } from '../../components/entitlements/UpgradePromptModal';
+import { useUpgradePrompt } from '../../hooks/useUpgradePrompt';
 
 export function CreateBandPage() {
   const navigate = useNavigate();
@@ -21,6 +23,7 @@ export function CreateBandPage() {
   const [colorPalette, setColorPalette] = useState<BandColorPaletteId>(DEFAULT_BAND_COLOR_PALETTE);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const { upgradeDecision, clearUpgradePrompt, handleEntitlementError } = useUpgradePrompt();
 
   useEffect(() => {
     if (!slug && name) {
@@ -40,6 +43,9 @@ export function CreateBandPage() {
       await refreshBands();
       navigate(`/app/${band.id}`, { replace: true });
     } catch (err) {
+      if (handleEntitlementError(err)) {
+        return;
+      }
       setError(err instanceof Error ? err.message : 'Unable to create band.');
     } finally {
       setSubmitting(false);
@@ -84,6 +90,10 @@ export function CreateBandPage() {
           {submitting ? 'Creating band…' : 'Create band'}
         </button>
       </form>
+
+      {upgradeDecision ? (
+        <UpgradePromptModal decision={upgradeDecision} onClose={clearUpgradePrompt} />
+      ) : null}
     </div>
   );
 }

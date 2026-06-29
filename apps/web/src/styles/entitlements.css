@@ -1,0 +1,38 @@
+.entitlements-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgb(0 0 0 / 55%);
+}
+
+.entitlements-dialog {
+  width: min(100%, 28rem);
+  padding: 1.25rem 1.5rem 1.5rem;
+  border-radius: 1rem;
+}
+
+.entitlements-dialog h2 {
+  margin: 0 0 0.5rem;
+}
+
+.entitlements-dialog p {
+  margin: 0 0 0.75rem;
+  line-height: 1.5;
+}
+
+.entitlements-dialog-meta {
+  color: #4a4a4a;
+  font-size: 0.92rem;
+}
+
+.entitlements-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}

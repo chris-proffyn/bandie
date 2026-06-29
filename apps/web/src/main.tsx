@@ -5,6 +5,10 @@ import { AuthProvider } from './context/AuthContext';
 import './lib/bandieClient';
 import './index.css';
 import './styles/brand.css';
+import './styles/entitlements.css';
+import './styles/calendar.css';
+import './styles/gigs.css';
+import './styles/admin.css';
 import App from './App.tsx';
 
 createRoot(document.getElementById('root')!).render(

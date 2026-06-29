@@ -320,6 +320,29 @@
   color: #bbb6aa;
 }
 
+.directory-results-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+.directory-test-data-toggle {
+  white-space: nowrap;
+}
+
+.directory-test-data-toggle.is-active {
+  background: #fde68a;
+  border-color: #fbbf24;
+  color: #78350f;
+}
+
+.directory-test-data-toggle-count {
+  font-weight: 700;
+  opacity: 0.9;
+}
+
 .directory-sort-control {
   display: flex;
   align-items: center;

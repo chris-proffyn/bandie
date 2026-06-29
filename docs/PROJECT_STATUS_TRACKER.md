@@ -2,8 +2,8 @@
 
 **Document status:** Live project tracker  
 **Product:** Bandie  
-**Phase:** Phase 7 complete (setlist management); Phase 8 next (calendar & availability)
-**Last updated:** 29 June 2026 (setlist library, builder, drag reorder, metrics)
+**Phase:** Phases 9–14 complete (calendar through entitlement admin); Phase 15 next (billing — not started)
+**Last updated:** 29 June 2026 (calendar, gigs, booking inbox, admin portal, metrics, entitlement enforcement)
 
 ---
 
@@ -17,8 +17,8 @@
 | Governance docs (requirements, delivery map) | Complete |
 | Web app scaffold (Vite + React + TypeScript) | Complete |
 | Bandie homepage (Phase 1) | Complete |
-| Mobile app | Not started (placeholder only) |
-| Supabase schema / migrations | Platform + Bandie through setlists (`20260629160000`); apply with `supabase db push` |
+| Mobile app (Phase 18) | Not started (placeholder only) |
+| Supabase schema / migrations | Platform + Bandie through admin/metrics/entitlements (`20260630150000`); apply with `supabase db push` |
 | Authentication & band membership (Phase 2) | Complete |
 | Public band profile (Phase 3) | Complete |
 | Band directory (Phase 4) | Complete |
@@ -26,12 +26,16 @@
 | Player directory | Complete |
 | Directory area filters | Complete — country + region on `/bands`, `/players`, `/app/bands`, `/app/players`; geo-detected default country |
 | Private workspace shell (Phase 5) | Complete — tabbed overview (Members / Band details), leader contact, lineup parts, player recruitment, member actions, invitations; songs/setlists deferred |
-| Workspace communications | Partial — unified hub at `/app/communications` (invites, player outreach, messages with replies) |
-| Booking enquiries | Partial — structured enquiry form on public band profile sends direct message to primary contact |
+| Workspace communications | Complete — unified hub at `/app/communications` (invites, outreach, messages, booking enquiries) |
+| Booking enquiries | Complete — public form, structured inbox, entitlement rate limits when enforcing |
 | Organiser venues | Complete — `/app/venues` in organiser workspace mode |
 | Song-part file storage | **Dropbox** — leader OAuth, band song-parts root, upload/preview/download via Netlify (`bandie_dropbox_song_part_storage_spec.md`) |
 | Songs & repertoire (Phase 6) | Complete — dashboard, song folder, Dropbox uploads, part templates, in-app PDF view, soft delete |
 | Setlist management (Phase 7) | Complete — library, builder with drag reorder, live metrics, leader-only edit |
+| Entitlement framework (Phase 8) | Complete — schema, seeds, service, gate hooks; enforcement off by default |
+| Calendar & gigs (Phases 9–10) | Complete — `/app/:bandId/calendar`, `/app/:bandId/gigs` |
+| Admin portal & metrics (Phases 12–14) | Complete — `/admin` (overview, accounts, metrics, entitlements, audit); enforcement toggle |
+| Billing (Phase 15) | Not started — Stripe; after calendar/gigs and entitlement admin |
 
 ## Active constraints
 
@@ -46,12 +50,39 @@
 
 ## Current focus
 
-**Next capability:** Calendar and availability (Phase 8) — setlist management complete on web
+**Next capability:** Calendar and availability (Phase 9) — wire new create paths through `checkBandLeaderCapability()` / `assertCanPerform()`
+
+**Immediate task:** Phase 9.1 — calendar data model (`bandie_calendar_events`, `bandie_availability_votes`)
+
+**Then:** Phase 9 calendar & availability (wire new create paths through `canPerform()` from the start)
 
 Reference documents:
-- `docs/project/product-functional-requirements.md` §7–8, §8b
+- `docs/project/bandie_entitlements_admin_portal_functional_technical_spec.md` — authoritative for Phases 8, 12–15, 17
+- `docs/project/product-functional-requirements.md` §10–11 (calendar, gigs)
 - `docs/project/bandie_dropbox_song_part_storage_spec.md`
 - `docs/project/product-technical-requirements.md` §6–7, §16
+
+## Phase roadmap (unified)
+
+Single numbering for product features, monetisation, admin, and mobile. Sub-phases (e.g. 2b, 6b) remain for parallel tracks within an area.
+
+| Phase | Name | Status | Notes |
+|---|---|---|---|
+| 0–7 | Foundations through setlists | Complete | Homepage, auth, directories, workspace, songs, Dropbox, setlists |
+| **8** | **Entitlement framework** | **Complete** | Plans, `canPerform()`, gate hooks; `VITE_BANDIE_ENFORCE_ENTITLEMENTS` default off |
+| **9** | **Calendar and availability** | **Next** | Rehearsal + gig availability modes, voting, public publish |
+| 10 | Gig management | Not started | Gig records, setlist linking, status workflow; gate via Phase 8 |
+| 11 | Booking enquiries | Partial | Public form done; dedicated inbox + notifications deferred |
+| 12 | Admin portal foundation | Not started | `/admin`, RBAC, audit log, account search |
+| 13 | Platform metrics | Not started | Event tracking, daily snapshots, DAU/WAU/MAU, tier distribution |
+| 14 | Entitlement admin | Not started | Plan matrix, draft/publish limits, overrides, trials, enforcement on existing features |
+| 15 | Billing integration | Not started | Stripe checkout, webhooks, subscription sync, billing settings |
+| 16 | Activity, notifications & polish | Partial | Comms hub done; activity feed, push, release verification |
+| 17 | Open mic & event packs | Not started | `bandie_open_mic_jam_night_spec.md`; add-on entitlements |
+| 18 | Mobile app | Not started | Expo scaffold; core member flows |
+| 19 | System health & moderation | Not started | Job health, profile moderation, admin alerts |
+
+**Sequencing rationale:** Phase 8 before 9–10 so calendar/gigs use entitlement hooks from day one. Admin foundation (12) follows core product calendar/gigs. Billing (15) after entitlement admin (14) so limits and plans are operable before charging. Full admin pricing console remains post-MVP per entitlements spec §16.2.
 
 ## Blockers
 
@@ -71,8 +102,11 @@ Player profiles & dir     ██████████  musician profiles + /p
 Private workspace shell   ██████████  overview, leader, lineup parts, recruitment, invites
 Songs & repertoire        ██████████  Phase 6 — dashboard, Dropbox files, templates, soft delete
 Setlists                  ██████████  Phase 7 — library, builder, drag reorder, metrics
-Mobile app                ░░░░░░░░░░  Phase 12 (deferred)
-Release verification      ░░░░░░░░░░  production smoke + a11y pass
+Entitlements              ██████████  Phase 8 — schema, seeds, service, gate hooks
+Calendar & gigs           ░░░░░░░░░░  Phases 9–10 (next)
+Admin & billing           ░░░░░░░░░░  Phases 12–15
+Mobile app                ░░░░░░░░░░  Phase 18 (deferred)
+Release verification      ░░░░░░░░░░  Phase 16 — production smoke + a11y pass
 ```
 
 `█` complete · `░` not started
@@ -190,7 +224,7 @@ Release verification      ░░░░░░░░░░  production smoke + a11
 - [x] 5.6 Find players flow — part-scoped player directory search and audition/join invites
 - [x] 5.6b Active member card actions — hamburger menu (make leader, make primary, assign part, unavailable, remove)
 - [x] 5.6c Platform admin mode — toggle on profile; admins manage all bands, edit profiles, recruit players
-- [ ] 5.7 Songs, setlists, calendar, and gigs navigation (deferred to Phases 6–8)
+- [x] 5.7 Songs and setlists navigation — complete (Phases 6–7); calendar and gigs deferred to Phases 9–10
 
 ### 6. Songs and repertoire
 
@@ -228,44 +262,161 @@ Authoritative spec: `docs/project/bandie_dropbox_song_part_storage_spec.md`
 - [x] 7.3 Setlist builder (drag/reorder)
 - [x] 7.4 Setlist metrics and status
 
-### 8. Calendar and availability
+### 8. Entitlement framework
 
-- [ ] 8.1 Calendar data model
-- [ ] 8.2 Rehearsal mode
-- [ ] 8.3 Gig availability mode
-- [ ] 8.4 Member voting
-- [ ] 8.5 Public calendar publishing
+Authoritative spec: `docs/project/bandie_entitlements_admin_portal_functional_technical_spec.md` (§8, §9, §21 Phase 1, §24 MVP scope)
 
-### 9. Gig management
+**Principle:** Plans, capabilities and limits are data — product code calls `canPerform()`, not hard-coded tier checks. **Subscriptions attach to users (players/organisers); band features resolve from the primary leader’s plan** (§20.1 #7). Enforce server-side in `@bandie/data` and critical DB writes. Ship permissive seed plans first so product work is not blocked; enforce freemium limits in Phase 14.
 
-- [ ] 9.1 Gig data model
-- [ ] 9.2 Gig list and detail views
-- [ ] 9.3 Linked setlists and readiness
-- [ ] 9.4 Gig status workflow
+**Product decisions:** Confirmed 29 June 2026 (stakeholder review) — spec §20.1–§20.2.
 
-### 10. Booking enquiries
+- [x] 8.1 Document resolved product decisions (§20) — authoritative in `bandie_entitlements_admin_portal_functional_technical_spec.md` §20.1–§20.2
+- [x] 8.2 Schema — `bandie_plans`, `bandie_capabilities`, `bandie_plan_entitlements`, `bandie_subscriptions`, `bandie_usage_meters`, `bandie_entitlement_overrides` (RLS on all); migration `20260630100000`
+- [x] 8.3 Seed plans — `player_free`, `band_standard`, `band_pro`, `organiser_free`, `organiser_plus`; capabilities per §18.2; migration `20260630110000`
+- [x] 8.4 `@bandie/data` entitlement service — `canPerform()`, plan resolution, usage summary, `EntitlementGateError`
+- [x] 8.5 Dev-mode permissive defaults — `VITE_BANDIE_ENFORCE_ENTITLEMENTS=false` by default (enforcement in Phase 14)
+- [x] 8.6 Gate pattern for new features — `checkBandLeaderCapability()` / `assertCanPerform()` exported for calendar/gigs
+- [x] 8.7 Retrofit gate hooks — bands, songs, setlists, folders, uploads, venues, member invites
+- [x] 8.8 Upgrade prompts UI — `UpgradePromptModal`, `useUpgradePrompt`, `FeatureGate`
+- [x] 8.9 Usage meter maintenance — count helpers, `syncUsageMeter`, `reconcileBandUsageMeters`, `reconcileUserUsageMeters`
 
-- [x] 10.1 Enquiry form (public) — structured form on band profile; sends direct message to primary contact
-- [ ] 10.2 Enquiry management (private workspace) — received in `/app/communications` as messages; dedicated inbox deferred
-- [ ] 10.3 Notifications for new enquiries
+### 9. Calendar and availability
 
-### 11. Platform foundations
+Reference: `product-functional-requirements.md` §10; mockup `bandie_calendar_mockup.html`. Capability keys: `calendar.use` (Phase 8).
 
-- [x] 11.1 Profile image storage (`bandie-profile-images` bucket with RLS)
-- [ ] 11.2 Song-part file storage — **Dropbox** (leader OAuth, server-side tokens); not Supabase Storage for song parts. See `bandie_dropbox_song_part_storage_spec.md`
-- [ ] 11.3 Activity feed / audit log (song-part file activity table planned)
-- [ ] 11.4 Communications — partial (invitations, player outreach, direct messages with replies; activity feed deferred)
-- [ ] 11.5 Admin portal (skeleton)
+- [x] 9.1 Calendar data model (`bandie_calendar_events`, `bandie_availability_votes`; RLS)
+- [x] 9.2 Rehearsal mode — leader proposes series; internal only
+- [x] 9.3 Gig availability mode — leader proposes windows; may publish publicly
+- [x] 9.4 Member voting — available / maybe / no / pending; status rules (confirmed / provisional / proposed)
+- [x] 9.5 Public calendar publishing — confirmed and provisional on public profile
 
-### 12. Mobile app
+### 10. Gig management
 
-- [ ] 12.1 Expo / React Native scaffold
-- [ ] 12.2 Core member flows (availability, setlists, songs)
-- [ ] 12.3 Performance mode (deferred post-MVP)
+Reference: `product-functional-requirements.md` §11. Capability keys: `gig.create`, `gigs.active_max_count` (Phase 8).
+
+- [x] 10.1 Gig data model (`bandie_gigs`; RLS)
+- [x] 10.2 Gig list and detail views
+- [x] 10.3 Linked setlists and readiness context
+- [x] 10.4 Gig status workflow — enquiry through archived
+
+### 11. Booking enquiries
+
+- [x] 11.1 Enquiry form (public) — structured form on band profile; sends direct message to primary contact
+- [x] 11.2 Enquiry management (private workspace) — dedicated booking enquiries inbox in communications
+- [x] 11.3 Notifications for new enquiries — communications summary badges and unread counts
+- [x] 11.4 Enquiry rate limits via entitlement service (`booking_enquiry.send`, `booking_enquiries.monthly_max_count`) when enforcing
+
+### 12. Admin portal foundation
+
+Authoritative spec: entitlements spec §35 Phase A, §38 MVP admin scope (foundation items).
+
+Builds on existing `is_app_admin` / `bandie_current_user_is_app_admin()` — extend into dedicated admin surface, not a separate ad-hoc skeleton.
+
+- [x] 12.1 Protected `/admin` route group and admin API middleware
+- [x] 12.2 Admin permission model — roles beyond binary app admin where needed
+- [x] 12.3 Audit log for admin actions (`bandie_audit_events`)
+- [x] 12.4 User, band and organiser search
+- [x] 12.5 Overview dashboard shell (read-only)
+
+### 13. Platform metrics
+
+Authoritative spec: entitlements spec §35 Phase B.
+
+- [x] 13.1 `bandie_metric_events` and client/server tracking helpers
+- [x] 13.2 Daily aggregation job and `bandie_daily_metric_snapshots`
+- [x] 13.3 Overview dashboards — DAU, WAU, MAU, users by type, tier distribution, content usage (songs, setlists, venues, gigs)
+- [x] 13.4 CSV export for permitted admins; last-updated timestamps on metrics
+
+### 14. Entitlement admin and enforcement
+
+Authoritative spec: entitlements spec §35 Phase C, §7.6–7.8 (overrides, trials, grandfathering).
+
+Turn on freemium limits for features built in Phases 6–11. Avoid full pricing console until tiers stabilise (spec §16.2).
+
+- [x] 14.1 Plan catalogue and entitlement matrix views
+- [x] 14.2 Draft/publish workflow for entitlement and limit changes
+- [x] 14.3 Usage limit editor with impact preview
+- [x] 14.4 Entitlement inspector and gate decision logs
+- [x] 14.5 Manual overrides and trial management (platform admins)
+- [x] 14.6 Enforce limits on songs, setlists, folders, storage, venues, members, gigs, calendar tiers
+
+### 15. Billing integration
+
+Authoritative spec: entitlements spec §15, §21 Phase 2, §35 Phase D (support/billing admin).
+
+- [ ] 15.1 Stripe products and prices mapped to `bandie_plans`
+- [ ] 15.2 Checkout session creation and workspace billing settings page
+- [ ] 15.3 Webhook handlers — idempotent subscription state sync
+- [ ] 15.4 Grace period, downgrade and over-limit behaviour (preserve content; block new over-limit creation)
+- [ ] 15.5 Admin subscription dashboard, Stripe links, webhook status and reconciliation trigger
+
+### 16. Activity, notifications and platform polish
+
+Consolidates deferred communications, activity feed, and release verification. Profile images and Dropbox song-part storage are **complete** (Phases 2b and 6).
+
+- [x] 16.1 Profile image storage (`bandie-profile-images` bucket with RLS)
+- [x] 16.2 Song-part file storage — Dropbox per `bandie_dropbox_song_part_storage_spec.md` (Phase 6)
+- [x] 16.3 Song-part file activity log (`bandie_song_part_file_activity`)
+- [ ] 16.4 Workspace activity feed and band-scoped threads (deferred from 2c.8)
+- [ ] 16.5 Email and push notifications (deferred from 2c.9)
+- [ ] 16.6 Production smoke tests and accessibility pass
+
+### 17. Open mic and event packs
+
+Authoritative spec: `bandie_open_mic_jam_night_spec.md`; monetisation via entitlements spec §6.4, §21 Phase 4 (add-on tables, not a separate billing path).
+
+- [ ] 17.1 Add-on schema — `bandie_addons`, `bandie_addon_entitlements`, `bandie_subject_addons`
+- [ ] 17.2 Open mic / jam night product flows per open mic spec
+- [ ] 17.3 One-off and pack entitlements (`open_mic.create`, `open_mic.monthly_max_count`)
+- [ ] 17.4 Admin visibility for open mic events in metrics
+
+### 18. Mobile app
+
+- [ ] 18.1 Expo / React Native scaffold
+- [ ] 18.2 Core member flows (availability, setlists, songs) — reuse `@bandie/data` including entitlements
+- [ ] 18.3 Performance mode (deferred post-MVP; tier-gated per entitlements spec §6.2)
+
+### 19. System health and moderation
+
+Authoritative spec: entitlements spec §35 Phase E. Deferred until admin portal mature.
+
+- [ ] 19.1 System jobs and background task health page
+- [ ] 19.2 Storage and integration health summaries
+- [ ] 19.3 Public profile moderation and reported-content queue
+- [ ] 19.4 Admin alerts for failed jobs and webhooks
 
 ---
 
 ## Session notes
+
+**29 June 2026 — Phases 9–14 (calendar, gigs, booking, admin, enforcement)**
+- Migrations `20260630120000`–`20260630150000`: calendar, gigs, booking enquiries, audit, metrics, entitlement drafts, platform settings
+- `@bandie/data`: `calendar`, `gigs`, `bookingEnquiries`, `metrics`, `adminPortal`, `entitlementAdmin`, `platformSettings`, `gateLogs`
+- Web: Calendar and Gigs pages; booking enquiry inbox; `/admin` portal; platform enforcement toggle (env `VITE_BANDIE_ENFORCE_ENTITLEMENTS` OR `bandie_platform_settings.entitlements_enforced`)
+
+**29 June 2026 — Phase 8 entitlement framework (8.3–8.9)**
+- Seed migration `20260630110000`: plans, capabilities, entitlements, `plan_scope` on subscriptions, default user subscriptions + profile trigger
+- `@bandie/data`: `entitlements.ts`, `usageMeters.ts`, enforcement toggle, gate hooks on create flows
+- Web: `UpgradePromptModal`, `FeatureGate`, `useUpgradePrompt`; `VITE_BANDIE_ENFORCE_ENTITLEMENTS` (default false)
+
+**29 June 2026 — Phase 8.2 entitlement schema**
+- Migration `20260630100000_bandie_entitlements_foundation.sql`: plans, capabilities, plan_entitlements, subscriptions, usage_meters, entitlement_overrides
+- Helpers: `bandie_get_band_primary_leader_user_id`, `bandie_user_can_view/manage_entitlement_subject`, `bandie_set_usage_meter` RPC
+- RLS: catalogue read for Bandie users; writes admin-only; subscriptions/overrides readable by subject; usage meter writes via RPC only
+
+**29 June 2026 — Phase 8.1 product decisions (confirmed)**
+- Stakeholder review locked §20.1–§20.2 in entitlements spec
+- **Player-centric billing:** leader’s subscription unlocks band features; not per-band workspace plans
+- **Player Free:** 1 band, 6 songs, 1 setlist; full song folders; no Bandie Dropbox byte metering
+- **Organiser Free:** 1 venue, 20 enquiries/month; open mic trial + event packs
+- **Downgrade:** keep content, block new over-limit creates; admin overrides platform admins only
+- **Band-leader tiers:** Free = 1 band, Level 1 (`band_standard`) = 3 bands, Level 2 (`band_pro`) = unlimited
+- Open: whether 999 songs is final paid ceiling on Level 1 / Level 2
+
+**29 June 2026 — Unified phase roadmap (entitlements + admin + billing)**
+- Renumbered post–Phase 7 work: **8** entitlement framework, **9** calendar, **10** gigs, **11** booking, **12–14** admin portal and entitlement admin, **15** billing, **16** activity/polish, **17** open mic packs, **18** mobile, **19** system health
+- Rationale: Phase 8 thin entitlement layer before calendar/gigs to avoid retrofit; billing after entitlement admin; consolidates former Phase 11 platform foundations into Phases 12–16
+- Authoritative spec: `docs/project/bandie_entitlements_admin_portal_functional_technical_spec.md`
 
 **29 June 2026 — Setlist management (Phase 7)**
 - Migration `20260629160000_bandie_setlists.sql`: `bandie_setlists`, `bandie_setlist_items`, member read / leader write RLS

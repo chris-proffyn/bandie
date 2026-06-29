@@ -28,12 +28,20 @@ import {
   PlayerDirectorySortControl,
 } from './PlayerDirectoryFiltersPanel';
 import { DirectoryPlayerCard } from './DirectoryPlayerCard';
+import { DirectoryTestDataToggle } from './DirectoryTestDataToggle';
 import {
   AdminRecruitingBandSelector,
   adminRecruitingBandContext,
 } from '../band/AdminRecruitingBandSelector';
 import { useAuth } from '../../context/AuthContext';
 import type { BackNavigationState } from '../../lib/backNavigation';
+import {
+  applyDirectoryTestDataFilter,
+  countDirectoryTestRows,
+  readDirectoryHideTestData,
+  saveDirectoryHideTestData,
+  showDirectoryTestDataToggle,
+} from '../../lib/directoryTestDataPreference';
 import {
   loadPlayerDirectoryNavigation,
   savePlayerDirectoryNavigation,
@@ -84,6 +92,7 @@ export function PlayerDirectoryView({
     const state = location.state as BackNavigationState | null;
     return state?.playerSort ?? storedNavigation.sort;
   });
+  const [hideTestData, setHideTestData] = useState(readDirectoryHideTestData);
 
   useEffect(() => {
     const state = location.state as BackNavigationState | null;
@@ -117,14 +126,29 @@ export function PlayerDirectoryView({
       .finally(() => setLoading(false));
   }, []);
 
-  const genres = useMemo(() => collectPlayerDirectoryGenres(players), [players]);
-  const instruments = useMemo(() => collectPlayerDirectoryPrimaryInstruments(players), [players]);
-  const stats = useMemo(() => computePlayerDirectoryStats(players), [players]);
+  const visiblePlayers = useMemo(
+    () => applyDirectoryTestDataFilter(players, hideTestData),
+    [players, hideTestData],
+  );
+  const testPlayerCount = useMemo(() => countDirectoryTestRows(players), [players]);
+  const showTestDataToggle = useMemo(() => showDirectoryTestDataToggle(players), [players]);
+
+  const genres = useMemo(() => collectPlayerDirectoryGenres(visiblePlayers), [visiblePlayers]);
+  const instruments = useMemo(
+    () => collectPlayerDirectoryPrimaryInstruments(visiblePlayers),
+    [visiblePlayers],
+  );
+  const stats = useMemo(() => computePlayerDirectoryStats(visiblePlayers), [visiblePlayers]);
 
   const filteredPlayers = useMemo(() => {
-    const filtered = filterPlayerDirectory(players, filters, geography ?? undefined);
+    const filtered = filterPlayerDirectory(visiblePlayers, filters, geography ?? undefined);
     return sortPlayerDirectory(filtered, sort, filters.mode);
-  }, [players, filters, sort, geography]);
+  }, [visiblePlayers, filters, sort, geography]);
+
+  function handleHideTestDataChange(nextHidden: boolean) {
+    setHideTestData(nextHidden);
+    saveDirectoryHideTestData(nextHidden);
+  }
 
   const activePills = buildPlayerActiveFilterPills(filters, geography);
   const resetFilters = () => {
@@ -244,11 +268,21 @@ export function PlayerDirectoryView({
           <div>
             <h2>Available players</h2>
             <p>
-              Showing {filteredPlayers.length} of {players.length}{' '}
-              {players.length === 1 ? 'player' : 'players'} for {modeLabel} roles
+              Showing {filteredPlayers.length} of {visiblePlayers.length}{' '}
+              {visiblePlayers.length === 1 ? 'player' : 'players'} for {modeLabel} roles
             </p>
           </div>
-          <PlayerDirectorySortControl sort={sort} mode={filters.mode} onChange={setSort} />
+          <div className="directory-results-actions">
+            {showTestDataToggle ? (
+              <DirectoryTestDataToggle
+                hideTestData={hideTestData}
+                testItemCount={testPlayerCount}
+                itemLabel="players"
+                onChange={handleHideTestDataChange}
+              />
+            ) : null}
+            <PlayerDirectorySortControl sort={sort} mode={filters.mode} onChange={setSort} />
+          </div>
         </div>
 
         <div className="directory-active-filters" aria-label="Active filters">
@@ -257,6 +291,9 @@ export function PlayerDirectoryView({
               {pill}
             </span>
           ))}
+          {hideTestData && showTestDataToggle ? (
+            <span className="directory-filter-pill">Test data hidden</span>
+          ) : null}
         </div>
 
         {filteredPlayers.length === 0 ? (
@@ -273,6 +310,8 @@ export function PlayerDirectoryView({
                 )}
                 .
               </p>
+            ) : visiblePlayers.length === 0 && hideTestData && testPlayerCount > 0 ? (
+              <p>Test data is hidden. Choose Show test data to view seeded players.</p>
             ) : (
               <p>
                 Try broadening your country, area, town or filters, or switch search mode.

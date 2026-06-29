@@ -8,6 +8,8 @@ import {
   formatSetlistStatus,
   type SetlistStatus,
 } from '@bandie/data';
+import { UpgradePromptModal } from '../entitlements/UpgradePromptModal';
+import { useUpgradePrompt } from '../../hooks/useUpgradePrompt';
 
 type CreateSetlistDialogProps = {
   bandId: string;
@@ -23,6 +25,7 @@ export function CreateSetlistDialog({ bandId, canManage, onClose }: CreateSetlis
   const [status, setStatus] = useState<SetlistStatus>('draft');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { upgradeDecision, clearUpgradePrompt, handleEntitlementError } = useUpgradePrompt();
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -44,6 +47,9 @@ export function CreateSetlistDialog({ bandId, canManage, onClose }: CreateSetlis
       });
       navigate(`/app/${bandId}/setlists/${setlist.id}`);
     } catch (err) {
+      if (handleEntitlementError(err)) {
+        return;
+      }
       setError(err instanceof Error ? err.message : 'Unable to create setlist.');
     } finally {
       setSubmitting(false);
@@ -120,6 +126,10 @@ export function CreateSetlistDialog({ bandId, canManage, onClose }: CreateSetlis
           </div>
         </form>
       </div>
+
+      {upgradeDecision ? (
+        <UpgradePromptModal decision={upgradeDecision} onClose={clearUpgradePrompt} />
+      ) : null}
     </div>
   );
 }

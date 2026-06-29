@@ -512,6 +512,115 @@
   color: #1d4ed8;
 }
 
+/**
+ * §6.5 — Status pills and nested tiles on light surfaces.
+ * Pale fills without borders wash out on white cards. Use these paired tokens only
+ * inside .surface-light (see docs/RSD_UX_DESIGN_FRAMEWORK.md §6.5).
+ */
+.app-main .surface-light :is(.songs-pill, .setlists-pill, .test-data-badge),
+.app-shell .surface-light :is(.songs-pill, .setlists-pill, .test-data-badge) {
+  border: 1px solid transparent;
+  font-weight: 800;
+}
+
+.app-main .surface-light :is(.songs-pill, .setlists-pill):not(.green):not(.amber):not(.red):not(.blue):not(.slate),
+.app-shell .surface-light :is(.songs-pill, .setlists-pill):not(.green):not(.amber):not(.red):not(.blue):not(.slate) {
+  background: #e0e7ff;
+  color: #312e81;
+  border-color: #a5b4fc;
+}
+
+.app-main .surface-light :is(.songs-pill, .setlists-pill).blue,
+.app-shell .surface-light :is(.songs-pill, .setlists-pill).blue {
+  background: #bfdbfe;
+  color: #1e3a8a;
+  border-color: #60a5fa;
+}
+
+.app-main .surface-light :is(.songs-pill, .setlists-pill).green,
+.app-shell .surface-light :is(.songs-pill, .setlists-pill).green {
+  background: #bbf7d0;
+  color: #14532d;
+  border-color: #4ade80;
+}
+
+.app-main .surface-light :is(.songs-pill, .setlists-pill).amber,
+.app-shell .surface-light :is(.songs-pill, .setlists-pill).amber {
+  background: #fde68a;
+  color: #78350f;
+  border-color: #fbbf24;
+}
+
+.app-main .surface-light :is(.songs-pill, .setlists-pill).red,
+.app-shell .surface-light :is(.songs-pill, .setlists-pill).red {
+  background: #fecaca;
+  color: #7f1d1d;
+  border-color: #f87171;
+}
+
+.app-main .surface-light :is(.songs-pill, .setlists-pill).slate,
+.app-shell .surface-light :is(.songs-pill, .setlists-pill).slate {
+  background: #cbd5e1;
+  color: #1e293b;
+  border-color: #94a3b8;
+}
+
+.app-main .surface-light .setlists-stat,
+.app-shell .surface-light .setlists-stat {
+  background: #e5e7eb;
+  border: 1px solid #cbd5e1;
+  color: #111827;
+}
+
+.app-main .surface-light .setlists-metric span,
+.app-shell .surface-light .setlists-metric span {
+  color: #14532d;
+  background: #bbf7d0;
+  border-color: #4ade80;
+}
+
+.app-main .surface-light .setlists-stat small,
+.app-shell .surface-light .setlists-stat small {
+  color: #374151;
+}
+
+.app-main .surface-light .setlists-stack-row,
+.app-shell .surface-light .setlists-stack-row {
+  background: #f3f4f6;
+  border: 1px solid #cbd5e1;
+}
+
+.app-main .surface-light .setlists-card-btn,
+.app-shell .surface-light .setlists-card-btn {
+  background: #f3f4f6;
+  border: 1px solid #94a3b8;
+  color: #111827;
+}
+
+.app-main .surface-light .setlists-card-btn:hover,
+.app-shell .surface-light .setlists-card-btn:hover {
+  background: #e5e7eb;
+  border-color: #64748b;
+  color: #111827;
+}
+
+.app-main .surface-light.setlists-card,
+.app-shell .surface-light.setlists-card,
+.app-main .surface-light.setlists-metric,
+.app-shell .surface-light.setlists-metric,
+.app-main .surface-light.songs-metric,
+.app-shell .surface-light.songs-metric {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+}
+
+.app-main .surface-light .setlists-card-footer,
+.app-shell .surface-light .setlists-card-footer {
+  border-top-color: #d1d5db;
+  color: #374151;
+}
+
 .invite-list {
   list-style: none;
   padding: 0;

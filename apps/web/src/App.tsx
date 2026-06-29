@@ -15,6 +15,15 @@ import { SongFolderPage } from './pages/app/SongFolderPage';
 import { SongPartFolderPage } from './pages/app/SongPartFolderPage';
 import { SetlistsDashboardPage } from './pages/app/SetlistsDashboardPage';
 import { SetlistBuilderPage } from './pages/app/SetlistBuilderPage';
+import { CalendarPage } from './pages/app/CalendarPage';
+import { GigsDashboardPage } from './pages/app/GigsDashboardPage';
+import { GigDetailPage } from './pages/app/GigDetailPage';
+import { AdminLayout } from './components/admin/AdminLayout';
+import { AdminOverviewPage } from './pages/admin/AdminOverviewPage';
+import { AdminAccountsPage } from './pages/admin/AdminAccountsPage';
+import { AdminMetricsPage } from './pages/admin/AdminMetricsPage';
+import { AdminEntitlementsPage } from './pages/admin/AdminEntitlementsPage';
+import { AdminAuditPage } from './pages/admin/AdminAuditPage';
 import { WorkspaceBandDirectoryPage } from './pages/app/WorkspaceBandDirectoryPage';
 import { WorkspaceBandProfilePage } from './pages/app/WorkspaceBandProfilePage';
 import { WorkspacePlayerDirectoryPage } from './pages/app/WorkspacePlayerDirectoryPage';
@@ -131,6 +140,30 @@ export default function App() {
               }
             />
             <Route
+              path=":bandId/calendar"
+              element={
+                <WorkspaceModeRoute mode="player">
+                  <CalendarPage />
+                </WorkspaceModeRoute>
+              }
+            />
+            <Route
+              path=":bandId/gigs/:gigId"
+              element={
+                <WorkspaceModeRoute mode="player">
+                  <GigDetailPage />
+                </WorkspaceModeRoute>
+              }
+            />
+            <Route
+              path=":bandId/gigs"
+              element={
+                <WorkspaceModeRoute mode="player">
+                  <GigsDashboardPage />
+                </WorkspaceModeRoute>
+              }
+            />
+            <Route
               path=":bandId/setlists/:setlistId"
               element={
                 <WorkspaceModeRoute mode="player">
@@ -194,6 +227,14 @@ export default function App() {
                 </WorkspaceModeRoute>
               }
             />
+          </Route>
+
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminOverviewPage />} />
+            <Route path="accounts" element={<AdminAccountsPage />} />
+            <Route path="metrics" element={<AdminMetricsPage />} />
+            <Route path="entitlements" element={<AdminEntitlementsPage />} />
+            <Route path="audit" element={<AdminAuditPage />} />
           </Route>
         </Route>
       </Routes>

@@ -1,4 +1,5 @@
 import { slugifyBandName } from '@bandie/utils';
+import { assertCanPerform } from './entitlements';
 import { getBandieClient } from './context';
 import { getCurrentSession } from './auth';
 import {
@@ -483,6 +484,14 @@ export async function createBandSetlist(input: CreateSetlistInput): Promise<Band
   if (!title) {
     throw new Error('Setlist title is required.');
   }
+
+  await assertCanPerform({
+    capability: 'setlist.create',
+    subjectType: 'band',
+    subjectId: input.bandId,
+    bandId: input.bandId,
+    planScope: 'leader',
+  });
 
   const slug = await resolveUniqueSetlistSlug(input.bandId, title);
 

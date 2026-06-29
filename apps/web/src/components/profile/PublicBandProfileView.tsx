@@ -220,6 +220,7 @@ export function PublicBandProfileView({ profile, variant = 'public' }: PublicBan
         ) : null}
 
         <BandBookingContactCard
+          bandId={profile.id}
           bandName={profile.name}
           primaryContact={profile.primaryContact}
           setOffers={profile.setOffers}

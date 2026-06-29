@@ -1,4 +1,5 @@
 import { slugifyBandName } from '@bandie/utils';
+import { assertCanPerform } from './entitlements';
 import { getBandieClient } from './context';
 import { getCurrentSession } from './auth';
 import {
@@ -443,6 +444,14 @@ export async function createSongPartFolder(input: CreateSongPartFolderInput): Pr
     throw new Error('Part label is required.');
   }
 
+  await assertCanPerform({
+    capability: 'song_folder.create',
+    subjectType: 'band',
+    subjectId: input.bandId,
+    bandId: input.bandId,
+    planScope: 'leader',
+  });
+
   const client = getBandieClient();
   const { data: existing } = await client
     .from('bandie_song_part_folders')
@@ -706,6 +715,14 @@ export async function createBandSong(input: CreateSongInput): Promise<SongWithRe
   if (!title) {
     throw new Error('Song title is required.');
   }
+
+  await assertCanPerform({
+    capability: 'song.create',
+    subjectType: 'band',
+    subjectId: input.bandId,
+    bandId: input.bandId,
+    planScope: 'leader',
+  });
 
   const slug = await resolveUniqueSongSlug(input.bandId, title);
   const payload = {
@@ -978,6 +995,14 @@ export async function uploadSongPartFile(input: UploadSongPartFileInput): Promis
   if (!session?.access_token) {
     throw new Error('Sign in to upload song-part files.');
   }
+
+  await assertCanPerform({
+    capability: 'song_file.upload',
+    subjectType: 'band',
+    subjectId: input.bandId,
+    bandId: input.bandId,
+    planScope: 'leader',
+  });
 
   const binaryLength = Math.ceil((input.contentBase64.length * 3) / 4);
   if (binaryLength > SONG_PART_UPLOAD_MAX_BYTES) {

@@ -1,4 +1,5 @@
 import { getBandieClient } from './context';
+import { assertCanPerform } from './entitlements';
 
 export type BandInvitation = {
   id: string;
@@ -53,6 +54,14 @@ export async function createBandInvitation(input: CreateInvitationInput): Promis
   if (!user) {
     throw new Error('Must be signed in to invite members.');
   }
+
+  await assertCanPerform({
+    capability: 'band_members.invite',
+    subjectType: 'band',
+    subjectId: input.bandId,
+    bandId: input.bandId,
+    planScope: 'leader',
+  });
 
   const { data, error } = await client
     .from('bandie_band_invitations')

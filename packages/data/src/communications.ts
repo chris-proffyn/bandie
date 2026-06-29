@@ -6,6 +6,11 @@ import {
 import type { ReceivedBandInvitation, SentBandInvitation } from './invitations';
 import { countUnreadMessages, listMyMessages, type UserMessage } from './messages';
 import {
+  countUnreadBookingEnquiries,
+  listMyBookingEnquiries,
+  type BookingEnquiry,
+} from './bookingEnquiries';
+import {
   countMyPendingPlayerOutreach,
   listMyReceivedPlayerOutreach,
   listMySentPlayerOutreach,
@@ -14,12 +19,13 @@ import {
 } from './playerOutreach';
 import { isResolvedInviteStatus } from './invitationStatus';
 
-export type CommunicationFilter = 'all' | 'invites' | 'messages';
+export type CommunicationFilter = 'all' | 'invites' | 'messages' | 'enquiries';
 
 export type CommunicationSummary = {
   pendingInvitations: number;
   pendingPlayerOutreach: number;
   unreadMessages: number;
+  unreadBookingEnquiries: number;
   total: number;
 };
 
@@ -65,18 +71,27 @@ export type SentPlayerOutreachCommunication = {
   outreach: SentPlayerOutreach;
 };
 
+export type BookingEnquiryCommunication = {
+  kind: 'booking_enquiry';
+  id: string;
+  created_at: string;
+  enquiry: BookingEnquiry;
+};
+
 export type CommunicationItem =
   | BandInvitationCommunication
   | PlayerOutreachCommunication
   | MessageCommunication
   | SentBandInvitationCommunication
-  | SentPlayerOutreachCommunication;
+  | SentPlayerOutreachCommunication
+  | BookingEnquiryCommunication;
 
 export async function getCommunicationSummary(): Promise<CommunicationSummary> {
-  const [invitations, playerOutreach, unreadMessages] = await Promise.all([
+  const [invitations, playerOutreach, unreadMessages, unreadBookingEnquiries] = await Promise.all([
     listPendingInvitationsForCurrentUser(),
     countMyPendingPlayerOutreach(),
     countUnreadMessages(),
+    countUnreadBookingEnquiries(),
   ]);
 
   const pendingInvitations = invitations.length;
@@ -85,18 +100,23 @@ export async function getCommunicationSummary(): Promise<CommunicationSummary> {
     pendingInvitations,
     pendingPlayerOutreach: playerOutreach,
     unreadMessages,
-    total: pendingInvitations + playerOutreach + unreadMessages,
+    unreadBookingEnquiries,
+    total: pendingInvitations + playerOutreach + unreadMessages + unreadBookingEnquiries,
   };
 }
 
 export async function listCommunications(): Promise<CommunicationItem[]> {
-  const [invitations, playerOutreach, sentInvitations, sentOutreach, messages] = await Promise.all([
+  const [invitations, playerOutreach, sentInvitations, sentOutreach, messages, enquiries] =
+    await Promise.all([
     listMyReceivedBandInvitations(),
     listMyReceivedPlayerOutreach(),
     listMySentBandInvitations(),
     listMySentPlayerOutreach(),
     listMyMessages(),
+    listMyBookingEnquiries(),
   ]);
+
+  const enquiryMessageIds = new Set(enquiries.map((enquiry) => enquiry.message_id));
 
   const items: CommunicationItem[] = [
     ...invitations.map(
@@ -131,12 +151,22 @@ export async function listCommunications(): Promise<CommunicationItem[]> {
         outreach,
       }),
     ),
-    ...messages.map(
+    ...messages
+      .filter((message) => !enquiryMessageIds.has(message.id))
+      .map(
       (message): MessageCommunication => ({
         kind: 'message',
         id: message.id,
         created_at: message.created_at,
         message,
+      }),
+    ),
+    ...enquiries.map(
+      (enquiry): BookingEnquiryCommunication => ({
+        kind: 'booking_enquiry',
+        id: enquiry.id,
+        created_at: enquiry.created_at,
+        enquiry,
       }),
     ),
   ];
@@ -162,6 +192,10 @@ export function filterCommunications(
         item.kind === 'sent_band_invitation' ||
         item.kind === 'sent_player_outreach',
     );
+  }
+
+  if (filter === 'enquiries') {
+    return items.filter((item) => item.kind === 'booking_enquiry');
   }
 
   return items.filter((item) => item.kind === 'message');

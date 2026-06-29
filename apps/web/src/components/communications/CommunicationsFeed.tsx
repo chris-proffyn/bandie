@@ -10,8 +10,10 @@ import {
   isInvitationAwaitingResponse,
   listCommunications,
   playerOutreachTypeLabel,
-  replyToMessage,
   markMessageRead,
+  markBookingEnquiryRead,
+  replyToMessage,
+  BOOKING_ENQUIRY_STATUS_LABELS,
   respondToPlayerOutreach,
   revokeBandInvitation,
   revokePlayerOutreach,
@@ -240,6 +242,86 @@ function FeedItem({
               Revoke
             </button>
           </div>
+        ) : null}
+      </li>
+    );
+  }
+
+  if (item.kind === 'booking_enquiry') {
+    const enquiry = item.enquiry;
+    const isIncoming = enquiry.recipient_user_id === currentUserId;
+    const isUnread = isIncoming && enquiry.status === 'new';
+
+    return (
+      <li
+        className={`communications-feed-item ${isUnread ? 'communications-message-item-unread' : ''}`}
+      >
+        <div className="communications-feed-head">
+          <span className="communications-type-badge">Booking enquiry</span>
+          <span className="communications-item-meta">{formatTimestamp(item.created_at)}</span>
+        </div>
+        <strong>{enquiry.band_name}</strong>
+        <p className="communications-item-meta">
+          {isIncoming ? 'Received' : 'Sent'}
+          {enquiry.preferred_date ? ` · ${enquiry.preferred_date}` : ''}
+          {enquiry.venue_summary ? ` · ${enquiry.venue_summary}` : ''}
+          {' · '}
+          {BOOKING_ENQUIRY_STATUS_LABELS[enquiry.status]}
+        </p>
+        <p className="communications-message-body">{enquiry.message_body}</p>
+        {error ? <div className="auth-message auth-message-error">{error}</div> : null}
+        {isIncoming ? (
+          <div className="communications-item-actions">
+            {isUnread ? (
+              <button
+                type="button"
+                className="auth-button auth-button-secondary"
+                disabled={acting}
+                onClick={() => {
+                  void runAction(async () => {
+                    await markBookingEnquiryRead(enquiry);
+                  });
+                }}
+              >
+                Mark read
+              </button>
+            ) : null}
+            <button
+              type="button"
+              className="auth-button auth-button-secondary"
+              onClick={() => {
+                setShowReply((value) => !value);
+              }}
+            >
+              {showReply ? 'Cancel' : 'Reply'}
+            </button>
+          </div>
+        ) : null}
+        {showReply ? (
+          <form
+            className="communications-reply-form auth-form"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void runAction(async () => {
+                await replyToMessage({ messageId: enquiry.message_id, body: replyBody });
+                setReplyBody('');
+                setShowReply(false);
+              });
+            }}
+          >
+            <div className="auth-field">
+              <label htmlFor={`feed-enquiry-reply-${enquiry.id}`}>Your reply</label>
+              <textarea
+                id={`feed-enquiry-reply-${enquiry.id}`}
+                rows={3}
+                value={replyBody}
+                onChange={(event) => setReplyBody(event.target.value)}
+              />
+            </div>
+            <button className="auth-button" type="submit" disabled={acting}>
+              {acting ? 'Sending…' : 'Send reply'}
+            </button>
+          </form>
         ) : null}
       </li>
     );

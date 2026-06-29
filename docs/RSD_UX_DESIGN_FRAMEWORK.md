@@ -192,6 +192,43 @@ Reference: `.app-main .surface-light` rules in `apps/web/src/styles/auth.css`; s
 
 ---
 
+### 6.5 Status pills and nested tiles on light surfaces
+
+Pale status pills (e.g. `#eef2ff` fill, `#dbeafe` fill) **without borders** disappear on white cards (`#ffffff`). This has recurred on songs metrics, setlist library cards, and modals. **Do not ship washed-out pills on light surfaces.**
+
+**Rule:** Every status pill, badge, or tag on a light surface uses **three tokens together**: background, text, **border**. Nested tiles inside a white card (stat strips, song rows, list items) need a **visible border** (`#cbd5e1` or darker), not only a faint fill.
+
+**Canonical palette (light-surface status pills)**
+
+| Variant | Background | Text | Border | Use |
+|---------|------------|------|--------|-----|
+| Default / indigo | `#e0e7ff` | `#312e81` | `#a5b4fc` | Vibe tags, generic labels |
+| Blue | `#bfdbfe` | `#1e3a8a` | `#60a5fa` | Draft, info |
+| Green | `#bbf7d0` | `#14532d` | `#4ade80` | Gig ready, success |
+| Amber | `#fde68a` | `#78350f` | `#fbbf24` | Needs attention, warning |
+| Red | `#fecaca` | `#7f1d1d` | `#f87171` | Error, blocked |
+| Slate | `#cbd5e1` | `#1e293b` | `#94a3b8` | Archived, neutral |
+
+**Nested tiles inside white cards**
+
+| Element | Background | Border |
+|---------|------------|--------|
+| Stat cell / mini metric | `#e5e7eb` | `#cbd5e1` |
+| Stack row / list item | `#f3f4f6` | `#cbd5e1` |
+| Card shell | `#ffffff` | `#d1d5db` |
+| Secondary button on card | `#f3f4f6` | `#94a3b8` |
+
+**Implementation**
+
+1. Add **`surface-light`** to the white card (§6.4).
+2. Use **`.songs-pill`** / **`.setlists-pill`** classes (or shared status classes) — do not invent new pale hex values per screen.
+3. Shared overrides live in `apps/web/src/styles/auth.css` under `.app-main .surface-light` (§6.5 block). Page CSS may set the same tokens as defaults; auth.css wins inside the app shell.
+4. **Never** use `rgba(255,255,255,0.96)` card borders on white — use `#d1d5db`.
+
+**Check before shipping:** squint test — pills and stat boxes must remain clearly separated from the card background without relying on shadow alone.
+
+---
+
 ## 7. Reusable Component Library
 
 ### 7.1 Layout Components
@@ -206,7 +243,7 @@ Reference: `.app-main .surface-light` rules in `apps/web/src/styles/auth.css`; s
 ### 7.2 Content Components
 - Card
 - Avatar
-- Badge / Tag
+- Badge / Tag — **must follow §6.5 palette on light surfaces** (background + text + border)
 - List Item
 - Divider
 

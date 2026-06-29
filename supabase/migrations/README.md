@@ -70,6 +70,15 @@ Song-part file bytes live in **Dropbox** (leader OAuth), not Supabase Storage. A
 - `20260629150000_bandie_songs_soft_delete.sql` — `is_deleted`, `deleted_at`, leader-only delete/restore trigger
 - `20260629160000_bandie_setlists.sql` — `bandie_setlists`, `bandie_setlist_items`, member read / leader write RLS
 
+## Phase 8 — entitlements (in progress)
+
+- `20260630100000_bandie_entitlements_foundation.sql` — plan catalogue, capabilities, subscriptions, usage meters, overrides (RLS + `bandie_set_usage_meter` RPC)
+- `20260630110000_bandie_entitlements_seed.sql` — plan/capability seeds, `plan_scope`, default subscriptions, profile trigger
+- `20260630120000_bandie_calendar.sql` — calendar events, availability votes, public date sync
+- `20260630130000_bandie_gigs.sql` — gig records with setlist link
+- `20260630140000_bandie_booking_enquiries.sql` — booking enquiry metadata + list RPC
+- `20260630150000_bandie_admin_metrics_entitlements.sql` — audit, metrics, drafts, gate logs, admin search, aggregation RPC
+
 OAuth and Dropbox API routes run server-side (Netlify functions); tokens are not client-readable.
 
 ## RLS requirement

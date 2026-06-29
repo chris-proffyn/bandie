@@ -24,7 +24,15 @@ import {
   DirectorySortControl,
 } from './DirectoryFiltersPanel';
 import { DirectoryBandCard } from './DirectoryBandCard';
+import { DirectoryTestDataToggle } from './DirectoryTestDataToggle';
 import { useAuth } from '../../context/AuthContext';
+import {
+  applyDirectoryTestDataFilter,
+  countDirectoryTestRows,
+  readDirectoryHideTestData,
+  saveDirectoryHideTestData,
+  showDirectoryTestDataToggle,
+} from '../../lib/directoryTestDataPreference';
 
 type BandDirectoryViewProps = {
   variant: 'public' | 'workspace';
@@ -46,6 +54,7 @@ export function BandDirectoryView({
     resolveDirectoryAreaFilters(initialFilters, detectedAreaDefaults),
   );
   const [sort, setSort] = useState<DirectorySort>('recommended');
+  const [hideTestData, setHideTestData] = useState(readDirectoryHideTestData);
 
   useEffect(() => {
     loadGeographyIndex()
@@ -63,13 +72,25 @@ export function BandDirectoryView({
       .finally(() => setLoading(false));
   }, []);
 
-  const genres = useMemo(() => collectDirectoryGenres(bands), [bands]);
-  const stats = useMemo(() => computeDirectoryStats(bands), [bands]);
+  const visibleBands = useMemo(
+    () => applyDirectoryTestDataFilter(bands, hideTestData),
+    [bands, hideTestData],
+  );
+  const testBandCount = useMemo(() => countDirectoryTestRows(bands), [bands]);
+  const showTestDataToggle = useMemo(() => showDirectoryTestDataToggle(bands), [bands]);
+
+  const genres = useMemo(() => collectDirectoryGenres(visibleBands), [visibleBands]);
+  const stats = useMemo(() => computeDirectoryStats(visibleBands), [visibleBands]);
 
   const filteredBands = useMemo(() => {
-    const filtered = filterDirectoryBands(bands, filters, geography ?? undefined);
+    const filtered = filterDirectoryBands(visibleBands, filters, geography ?? undefined);
     return sortDirectoryBands(filtered, sort);
-  }, [bands, filters, sort, geography]);
+  }, [visibleBands, filters, sort, geography]);
+
+  function handleHideTestDataChange(nextHidden: boolean) {
+    setHideTestData(nextHidden);
+    saveDirectoryHideTestData(nextHidden);
+  }
 
   const activePills = buildActiveFilterPills(filters, geography);
   const resetFilters = () =>
@@ -155,11 +176,21 @@ export function BandDirectoryView({
           <div>
             <h2>Available bands</h2>
             <p>
-              Showing {filteredBands.length} of {bands.length}{' '}
-              {bands.length === 1 ? 'band' : 'bands'}
+              Showing {filteredBands.length} of {visibleBands.length}{' '}
+              {visibleBands.length === 1 ? 'band' : 'bands'}
             </p>
           </div>
-          <DirectorySortControl sort={sort} onChange={setSort} />
+          <div className="directory-results-actions">
+            {showTestDataToggle ? (
+              <DirectoryTestDataToggle
+                hideTestData={hideTestData}
+                testItemCount={testBandCount}
+                itemLabel="bands"
+                onChange={handleHideTestDataChange}
+              />
+            ) : null}
+            <DirectorySortControl sort={sort} onChange={setSort} />
+          </div>
         </div>
 
         <div className="directory-active-filters" aria-label="Active filters">
@@ -172,6 +203,9 @@ export function BandDirectoryView({
           ) : (
             <span className="directory-filter-pill">Showing all published bands</span>
           )}
+          {hideTestData && showTestDataToggle ? (
+            <span className="directory-filter-pill">Test data hidden</span>
+          ) : null}
         </div>
 
         {filteredBands.length === 0 ? (
@@ -182,6 +216,8 @@ export function BandDirectoryView({
                 No bands have published their profile yet. If you are in a band, create an account
                 and publish your public profile to appear here.
               </p>
+            ) : visibleBands.length === 0 && hideTestData && testBandCount > 0 ? (
+              <p>Test data is hidden. Choose Show test data to view seeded bands.</p>
             ) : (
               <p>Try broadening your country, area, town, price range or genre filters.</p>
             )}

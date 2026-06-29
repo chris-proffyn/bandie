@@ -18,11 +18,13 @@ import {
   isPlatformAppAdminRole,
   isPlayerWorkspaceRoute,
   listUserBands,
+  loadPlatformEntitlementEnforcement,
   onAuthStateChange,
   resolveDisplayName,
   resolveWorkspaceMode,
   setBandieAdminModeActive,
   signOut,
+  trackSessionActive,
   workspaceModeHomePath,
   type UserBand,
   type UserProfile,
@@ -169,7 +171,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setAdminModeEnabled(storedAdminMode);
         setBandieAdminModeActive(appAdmin && storedAdminMode);
 
-        await Promise.all([refreshBands(), refreshProfile()]);
+        await Promise.all([
+          refreshBands(),
+          refreshProfile(),
+          loadPlatformEntitlementEnforcement(),
+          trackSessionActive(),
+        ]);
       })
       .catch(() => {
         setBands([]);

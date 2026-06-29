@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { createBandSong, SONG_PARTS_LEADER_ONLY_MESSAGE } from '@bandie/data';
+import { UpgradePromptModal } from '../entitlements/UpgradePromptModal';
+import { useUpgradePrompt } from '../../hooks/useUpgradePrompt';
 import { EMPTY_SONG_METADATA, parseDurationFromForm, type SongMetadataFormValues } from '../../lib/songMetadataForm';
 import { SongMetadataFormFields } from './SongMetadataFormFields';
 
@@ -14,6 +16,7 @@ export function AddSongDialog({ bandId, canManage, onClose, onCreated }: AddSong
   const [values, setValues] = useState<SongMetadataFormValues>(EMPTY_SONG_METADATA);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { upgradeDecision, clearUpgradePrompt, handleEntitlementError } = useUpgradePrompt();
 
   function handleChange(patch: Partial<SongMetadataFormValues>) {
     setValues((current) => ({ ...current, ...patch }));
@@ -45,6 +48,9 @@ export function AddSongDialog({ bandId, canManage, onClose, onCreated }: AddSong
       onCreated();
       onClose();
     } catch (err) {
+      if (handleEntitlementError(err)) {
+        return;
+      }
       setError(err instanceof Error ? err.message : 'Unable to add song.');
     } finally {
       setSubmitting(false);
@@ -78,6 +84,10 @@ export function AddSongDialog({ bandId, canManage, onClose, onCreated }: AddSong
           </div>
         </form>
       </div>
+
+      {upgradeDecision ? (
+        <UpgradePromptModal decision={upgradeDecision} onClose={clearUpgradePrompt} />
+      ) : null}
     </div>
   );
 }

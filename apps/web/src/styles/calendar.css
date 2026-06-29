@@ -1,0 +1,106 @@
+.calendar-page {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.calendar-header-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.calendar-form-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.calendar-form-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.calendar-event-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.calendar-event-card {
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 1rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.calendar-event-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.calendar-event-type {
+  display: inline-block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.calendar-event-meta,
+.calendar-event-notes,
+.calendar-vote-summary {
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.calendar-vote-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.calendar-vote-actions .active {
+  border-color: var(--brand-primary);
+}
+
+.calendar-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.calendar-status-proposed {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.calendar-status-provisional {
+  background: rgba(255, 193, 7, 0.15);
+}
+
+.calendar-status-confirmed {
+  background: rgba(76, 175, 80, 0.18);
+}
+
+.calendar-delete-btn {
+  justify-self: start;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+}

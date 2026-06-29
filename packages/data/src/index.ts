@@ -514,3 +514,157 @@ export type {
   BandSongPartStorage,
   SongPartStorageHealth,
 } from './songPartStorage';
+
+export {
+  initBandieEntitlementEnforcement,
+  isEntitlementEnforcementEnabled,
+  resolveEntitlementEnforcement,
+  setPlatformEntitlementEnforcement,
+} from './entitlementEnforcement';
+
+export { EntitlementGateError, isEntitlementGateError } from './entitlementErrors';
+
+export {
+  PLAN_CODES,
+  PLAN_DISPLAY_NAMES,
+  UPGRADE_URL,
+} from './entitlementTypes';
+export type {
+  EntitlementCheckInput,
+  EntitlementPlanScope,
+  EntitlementSubjectType,
+  GateDecision,
+  GateReasonCode,
+  PlanCode,
+  UsageMeterEntry,
+  UsageSummary,
+} from './entitlementTypes';
+
+export {
+  canPerform,
+  assertCanPerform,
+  checkBandLeaderCapability,
+  checkUserLeaderCapability,
+  checkUserOrganiserCapability,
+  getUsageSummaryForUser,
+  getBandUsageSummary,
+  listPublicPlans,
+  ensureDefaultUserSubscriptions,
+} from './entitlements';
+
+export {
+  METER_KEYS,
+  METER_LABELS,
+  meterKeyForLimitCapability,
+  measureUsage,
+  syncUsageMeter,
+  reconcileBandUsageMeters,
+  reconcileUserUsageMeters,
+  countBandsLedByUser,
+  countActiveSongsInBand,
+  countSetlistsInBand,
+  countOrganiserVenues,
+  countActiveBandMembers,
+  countActiveGigsInBand,
+  countBookingEnquiriesSentThisMonth,
+} from './usageMeters';
+
+export {
+  listBandCalendarEvents,
+  listBandCalendarEventsWithVotes,
+  getCalendarEventWithVotes,
+  createCalendarEvent,
+  deleteCalendarEvent,
+  castAvailabilityVote,
+  getBandCalendarTier,
+  summarizeAvailabilityVotes,
+  formatCalendarEventType,
+  availabilityStatusClass,
+  CALENDAR_LEADER_ONLY_MESSAGE,
+  AVAILABILITY_STATUS_LABELS,
+  AVAILABILITY_VOTE_LABELS,
+} from './calendar';
+export type {
+  CalendarEvent,
+  CalendarEventType,
+  CalendarEventVote,
+  CalendarEventWithVotes,
+  AvailabilityStatus as CalendarAvailabilityStatus,
+  AvailabilityVote,
+  CreateCalendarEventInput,
+} from './calendar';
+
+export {
+  listBandGigs,
+  getGig,
+  createGig,
+  updateGig,
+  archiveGig,
+  computeGigDashboardMetrics,
+  formatGigStatus,
+  gigStatusPillClass,
+  GIG_STATUS_OPTIONS,
+  ACTIVE_GIG_STATUSES,
+  GIG_LEADER_ONLY_MESSAGE,
+} from './gigs';
+export type { BandGig, GigStatus, GigWithSetlistContext, CreateGigInput, UpdateGigInput } from './gigs';
+
+export {
+  listMyBookingEnquiries,
+  listReceivedBookingEnquiries,
+  countUnreadBookingEnquiries,
+  sendBookingEnquiry,
+  updateBookingEnquiryStatus,
+  markBookingEnquiryRead,
+  BOOKING_ENQUIRY_STATUS_LABELS,
+} from './bookingEnquiries';
+export type { BookingEnquiry, BookingEnquiryStatus, SendBookingEnquiryInput } from './bookingEnquiries';
+
+export {
+  trackMetricEvent,
+  trackSessionActive,
+  listMetricSnapshots,
+  aggregateDailyMetrics,
+  snapshotsToCsv,
+} from './metrics';
+export type { MetricEventInput, MetricSnapshot } from './metrics';
+
+export {
+  searchAdminUsers,
+  searchAdminBands,
+  logAdminAuditEvent,
+  listAuditEvents,
+  getAdminOverviewCounts,
+} from './adminPortal';
+export type { AdminSearchUser, AdminSearchBand, AuditEvent, AdminOverviewCounts } from './adminPortal';
+
+export {
+  listPlansWithEntitlements,
+  listEntitlementDrafts,
+  listEntitlementDraftItems,
+  createEntitlementDraft,
+  addEntitlementDraftItem,
+  publishEntitlementDraft,
+  listEntitlementOverrides,
+  createEntitlementOverride,
+  deleteEntitlementOverride,
+  buildEntitlementImpactPreview,
+} from './entitlementAdmin';
+export type {
+  PlanWithEntitlements,
+  EntitlementDraft,
+  EntitlementDraftItem,
+  EntitlementOverride,
+  EntitlementImpactPreview,
+} from './entitlementAdmin';
+
+export {
+  loadPlatformEntitlementEnforcement,
+  getPlatformSetting,
+  setPlatformSetting,
+  setEntitlementsEnforced,
+  isEntitlementsEnforcedOnPlatform,
+} from './platformSettings';
+
+export { logGateDecision, listGateDecisionLogs } from './gateLogs';
+export type { GateDecisionLog } from './gateLogs';

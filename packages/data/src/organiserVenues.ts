@@ -1,4 +1,5 @@
 import { getBandieClient } from './context';
+import { assertCanPerform } from './entitlements';
 import { removeOrganiserVenueImage } from './storage';
 
 export const ORGANISER_VENUE_TYPES = [
@@ -154,6 +155,13 @@ export async function createOrganiserVenue(input: OrganiserVenueInput): Promise<
   if (!user) {
     throw new Error('You must be signed in to add a venue.');
   }
+
+  await assertCanPerform({
+    capability: 'venue.create',
+    subjectType: 'user',
+    subjectId: user.id,
+    planScope: 'organiser',
+  });
 
   const payload = buildVenuePayload(input);
   const { data, error } = await client

@@ -7,7 +7,13 @@ const appCode = import.meta.env.VITE_APP_CODE ?? 'bandie';
 if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('Supabase environment variables are missing. Auth features will not work.');
 } else {
-  initBandieData({ supabaseUrl, supabaseAnonKey, appCode, dataMode: import.meta.env.VITE_BANDIE_DATA_MODE });
+  initBandieData({
+    supabaseUrl,
+    supabaseAnonKey,
+    appCode,
+    dataMode: import.meta.env.VITE_BANDIE_DATA_MODE,
+    enforceEntitlements: import.meta.env.VITE_BANDIE_ENFORCE_ENTITLEMENTS,
+  });
 }
 
 export function getAppOrigin(): string {

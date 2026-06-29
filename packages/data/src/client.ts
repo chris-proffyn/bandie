@@ -6,6 +6,8 @@ export interface BandieClientConfig {
   appCode?: string;
   /** `test` shows fictitious bands/players; `live` hides rows where test_user is true */
   dataMode?: string;
+  /** When true, tier limits from entitlements are enforced (default off until Phase 14). */
+  enforceEntitlements?: string | boolean;
 }
 
 const DEFAULT_APP_CODE = 'bandie';

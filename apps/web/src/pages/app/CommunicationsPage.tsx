@@ -10,6 +10,7 @@ import '../../styles/communications.css';
 const FILTER_OPTIONS: { value: CommunicationFilter; label: string }[] = [
   { value: 'all', label: 'All' },
   { value: 'invites', label: 'Invites' },
+  { value: 'enquiries', label: 'Booking enquiries' },
   { value: 'messages', label: 'Messages' },
 ];
 
@@ -20,6 +21,7 @@ export function CommunicationsPage() {
     pendingInvitations: 0,
     pendingPlayerOutreach: 0,
     unreadMessages: 0,
+    unreadBookingEnquiries: 0,
     total: 0,
   });
   const [loadingSummary, setLoadingSummary] = useState(true);
@@ -35,6 +37,7 @@ export function CommunicationsPage() {
         pendingInvitations: 0,
         pendingPlayerOutreach: 0,
         unreadMessages: 0,
+        unreadBookingEnquiries: 0,
         total: 0,
       });
     } finally {
@@ -84,6 +87,9 @@ export function CommunicationsPage() {
             ) : null}
             {option.value === 'messages' && summary.unreadMessages > 0 ? (
               <span className="communications-filter-badge">{summary.unreadMessages}</span>
+            ) : null}
+            {option.value === 'enquiries' && summary.unreadBookingEnquiries > 0 ? (
+              <span className="communications-filter-badge">{summary.unreadBookingEnquiries}</span>
             ) : null}
             {option.value === 'all' && summary.total > 0 ? (
               <span className="communications-filter-badge">{summary.total}</span>
@@ -168,6 +174,23 @@ export function CommunicationsPage() {
             />
           </section>
         </>
+      ) : null}
+
+      {filter === 'enquiries' ? (
+        <section className="panel communications-section">
+          <div className="communications-section-head">
+            <div>
+              <h2>Booking enquiries</h2>
+              <p className="profile-section-intro">
+                Structured booking requests from public band profiles, with venue and date context.
+              </p>
+            </div>
+            {summary.unreadBookingEnquiries > 0 ? (
+              <span className="communications-count-badge">{summary.unreadBookingEnquiries}</span>
+            ) : null}
+          </div>
+          <CommunicationsFeed filter="enquiries" onChanged={refreshSummary} />
+        </section>
       ) : null}
 
       {filter === 'messages' ? (

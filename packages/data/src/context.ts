@@ -1,11 +1,13 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createBandieClient, getAppCode, type BandieClientConfig } from './client';
+import { initBandieEntitlementEnforcement } from './entitlementEnforcement';
 import { initBandieDataMode } from './testDataMode';
 
 let bandieClient: SupabaseClient | null = null;
 
 export function initBandieData(config: BandieClientConfig): SupabaseClient {
   initBandieDataMode(config.dataMode);
+  initBandieEntitlementEnforcement(config.enforceEntitlements);
   bandieClient = createBandieClient(config);
   return bandieClient;
 }

@@ -1,4 +1,5 @@
 import { getBandieClient } from './context';
+import { ensureDefaultUserSubscriptions } from './entitlements';
 import { isBandieAdminModeActive } from './adminMode';
 import { isCurrentUserAppAdmin } from './membership';
 import type { PlayerGender } from './playerGender';
@@ -337,6 +338,7 @@ async function applyUserProfileUpdates(
 export async function ensureBandieProfile(displayName?: string): Promise<UserProfile> {
   const existing = await getCurrentUserProfile();
   if (existing) {
+    await ensureDefaultUserSubscriptions(existing.user_id, Boolean(existing.is_organiser));
     if (!existing.username?.trim()) {
       await ensureProfileUsername(existing.user_id);
       const refreshed = await getCurrentUserProfile();
@@ -368,6 +370,8 @@ export async function ensureBandieProfile(displayName?: string): Promise<UserPro
   if (error) {
     throw new Error(mapProfileSaveError(error));
   }
+
+  await ensureDefaultUserSubscriptions(user.id, false);
 
   return {
     ...data,
