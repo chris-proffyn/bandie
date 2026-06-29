@@ -155,32 +155,39 @@ export function SongFolderPage() {
 
       <SongMetadataPanel song={song} onEdit={() => setShowEditSong(true)} />
 
-      <section className="panel songs-part-folders-section">
-        <div className="songs-side-card-header">
-          <div>
+      <details className="panel songs-part-folders-section songs-collapsible-section">
+        <summary className="songs-collapsible-summary">
+          <div className="songs-collapsible-summary-text">
             <h2>Part folders</h2>
-            <p>Open a folder to view, upload, or download files for that part.</p>
+            <p>
+              {partFolders.length > 0
+                ? `${partFolders.length} folder${partFolders.length === 1 ? '' : 's'} — open one to view, upload, or download files`
+                : 'Open a folder to view, upload, or download files for that part'}
+            </p>
           </div>
+          <span className="songs-collapsible-chevron" aria-hidden="true" />
+        </summary>
+
+        <div className="songs-collapsible-body">
+          {!canManageSongParts ? (
+            <p className="my-bands-lead songs-leader-only-note">{SONG_PARTS_LEADER_ONLY_MESSAGE}</p>
+          ) : null}
+
+          <SongPartFolderCards bandId={bandId} songId={songId} partFolders={partFolders} />
+
+          {canManageSongParts ? (
+            <div className="songs-part-folders-actions">
+              <button
+                type="button"
+                className="directory-btn directory-btn-primary"
+                onClick={() => setShowAddFolder(true)}
+              >
+                Add folder
+              </button>
+            </div>
+          ) : null}
         </div>
-
-        {!canManageSongParts ? (
-          <p className="my-bands-lead songs-leader-only-note">{SONG_PARTS_LEADER_ONLY_MESSAGE}</p>
-        ) : null}
-
-        <SongPartFolderCards bandId={bandId} songId={songId} partFolders={partFolders} />
-
-        {canManageSongParts ? (
-          <div className="songs-part-folders-actions">
-            <button
-              type="button"
-              className="directory-btn directory-btn-primary"
-              onClick={() => setShowAddFolder(true)}
-            >
-              Add folder
-            </button>
-          </div>
-        ) : null}
-      </section>
+      </details>
 
       {showAddFolder ? (
         <AddSongPartFolderDialog

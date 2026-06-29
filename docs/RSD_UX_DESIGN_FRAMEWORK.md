@@ -170,6 +170,28 @@ The following are fixed:
 
 ---
 
+### 6.4 Light surfaces inside the dark app shell
+
+The authenticated app shell uses a **dark background** with cream body text (`#f6f3ea`). Many workspace screens also use **white or near-white cards** (metrics, metadata panels, modals, song folder tiles).
+
+**Never place light-grey text on a white or near-white background.** This includes inherited `.panel p` colour (`#bbb6aa`), default `small` muted tones, and any `#bbb6aa` / `#6b7280` copy used for primary field values.
+
+**Required pattern:**
+
+1. Add the **`surface-light`** class to every card, modal, or panel whose background is white or near-white (`apps/web/src/styles/auth.css` resets typography for these surfaces).
+2. Prefer **`songs-side-card surface-light`** or **`songs-metric surface-light`** over bare **`.panel`** when the section content is predominantly light cards.
+3. On light surfaces, use:
+   - **Headings / labels (`strong`):** `#111827`
+   - **Values and body copy:** `#374151` or darker (`small`, list values)
+   - **Helper / subtitle copy only:** `#4b5563` (`p`, descriptions) — not for data values users must read at a glance
+4. Reserve **`.panel`** (translucent dark) for sections that stay on the dark shell without nested white tiles. If a `.panel` contains white nested cards, either wrap the panel in `surface-light` or restyle the nested cards explicitly.
+
+**Check before shipping:** open the screen on a dark route (`/app/...`) and confirm no field label or value is rendered in cream or light grey on white.
+
+Reference: `.app-main .surface-light` rules in `apps/web/src/styles/auth.css`; song metadata panel in `SongMetadataPanel.tsx`.
+
+---
+
 ## 7. Reusable Component Library
 
 ### 7.1 Layout Components

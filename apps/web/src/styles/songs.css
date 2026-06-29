@@ -305,20 +305,34 @@
   justify-content: space-between;
   gap: 0.75rem;
   align-items: center;
+  color: #1f2937;
+}
+
+.songs-side-card:not(.dark) .songs-list-item,
+.surface-light .songs-list-item {
+  background: #f9fafb;
+  border-color: #e5e7eb;
 }
 
 .songs-side-card.dark .songs-list-item {
   background: rgba(255, 255, 255, 0.04);
   border-color: rgba(255, 255, 255, 0.12);
+  color: inherit;
 }
 
 .songs-list-item strong {
   display: block;
   margin-bottom: 0.2rem;
+  color: #111827;
+}
+
+.songs-side-card.dark .songs-list-item strong {
+  color: inherit;
 }
 
 .songs-list-item small {
   display: block;
+  color: #374151;
 }
 
 .songs-side-card.dark .songs-list-item small {
@@ -387,6 +401,10 @@
   margin: 0;
 }
 
+.songs-metadata-panel .songs-side-card-header p {
+  color: #4b5563;
+}
+
 .songs-metadata-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -400,6 +418,71 @@
 .songs-part-folders-section {
   display: grid;
   gap: 1rem;
+}
+
+.songs-collapsible-section {
+  padding: 0;
+  overflow: hidden;
+}
+
+.songs-collapsible-summary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.songs-collapsible-summary::-webkit-details-marker {
+  display: none;
+}
+
+.songs-collapsible-summary-text h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.15rem;
+  letter-spacing: -0.03em;
+}
+
+.songs-collapsible-summary-text p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.songs-collapsible-chevron {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #374151;
+  display: grid;
+  place-items: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.songs-collapsible-chevron::before {
+  content: '+';
+}
+
+.songs-collapsible-section[open] .songs-collapsible-chevron::before {
+  content: '−';
+}
+
+.songs-collapsible-body {
+  display: grid;
+  gap: 1rem;
+  padding: 0 1.25rem 1.25rem;
+  border-top: 1px solid #edf2f7;
+}
+
+.songs-collapsible-section[open] .songs-collapsible-body {
+  padding-top: 1.25rem;
 }
 
 .songs-part-folders-actions {

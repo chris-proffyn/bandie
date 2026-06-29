@@ -442,6 +442,7 @@
 /**
  * Light surfaces inside the dark app shell must reset inherited cream text (#f6f3ea).
  * Add .surface-light to any card, modal, or panel with a white/near-white background.
+ * Never use light grey (#bbb6aa, #6b7280) for labels or values on white — see RSD_UX §6.4.
  */
 .app-main .surface-light {
   color: #1f2937;
@@ -464,9 +465,15 @@
   color: #4b5563;
 }
 
+/* Muted helper copy only — never for primary values on white/light cards */
+.app-main .surface-light .text-muted,
+.app-shell .surface-light .text-muted {
+  color: #6b7280;
+}
+
 .app-main .surface-light small,
 .app-shell .surface-light small {
-  color: #6b7280;
+  color: #374151;
 }
 
 .app-main .surface-light label,

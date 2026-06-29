@@ -109,6 +109,8 @@
 # - Mobile-first, portrait-first decisions
 # - Component reuse over bespoke UI
 # - Accessibility by default (tap targets, contrast, readable errors)
+# - White/near-white cards in the dark app shell must use .surface-light (auth.css);
+#   never light grey text on white backgrounds — see docs/RSD_UX_DESIGN_FRAMEWORK.md §6.4
 # - Consistent navigation and interaction patterns
 # - Controlled branding / grey-label constraints
 #

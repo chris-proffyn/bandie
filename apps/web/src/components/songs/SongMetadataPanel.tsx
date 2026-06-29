@@ -7,7 +7,7 @@ type SongMetadataPanelProps = {
 
 export function SongMetadataPanel({ song, onEdit }: SongMetadataPanelProps) {
   return (
-    <section className="panel songs-metadata-panel">
+    <section className="songs-side-card surface-light songs-metadata-panel">
       <div className="songs-side-card-header">
         <div>
           <h2>Song metadata</h2>

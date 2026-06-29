@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
-  createBandSongPartTemplate,
   deleteBandSongPartTemplate,
   ensureBandSongPartTemplates,
   listBandSongPartTemplates,
@@ -10,6 +9,7 @@ import {
   updateBandSongPartTemplate,
   type BandSongPartTemplate,
 } from '@bandie/data';
+import { AddBandSongPartTemplateDialog } from './AddBandSongPartTemplateDialog';
 
 type BandSongPartTemplatesPanelProps = {
   bandId: string;
@@ -20,8 +20,8 @@ export function BandSongPartTemplatesPanel({ bandId, canManage }: BandSongPartTe
   const [templates, setTemplates] = useState<BandSongPartTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [newLabel, setNewLabel] = useState('');
   const [submittingId, setSubmittingId] = useState<string | null>(null);
+  const [showAddPart, setShowAddPart] = useState(false);
 
   const loadTemplates = useCallback(async () => {
     setLoading(true);
@@ -43,26 +43,6 @@ export function BandSongPartTemplatesPanel({ bandId, canManage }: BandSongPartTe
   useEffect(() => {
     void loadTemplates();
   }, [loadTemplates]);
-
-  async function handleAddPart(event: React.FormEvent) {
-    event.preventDefault();
-    if (!newLabel.trim()) {
-      return;
-    }
-
-    setSubmittingId('new');
-    setError(null);
-
-    try {
-      await createBandSongPartTemplate({ bandId, partLabel: newLabel.trim() });
-      setNewLabel('');
-      await loadTemplates();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to add part template.');
-    } finally {
-      setSubmittingId(null);
-    }
-  }
 
   async function handleToggleRequired(template: BandSongPartTemplate) {
     setSubmittingId(template.id);
@@ -108,9 +88,26 @@ export function BandSongPartTemplatesPanel({ bandId, canManage }: BandSongPartTe
             for your band — not every lineup slot needs its own folder.
           </p>
         </div>
+        {canManage ? (
+          <div className="songs-side-card-header-actions">
+            <button
+              type="button"
+              className="directory-btn directory-btn-primary"
+              onClick={() => setShowAddPart(true)}
+            >
+              Add part
+            </button>
+          </div>
+        ) : null}
       </div>
 
       {error ? <div className="songs-error">{error}</div> : null}
+
+      {!canManage ? (
+        <p className="my-bands-lead songs-leader-only-note" style={{ margin: 0 }}>
+          {SONG_PARTS_LEADER_ONLY_MESSAGE}
+        </p>
+      ) : null}
 
       {loading ? (
         <p className="songs-templates-loading">Loading part templates…</p>
@@ -161,29 +158,13 @@ export function BandSongPartTemplatesPanel({ bandId, canManage }: BandSongPartTe
         </div>
       )}
 
-      {canManage ? (
-        <form className="songs-template-add-form surface-light" onSubmit={handleAddPart}>
-          <label>
-            Add part folder
-            <input
-              value={newLabel}
-              onChange={(event) => setNewLabel(event.target.value)}
-              placeholder="e.g. Guitar, Keys, Backing vocals"
-            />
-          </label>
-          <button
-            type="submit"
-            className="songs-card-btn songs-card-btn-primary"
-            disabled={submittingId === 'new' || !newLabel.trim()}
-          >
-            Add part
-          </button>
-        </form>
-      ) : (
-        <p className="my-bands-lead songs-leader-only-note" style={{ margin: 0 }}>
-          {SONG_PARTS_LEADER_ONLY_MESSAGE}
-        </p>
-      )}
+      {showAddPart ? (
+        <AddBandSongPartTemplateDialog
+          bandId={bandId}
+          onClose={() => setShowAddPart(false)}
+          onCreated={() => void loadTemplates()}
+        />
+      ) : null}
     </section>
   );
 }
