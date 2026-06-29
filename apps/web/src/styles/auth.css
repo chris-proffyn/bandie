@@ -377,6 +377,73 @@
   color: #ff8da8;
 }
 
+.app-plan-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  border-radius: 999px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.app-plan-pill:hover,
+.app-plan-pill:focus-visible {
+  text-decoration: none;
+}
+
+.app-plan-pill-free {
+  background: rgba(148, 163, 184, 0.14);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  color: #cbd5e1;
+}
+
+.app-plan-pill-free:hover,
+.app-plan-pill-free:focus-visible {
+  color: #e2e8f0;
+  border-color: rgba(203, 213, 225, 0.45);
+}
+
+.app-plan-pill-plus {
+  background: rgba(99, 102, 241, 0.16);
+  border: 1px solid rgba(129, 140, 248, 0.4);
+  color: #a5b4fc;
+}
+
+.app-plan-pill-plus:hover,
+.app-plan-pill-plus:focus-visible {
+  color: #c7d2fe;
+  border-color: rgba(165, 180, 252, 0.55);
+}
+
+.app-plan-pill-pro {
+  background: rgba(255, 204, 51, 0.14);
+  border: 1px solid rgba(255, 204, 51, 0.35);
+  color: #ffcc33;
+}
+
+.app-plan-pill-pro:hover,
+.app-plan-pill-pro:focus-visible {
+  color: #ffe08a;
+  border-color: rgba(255, 224, 138, 0.5);
+}
+
+.app-plan-pill-organiser {
+  background: rgba(52, 211, 153, 0.14);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  color: #6ee7b7;
+}
+
+.app-plan-pill-organiser:hover,
+.app-plan-pill-organiser:focus-visible {
+  color: #a7f3d0;
+  border-color: rgba(110, 231, 183, 0.5);
+}
+
 .app-main {
   padding: 1.5rem;
 }

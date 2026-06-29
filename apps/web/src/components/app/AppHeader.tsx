@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
-import { getNotificationSummary, WORKSPACE_MODE_LABELS } from '@bandie/data';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, NavLink, useLocation } from 'react-router-dom';
+import { getNotificationSummary, listUserSubscriptions, WORKSPACE_MODE_LABELS } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
 import { getAppNavItems } from '../../lib/appNavigation';
 import { BANDIE_BRAND_NAME } from '../../lib/brand';
+import { resolveWorkspacePlanPill } from '../../lib/planPill';
 import { BandieLogo } from '../brand/BandieLogo';
 
 type AppHeaderProps = {
@@ -11,10 +12,12 @@ type AppHeaderProps = {
 };
 
 export function AppHeader({ bandId }: AppHeaderProps) {
+  const location = useLocation();
   const { displayName, logout, adminModeActive, workspaceMode, canSwitchWorkspaceMode, session, isAppAdmin } =
     useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
+  const [planPill, setPlanPill] = useState<ReturnType<typeof resolveWorkspacePlanPill> | null>(null);
   const navItems = getAppNavItems({
     bandId,
     workspaceMode,
@@ -32,6 +35,31 @@ export function AppHeader({ bandId }: AppHeaderProps) {
       .then((summary) => setNotificationCount(summary.total))
       .catch(() => setNotificationCount(0));
   }, [session, workspaceMode, bandId]);
+
+  useEffect(() => {
+    if (!session) {
+      setPlanPill(null);
+      return;
+    }
+
+    listUserSubscriptions()
+      .then((subscriptions) => setPlanPill(resolveWorkspacePlanPill(subscriptions, workspaceMode)))
+      .catch(() =>
+        setPlanPill(resolveWorkspacePlanPill([], workspaceMode)),
+      );
+  }, [session, workspaceMode, location.pathname]);
+
+  const planPillTitle = useMemo(() => {
+    if (!planPill) {
+      return undefined;
+    }
+
+    if (planPill.planName) {
+      return `${planPill.planName} plan — view billing`;
+    }
+
+    return `${planPill.label} plan — view billing`;
+  }, [planPill]);
 
   function handleLogout() {
     setMenuOpen(false);
@@ -77,6 +105,16 @@ export function AppHeader({ bandId }: AppHeaderProps) {
 
         <div className={`app-header-account ${menuOpen ? 'app-header-account-open' : ''}`}>
           {adminModeActive ? <span className="app-admin-badge">Admin mode</span> : null}
+          {planPill ? (
+            <Link
+              to="/app/profile"
+              className={`app-plan-pill app-plan-pill-${planPill.tone}`}
+              title={planPillTitle}
+              onClick={() => setMenuOpen(false)}
+            >
+              {planPill.label}
+            </Link>
+          ) : null}
           {isAppAdmin ? (
             <Link to="/admin" className="app-header-nav-link" onClick={() => setMenuOpen(false)}>
               Admin portal
