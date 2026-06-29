@@ -18,6 +18,7 @@ import {
 } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
 import { AddSongDialog } from '../../components/songs/AddSongDialog';
+import { SongsBandContextBar } from '../../components/songs/SongsBandContextBar';
 import '../../styles/songs.css';
 
 function partsPillClass(song: SongWithReadiness): string {
@@ -104,12 +105,14 @@ export function SongsDashboardPage() {
 
   return (
     <div className="songs-page">
+      <SongsBandContextBar bandId={bandId} bandName={membership?.name} />
+
       <header className="songs-header">
         <div>
           <p className="my-bands-eyebrow">Songs management</p>
           <h1>Band songbook dashboard</h1>
           <p className="my-bands-lead">
-            Upload, organise and prepare the working repertoire for {membership?.name ?? 'this band'}.
+            Upload, organise and prepare the working repertoire for this band.
             Track readiness, keys, parts and file activity in one secure member-only area.
           </p>
         </div>

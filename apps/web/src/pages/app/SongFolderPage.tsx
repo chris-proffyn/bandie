@@ -20,6 +20,7 @@ import {
   SongPartFolderGrid,
   SongPartUploadPanel,
 } from '../../components/songs/SongPartUploadPanel';
+import { SongsBandContextBar } from '../../components/songs/SongsBandContextBar';
 import '../../styles/songs.css';
 
 function fileTypeLabel(file: SongPartFile): string {
@@ -164,6 +165,8 @@ export function SongFolderPage() {
 
   return (
     <div className="songs-page">
+      <SongsBandContextBar bandId={bandId} bandName={membership?.name} />
+
       <header className="songs-header">
         <div>
           <p className="my-bands-eyebrow">Song folder</p>

@@ -3,11 +3,24 @@ import { useAuth } from '../../context/AuthContext';
 
 type BandSwitcherProps = {
   currentBandId?: string;
+  getBandPath?: (bandId: string) => string;
+  compact?: boolean;
+  selectId?: string;
 };
 
-export function BandSwitcher({ currentBandId }: BandSwitcherProps) {
+export function BandSwitcher({
+  currentBandId,
+  getBandPath,
+  compact = false,
+  selectId = 'band-switcher',
+}: BandSwitcherProps) {
   const { bands } = useAuth();
   const navigate = useNavigate();
+
+  function navigateToBand(nextBandId: string) {
+    const path = getBandPath ? getBandPath(nextBandId) : `/app/${nextBandId}`;
+    navigate(path);
+  }
 
   if (!bands.length) {
     return (
@@ -18,14 +31,14 @@ export function BandSwitcher({ currentBandId }: BandSwitcherProps) {
   }
 
   return (
-    <div className="band-switcher">
-      <label htmlFor="band-switcher" style={{ fontSize: '0.82rem', fontWeight: 700, color: '#bbb6aa' }}>
-        Active band
+    <div className={`band-switcher ${compact ? 'band-switcher-compact' : ''}`}>
+      <label htmlFor={selectId} style={{ fontSize: '0.82rem', fontWeight: 700, color: '#bbb6aa' }}>
+        {compact ? 'Switch band' : 'Active band'}
       </label>
       <select
-        id="band-switcher"
+        id={selectId}
         value={currentBandId ?? bands[0]?.id ?? ''}
-        onChange={(event) => navigate(`/app/${event.target.value}`)}
+        onChange={(event) => navigateToBand(event.target.value)}
       >
         {bands.map((band) => (
           <option key={band.id} value={band.id}>
@@ -33,16 +46,20 @@ export function BandSwitcher({ currentBandId }: BandSwitcherProps) {
           </option>
         ))}
       </select>
-      <button
-        type="button"
-        className="auth-button auth-button-secondary"
-        onClick={() => navigate('/app/bands/new')}
-      >
-        Create another band
-      </button>
-      <button type="button" className="auth-button auth-button-secondary" onClick={() => navigate('/app')}>
-        All my bands
-      </button>
+      {compact ? null : (
+        <>
+          <button
+            type="button"
+            className="auth-button auth-button-secondary"
+            onClick={() => navigate('/app/bands/new')}
+          >
+            Create another band
+          </button>
+          <button type="button" className="auth-button auth-button-secondary" onClick={() => navigate('/app')}>
+            All my bands
+          </button>
+        </>
+      )}
     </div>
   );
 }
