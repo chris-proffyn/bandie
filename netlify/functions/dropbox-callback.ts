@@ -97,7 +97,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
 
     if (oauthState.band_id) {
       return redirectResponse(
-        `${appUrl}/app/bands/${oauthState.band_id}?tab=details&dropbox=connected`,
+        `${appUrl}/app/${oauthState.band_id}?tab=details&dropbox=connected`,
       );
     }
 
