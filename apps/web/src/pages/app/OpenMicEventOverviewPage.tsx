@@ -125,19 +125,19 @@ export function OpenMicEventOverviewPage() {
             Publish event
           </button>
         ) : null}
-        <Link className="auth-button auth-button--secondary" to={`/app/open-mic/${event.id}/songs`}>
+        <Link className="auth-button auth-button-secondary" to={`/app/open-mic/${event.id}/songs`}>
           Manage songs
         </Link>
-        <Link className="auth-button auth-button--secondary" to={`/app/open-mic/${event.id}/poster`}>
+        <Link className="auth-button auth-button-secondary" to={`/app/open-mic/${event.id}/poster`}>
           Create poster
         </Link>
         {signupOpen ? (
-          <a className="auth-button auth-button--secondary" href={publicUrl} target="_blank" rel="noreferrer">
+          <a className="auth-button auth-button-secondary" href={publicUrl} target="_blank" rel="noreferrer">
             Open sign-up page
           </a>
         ) : null}
         {event.status === 'signup_open' || event.status === 'published' ? (
-          <Link className="auth-button auth-button--secondary" to={`/app/open-mic/${event.id}/live`}>
+          <Link className="auth-button auth-button-secondary" to={`/app/open-mic/${event.id}/live`}>
             Launch live mode
           </Link>
         ) : null}
@@ -148,7 +148,7 @@ export function OpenMicEventOverviewPage() {
         ) : null}
         <button
           type="button"
-          className="auth-button auth-button--secondary"
+          className="auth-button auth-button-secondary"
           disabled={busy}
           onClick={() => void runAction(() => duplicateOpenMicEvent(event.id))}
         >
@@ -157,7 +157,7 @@ export function OpenMicEventOverviewPage() {
         {!['cancelled', 'completed', 'archived'].includes(event.status) ? (
           <button
             type="button"
-            className="auth-button auth-button--secondary"
+            className="auth-button auth-button-secondary"
             disabled={busy}
             onClick={() => void runAction(() => cancelOpenMicEvent(event.id))}
           >

@@ -5,6 +5,7 @@ import {
   type AdminSearchBand,
   type AdminSearchUser,
 } from '@bandie/data';
+import { AdminOrganiserInvitesPanel } from '../../components/admin/AdminOrganiserInvitesPanel';
 
 export function AdminAccountsPage() {
   const [query, setQuery] = useState('');
@@ -95,6 +96,8 @@ export function AdminAccountsPage() {
           </tbody>
         </table>
       </section>
+
+      <AdminOrganiserInvitesPanel />
     </div>
   );
 }

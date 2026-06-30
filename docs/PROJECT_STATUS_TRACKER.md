@@ -524,6 +524,13 @@ Task checklist: `docs/project/bandie_song_suggestions_voting_implementation_plan
 
 ## Session notes
 
+**30 June 2026 — Organiser invitations (admin portal)**
+- Migration `20260702140000_bandie_organiser_invitations.sql` — `bandie_organiser_invitations` table; admin-only RPCs to create/list/revoke; invitee accept/decline via `/invite/:token`
+- Data: `organiserInvitations.ts`; communications summary includes pending organiser invites
+- Admin UI: `AdminOrganiserInvitesPanel` on `/admin/accounts`
+- Accept flow: `AcceptInvitePage` resolves band vs organiser token; organiser accept sets `is_organiser` and routes to organiser home
+- Communications: `IncomingOrganiserInvitationsPanel` on `/app/communications` (All tab)
+
 **27 June 2026 — Phase 17 Open mic / jam nights MVP implemented**
 - Migrations `20260702100000_bandie_open_mic_events.sql`, `20260702110000_bandie_open_mic_songs_signup.sql` applied via `supabase db push`
 - Data: `openMicEvents.ts`, `openMicSongs.ts`, `openMicLive.ts`; `open_mic.create` Organiser Plus gate + upgrade messaging

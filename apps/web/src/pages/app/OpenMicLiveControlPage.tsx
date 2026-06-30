@@ -100,11 +100,11 @@ export function OpenMicLiveControlPage() {
               Start event
             </button>
           ) : (
-            <button type="button" className="auth-button auth-button--secondary" onClick={() => void endOpenMicEvent(event.id).then(load)}>
+            <button type="button" className="auth-button auth-button-secondary" onClick={() => void endOpenMicEvent(event.id).then(load)}>
               End event
             </button>
           )}
-          <button type="button" className="auth-button auth-button--secondary" onClick={handlePrintRunningOrder}>
+          <button type="button" className="auth-button auth-button-secondary" onClick={handlePrintRunningOrder}>
             Export PDF
           </button>
         </div>
@@ -128,7 +128,7 @@ export function OpenMicLiveControlPage() {
             </button>
             <button
               type="button"
-              className="auth-button auth-button--secondary"
+              className="auth-button auth-button-secondary"
               onClick={() => void markSong(dashboard.nowPlaying!.id, 'skipped')}
             >
               Skip
@@ -167,7 +167,7 @@ export function OpenMicLiveControlPage() {
                 {song.live_status !== 'playing' ? (
                   <button
                     type="button"
-                    className="auth-button auth-button--secondary"
+                    className="auth-button auth-button-secondary"
                     onClick={() => void markSong(song.id, 'playing')}
                   >
                     Play

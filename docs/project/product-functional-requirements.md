@@ -326,7 +326,7 @@ Player and organiser workspace users share a communications hub at `/app/communi
 **Player workspace**
 
 **Routing**
-- Post-auth and app entry redirect to `/app/communications` when pending invitations or player outreach exist
+- Post-auth and app entry redirect to `/app/communications` when pending invitations, organiser invitations, or player outreach exist
 - `/app/invites` and `/app/notifications` redirect to `/app/communications` for backwards compatibility
 
 Activity feed, band-scoped threads, and email/push notifications are deferred.
@@ -357,6 +357,7 @@ Bandie app admins (`is_app_admin`) also have a dedicated **`/admin`** portal (se
 
 - Overview counts (users, bands, songs, setlists, gigs)
 - User and band search
+- **Invite organiser** — platform admins create email-specific organiser invitations from `/admin/accounts`; shareable `/invite/:token` link (same pattern as band member invites; Bandie does not send email)
 - Platform metrics (DAU/WAU/MAU, content totals, tier distribution) with CSV export
 - Entitlement admin — **editable plan catalogue** (five plans: **Player Free**, **Player Plus**, **Player Pro**, **Organiser Free**, **Organiser Plus**; plan codes unchanged): select a plan from grouped pills (Player / Organiser), then edit metadata and capabilities in one panel; draft/publish workflow, manual overrides, gate decision logs, enforcement toggle
 - Audit log

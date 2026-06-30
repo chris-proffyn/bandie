@@ -193,6 +193,23 @@ export type {
 } from './invitations';
 
 export {
+  createOrganiserInvitation,
+  listOrganiserInvitationsForAdmin,
+  revokeOrganiserInvitation,
+  resolveInviteTokenType,
+  listPendingOrganiserInvitationsForCurrentUser,
+  acceptOrganiserInvitation,
+  declineOrganiserInvitation,
+  acceptInviteByToken,
+} from './organiserInvitations';
+export type {
+  OrganiserInvitation,
+  PendingOrganiserInvitation,
+  InviteTokenType,
+  AcceptInviteResult,
+} from './organiserInvitations';
+
+export {
   listMyMessages,
   countUnreadMessages,
   sendDirectMessage,

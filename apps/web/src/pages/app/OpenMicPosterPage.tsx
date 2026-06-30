@@ -77,7 +77,7 @@ export function OpenMicPosterPage() {
           <h1>Event poster</h1>
         </div>
         <div className="open-mic-header-actions">
-          <button type="button" className="auth-button auth-button--secondary" onClick={() => void copyLink()}>
+          <button type="button" className="auth-button auth-button-secondary" onClick={() => void copyLink()}>
             {copied ? 'Copied!' : 'Copy public link'}
           </button>
           <button type="button" className="auth-button" onClick={() => window.print()}>

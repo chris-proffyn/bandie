@@ -4,6 +4,7 @@ import {
   getCurrentSession,
   listMyPendingPlayerOutreach,
   listPendingInvitationsForCurrentUser,
+  listPendingOrganiserInvitationsForCurrentUser,
   resolveWorkspaceMode,
   workspaceModeHomePath,
 } from '@bandie/data';
@@ -13,12 +14,13 @@ export async function routeAfterAuth(options: {
   intent: string | null;
   redirect: string | null;
 }): Promise<string> {
-  const [pending, playerOutreach] = await Promise.all([
+  const [pending, organiserPending, playerOutreach] = await Promise.all([
     listPendingInvitationsForCurrentUser(),
+    listPendingOrganiserInvitationsForCurrentUser(),
     listMyPendingPlayerOutreach(),
   ]);
 
-  if (pending.length > 0 || playerOutreach.length > 0) {
+  if (pending.length > 0 || organiserPending.length > 0 || playerOutreach.length > 0) {
     return '/app/communications';
   }
 

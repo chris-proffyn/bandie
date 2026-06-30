@@ -187,6 +187,7 @@ RLS policies must enforce band membership for all private data.
 
 **Communications data access (`@bandie/data`):**
 - `listPendingInvitationsForCurrentUser`, `acceptBandInvitation`, `declineBandInvitation`, `acceptAllPendingInvitations` — band invitations
+- `createOrganiserInvitation`, `listOrganiserInvitationsForAdmin`, `revokeOrganiserInvitation`, `listPendingOrganiserInvitationsForCurrentUser`, `acceptOrganiserInvitation`, `declineOrganiserInvitation`, `resolveInviteTokenType`, `acceptInviteByToken` — organiser invitations (admin create; invitee accept via `/invite/:token`)
 - `listMyPendingPlayerOutreach`, `respondToPlayerOutreach`, `countMyPendingPlayerOutreach` — player outreach inbox
 - `listMyMessages`, `sendDirectMessage`, `sendDirectMessageToUser`, `replyToMessage`, `markMessageRead`, `countUnreadMessages` — direct messages (`player_message.send` entitlement when enforcing)
 - `listCommunications`, `filterCommunications`, `filterResolvedInviteCommunications`, `filterReadGeneralMessages`, `getCommunicationCategory`, `getCommunicationSummary`, `getNotificationSummary` — unified feed (three categories: player invite, gig invite, general message) and nav badge
@@ -375,7 +376,7 @@ Breakpoints: mobile 0–639px, tablet 640–1023px, desktop 1024px+.
 | `/bands/:slug` | Public | Public band profile |
 | `/players` | Public | Player directory |
 | `/players/:profileId` | Public | Public player profile |
-| `/invite/:token` | Public | Accept band invitation |
+| `/invite/:token` | Public | Accept band or organiser invitation |
 | `/signup` | Guest | Registration |
 | `/login` | Guest | Login |
 | `/forgot-password` | Guest | Request password reset |

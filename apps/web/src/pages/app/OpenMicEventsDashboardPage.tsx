@@ -7,6 +7,7 @@ import {
   createOrganiserVenue,
   EntitlementGateError,
   formatOpenMicEventStatus,
+  formatOrganiserVenueAddress,
   listMyOrganiserVenues,
   listOrganiserOpenMicEvents,
   openMicStatusPillClass,
@@ -16,7 +17,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { UpgradePromptModal } from '../../components/entitlements/UpgradePromptModal';
 import { useUpgradePrompt } from '../../hooks/useUpgradePrompt';
-import '../../styles/openMic.css';
+import '../../styles/gigs.css';
 
 type VenueChoice = '' | 'new' | string;
 
@@ -54,6 +55,15 @@ export function OpenMicEventsDashboardPage() {
     }
   }, []);
 
+  const loadVenues = useCallback(async () => {
+    try {
+      const rows = await listMyOrganiserVenues();
+      setVenues(rows);
+    } catch {
+      setVenues([]);
+    }
+  }, []);
+
   useEffect(() => {
     void loadEvents();
   }, [loadEvents]);
@@ -70,17 +80,25 @@ export function OpenMicEventsDashboardPage() {
 
   useEffect(() => {
     if (showCreate) {
-      void listMyOrganiserVenues()
-        .then(setVenues)
-        .catch(() => setVenues([]));
+      void loadVenues();
     }
-  }, [showCreate]);
+  }, [showCreate, loadVenues]);
 
   const metrics = useMemo(() => computeOpenMicDashboardMetrics(events), [events]);
+
+  const selectedVenue = useMemo(
+    () => venues.find((venue) => venue.id === form.venueChoice) ?? null,
+    [form.venueChoice, venues],
+  );
 
   async function handleCreate(event: FormEvent) {
     event.preventDefault();
     if (!form.title.trim() || !form.startsAt) {
+      return;
+    }
+
+    if (form.venueChoice === 'new' && !form.newVenueName.trim()) {
+      setFormError('Enter a name for the new venue or choose a saved venue.');
       return;
     }
 
@@ -95,14 +113,16 @@ export function OpenMicEventsDashboardPage() {
       if (form.venueChoice === 'new') {
         const venue = await createOrganiserVenue({
           name: form.newVenueName.trim(),
-          address_line1: form.newVenueAddress.trim() || undefined,
+          address_line1: form.newVenueAddress.trim() || null,
         });
         venueId = venue.id;
         venueName = venue.name;
-      } else if (form.venueChoice) {
-        const venue = venues.find((row) => row.id === form.venueChoice);
-        venueId = form.venueChoice;
-        venueName = venue?.name ?? null;
+        venueAddress = formatOrganiserVenueAddress(venue);
+        await loadVenues();
+      } else if (selectedVenue) {
+        venueId = selectedVenue.id;
+        venueName = selectedVenue.name;
+        venueAddress = formatOrganiserVenueAddress(selectedVenue);
       }
 
       const created = await createOpenMicEvent({
@@ -113,6 +133,14 @@ export function OpenMicEventsDashboardPage() {
         venueAddress,
       });
 
+      setShowCreate(false);
+      setForm({
+        title: '',
+        startsAt: '',
+        venueChoice: '',
+        newVenueName: '',
+        newVenueAddress: '',
+      });
       navigate(`/app/open-mic/${created.id}`);
     } catch (err) {
       if (!handleEntitlementError(err)) {
@@ -124,21 +152,28 @@ export function OpenMicEventsDashboardPage() {
   }
 
   return (
-    <div className="open-mic-page">
-      <div className="open-mic-header">
+    <div className="gigs-page">
+      <header className="gigs-header">
         <div>
-          <h1>Open mic / jam nights</h1>
-          <p>Create events, build song lists, and run the evening from a live control room.</p>
+          <p className="my-bands-eyebrow">Open mic / jam nights</p>
+          <h1>Plan evenings and run sign-ups</h1>
+          <p className="my-bands-lead">
+            Create events, build song lists with instrument slots, and run the evening from a live
+            control room.
+          </p>
         </div>
-        <div className="open-mic-header-actions">
+        <div className="gigs-header-actions">
+          <Link to="/app/venues" className="directory-btn directory-btn-secondary">
+            My venues
+          </Link>
           {canCreate ? (
-            <button type="button" className="auth-button" onClick={() => setShowCreate((value) => !value)}>
-              {showCreate ? 'Cancel' : 'New event'}
+            <button type="button" className="auth-button" onClick={() => setShowCreate(true)}>
+              New event
             </button>
           ) : (
             <button
               type="button"
-              className="auth-button auth-button--secondary"
+              className="directory-btn directory-btn-secondary"
               onClick={() => {
                 if (!user) return;
                 void checkUserOrganiserCapability(user.id, 'open_mic.create').then((decision) => {
@@ -152,123 +187,160 @@ export function OpenMicEventsDashboardPage() {
             </button>
           )}
         </div>
-      </div>
+      </header>
 
-      <div className="open-mic-metrics">
-        <div className="open-mic-metric-card">
+      <div className="gigs-metrics">
+        <article className="gigs-metric-card">
           <span>Total events</span>
           <strong>{metrics.total}</strong>
-        </div>
-        <div className="open-mic-metric-card">
+        </article>
+        <article className="gigs-metric-card">
           <span>Upcoming</span>
           <strong>{metrics.upcoming}</strong>
-        </div>
-        <div className="open-mic-metric-card">
+        </article>
+        <article className="gigs-metric-card">
           <span>Drafts</span>
           <strong>{metrics.drafts}</strong>
-        </div>
-        <div className="open-mic-metric-card">
+        </article>
+        <article className="gigs-metric-card">
           <span>Live now</span>
           <strong>{metrics.live}</strong>
-        </div>
+        </article>
       </div>
 
+      {loadError ? <div className="auth-message auth-message-error">{loadError}</div> : null}
+
       {showCreate && canCreate ? (
-        <form className="panel" onSubmit={handleCreate}>
-          <h2>Create open mic event</h2>
-          {formError ? <p className="form-error">{formError}</p> : null}
-          <label>
-            Event title
-            <input
-              value={form.title}
-              onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
-              required
-            />
-          </label>
-          <label>
-            Starts
-            <input
-              type="datetime-local"
-              value={form.startsAt}
-              onChange={(e) => setForm((prev) => ({ ...prev, startsAt: e.target.value }))}
-              required
-            />
-          </label>
-          <label>
-            Venue
-            <select
-              value={form.venueChoice}
-              onChange={(e) => setForm((prev) => ({ ...prev, venueChoice: e.target.value as VenueChoice }))}
-            >
-              <option value="">Ad hoc venue later</option>
-              <option value="new">Add new venue…</option>
-              {venues.map((venue) => (
-                <option key={venue.id} value={venue.id}>
-                  {venue.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          {form.venueChoice === 'new' ? (
-            <>
-              <label>
-                Venue name
-                <input
-                  value={form.newVenueName}
-                  onChange={(e) => setForm((prev) => ({ ...prev, newVenueName: e.target.value }))}
-                  required
-                />
-              </label>
-              <label>
-                Address
-                <input
-                  value={form.newVenueAddress}
-                  onChange={(e) => setForm((prev) => ({ ...prev, newVenueAddress: e.target.value }))}
-                />
-              </label>
-            </>
-          ) : null}
-          <div className="open-mic-header-actions">
-            <button type="submit" className="auth-button" disabled={submitting}>
-              {submitting ? 'Creating…' : 'Create draft'}
-            </button>
-          </div>
-        </form>
-      ) : null}
-
-      {loading ? <p>Loading events…</p> : null}
-      {loadError ? <p className="form-error">{loadError}</p> : null}
-
-      {!loading && events.length === 0 ? (
-        <div className="panel">
-          <p>No open mic events yet. Create your first event to get a public sign-up page and poster.</p>
-        </div>
-      ) : null}
-
-      <ul className="open-mic-list">
-        {events.map((event) => {
-          const venueLabel = event.venue?.name ?? event.venue_name ?? 'Venue TBC';
-          const starts = new Date(event.starts_at).toLocaleString('en-GB', {
-            dateStyle: 'medium',
-            timeStyle: 'short',
-          });
-          return (
-            <li key={event.id}>
-              <Link className="open-mic-list-item" to={`/app/open-mic/${event.id}`}>
-                <div>
-                  <strong>{event.title}</strong>
-                  <p>
-                    {starts} · {venueLabel} · {event.songCount} songs · {event.signupCount} sign-ups
-                  </p>
+        <section className="panel gigs-create-panel">
+          <h2>New open mic event</h2>
+          <p className="workspace-empty-note">
+            Start with a title and date. You&apos;ll add venue details, songs, and sign-up settings on
+            the next screen.
+          </p>
+          <form className="auth-form" onSubmit={handleCreate}>
+            <div className="auth-field">
+              <label htmlFor="open-mic-title">Title</label>
+              <input
+                id="open-mic-title"
+                value={form.title}
+                onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
+                placeholder="e.g. Tuesday open mic"
+                required
+              />
+            </div>
+            <div className="auth-field">
+              <label htmlFor="open-mic-starts">Date and time</label>
+              <input
+                id="open-mic-starts"
+                type="datetime-local"
+                value={form.startsAt}
+                onChange={(e) => setForm((prev) => ({ ...prev, startsAt: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="auth-field">
+              <label htmlFor="open-mic-venue">Venue (optional)</label>
+              <select
+                id="open-mic-venue"
+                value={form.venueChoice}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, venueChoice: e.target.value as VenueChoice }))
+                }
+              >
+                <option value="">No venue yet</option>
+                {venues.map((venue) => (
+                  <option key={venue.id} value={venue.id}>
+                    {venue.name}
+                    {venue.city ? ` · ${venue.city}` : ''}
+                  </option>
+                ))}
+                <option value="new">Add new venue…</option>
+              </select>
+            </div>
+            {form.venueChoice === 'new' ? (
+              <>
+                <div className="auth-field">
+                  <label htmlFor="open-mic-new-venue-name">New venue name</label>
+                  <input
+                    id="open-mic-new-venue-name"
+                    value={form.newVenueName}
+                    onChange={(e) => setForm((prev) => ({ ...prev, newVenueName: e.target.value }))}
+                    required
+                  />
                 </div>
-                <span className={openMicStatusPillClass(event.status)}>
-                  {formatOpenMicEventStatus(event.status)}
-                </span>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+                <div className="auth-field">
+                  <label htmlFor="open-mic-new-venue-address">Address (optional)</label>
+                  <input
+                    id="open-mic-new-venue-address"
+                    value={form.newVenueAddress}
+                    onChange={(e) => setForm((prev) => ({ ...prev, newVenueAddress: e.target.value }))}
+                    placeholder="Street, city or postcode"
+                  />
+                </div>
+                <p className="workspace-empty-note">
+                  The venue will be saved to My venues and linked to this event.
+                </p>
+              </>
+            ) : selectedVenue ? (
+              <p className="workspace-empty-note">
+                {formatOrganiserVenueAddress(selectedVenue) ?? 'No address saved for this venue.'}
+              </p>
+            ) : null}
+            {formError ? <div className="auth-message auth-message-error">{formError}</div> : null}
+            <div className="gigs-form-actions">
+              <button
+                type="button"
+                className="auth-button auth-button-secondary"
+                onClick={() => setShowCreate(false)}
+                disabled={submitting}
+              >
+                Cancel
+              </button>
+              <button type="submit" className="auth-button" disabled={submitting}>
+                {submitting ? 'Creating…' : 'Create draft'}
+              </button>
+            </div>
+          </form>
+        </section>
+      ) : null}
+
+      <section className="panel">
+        <h2>Your events</h2>
+        {loading ? <p className="workspace-empty-note">Loading events…</p> : null}
+        {!loading && events.length === 0 ? (
+          <p className="workspace-empty-note">
+            No open mic events yet. Create your first event to get a public sign-up page and poster.
+          </p>
+        ) : null}
+        <ul className="gigs-list">
+          {events.map((event) => {
+            const venueLabel = event.venue?.name ?? event.venue_name ?? 'Venue TBC';
+            const starts = new Date(event.starts_at).toLocaleString('en-GB', {
+              weekday: 'short',
+              day: 'numeric',
+              month: 'short',
+              hour: '2-digit',
+              minute: '2-digit',
+            });
+            return (
+              <li key={event.id}>
+                <Link className="gigs-list-item" to={`/app/open-mic/${event.id}`}>
+                  <div>
+                    <strong>{event.title}</strong>
+                    <p>
+                      {starts} · {venueLabel} · {event.songCount} songs · {event.signupCount}{' '}
+                      sign-ups
+                    </p>
+                  </div>
+                  <span className={openMicStatusPillClass(event.status)}>
+                    {formatOpenMicEventStatus(event.status)}
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
 
       {upgradeDecision ? (
         <UpgradePromptModal decision={upgradeDecision} onClose={clearUpgradePrompt} />

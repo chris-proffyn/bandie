@@ -3,6 +3,7 @@ import { getCommunicationSummary, type CommunicationFilter } from '@bandie/data'
 import { useAuth } from '../../context/AuthContext';
 import { CommunicationsFeed } from '../../components/communications/CommunicationsFeed';
 import { IncomingBandInvitationsPanel } from '../../components/communications/IncomingBandInvitationsPanel';
+import { IncomingOrganiserInvitationsPanel } from '../../components/communications/IncomingOrganiserInvitationsPanel';
 import { IncomingPlayerOutreachPanel } from '../../components/communications/IncomingPlayerOutreachPanel';
 import { OutgoingInvitesPanel } from '../../components/communications/OutgoingInvitesPanel';
 import { UserMessagesPanel } from '../../components/communications/UserMessagesPanel';
@@ -30,6 +31,7 @@ export function CommunicationsPage() {
   const [hideReadMessages, setHideReadMessages] = useState(true);
   const [summary, setSummary] = useState({
     pendingInvitations: 0,
+    pendingOrganiserInvitations: 0,
     pendingPlayerOutreach: 0,
     unreadMessages: 0,
     unreadBookingEnquiries: 0,
@@ -52,6 +54,7 @@ export function CommunicationsPage() {
     } catch {
       setSummary({
         pendingInvitations: 0,
+        pendingOrganiserInvitations: 0,
         pendingPlayerOutreach: 0,
         unreadMessages: 0,
         unreadBookingEnquiries: 0,
@@ -141,13 +144,16 @@ export function CommunicationsPage() {
       ) : null}
 
       {filter === 'all' ? (
-        <section className="panel communications-section">
-          <CommunicationsFeed
-            filter="all"
-            hideResolvedInvites={hideResolvedInvites}
-            onChanged={refreshSummary}
-          />
-        </section>
+        <>
+          <IncomingOrganiserInvitationsPanel onChanged={refreshSummary} />
+          <section className="panel communications-section">
+            <CommunicationsFeed
+              filter="all"
+              hideResolvedInvites={hideResolvedInvites}
+              onChanged={refreshSummary}
+            />
+          </section>
+        </>
       ) : null}
 
       {filter === 'gig_invites' ? (

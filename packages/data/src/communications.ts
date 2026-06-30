@@ -3,6 +3,7 @@ import {
   listMyReceivedBandInvitations,
   listPendingInvitationsForCurrentUser,
 } from './invitations';
+import { listPendingOrganiserInvitationsForCurrentUser } from './organiserInvitations';
 import type { ReceivedBandInvitation, SentBandInvitation } from './invitations';
 import { countUnreadMessages, listMyMessages, type UserMessage } from './messages';
 import {
@@ -65,6 +66,7 @@ export function isGeneralMessageCommunication(item: CommunicationItem): boolean 
 
 export type CommunicationSummary = {
   pendingInvitations: number;
+  pendingOrganiserInvitations: number;
   pendingPlayerOutreach: number;
   unreadMessages: number;
   unreadBookingEnquiries: number;
@@ -146,9 +148,16 @@ export type CommunicationItem =
   | SentGigInviteCommunicationItem;
 
 export async function getCommunicationSummary(): Promise<CommunicationSummary> {
-  const [invitations, playerOutreach, unreadMessages, unreadBookingEnquiries, unreadGigInvites] =
-    await Promise.all([
+  const [
+    invitations,
+    organiserInvitations,
+    playerOutreach,
+    unreadMessages,
+    unreadBookingEnquiries,
+    unreadGigInvites,
+  ] = await Promise.all([
     listPendingInvitationsForCurrentUser(),
+    listPendingOrganiserInvitationsForCurrentUser(),
     countMyPendingPlayerOutreach(),
     countUnreadMessages(),
     countUnreadBookingEnquiries(),
@@ -156,15 +165,18 @@ export async function getCommunicationSummary(): Promise<CommunicationSummary> {
   ]);
 
   const pendingInvitations = invitations.length;
+  const pendingOrganiserInvitations = organiserInvitations.length;
 
   return {
     pendingInvitations,
+    pendingOrganiserInvitations,
     pendingPlayerOutreach: playerOutreach,
     unreadMessages,
     unreadBookingEnquiries,
     unreadGigInvites,
     total:
       pendingInvitations +
+      pendingOrganiserInvitations +
       playerOutreach +
       unreadMessages +
       unreadBookingEnquiries +
@@ -363,7 +375,10 @@ export async function getNotificationSummary(): Promise<NotificationSummary> {
   const summary = await getCommunicationSummary();
 
   return {
-    pendingInvitations: summary.pendingInvitations + summary.pendingPlayerOutreach,
+    pendingInvitations:
+      summary.pendingInvitations +
+      summary.pendingOrganiserInvitations +
+      summary.pendingPlayerOutreach,
     unreadMessages: summary.unreadMessages,
     total: summary.total,
   };

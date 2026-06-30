@@ -277,7 +277,7 @@ export function PublicOpenMicEventPage() {
                   onChange={(e) => setSuggestionForm((prev) => ({ ...prev, notes: e.target.value }))}
                 />
               </label>
-              <button type="submit" className="auth-button auth-button--secondary">
+              <button type="submit" className="auth-button auth-button-secondary">
                 Send suggestion
               </button>
             </form>

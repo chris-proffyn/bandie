@@ -129,7 +129,7 @@ export function OpenMicSongListPage() {
                   </button>
                   <button
                     type="button"
-                    className="auth-button auth-button--secondary"
+                    className="auth-button auth-button-secondary"
                     onClick={() => void rejectOpenMicAssignment(signup.id).then(load)}
                   >
                     Reject
@@ -186,7 +186,7 @@ export function OpenMicSongListPage() {
               </div>
               <button
                 type="button"
-                className="auth-button auth-button--secondary"
+                className="auth-button auth-button-secondary"
                 onClick={() => void deleteOpenMicSong(song.id).then(load)}
               >
                 Delete
@@ -208,21 +208,21 @@ export function OpenMicSongListPage() {
               <div className="open-mic-header-actions">
                 <button
                   type="button"
-                  className="auth-button auth-button--secondary"
+                  className="auth-button auth-button-secondary"
                   onClick={() => void handleApplyTemplate(song.id, 'rock')}
                 >
                   Rock template
                 </button>
                 <button
                   type="button"
-                  className="auth-button auth-button--secondary"
+                  className="auth-button auth-button-secondary"
                   onClick={() => void handleApplyTemplate(song.id, 'acoustic')}
                 >
                   Acoustic template
                 </button>
                 <button
                   type="button"
-                  className="auth-button auth-button--secondary"
+                  className="auth-button auth-button-secondary"
                   onClick={() => void handleApplyTemplate(song.id, 'blues')}
                 >
                   Blues template
