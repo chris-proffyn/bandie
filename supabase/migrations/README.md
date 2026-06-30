@@ -100,6 +100,9 @@ Local webhook forwarding:
 stripe listen --forward-to localhost:8888/api/billing/stripe-webhook
 ```
 
+## Phase 20 — song suggestions (applied)
+
+- `20260701170000_bandie_song_suggestions.sql` — suggestion groups, votes, confirmed snapshot, vote summary view, RLS + RPCs (submit, vote, close/reopen, veto, reset, confirm)
 
 ## RLS requirement
 

@@ -524,6 +524,35 @@ Rock, jazz, punk, post-punk, funk, acoustic, high energy, etc.
 
 ---
 
+## 9b. Song suggestions and voting
+
+**Status:** Implemented (web MVP) — `/app/:bandId/songs/suggestions`  
+**Spec:** `bandie_song_suggestions_voting_spec.md`
+
+Whole-band collaboration to decide which songs to learn next. All approved band members (including free-tier) can suggest and vote; only band leaders create groups, close windows, veto, reset votes, and confirm selections.
+
+### Suggestion groups
+
+Leader creates a named group with brief, target number of songs, suggestion closing date/time, optional voting closing date, preferred genres/decades, and **vote visibility** (`member_visible` — show who voted how; or `aggregate_only` — counts only, leader always sees per-member votes).
+
+### Member participation
+
+Members submit song title, artist, optional YouTube/Spotify links and rationale. Submitter receives an automatic `happy_to_play` vote. Members vote 🙂 / 😐 / 🙁 while voting is open. Duplicate title+artist shows a non-blocking warning.
+
+### Leader controls
+
+Close or reopen suggestions; close voting; **veto** a suggestion with required reason; **reset all votes** for a re-vote on ties; confirm top N with optional override reasons for songs outside rank order (warning if votes incomplete).
+
+### Outcome
+
+Confirmed songs appear in a read-only ranked list. Leader may **create skeleton setlist** — draft setlist in rank order, creating draft catalogue songs where missing (`setlist.create` entitlement when enforcing). Activity feed on group detail.
+
+### Deferred (post-MVP)
+
+Scheduled auto-close at deadline, vote comment UI, email reminders, Band Admin parity, draft group status, max open groups per tier.
+
+---
+
 ## 10. Calendar and availability
 
 **Status:** Implemented (web MVP) — `/app/:bandId/calendar`  

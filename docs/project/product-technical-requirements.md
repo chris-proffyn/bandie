@@ -157,6 +157,11 @@ All tables prefixed `bandie_`. Full schema to be defined in migrations. Conceptu
 | `bandie_band_song_part_storage` | Per-band Dropbox song-parts root folder mapping |
 | `bandie_setlists` | Setlist definitions |
 | `bandie_setlist_items` | Songs in setlist order |
+| `bandie_song_suggestion_groups` | Song suggestion rounds (brief, windows, vote visibility, status) |
+| `bandie_song_suggestions` | Member song proposals per group |
+| `bandie_song_suggestion_votes` | Per-member votes (happy / meh / rather not) |
+| `bandie_song_suggestion_group_events` | Audit/activity log for suggestion groups |
+| `bandie_song_suggestion_confirmed_songs` | Leader-confirmed ranked snapshot |
 | `bandie_calendar_events` | Rehearsals and availability windows (`series_key`, `repeat_pattern` for repeating series) |
 | `bandie_availability_votes` | Member votes on calendar events |
 | `bandie_gigs` | Gig records (enquiry through archived) |
@@ -245,6 +250,7 @@ Band workspace limits resolve from the **primary leader’s** active subscriptio
 
 **Calendar, gigs, booking (`@bandie/data`):**
 - `calendar.ts` — events, votes, repeating series (`calendarRecurrence.ts`: weekly, monthly nth weekday), `calendar.use` tier (`none` on Player Free; `full` on Player Plus / Player Pro)
+- `songSuggestions.ts` — suggestion groups, submit/vote, leader close/veto/reset/confirm, ranking, skeleton setlist from confirmed group (`setlist.create` when enforcing)
 - `gigs.ts` — organiser gig CRUD, band invites, setlist assignment RPCs, `gig.create` limits (organiser scope)
 - `bookingEnquiries.ts` — send, inbox, `booking_enquiry.send` limits
 
@@ -385,6 +391,8 @@ Breakpoints: mobile 0–639px, tablet 640–1023px, desktop 1024px+.
 | `/app/gigs/:gigId` | Protected (organiser mode) | Organiser gig detail (venue, band invites, running order) |
 | `/app/profiles/:profileId/edit` | Protected (admin mode) | Admin edit player profile |
 | `/app/:bandId/songs` | Protected | Songs dashboard |
+| `/app/:bandId/songs/suggestions` | Protected | Song suggestion groups list |
+| `/app/:bandId/songs/suggestions/:groupId` | Protected | Suggestion group detail (vote, leader confirm) |
 | `/app/:bandId/songs/:songId` | Protected | Song folder |
 | `/app/:bandId/setlists` | Protected | Setlist library |
 | `/app/:bandId/setlists/:setlistId` | Protected | Setlist builder |

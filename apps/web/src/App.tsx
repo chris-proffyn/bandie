@@ -13,6 +13,8 @@ import { PendingInvitesPage } from './pages/app/PendingInvitesPage';
 import { CreateBandPage } from './pages/app/CreateBandPage';
 import { WorkspaceHomePage } from './pages/app/WorkspaceHomePage';
 import { SongsDashboardPage } from './pages/app/SongsDashboardPage';
+import { SongSuggestionGroupsPage } from './pages/app/SongSuggestionGroupsPage';
+import { SongSuggestionGroupDetailPage } from './pages/app/SongSuggestionGroupDetailPage';
 import { SongFolderPage } from './pages/app/SongFolderPage';
 import { SongPartFolderPage } from './pages/app/SongPartFolderPage';
 import { SetlistsDashboardPage } from './pages/app/SetlistsDashboardPage';
@@ -224,6 +226,22 @@ export default function App() {
                 element={
                   <WorkspaceModeRoute mode="player">
                     <SetlistsDashboardPage />
+                  </WorkspaceModeRoute>
+                }
+              />
+              <Route
+                path="songs/suggestions/:groupId"
+                element={
+                  <WorkspaceModeRoute mode="player">
+                    <SongSuggestionGroupDetailPage />
+                  </WorkspaceModeRoute>
+                }
+              />
+              <Route
+                path="songs/suggestions"
+                element={
+                  <WorkspaceModeRoute mode="player">
+                    <SongSuggestionGroupsPage />
                   </WorkspaceModeRoute>
                 }
               />

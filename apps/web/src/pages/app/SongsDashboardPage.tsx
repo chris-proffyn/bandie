@@ -10,8 +10,11 @@ import {
   formatSongPartActivityLabel,
   formatSongReadinessStatus,
   isBandLeaderRole,
+  listBandSongSuggestionGroups,
   listBandSongs,
   listRecentSongPartActivity,
+  SONG_SUGGESTION_GROUP_STATUS_LABELS,
+  songSuggestionGroupStatusClass,
   restoreBandSong,
   SONG_PARTS_LEADER_ONLY_MESSAGE,
   songTitleInitials,
@@ -55,6 +58,9 @@ export function SongsDashboardPage() {
   const [showAddSong, setShowAddSong] = useState(false);
   const [showDeleted, setShowDeleted] = useState(false);
   const [restoringId, setRestoringId] = useState<string | null>(null);
+  const [suggestionGroups, setSuggestionGroups] = useState<
+    Awaited<ReturnType<typeof listBandSongSuggestionGroups>>
+  >([]);
   const [filters, setFilters] = useState<SongListFilters>({
     search: '',
     genre: 'all',
@@ -72,12 +78,14 @@ export function SongsDashboardPage() {
     setLoadError(null);
 
     try {
-      const [songRows, activityRows] = await Promise.all([
+      const [songRows, activityRows, groupRows] = await Promise.all([
         listBandSongs(bandId, { ...filters, includeDeleted: showDeleted }),
         listRecentSongPartActivity(bandId),
+        listBandSongSuggestionGroups(bandId),
       ]);
       setSongs(songRows);
       setActivity(activityRows);
+      setSuggestionGroups(groupRows);
     } catch (err) {
       setSongs([]);
       setActivity([]);
@@ -144,6 +152,9 @@ export function SongsDashboardPage() {
           </p>
         </div>
         <div className="songs-header-actions">
+          <Link to={`/app/${bandId}/songs/suggestions`} className="directory-btn directory-btn-secondary">
+            Song suggestions
+          </Link>
           <Link to={`/app/${bandId}`} className="directory-btn directory-btn-secondary">
             Band overview
           </Link>
@@ -199,6 +210,50 @@ export function SongsDashboardPage() {
           <span>From gig-ready songs</span>
         </article>
       </section>
+
+      {suggestionGroups.some((group) =>
+        ['open_for_suggestions', 'suggestions_closed', 'voting_closed'].includes(group.status),
+      ) ? (
+        <section className="panel">
+          <div className="songs-side-card-header">
+            <div>
+              <h2>Active song suggestions</h2>
+              <p>Groups where the band is suggesting and voting on new repertoire.</p>
+            </div>
+            <Link to={`/app/${bandId}/songs/suggestions`} className="directory-btn directory-btn-secondary">
+              View all
+            </Link>
+          </div>
+          <div className="song-suggestions-grid">
+            {suggestionGroups
+              .filter((group) =>
+                ['open_for_suggestions', 'suggestions_closed', 'voting_closed'].includes(
+                  group.status,
+                ),
+              )
+              .slice(0, 3)
+              .map((group) => (
+                <Link
+                  key={group.id}
+                  to={`/app/${bandId}/songs/suggestions/${group.id}`}
+                  className="song-suggestion-card"
+                >
+                  <div className="song-suggestion-card-head">
+                    <div>
+                      <h3>{group.name}</h3>
+                      <p className="song-suggestion-meta">
+                        {group.suggestion_count} suggestions · target {group.target_song_count}
+                      </p>
+                    </div>
+                    <span className={songSuggestionGroupStatusClass(group.status)}>
+                      {SONG_SUGGESTION_GROUP_STATUS_LABELS[group.status]}
+                    </span>
+                  </div>
+                </Link>
+              ))}
+          </div>
+        </section>
+      ) : null}
 
       <section className="songs-content-grid">
         <div className="panel">
