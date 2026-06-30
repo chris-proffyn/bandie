@@ -18,6 +18,7 @@ import { useAuth } from '../../context/AuthContext';
 import { UpgradePromptModal } from '../../components/entitlements/UpgradePromptModal';
 import { useUpgradePrompt } from '../../hooks/useUpgradePrompt';
 import '../../styles/gigs.css';
+import '../../styles/workspace.css';
 
 type VenueChoice = '' | 'new' | string;
 

@@ -14,6 +14,9 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { BackLink } from '../components/navigation/BackLink';
 import { usePageMeta } from '../lib/usePageMeta';
+import '../styles/bandProfile.css';
+import '../styles/gigs.css';
+import '../styles/workspace.css';
 import '../styles/openMic.css';
 
 export function PublicOpenMicEventPage() {
@@ -134,7 +137,7 @@ export function PublicOpenMicEventPage() {
 
   if (loading) {
     return (
-      <div className="open-mic-public-page">
+      <div className="band-profile-page open-mic-public-page">
         <div className="open-mic-public-hero">
           <BackLink fallbackTo="/" label="Back to Bandie" />
           <h1>Loading event…</h1>
@@ -145,11 +148,13 @@ export function PublicOpenMicEventPage() {
 
   if (missing || !event) {
     return (
-      <div className="open-mic-public-page">
+      <div className="band-profile-page open-mic-public-page">
         <div className="open-mic-public-hero">
           <BackLink fallbackTo="/" label="Back to Bandie" />
           <h1>Event not found</h1>
-          <p>This link may be incorrect, or the organiser has not published the event yet.</p>
+          <p className="workspace-section-note">
+            This link may be incorrect, or the organiser has not published the event yet.
+          </p>
         </div>
       </div>
     );
@@ -163,10 +168,10 @@ export function PublicOpenMicEventPage() {
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(publicUrl)}`;
 
   return (
-    <div className="open-mic-public-page">
+    <div className="band-profile-page open-mic-public-page">
       <div className="open-mic-public-hero">
         <BackLink fallbackTo="/" label="Back to Bandie" />
-        <p>{formatOpenMicEventType(event.event_type)}</p>
+        <p className="my-bands-eyebrow">{formatOpenMicEventType(event.event_type)}</p>
         <h1>{event.title}</h1>
         <div className="open-mic-public-meta">
           <span>{starts}</span>
@@ -174,53 +179,61 @@ export function PublicOpenMicEventPage() {
           {event.venue_address ? <span>{event.venue_address}</span> : null}
           <span>Sign-up: {formatOpenMicSignupMode(event.signup_mode)}</span>
         </div>
-        {event.description ? <p>{event.description}</p> : null}
+        {event.description ? <p className="workspace-section-note">{event.description}</p> : null}
         {user ? (
           <p>
-            <span className="status-pill status-pill--success">Bandie member</span>
+            <span className="open-mic-public-badge">Bandie member</span>
           </p>
         ) : null}
-        <img src={qrUrl} alt="Event QR code" width={180} height={180} />
+        <img className="open-mic-public-qr" src={qrUrl} alt="Event QR code" />
 
-        {message ? <p className="auth-message auth-message-success">{message}</p> : null}
-        {error ? <p className="form-error">{error}</p> : null}
+        {message ? <div className="auth-message auth-message-success">{message}</div> : null}
+        {error ? <div className="auth-message auth-message-error">{error}</div> : null}
 
         {signupOpen && songs.length > 0 ? (
-          <section className="panel">
-            <h2>Sign up for a slot</h2>
-            <form className="open-mic-signup-form" onSubmit={handleSignup}>
-              <label>
-                Your name
+          <section className="panel workspace-section">
+            <header className="workspace-section-header">
+              <div>
+                <h2>Sign up for a slot</h2>
+              </div>
+            </header>
+            <form className="auth-form" onSubmit={handleSignup}>
+              <div className="auth-field">
+                <label htmlFor="signup-name">Your name</label>
                 <input
+                  id="signup-name"
                   value={signupForm.displayName}
                   onChange={(e) => setSignupForm((prev) => ({ ...prev, displayName: e.target.value }))}
                   required
                 />
-              </label>
+              </div>
               {event.required_contact_field !== 'phone' ? (
-                <label>
-                  Email
+                <div className="auth-field">
+                  <label htmlFor="signup-email">Email</label>
                   <input
+                    id="signup-email"
                     type="email"
                     value={signupForm.email}
                     onChange={(e) => setSignupForm((prev) => ({ ...prev, email: e.target.value }))}
                     required={event.required_contact_field === 'email'}
                   />
-                </label>
+                </div>
               ) : null}
               {event.required_contact_field !== 'email' ? (
-                <label>
-                  Phone
+                <div className="auth-field">
+                  <label htmlFor="signup-phone">Phone</label>
                   <input
+                    id="signup-phone"
                     value={signupForm.phone}
                     onChange={(e) => setSignupForm((prev) => ({ ...prev, phone: e.target.value }))}
                     required={event.required_contact_field === 'phone'}
                   />
-                </label>
+                </div>
               ) : null}
-              <label>
-                Choose slot
+              <div className="auth-field">
+                <label htmlFor="signup-slot">Choose slot</label>
                 <select
+                  id="signup-slot"
                   value={signupForm.slotId}
                   onChange={(e) => setSignupForm((prev) => ({ ...prev, slotId: e.target.value }))}
                   required
@@ -236,70 +249,88 @@ export function PublicOpenMicEventPage() {
                       )),
                   )}
                 </select>
-              </label>
-              <label>
-                Note for organiser
+              </div>
+              <div className="auth-field">
+                <label htmlFor="signup-note">Note for organiser</label>
                 <textarea
+                  id="signup-note"
                   value={signupForm.requestNote}
                   onChange={(e) => setSignupForm((prev) => ({ ...prev, requestNote: e.target.value }))}
                 />
-              </label>
-              <button type="submit" className="auth-button">
-                {event.signup_mode === 'moderated' ? 'Request slot' : 'Sign up'}
-              </button>
+              </div>
+              <div className="gig-detail-actions">
+                <button type="submit" className="auth-button">
+                  {event.signup_mode === 'moderated' ? 'Request slot' : 'Sign up'}
+                </button>
+              </div>
             </form>
           </section>
         ) : null}
 
         {signupOpen ? (
-          <section className="panel">
-            <h2>Suggest a song</h2>
-            <form className="open-mic-signup-form" onSubmit={handleSuggestion}>
-              <label>
-                Song title
+          <section className="panel workspace-section">
+            <header className="workspace-section-header">
+              <div>
+                <h2>Suggest a song</h2>
+              </div>
+            </header>
+            <form className="auth-form" onSubmit={handleSuggestion}>
+              <div className="auth-field">
+                <label htmlFor="suggestion-title">Song title</label>
                 <input
+                  id="suggestion-title"
                   value={suggestionForm.title}
                   onChange={(e) => setSuggestionForm((prev) => ({ ...prev, title: e.target.value }))}
                   required
                 />
-              </label>
-              <label>
-                Artist
+              </div>
+              <div className="auth-field">
+                <label htmlFor="suggestion-artist">Artist</label>
                 <input
+                  id="suggestion-artist"
                   value={suggestionForm.artist}
                   onChange={(e) => setSuggestionForm((prev) => ({ ...prev, artist: e.target.value }))}
                 />
-              </label>
-              <label>
-                Notes
+              </div>
+              <div className="auth-field">
+                <label htmlFor="suggestion-notes">Notes</label>
                 <textarea
+                  id="suggestion-notes"
                   value={suggestionForm.notes}
                   onChange={(e) => setSuggestionForm((prev) => ({ ...prev, notes: e.target.value }))}
                 />
-              </label>
-              <button type="submit" className="auth-button auth-button-secondary">
-                Send suggestion
-              </button>
+              </div>
+              <div className="gig-detail-actions">
+                <button type="submit" className="directory-btn directory-btn-secondary">
+                  Send suggestion
+                </button>
+              </div>
             </form>
           </section>
         ) : null}
 
         {event.public_song_list_enabled && songs.length > 0 ? (
-          <section className="panel">
-            <h2>Song list</h2>
-            <ul className="open-mic-list">
+          <section className="panel workspace-section">
+            <header className="workspace-section-header">
+              <div>
+                <h2>Song list</h2>
+              </div>
+            </header>
+            <ul className="gigs-list">
               {songs.map((song) => (
-                <li key={song.id} className="open-mic-song-row">
-                  <strong>
-                    {song.title}
-                    {song.artist ? ` — ${song.artist}` : ''}
-                  </strong>
-                  <div className="open-mic-slot-chips">
-                    {song.slots.map((slot) => (
-                      <span key={slot.id} className="open-mic-slot-chip">
-                        {slot.slot_name}
-                      </span>
-                    ))}
+                <li key={song.id} className="open-mic-song-card">
+                  <div>
+                    <strong>
+                      {song.title}
+                      {song.artist ? ` — ${song.artist}` : ''}
+                    </strong>
+                    <div className="open-mic-slot-chips" style={{ marginTop: '0.5rem' }}>
+                      {song.slots.map((slot) => (
+                        <span key={slot.id} className="open-mic-slot-chip">
+                          {slot.slot_name}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </li>
               ))}

@@ -104,6 +104,12 @@
   min-height: 42px;
   padding: 0.55rem 1.15rem;
   border-radius: 12px;
+  white-space: nowrap;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 .gig-invite-status {

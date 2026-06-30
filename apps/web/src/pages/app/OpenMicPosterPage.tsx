@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { getOpenMicEvent, getOpenMicPublicUrl } from '@bandie/data';
 import { usePageMeta } from '../../lib/usePageMeta';
+import '../../styles/gigs.css';
+import '../../styles/workspace.css';
 import '../../styles/openMic.css';
 
 const POSTER_TEMPLATES = [
@@ -68,36 +70,45 @@ export function OpenMicPosterPage() {
   }
 
   return (
-    <div className="open-mic-page">
-      <div className="open-mic-header open-mic-no-print">
+    <div className="gigs-page">
+      <header className="gigs-header open-mic-no-print">
         <div>
-          <p>
-            <Link to={`/app/open-mic/${eventId}`}>Back to event</Link>
-          </p>
-          <h1>Event poster</h1>
+          <p className="my-bands-eyebrow">Event poster</p>
+          <h1>{title}</h1>
+          <p className="my-bands-lead">Print an A4 poster with QR code for sign-ups.</p>
         </div>
-        <div className="open-mic-header-actions">
-          <button type="button" className="auth-button auth-button-secondary" onClick={() => void copyLink()}>
-            {copied ? 'Copied!' : 'Copy public link'}
-          </button>
-          <button type="button" className="auth-button" onClick={() => window.print()}>
-            Print A4
-          </button>
-        </div>
+        <Link to={`/app/open-mic/${eventId}`} className="directory-btn directory-btn-secondary">
+          Back to event
+        </Link>
+      </header>
+
+      <div className="gig-detail-actions open-mic-no-print">
+        <button type="button" className="directory-btn directory-btn-secondary" onClick={() => void copyLink()}>
+          {copied ? 'Copied!' : 'Copy public link'}
+        </button>
+        <button type="button" className="auth-button" onClick={() => window.print()}>
+          Print A4
+        </button>
       </div>
 
-      <div className="panel open-mic-no-print">
-        <label>
-          Poster style
-          <select value={templateId} onChange={(e) => setTemplateId(e.target.value)}>
-            {POSTER_TEMPLATES.map((row) => (
-              <option key={row.id} value={row.id}>
-                {row.label}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+      <section className="panel workspace-section open-mic-no-print">
+        <form className="auth-form">
+          <div className="auth-field">
+            <label htmlFor="open-mic-poster-template">Poster style</label>
+            <select
+              id="open-mic-poster-template"
+              value={templateId}
+              onChange={(e) => setTemplateId(e.target.value)}
+            >
+              {POSTER_TEMPLATES.map((row) => (
+                <option key={row.id} value={row.id}>
+                  {row.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </form>
+      </section>
 
       <article className={`open-mic-poster ${template.className}`}>
         <div>

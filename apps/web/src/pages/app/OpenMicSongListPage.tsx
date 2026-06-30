@@ -15,6 +15,8 @@ import {
   type OpenMicSongSuggestion,
   type OpenMicSongWithSlots,
 } from '@bandie/data';
+import '../../styles/gigs.css';
+import '../../styles/workspace.css';
 import '../../styles/openMic.css';
 
 export function OpenMicSongListPage() {
@@ -54,8 +56,8 @@ export function OpenMicSongListPage() {
     void load();
   }, [load]);
 
-  async function handleAddSong(event: FormEvent) {
-    event.preventDefault();
+  async function handleAddSong(formEvent: FormEvent) {
+    formEvent.preventDefault();
     if (!eventId || !title.trim()) return;
     try {
       await addOpenMicSong(eventId, { title, artist: artist || null });
@@ -77,49 +79,74 @@ export function OpenMicSongListPage() {
   }
 
   return (
-    <div className="open-mic-page">
-      <div className="open-mic-header">
+    <div className="gigs-page">
+      <header className="gigs-header">
         <div>
-          <p>
-            <Link to={`/app/open-mic/${eventId}`}>{eventTitle}</Link>
-          </p>
-          <h1>Song list</h1>
+          <p className="my-bands-eyebrow">Song list</p>
+          <h1>{eventTitle}</h1>
+          <p className="my-bands-lead">Add songs, apply instrument templates, and review sign-ups.</p>
         </div>
-      </div>
+        <Link to={`/app/open-mic/${eventId}`} className="directory-btn directory-btn-secondary">
+          Back to event
+        </Link>
+      </header>
 
-      {error ? <p className="form-error">{error}</p> : null}
-      {loading ? <p>Loading songs…</p> : null}
+      {error ? <div className="auth-message auth-message-error">{error}</div> : null}
+      {loading ? <p className="workspace-empty-note">Loading songs…</p> : null}
 
-      <form className="panel" onSubmit={handleAddSong}>
-        <h2>Add song</h2>
-        <div className="open-mic-header-actions" style={{ alignItems: 'end' }}>
-          <label style={{ flex: 1 }}>
-            Title
-            <input value={title} onChange={(e) => setTitle(e.target.value)} required />
-          </label>
-          <label style={{ flex: 1 }}>
-            Artist
-            <input value={artist} onChange={(e) => setArtist(e.target.value)} />
-          </label>
-          <button type="submit" className="auth-button">
-            Add
-          </button>
-        </div>
-      </form>
+      <section className="panel workspace-section">
+        <header className="workspace-section-header">
+          <div>
+            <h2>Add song</h2>
+            <p className="workspace-section-intro">Songs appear in running order on the live control room.</p>
+          </div>
+        </header>
+        <form className="auth-form" onSubmit={handleAddSong}>
+          <div className="gig-detail-grid">
+            <div className="auth-field">
+              <label htmlFor="open-mic-song-title">Title</label>
+              <input
+                id="open-mic-song-title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+              />
+            </div>
+            <div className="auth-field">
+              <label htmlFor="open-mic-song-artist">Artist (optional)</label>
+              <input
+                id="open-mic-song-artist"
+                value={artist}
+                onChange={(e) => setArtist(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="gig-detail-actions">
+            <button type="submit" className="auth-button">
+              Add song
+            </button>
+          </div>
+        </form>
+      </section>
 
       {signups.length > 0 ? (
-        <div className="panel">
-          <h2>Pending sign-ups ({signups.length})</h2>
-          <ul className="open-mic-list">
+        <section className="panel workspace-section">
+          <header className="workspace-section-header">
+            <div>
+              <h2>Pending sign-ups ({signups.length})</h2>
+              <p className="workspace-section-intro">Approve or reject player requests.</p>
+            </div>
+          </header>
+          <ul className="gigs-list">
             {signups.map((signup) => (
-              <li key={signup.id} className="open-mic-song-row">
+              <li key={signup.id} className="open-mic-queue-item">
                 <div>
                   <strong>{signup.player.display_name}</strong>
                   <p>
                     {signup.song.title} · {signup.slot.slot_name}
                   </p>
                 </div>
-                <div className="open-mic-header-actions">
+                <div className="gig-detail-actions">
                   <button
                     type="button"
                     className="auth-button"
@@ -129,7 +156,7 @@ export function OpenMicSongListPage() {
                   </button>
                   <button
                     type="button"
-                    className="auth-button auth-button-secondary"
+                    className="directory-btn directory-btn-secondary"
                     onClick={() => void rejectOpenMicAssignment(signup.id).then(load)}
                   >
                     Reject
@@ -138,15 +165,19 @@ export function OpenMicSongListPage() {
               </li>
             ))}
           </ul>
-        </div>
+        </section>
       ) : null}
 
       {suggestions.length > 0 ? (
-        <div className="panel">
-          <h2>Song suggestions ({suggestions.length})</h2>
-          <ul className="open-mic-list">
+        <section className="panel workspace-section">
+          <header className="workspace-section-header">
+            <div>
+              <h2>Song suggestions ({suggestions.length})</h2>
+            </div>
+          </header>
+          <ul className="gigs-list">
             {suggestions.map((suggestion) => (
-              <li key={suggestion.id} className="open-mic-song-row">
+              <li key={suggestion.id} className="open-mic-queue-item">
                 <div>
                   <strong>
                     {suggestion.title}
@@ -154,84 +185,98 @@ export function OpenMicSongListPage() {
                   </strong>
                   {suggestion.notes ? <p>{suggestion.notes}</p> : null}
                 </div>
-                <button
-                  type="button"
-                  className="auth-button"
-                  onClick={() =>
-                    void addOpenMicSong(eventId!, {
-                      title: suggestion.title,
-                      artist: suggestion.artist,
-                      notes: suggestion.notes,
-                    }).then(load)
-                  }
-                >
-                  Add to list
-                </button>
+                <div className="gig-detail-actions">
+                  <button
+                    type="button"
+                    className="auth-button"
+                    onClick={() =>
+                      void addOpenMicSong(eventId!, {
+                        title: suggestion.title,
+                        artist: suggestion.artist,
+                        notes: suggestion.notes,
+                      }).then(load)
+                    }
+                  >
+                    Add to list
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
-        </div>
+        </section>
       ) : null}
 
-      <div className="open-mic-song-list">
-        {songs.map((song) => (
-          <article key={song.id} className="open-mic-song-row">
-            <div className="open-mic-header">
-              <div>
-                <strong>
-                  {song.title}
-                  {song.artist ? ` — ${song.artist}` : ''}
-                </strong>
-                <p>{formatSongReadiness(song.readiness_status)}</p>
-              </div>
-              <button
-                type="button"
-                className="auth-button auth-button-secondary"
-                onClick={() => void deleteOpenMicSong(song.id).then(load)}
-              >
-                Delete
-              </button>
-            </div>
-            <div className="open-mic-slot-chips">
-              {song.slots.map((slot) => (
-                <span
-                  key={slot.id}
-                  className={`open-mic-slot-chip ${
-                    slot.status === 'open' ? 'open-mic-slot-chip--open' : 'open-mic-slot-chip--filled'
-                  }`}
-                >
-                  {slot.slot_name} ({slot.status})
-                </span>
-              ))}
-            </div>
-            {song.slots.length === 0 ? (
-              <div className="open-mic-header-actions">
-                <button
-                  type="button"
-                  className="auth-button auth-button-secondary"
-                  onClick={() => void handleApplyTemplate(song.id, 'rock')}
-                >
-                  Rock template
-                </button>
-                <button
-                  type="button"
-                  className="auth-button auth-button-secondary"
-                  onClick={() => void handleApplyTemplate(song.id, 'acoustic')}
-                >
-                  Acoustic template
-                </button>
-                <button
-                  type="button"
-                  className="auth-button auth-button-secondary"
-                  onClick={() => void handleApplyTemplate(song.id, 'blues')}
-                >
-                  Blues template
-                </button>
-              </div>
+      <section className="panel workspace-section">
+        <header className="workspace-section-header">
+          <div>
+            <h2>Running order</h2>
+            {!loading && songs.length === 0 ? (
+              <p className="workspace-section-intro">No songs yet. Add your first song above.</p>
             ) : null}
-          </article>
-        ))}
-      </div>
+          </div>
+        </header>
+        <ul className="gigs-list">
+          {songs.map((song) => (
+            <li key={song.id}>
+              <article className="open-mic-song-card">
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <strong>
+                    {song.title}
+                    {song.artist ? ` — ${song.artist}` : ''}
+                  </strong>
+                  <p>{formatSongReadiness(song.readiness_status)}</p>
+                  <div className="open-mic-slot-chips" style={{ marginTop: '0.5rem' }}>
+                    {song.slots.map((slot) => (
+                      <span
+                        key={slot.id}
+                        className={`open-mic-slot-chip ${
+                          slot.status === 'open' ? 'open-mic-slot-chip--open' : 'open-mic-slot-chip--filled'
+                        }`}
+                      >
+                        {slot.slot_name} ({slot.status})
+                      </span>
+                    ))}
+                  </div>
+                  {song.slots.length === 0 ? (
+                    <div className="gig-detail-actions" style={{ marginTop: '0.75rem' }}>
+                      <button
+                        type="button"
+                        className="directory-btn directory-btn-secondary"
+                        onClick={() => void handleApplyTemplate(song.id, 'rock')}
+                      >
+                        Rock template
+                      </button>
+                      <button
+                        type="button"
+                        className="directory-btn directory-btn-secondary"
+                        onClick={() => void handleApplyTemplate(song.id, 'acoustic')}
+                      >
+                        Acoustic template
+                      </button>
+                      <button
+                        type="button"
+                        className="directory-btn directory-btn-secondary"
+                        onClick={() => void handleApplyTemplate(song.id, 'blues')}
+                      >
+                        Blues template
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
+                <div className="gig-detail-actions">
+                  <button
+                    type="button"
+                    className="directory-btn directory-btn-secondary"
+                    onClick={() => void deleteOpenMicSong(song.id).then(load)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </article>
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 }

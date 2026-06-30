@@ -12,6 +12,8 @@ import {
   type OpenMicLiveDashboard,
   type OpenMicEventSummaryStats,
 } from '@bandie/data';
+import '../../styles/gigs.css';
+import '../../styles/workspace.css';
 import '../../styles/openMic.css';
 
 export function OpenMicLiveControlPage() {
@@ -66,19 +68,19 @@ export function OpenMicLiveControlPage() {
     }
   }
 
-  function handlePrintRunningOrder() {
-    window.print();
-  }
-
   if (loading && !dashboard) {
-    return <p>Loading live control room…</p>;
+    return <p className="workspace-empty-note">Loading live control room…</p>;
   }
 
   if (!event || !dashboard) {
     return (
-      <div className="panel">
-        <p>{error ?? 'Event not found.'}</p>
-        <Link to="/app/open-mic">Back</Link>
+      <div className="gigs-page">
+        <div className="panel">
+          <p>{error ?? 'Event not found.'}</p>
+          <Link to="/app/open-mic" className="directory-btn directory-btn-secondary">
+            Back to events
+          </Link>
+        </div>
       </div>
     );
   }
@@ -86,39 +88,44 @@ export function OpenMicLiveControlPage() {
   const isLive = event.status === 'in_progress';
 
   return (
-    <div className="open-mic-live-page">
-      <div className="open-mic-header open-mic-no-print">
+    <div className="gigs-page">
+      <header className="gigs-header open-mic-no-print">
         <div>
-          <p>
-            <Link to={`/app/open-mic/${eventId}`}>{event.title}</Link>
-          </p>
-          <h1>Live control room</h1>
+          <p className="my-bands-eyebrow">Live control room</p>
+          <h1>{event.title}</h1>
+          <p className="my-bands-lead">Run the evening — mark songs playing, complete, or skip.</p>
         </div>
-        <div className="open-mic-header-actions">
-          {!isLive ? (
-            <button type="button" className="auth-button" onClick={() => void startOpenMicEvent(event.id).then(load)}>
-              Start event
-            </button>
-          ) : (
-            <button type="button" className="auth-button auth-button-secondary" onClick={() => void endOpenMicEvent(event.id).then(load)}>
-              End event
-            </button>
-          )}
-          <button type="button" className="auth-button auth-button-secondary" onClick={handlePrintRunningOrder}>
-            Export PDF
+        <Link to={`/app/open-mic/${eventId}`} className="directory-btn directory-btn-secondary">
+          Back to event
+        </Link>
+      </header>
+
+      <div className="gig-detail-actions open-mic-no-print">
+        {!isLive ? (
+          <button type="button" className="auth-button" onClick={() => void startOpenMicEvent(event.id).then(load)}>
+            Start event
           </button>
-        </div>
+        ) : (
+          <button
+            type="button"
+            className="directory-btn directory-btn-secondary"
+            onClick={() => void endOpenMicEvent(event.id).then(load)}
+          >
+            End event
+          </button>
+        )}
+        <button type="button" className="directory-btn directory-btn-secondary" onClick={() => window.print()}>
+          Export PDF
+        </button>
       </div>
 
-      {error ? <p className="form-error">{error}</p> : null}
+      {error ? <div className="auth-message auth-message-error">{error}</div> : null}
 
       <section className="open-mic-live-now open-mic-no-print">
-        <p style={{ margin: 0, opacity: 0.75 }}>Now playing</p>
-        <h2 style={{ margin: '0.35rem 0 0' }}>
-          {dashboard.nowPlaying ? dashboard.nowPlaying.title : 'Nothing playing yet'}
-        </h2>
+        <p className="open-mic-live-now-label">Now playing</p>
+        <h2>{dashboard.nowPlaying ? dashboard.nowPlaying.title : 'Nothing playing yet'}</h2>
         {dashboard.nowPlaying ? (
-          <div className="open-mic-header-actions" style={{ marginTop: '0.75rem' }}>
+          <div className="gig-detail-actions" style={{ marginTop: '0.75rem' }}>
             <button
               type="button"
               className="auth-button"
@@ -128,7 +135,7 @@ export function OpenMicLiveControlPage() {
             </button>
             <button
               type="button"
-              className="auth-button auth-button-secondary"
+              className="directory-btn directory-btn-secondary"
               onClick={() => void markSong(dashboard.nowPlaying!.id, 'skipped')}
             >
               Skip
@@ -138,18 +145,26 @@ export function OpenMicLiveControlPage() {
       </section>
 
       {dashboard.issues.length > 0 ? (
-        <div className="panel open-mic-no-print">
-          <h2>Issues</h2>
-          <ul>
+        <section className="panel workspace-section open-mic-no-print">
+          <header className="workspace-section-header">
+            <div>
+              <h2>Issues</h2>
+            </div>
+          </header>
+          <ul className="workspace-section-note">
             {dashboard.issues.map((issue) => (
               <li key={issue}>{issue}</li>
             ))}
           </ul>
-        </div>
+        </section>
       ) : null}
 
-      <section className="panel">
-        <h2 className="open-mic-no-print">Running order</h2>
+      <section className="panel workspace-section">
+        <header className="workspace-section-header open-mic-no-print">
+          <div>
+            <h2>Running order</h2>
+          </div>
+        </header>
         <div className="open-mic-live-list">
           {dashboard.songs.map((song) => (
             <div
@@ -161,13 +176,13 @@ export function OpenMicLiveControlPage() {
                   {song.title}
                   {song.artist ? ` — ${song.artist}` : ''}
                 </strong>
-                <p style={{ margin: '0.25rem 0 0', color: 'var(--text-muted)' }}>{song.live_status}</p>
+                <p className="workspace-empty-note">{song.live_status}</p>
               </div>
-              <div className="open-mic-header-actions open-mic-no-print">
+              <div className="gig-detail-actions open-mic-no-print">
                 {song.live_status !== 'playing' ? (
                   <button
                     type="button"
-                    className="auth-button auth-button-secondary"
+                    className="directory-btn directory-btn-secondary"
                     onClick={() => void markSong(song.id, 'playing')}
                   >
                     Play
@@ -180,19 +195,19 @@ export function OpenMicLiveControlPage() {
       </section>
 
       {summary ? (
-        <div className="open-mic-card-grid open-mic-no-print">
-          <div className="open-mic-summary-card">
+        <div className="gigs-metrics open-mic-no-print">
+          <article className="gigs-metric-card">
             <span>Songs</span>
             <strong>{summary.totalSongs}</strong>
-          </div>
-          <div className="open-mic-summary-card">
+          </article>
+          <article className="gigs-metric-card">
             <span>Completed</span>
             <strong>{summary.completedSongs}</strong>
-          </div>
-          <div className="open-mic-summary-card">
+          </article>
+          <article className="gigs-metric-card">
             <span>Sign-ups</span>
             <strong>{summary.approvedSignups}</strong>
-          </div>
+          </article>
         </div>
       ) : null}
     </div>

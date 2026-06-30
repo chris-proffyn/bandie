@@ -230,25 +230,7 @@ export function formatOpenMicEventStatus(status: OpenMicEventStatus): string {
 }
 
 export function openMicStatusPillClass(status: OpenMicEventStatus): string {
-  switch (status) {
-    case 'draft':
-      return 'status-pill status-pill--muted';
-    case 'published':
-    case 'signup_open':
-      return 'status-pill status-pill--success';
-    case 'signup_closed':
-      return 'status-pill status-pill--warning';
-    case 'in_progress':
-      return 'status-pill status-pill--info';
-    case 'completed':
-      return 'status-pill status-pill--muted';
-    case 'cancelled':
-      return 'status-pill status-pill--danger';
-    case 'archived':
-      return 'status-pill status-pill--muted';
-    default:
-      return 'status-pill';
-  }
+  return `open-mic-status open-mic-status-${status}`;
 }
 
 export function formatOpenMicEventType(type: OpenMicEventType): string {
