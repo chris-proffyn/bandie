@@ -3,6 +3,7 @@ import { GuestRoute, ProtectedRoute } from './components/auth/ProtectedRoute';
 import { WorkspaceModeRoute } from './components/auth/WorkspaceModeRoute';
 import { AppLayout } from './components/app/AppLayout';
 import { BandScopedRoute } from './components/app/BandScopedRoute';
+import { BandDirectoryAccessRoute, WorkspaceEntitlementRoute } from './components/entitlements/WorkspaceEntitlementRoute';
 import { AcceptInvitePage } from './pages/app/AcceptInvitePage';
 import { AppEntryPage } from './pages/app/AppEntryPage';
 import { AdminUserProfileEditPage } from './pages/app/AdminUserProfileEditPage';
@@ -112,12 +113,28 @@ export default function App() {
               path="bands/new"
               element={
                 <WorkspaceModeRoute mode="player">
-                  <CreateBandPage />
+                  <WorkspaceEntitlementRoute capability="band.create">
+                    <CreateBandPage />
+                  </WorkspaceEntitlementRoute>
                 </WorkspaceModeRoute>
               }
             />
-            <Route path="bands/:slug" element={<WorkspaceBandProfilePage />} />
-            <Route path="bands" element={<WorkspaceBandDirectoryPage />} />
+            <Route
+              path="bands/:slug"
+              element={
+                <BandDirectoryAccessRoute>
+                  <WorkspaceBandProfilePage />
+                </BandDirectoryAccessRoute>
+              }
+            />
+            <Route
+              path="bands"
+              element={
+                <BandDirectoryAccessRoute>
+                  <WorkspaceBandDirectoryPage />
+                </BandDirectoryAccessRoute>
+              }
+            />
             <Route
               path="venues"
               element={
@@ -154,7 +171,9 @@ export default function App() {
               path="players"
               element={
                 <WorkspaceModeRoute mode="player">
-                  <WorkspacePlayerDirectoryPage />
+                  <WorkspaceEntitlementRoute capability="player_directory.browse">
+                    <WorkspacePlayerDirectoryPage />
+                  </WorkspaceEntitlementRoute>
                 </WorkspaceModeRoute>
               }
             />

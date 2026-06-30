@@ -775,6 +775,11 @@ export type {
   PlayerEntitlementTestPlanCode,
 } from './entitlementTestPlan';
 
+export {
+  getPlayerWorkspaceAccess,
+} from './playerWorkspaceAccess';
+export type { PlayerWorkspaceAccess } from './playerWorkspaceAccess';
+
 export { logGateDecision, listGateDecisionLogs } from './gateLogs';
 export type { GateDecisionLog } from './gateLogs';
 

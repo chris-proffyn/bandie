@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { listMyPendingPlayerOutreach, listPendingInvitationsForCurrentUser } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
+import { usePlayerWorkspaceAccess } from '../../hooks/usePlayerWorkspaceAccess';
 import { WorkspaceBandCard } from '../../components/bands/WorkspaceBandCard';
 import { DirectoryTestDataToggle } from '../../components/directory/DirectoryTestDataToggle';
 import {
@@ -16,6 +17,7 @@ import '../../styles/directory.css';
 export function AppEntryPage() {
   const navigate = useNavigate();
   const { bands, loading } = useAuth();
+  const { access: playerAccess } = usePlayerWorkspaceAccess();
   const [checkingInvites, setCheckingInvites] = useState(true);
   const [hideTestData, setHideTestData] = useState(readDirectoryHideTestData);
 
@@ -62,11 +64,13 @@ export function AppEntryPage() {
           <h1>Your bands</h1>
           <p className="my-bands-lead">
             {bands.length
-              ? 'Open a band workspace to manage your profile, members, and upcoming tools.'
-              : 'Create a band or accept an invitation to get started.'}
+              ? 'Open a band workspace to view members, songs, setlists, and calendar.'
+              : playerAccess.canCreateBand
+                ? 'Create a band or accept an invitation to get started.'
+                : 'Accept a band invitation to get started. Player Free accounts collaborate inside invited bands.'}
           </p>
         </div>
-        {bands.length > 0 ? (
+        {bands.length > 0 && playerAccess.canCreateBand ? (
           <div className="my-bands-header-actions">
             {showTestDataToggle ? (
               <DirectoryTestDataToggle
@@ -80,6 +84,15 @@ export function AppEntryPage() {
               Create a band
             </Link>
           </div>
+        ) : bands.length > 0 && showTestDataToggle ? (
+          <div className="my-bands-header-actions">
+            <DirectoryTestDataToggle
+              hideTestData={hideTestData}
+              testItemCount={testBandCount}
+              itemLabel="bands"
+              onChange={handleHideTestDataChange}
+            />
+          </div>
         ) : null}
       </header>
 
@@ -87,18 +100,29 @@ export function AppEntryPage() {
         <div className="directory-empty-state">
           <strong>No bands yet</strong>
           <p>
-            You are not a member of any bands. Create your own band workspace or ask a band leader to
-            send you an invitation.
+            {playerAccess.canCreateBand
+              ? 'You are not a member of any bands. Create your own band workspace or ask a band leader to send you an invitation.'
+              : 'You are not a member of any bands yet. Ask a band leader to send you an invitation, then check Communications to accept it.'}
           </p>
-          <Link to="/app/bands/new" className="directory-btn directory-btn-primary">
-            Create your first band
-          </Link>
-          <Link to="/app/players" className="directory-btn directory-btn-secondary" style={{ marginTop: '0.75rem' }}>
-            Find players
-          </Link>
-          <Link to="/app/bands" className="directory-btn directory-btn-secondary" style={{ marginTop: '0.75rem' }}>
-            Browse band directory
-          </Link>
+          {playerAccess.canCreateBand ? (
+            <Link to="/app/bands/new" className="directory-btn directory-btn-primary">
+              Create your first band
+            </Link>
+          ) : (
+            <Link to="/app/communications" className="directory-btn directory-btn-primary">
+              Open Communications
+            </Link>
+          )}
+          {playerAccess.canBrowsePlayerDirectory ? (
+            <Link to="/app/players" className="directory-btn directory-btn-secondary" style={{ marginTop: '0.75rem' }}>
+              Find players
+            </Link>
+          ) : null}
+          {playerAccess.canBrowseBandDirectory ? (
+            <Link to="/app/bands" className="directory-btn directory-btn-secondary" style={{ marginTop: '0.75rem' }}>
+              Browse band directory
+            </Link>
+          ) : null}
         </div>
       ) : visibleBands.length === 0 && hideTestData && testBandCount > 0 ? (
         <div className="directory-empty-state">

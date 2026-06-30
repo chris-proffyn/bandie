@@ -403,6 +403,12 @@ Authoritative spec: entitlements spec §35 Phase E. Deferred until admin portal 
 
 ## Session notes
 
+**30 June 2026 — Player Free member-only scope**
+- Migration `20260701150000_bandie_player_free_member_scope.sql` — `band_directory.browse`, `player_directory.browse` capabilities; Player Free locked to invite-only band collaboration
+- `@bandie/data`: `getPlayerWorkspaceAccess()`; route guards via `WorkspaceEntitlementRoute` / `BandDirectoryAccessRoute`
+- UI: hide directory nav and create-band actions for Player Free; My bands empty state points to Communications
+- Docs: product functional §6; product technical §6
+
 **29 June 2026 — Launch promo plan testing (profile)**
 - Migration `20260701130000_bandie_entitlement_test_plan_override.sql` — `bandie_profiles.entitlement_test_leader_plan_code` (`player_free` \| `player_plus` \| `player_pro` \| null)
 - `@bandie/data`: `entitlementTestPlan.ts` — `getEntitlementTestPlanSettings`, `updateEntitlementTestLeaderPlan`, `resolveEffectiveLeaderPlanCode`; `loadActiveSubscription` applies override for active `launch_promo` leader subscriptions

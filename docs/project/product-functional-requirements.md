@@ -367,13 +367,13 @@ Authoritative spec: `bandie_entitlements_admin_portal_functional_technical_spec.
 
 ### Player subscription tiers (band leader plans)
 
-Limits apply when entitlements are enforced. Band workspace features resolve from the **primary band leader’s** subscription (`plan_scope = leader`). Members on **Player Free** can view band content but cannot create bands, songs, setlists, or uploads on their own account.
+Limits apply when entitlements are enforced. Band workspace features resolve from the **primary band leader’s** subscription (`plan_scope = leader`). **Player Free** is a **member-only** tier: users join bands by invitation and operate inside those bands only.
 
 | Plan | Code | Summary |
 |---|---|---|
-| Player Free | `player_free` | Profile + join bands by invite; view songs/setlists — no creates |
-| Player Plus | `player_plus` | 1 band; 20 songs and 3 setlists per band; full calendar and song folders |
-| Player Pro | `player_pro` | Unlimited bands; 999 songs and 999 setlists per band |
+| Player Free | `player_free` | Profile + accept invites; view band members, songs, setlists, and calendar inside invited bands — no directories or band creation |
+| Player Plus | `player_plus` | 1 band; directories; 20 songs and 3 setlists per band led |
+| Player Pro | `player_pro` | Unlimited bands; directories; 999 songs and setlists per band |
 
 Billing UI at `/app/profile` (Stripe checkout and Customer Portal when configured). See tracker Phase 15.
 

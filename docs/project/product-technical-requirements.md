@@ -227,7 +227,9 @@ Band workspace limits resolve from the **primary leader’s** active subscriptio
 
 | Code | `bands.max_count` | `songs.max_count` | `setlists.max_count` | Creates (band/song/setlist/upload) |
 |---|---:|---:|---:|---|
-| `player_free` | 0 | 0 | 0 | No |
+| `player_free` | 0 | 0 | 0 | No | No directories |
+
+**Player Free scope:** `band_directory.browse` and `player_directory.browse` are false. Users access band workspace features only as invited members (RLS + membership). Organiser venues use the organiser plan (`organiser_free` / `organiser_plus`), not the player tier.
 | `player_plus` | 1 | 20 | 3 | Yes |
 | `player_pro` | unlimited | 999 | 999 | Yes |
 

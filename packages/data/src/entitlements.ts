@@ -50,6 +50,18 @@ const REQUIRED_UPGRADE_PLAN: Record<string, PlanCode> = {
   'venues.max_count': PLAN_CODES.ORGANISER_PLUS,
   'booking_enquiries.monthly_max_count': PLAN_CODES.ORGANISER_PLUS,
   'gigs.active_max_count': PLAN_CODES.ORGANISER_PLUS,
+  'band.create': PLAN_CODES.PLAYER_PLUS,
+  'band_directory.browse': PLAN_CODES.PLAYER_PLUS,
+  'player_directory.browse': PLAN_CODES.PLAYER_PLUS,
+};
+
+const BOOLEAN_CAPABILITY_MESSAGES: Record<string, (planName: string) => string> = {
+  'band.create': (planName) =>
+    `${planName} accounts join bands by invitation. Upgrade to Player Plus to create your own band.`,
+  'band_directory.browse': (planName) =>
+    `The band directory is not available on ${planName}. Upgrade to Player Plus to discover bands.`,
+  'player_directory.browse': (planName) =>
+    `The player directory is not available on ${planName}. Upgrade to Player Plus to find musicians.`,
 };
 
 function allowedDecision(partial: Partial<GateDecision> = {}): GateDecision {
@@ -400,9 +412,12 @@ async function evaluateBooleanCapability(
   const enabled = entitlementValue === true;
   if (!enabled) {
     const requiredPlan = REQUIRED_UPGRADE_PLAN[capabilityKey] ?? PLAN_CODES.PLAYER_PLUS;
+    const customMessage = BOOLEAN_CAPABILITY_MESSAGES[capabilityKey];
     return deniedDecision({
       reasonCode: 'feature_locked',
-      message: `This feature is not included on your ${subscription.planName} plan. Upgrade to ${PLAN_DISPLAY_NAMES[requiredPlan]} to unlock it.`,
+      message:
+        customMessage?.(subscription.planName) ??
+        `This feature is not included on your ${subscription.planName} plan. Upgrade to ${PLAN_DISPLAY_NAMES[requiredPlan]} to unlock it.`,
       currentPlan: subscription.planCode,
       currentPlanName: subscription.planName,
       requiredPlan,

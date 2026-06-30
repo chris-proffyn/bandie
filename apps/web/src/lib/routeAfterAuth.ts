@@ -1,5 +1,7 @@
 import {
+  checkUserLeaderCapability,
   getCurrentUserProfile,
+  getCurrentSession,
   listMyPendingPlayerOutreach,
   listPendingInvitationsForCurrentUser,
   resolveWorkspaceMode,
@@ -21,7 +23,14 @@ export async function routeAfterAuth(options: {
   }
 
   if (options.intent === 'create-band') {
-    return '/app/bands/new';
+    const session = await getCurrentSession();
+    if (session?.user) {
+      const decision = await checkUserLeaderCapability(session.user.id, 'band.create');
+      if (decision.allowed) {
+        return '/app/bands/new';
+      }
+    }
+    return '/app';
   }
 
   if (options.intent === 'player-profile') {

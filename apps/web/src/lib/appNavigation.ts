@@ -13,6 +13,8 @@ type AppNavOptions = {
   workspaceMode?: WorkspaceMode;
   adminModeActive?: boolean;
   notificationCount?: number;
+  canBrowseBandDirectory?: boolean;
+  canBrowsePlayerDirectory?: boolean;
 };
 
 export function getAppNavItems({
@@ -20,6 +22,8 @@ export function getAppNavItems({
   workspaceMode = 'player',
   adminModeActive = false,
   notificationCount = 0,
+  canBrowseBandDirectory = true,
+  canBrowsePlayerDirectory = true,
 }: AppNavOptions): AppNavItem[] {
   const resolvedBandId = bandRouteIdFromParam(bandId);
   const inBandContext = Boolean(resolvedBandId);
@@ -27,8 +31,8 @@ export function getAppNavItems({
   const directoryItems: AppNavItem[] = inBandContext
     ? []
     : [
-        { label: 'Band directory', to: '/app/bands' },
-        { label: 'Player directory', to: '/app/players' },
+        ...(canBrowseBandDirectory ? [{ label: 'Band directory', to: '/app/bands' }] : []),
+        ...(canBrowsePlayerDirectory ? [{ label: 'Player directory', to: '/app/players' }] : []),
       ];
 
   if (adminModeActive) {

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { getCurrentUserProfile, type UserProfile } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
+import { usePlayerWorkspaceAccess } from '../../hooks/usePlayerWorkspaceAccess';
 import { AdminModePanel } from '../../components/profile/AdminModePanel';
 import { BillingPanel } from '../../components/profile/BillingPanel';
 import { WorkspaceModePanel } from '../../components/profile/WorkspaceModePanel';
@@ -36,6 +37,7 @@ function profilePageIntro(profile: UserProfile): string {
 
 export function UserProfilePage() {
   const { user, profile, refreshProfile, isAppAdmin, workspaceMode } = useAuth();
+  const { access: playerAccess } = usePlayerWorkspaceAccess();
   const [searchParams] = useSearchParams();
   const [formProfile, setFormProfile] = useState<UserProfile | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -80,20 +82,26 @@ export function UserProfilePage() {
             <p className="user-profile-page-intro">
               {profilePageIntro(formProfile)}{' '}
               {workspaceMode === 'organiser' || (formProfile.is_organiser && !formProfile.is_player) ? (
-                <>
+                playerAccess.canBrowseBandDirectory ? (
                   <Link to="/app/bands" className="profile-preview-link">
                     Browse the band directory
                   </Link>
-                </>
+                ) : null
               ) : (
                 <>
-                  <Link to="/app/bands" className="profile-preview-link">
-                    Browse the band directory
-                  </Link>{' '}
-                  or{' '}
-                  <Link to="/app/players" className="profile-preview-link">
-                    find players
-                  </Link>
+                  {playerAccess.canBrowseBandDirectory ? (
+                    <Link to="/app/bands" className="profile-preview-link">
+                      Browse the band directory
+                    </Link>
+                  ) : null}
+                  {playerAccess.canBrowseBandDirectory && playerAccess.canBrowsePlayerDirectory
+                    ? ' or '
+                    : null}
+                  {playerAccess.canBrowsePlayerDirectory ? (
+                    <Link to="/app/players" className="profile-preview-link">
+                      find players
+                    </Link>
+                  ) : null}
                 </>
               )}
             </p>

@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { usePlayerWorkspaceAccess } from '../../hooks/usePlayerWorkspaceAccess';
 
 type BandSwitcherProps = {
   currentBandId?: string;
@@ -15,6 +16,7 @@ export function BandSwitcher({
   selectId = 'band-switcher',
 }: BandSwitcherProps) {
   const { bands } = useAuth();
+  const { access: playerAccess } = usePlayerWorkspaceAccess();
   const navigate = useNavigate();
 
   function navigateToBand(nextBandId: string) {
@@ -48,13 +50,15 @@ export function BandSwitcher({
       </select>
       {compact ? null : (
         <>
-          <button
-            type="button"
-            className="auth-button auth-button-secondary"
-            onClick={() => navigate('/app/bands/new')}
-          >
-            Create another band
-          </button>
+          {playerAccess.canCreateBand ? (
+            <button
+              type="button"
+              className="auth-button auth-button-secondary"
+              onClick={() => navigate('/app/bands/new')}
+            >
+              Create another band
+            </button>
+          ) : null}
           <button type="button" className="auth-button auth-button-secondary" onClick={() => navigate('/app')}>
             All my bands
           </button>

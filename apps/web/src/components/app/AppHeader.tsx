@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { getCommunicationSummary, listUserSubscriptions, WORKSPACE_MODE_LABELS } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
+import { usePlayerWorkspaceAccess } from '../../hooks/usePlayerWorkspaceAccess';
 import { getAppNavItems } from '../../lib/appNavigation';
 import { BANDIE_BRAND_NAME } from '../../lib/brand';
 import { resolveWorkspacePlanPill } from '../../lib/planPill';
@@ -15,6 +16,7 @@ export function AppHeader({ bandId }: AppHeaderProps) {
   const location = useLocation();
   const { displayName, logout, adminModeActive, workspaceMode, canSwitchWorkspaceMode, session, isAppAdmin } =
     useAuth();
+  const { access: playerAccess } = usePlayerWorkspaceAccess();
   const [menuOpen, setMenuOpen] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
   const [planPill, setPlanPill] = useState<ReturnType<typeof resolveWorkspacePlanPill> | null>(null);
@@ -23,6 +25,8 @@ export function AppHeader({ bandId }: AppHeaderProps) {
     workspaceMode,
     adminModeActive,
     notificationCount,
+    canBrowseBandDirectory: playerAccess.canBrowseBandDirectory,
+    canBrowsePlayerDirectory: playerAccess.canBrowsePlayerDirectory,
   });
 
   useEffect(() => {
