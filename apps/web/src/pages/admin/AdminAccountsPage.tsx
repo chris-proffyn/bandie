@@ -40,12 +40,17 @@ export function AdminAccountsPage() {
       <section className="panel">
         <p className="my-bands-eyebrow">Accounts</p>
         <h2>User, band and organiser search</h2>
-        <form className="admin-search-bar auth-form" onSubmit={handleSearch}>
-          <input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search by name, username, email, band…"
-          />
+        <form className="admin-search-bar" onSubmit={handleSearch}>
+          <div className="auth-field">
+            <label htmlFor="adminAccountSearch">Search</label>
+            <input
+              id="adminAccountSearch"
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search by name, username, email, band…"
+            />
+          </div>
           <button type="submit" className="auth-button" disabled={loading}>
             {loading ? 'Searching…' : 'Search'}
           </button>

@@ -221,11 +221,15 @@ export function AdminEntitlementsPage() {
       <section className="panel">
         <h3>Draft / publish workflow</h3>
         <div className="admin-search-bar">
-          <input
-            value={draftName}
-            onChange={(event) => setDraftName(event.target.value)}
-            placeholder="Draft name"
-          />
+          <div className="auth-field">
+            <label htmlFor="adminDraftName">Draft name</label>
+            <input
+              id="adminDraftName"
+              value={draftName}
+              onChange={(event) => setDraftName(event.target.value)}
+              placeholder="Draft name"
+            />
+          </div>
           <button type="button" className="auth-button" onClick={() => void handleCreateDraft()}>
             Create draft
           </button>

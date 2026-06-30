@@ -291,6 +291,10 @@
   margin: 0;
 }
 
+.admin-search-bar .auth-button {
+  flex: 0 0 auto;
+}
+
 /* Billing admin — compact controls, mobile-friendly without full-bleed buttons */
 .admin-billing-page {
   max-width: 52rem;
