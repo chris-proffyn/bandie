@@ -6,6 +6,7 @@
 /api/bands/song-part-files/upload /.netlify/functions/song-part-file-upload 200
 /api/bands/song-part-files/preview /.netlify/functions/song-part-file-preview 200
 /api/bands/song-part-files/download /.netlify/functions/song-part-file-download 200
+/api/bands/songs/copy /.netlify/functions/songs-copy-to-band 200
 /api/billing/create-checkout /.netlify/functions/billing-create-checkout 200
 /api/billing/create-portal /.netlify/functions/billing-create-portal 200
 /api/billing/stripe-webhook /.netlify/functions/billing-stripe-webhook 200
