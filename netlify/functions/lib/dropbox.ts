@@ -216,6 +216,36 @@ export type DropboxFileMetadata = {
   size?: number;
 };
 
+export async function copyDropboxPath(
+  accessToken: string,
+  fromPath: string,
+  toPath: string,
+): Promise<DropboxFileMetadata> {
+  const response = await fetch(`${DROPBOX_API_RPC}/files/copy_v2`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from_path: fromPath,
+      to_path: toPath,
+      autorename: true,
+    }),
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(`Dropbox copy failed: ${detail}`);
+  }
+
+  const payload = (await response.json()) as {
+    metadata: DropboxFileMetadata;
+  };
+
+  return payload.metadata;
+}
+
 export async function uploadDropboxFile(
   accessToken: string,
   path: string,

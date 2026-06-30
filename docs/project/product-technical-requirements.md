@@ -271,6 +271,7 @@ Authoritative spec: `docs/project/bandie_dropbox_song_part_storage_spec.md`
 - OAuth connect/callback — server-side only; encrypted tokens in `bandie_user_integrations`
 - Band song-parts root initialisation — `bandie_band_song_part_storage`
 - Upload, attach, preview, download — Bandie API routes proxy Dropbox; path validated under band root
+- **Copy song between bands** — `POST /api/bands/songs/copy` (`songs-copy-to-band`); leader on source and target; Dropbox `copy_v2` per file into target band tree; `@bandie/data` `copyBandSongToBand()`
 - File metadata and status — `bandie_song_part_files`; activity — `bandie_song_part_file_activity`
 - Provider abstraction — `ExternalStorageProvider` interface; MVP implements Dropbox only
 - UI must not receive refresh tokens; members access files via Bandie permissions, not Dropbox ACLs

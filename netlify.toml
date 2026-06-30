@@ -55,6 +55,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/bands/songs/copy"
+  to = "/.netlify/functions/songs-copy-to-band"
+  status = 200
+
+[[redirects]]
   from = "/api/billing/create-checkout"
   to = "/.netlify/functions/billing-create-checkout"
   status = 200

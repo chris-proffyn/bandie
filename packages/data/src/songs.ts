@@ -1043,6 +1043,10 @@ export function formatSongPartActivityLabel(activity: SongPartFileActivity): str
       return displayName ? `Downloaded ${displayName}` : 'File downloaded';
     case 'song_created':
       return typeof metadata.title === 'string' ? `New song: ${metadata.title}` : 'New song added';
+    case 'song_copied':
+      return typeof metadata.sourceSongTitle === 'string'
+        ? `Copied from another band: ${metadata.sourceSongTitle}`
+        : 'Song copied from another band';
     default:
       return activity.action.replaceAll('_', ' ');
   }

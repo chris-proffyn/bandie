@@ -12,6 +12,7 @@ import {
 } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
 import { AddSongPartFolderDialog } from '../../components/songs/AddSongPartFolderDialog';
+import { CopySongToBandDialog } from '../../components/songs/CopySongToBandDialog';
 import { EditSongDialog } from '../../components/songs/EditSongDialog';
 import { SongMetadataPanel } from '../../components/songs/SongMetadataPanel';
 import { SongPartFolderCards } from '../../components/songs/SongPartFolderCards';
@@ -32,6 +33,7 @@ export function SongFolderPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showEditSong, setShowEditSong] = useState(false);
   const [showAddFolder, setShowAddFolder] = useState(false);
+  const [showCopySong, setShowCopySong] = useState(false);
 
   const loadSongWorkspace = useCallback(async () => {
     if (!bandId || !songId) {
@@ -115,6 +117,15 @@ export function SongFolderPage() {
           </p>
         </div>
         <div className="songs-header-actions">
+          {canManageSongParts ? (
+            <button
+              type="button"
+              className="directory-btn directory-btn-secondary"
+              onClick={() => setShowCopySong(true)}
+            >
+              Copy to another band
+            </button>
+          ) : null}
           <button
             type="button"
             className="directory-btn directory-btn-secondary"
@@ -206,6 +217,16 @@ export function SongFolderPage() {
           onClose={() => setShowEditSong(false)}
           onSaved={() => void loadSongWorkspace()}
           onDeleted={() => navigate(`/app/${bandId}/songs`)}
+        />
+      ) : null}
+
+      {showCopySong ? (
+        <CopySongToBandDialog
+          sourceBandId={bandId}
+          sourceSongId={songId}
+          sourceSongTitle={song.title}
+          bands={bands}
+          onClose={() => setShowCopySong(false)}
         />
       ) : null}
     </div>

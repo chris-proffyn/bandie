@@ -572,6 +572,9 @@ export type {
   SongPartStorageHealth,
 } from './songPartStorage';
 
+export { copyBandSongToBand } from './songCopy';
+export type { CopyBandSongInput, CopyBandSongResult } from './songCopy';
+
 export {
   initBandieEntitlementEnforcement,
   isEntitlementEnforcementEnabled,

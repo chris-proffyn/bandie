@@ -335,6 +335,43 @@ Recommended MVP: lazy creation to avoid unnecessary Dropbox folders.
 
 ---
 
+## 5.3a Copy Song to Another Band
+
+### Purpose
+
+Allow a band leader who manages multiple bands to duplicate a song — including part folder structure and Dropbox file bytes — from one band into another without re-uploading files.
+
+### Entry Point
+
+Song folder → **Copy to another band** (band leader only).
+
+### Behaviour
+
+1. Leader selects a target band from other bands they lead (source band excluded).
+2. Leader may override the song title; Bandie resolves a unique title and slug on the target band.
+3. Bandie verifies the leader owns both bands and that the target band has active Dropbox song-part storage.
+4. Both bands must map to the **same** `bandie_user_integrations` Dropbox connection (same leader account).
+5. Bandie inserts a new `bandie_songs` row on the target band (metadata copied; `times_played` reset).
+6. For each source part folder, Bandie inserts a matching `bandie_song_part_folders` row and creates the Dropbox part folder under the target band path.
+7. For each source file with a Dropbox path (not `unavailable`), Bandie calls Dropbox `files/copy_v2` from the source path to the equivalent path under the target band’s song-parts tree, then inserts new `bandie_song_part_files` metadata rows.
+8. Bandie recalculates readiness and logs `song_copied` activity.
+
+### Constraints
+
+- Cross-Dropbox-account copy is not supported in MVP.
+- Copy counts toward target band song limits when entitlements are enforced (`song.create`).
+- Source Dropbox paths must remain under the source band’s configured song-parts root.
+- Destination paths must remain under the target band’s configured song-parts root.
+
+### Acceptance Criteria
+
+- New song appears in the target band with independent slug and folder paths.
+- Copied files open via Bandie preview/download on the target band.
+- No modification to source song or source Dropbox files.
+- Clear error when target storage is inactive or Dropbox accounts differ.
+
+---
+
 ## 5.4 Upload Song-Part File
 
 ### Purpose

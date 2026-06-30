@@ -473,6 +473,11 @@ Task checklist: `docs/project/bandie_song_suggestions_voting_implementation_plan
 
 ## Session notes
 
+**29 June 2026 — Copy song between bands**
+- `POST /api/bands/songs/copy` — Netlify `songs-copy-to-band`; `songCopyServer.ts` copies DB rows + Dropbox `copy_v2` per file into target band tree
+- `@bandie/data` `copyBandSongToBand()` — `song.create` gate on target; Song folder **Copy to another band** dialog (leader, same Dropbox account)
+- Docs: `product-functional-requirements.md` §7, `product-technical-requirements.md`, `bandie_dropbox_song_part_storage_spec.md` §5.3a
+
 **1 July 2026 — Song suggestions & voting (Phase 20 implementation)**
 - Migration `20260701170000_bandie_song_suggestions.sql` — five tables, vote summary view, RLS, RPCs (submit with auto-vote, vote, close/reopen, veto, reset votes, confirm)
 - `@bandie/data` `songSuggestions.ts` — list/detail, ranking, skeleton setlist + draft catalogue creation

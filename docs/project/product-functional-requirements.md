@@ -428,6 +428,20 @@ required parts with current file / total required parts
 
 Feeds into broader song readiness alongside manual status and rehearsal confidence (setlists/gigs link in later phases).
 
+### Copy song to another band (implemented)
+
+Band leaders who lead **more than one band** can copy a song from one band into another:
+
+- **Who:** band leader (`owner`) on **both** source and target bands.
+- **What copies:** song metadata (title, artist, genre, key, duration, notes), all part folder definitions, and all song-part files with Dropbox-backed bytes.
+- **What resets:** `times_played` → 0; readiness recalculated on the new song.
+- **Dropbox:** server copies files via Dropbox `copy_v2` into the target band’s song-parts tree (`/Bandie/bands/{targetSlug}/song-parts/{songSlug}/{partKey}/…`). Both bands must use the **same leader Dropbox integration**; target band must have **active** song-part storage.
+- **Entitlements:** requires `song.create` on the target band (counts toward song limit when enforcement is on).
+- **UI:** Song folder → **Copy to another band** (leader only). Optional title override; duplicate titles auto-suffixed `(copy)`.
+- **Activity:** logged as `song_copied` in `bandie_song_part_file_activity`.
+
+Cross-account Dropbox copy (different leader accounts) is **out of scope** for MVP.
+
 ---
 
 ## 8b. Dropbox song-part storage integration
@@ -484,7 +498,7 @@ Upload and attach song-part files through Bandie into the leader’s Dropbox son
 
 Metadata in Bandie: name, type, part folder, uploader, date, version label, status (`current` / `draft` / `reference` / `superseded` / `archived` / `unavailable`).
 
-**Leader actions:** connect/reconnect Dropbox, initialise band song-parts root, add songs, soft-delete/restore songs, manage part templates and per-song folders, upload, attach existing Dropbox file (scoped to band root), mark status, remove attachment from Bandie (MVP: does not delete Dropbox file).
+**Leader actions:** connect/reconnect Dropbox, initialise band song-parts root, add songs, soft-delete/restore songs, manage part templates and per-song folders, upload, attach existing Dropbox file (scoped to band root), mark status, remove attachment from Bandie (MVP: does not delete Dropbox file), **copy song to another led band** (see §7).
 
 **Member actions:** view repertoire, preview PDFs in-app, download through Bandie.
 
