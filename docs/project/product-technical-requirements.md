@@ -160,7 +160,7 @@ All tables prefixed `bandie_`. Full schema to be defined in migrations. Conceptu
 | `bandie_calendar_events` | Rehearsals and availability windows (`series_key`, `repeat_pattern` for repeating series) |
 | `bandie_availability_votes` | Member votes on calendar events |
 | `bandie_gigs` | Gig records (enquiry through archived) |
-| `bandie_booking_enquiries` | Structured booking enquiry metadata (links to `bandie_user_messages`) |
+| `bandie_booking_enquiries` | Structured booking enquiry metadata (links to `bandie_user_messages`; `metadata` may include `gig_id`, `gig_title`, budget, event time) |
 | `bandie_plans` | Subscription plan catalogue |
 | `bandie_capabilities` | Entitlement capability definitions |
 | `bandie_plan_entitlements` | Plan → capability values |
@@ -317,7 +317,7 @@ apps/web/src/
 │   ├── directory/     Band and player directory filters and cards
 │   ├── marketing/     Public homepage nav and sections (three-mode layout)
 │   ├── organiser/     Organiser venue forms and cards
-│   └── profile/       Profile editors, public profile views, booking contact card
+│   └── profile/       Profile editors, public profile views, `BandBookingContactCard`, `BandBookingModal`
 ├── content/           Static content configs (e.g. homepageContent.ts)
 ├── context/           AuthContext (session, profile, bands, displayName)
 ├── pages/

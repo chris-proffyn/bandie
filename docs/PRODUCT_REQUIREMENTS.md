@@ -56,7 +56,7 @@ Individual musicians in multiple bands, band leaders, dep/substitute musicians, 
 - Player directory (deputy and member search modes)
 - Public band profiles (mini-sites)
 - Public player profiles
-- Structured booking enquiry on public band profiles (creates enquiry record + message to primary contact)
+- Structured booking enquiry on band profiles (**organisers only**; modal with optional gig link; creates enquiry record + message to primary contact, and gig invite when a gig is selected)
 - Organiser venue management in workspace (organiser mode)
 - Organiser gig management in workspace (organiser mode) — create gigs, invite bands, running order
 - Public calendar availability (confirmed/provisional gigs from calendar sync)

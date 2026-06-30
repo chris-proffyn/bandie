@@ -42,7 +42,7 @@ These are the various different elements we will build for Bandie. Status as of 
 — Band view of organiser gig invitations: accept/reject, see assigned slot and duration, assign setlists from the band library. **Done** (`/app/:bandId/gigs`) — read-only event details; setlist readiness on accepted invites. Organisers create and manage gigs at `/app/gigs` (see Organiser Gig Management above).
 
 ## Booking Enquiries 
-— A workflow for event organisers to contact bands and for bands to manage inbound booking interest. **Done** — structured form on public profiles; dedicated **Booking enquiries** inbox in `/app/communications`; entitlement rate limits when enforcing.
+— A workflow for event organisers to contact bands and for bands to manage inbound booking interest. **Done** — organiser-only **Book** modal on band profiles; optional gig link sends formal invite plus structured enquiry; dedicated **Booking enquiries** inbox in `/app/communications`; entitlement rate limits when enforcing.
 
 ## Notifications and Activity 
 — Cross-product updates, reminders, review tasks and activity feeds. **Partial** — workspace communications at `/app/communications` (invitations, player outreach, messages, booking enquiries); activity feed and push deferred (Phase 16).

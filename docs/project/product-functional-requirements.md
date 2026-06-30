@@ -73,7 +73,13 @@ Band name (with selectable display font), logo at the top of the profile (not in
 
 ### Booking enquiry (implemented)
 
-Signed-in organisers submit a structured enquiry from the public profile **Book** section: date, time, set duration (from band fee options), venue (with organiser venue picker when venues exist on profile), budget, and notes. Sender name, username, email, phone and location are included automatically. The enquiry is delivered as a direct message to the band's **primary contact** (band leader). Sign-in required.
+**Audience:** signed-in **organisers** only. Players and other signed-in non-organisers do not see the Book section on workspace band profiles (`/app/bands/:slug`). On public profiles (`/bands/:slug`), anonymous visitors see a sign-in prompt; signed-in non-organisers do not see booking.
+
+Signed-in organisers open **Book {band}** from the band profile. The enquiry opens in a **modal** with date, time, set duration (from band fee options), venue (with organiser venue picker when venues exist on profile), budget, and notes.
+
+**Link to your gig (optional):** organisers choose one of their active gigs from a dropdown, or **General enquiry (no specific gig)**. Selecting a gig pre-fills date, time, and venue from that gig, offers optional slot assignment when the gig has slots, and on submit sends both the structured booking enquiry **and** a formal gig invite (`bandie_organiser_invite_band_to_gig`) to the band primary contact. When navigating from gig planning (`/app/bands?forGig=…`), that gig is pre-selected in the modal.
+
+Sender name, username, email, phone and location are included automatically. The enquiry is delivered as a direct message to the band's **primary contact** (band leader). Linked gig context is stored in enquiry `metadata` (`gig_id`, `gig_title`). Sign-in required.
 
 ### Behaviour
 
@@ -282,7 +288,15 @@ Both flows use the `bandie_create_player_outreach` RPC; join invites also create
 
 ### Workspace communications
 
-Player workspace users have a communications hub at `/app/communications` for cross-band interaction.
+Player and organiser workspace users share a communications hub at `/app/communications` for cross-band and organiser interaction.
+
+**Organiser workspace**
+- Nav **Communications** badge includes booking enquiries and sent gig invites
+- **Booking enquiries** — structured enquiries sent to bands from profile **Book** flow (and received when applicable)
+- **Gig invitations sent** — outbound band invites from gig planning
+- Filter views: **All**, **Booking enquiries**, **Messages** (no band membership **Invites** tab)
+
+**Player workspace**
 
 **Filter views**
 - **All** — chronological feed of every invitation and message
@@ -552,7 +566,7 @@ Gigs are **organiser-owned** events. Organisers plan gigs through an eight-step 
 1. **Create placeholder** — Title and start date/time (`enquiry` status). Optional venue on create or on detail.
 2. **Identify venue** — Saved organiser venue or ad hoc name/address; may be combined with step 1.
 3. **Design structure** — End time (optional), number of slots, default slot duration (minutes). Moves planning toward `proposed`.
-4. **Invite bands** — Open the band directory from the gig detail screen, search profiles, and send invites from the band profile with a preview of gig, venue, and organiser contact details. Optional slot assignment in the invite modal. Band leaders receive a communications notification.
+4. **Invite bands** — Open the band directory from the gig detail screen (`/app/bands?forGig=…`), browse band profiles, and use **Book {band}** to send a structured enquiry with the gig linked in the booking modal. Optional slot assignment when the gig has slots. Band leaders receive a communications notification for the gig invite and the booking enquiry message.
 5. **Band responses** — Invited bands accept or reject; organiser sees per-band invite status on the gig.
 6. **Running order** — Adjust slot position and slot duration for invited bands; slot schedule preview shows computed start/end per slot.
 7. **Confirm gig** — When structure and at least one accepted band are in place, organiser confirms (`confirmed`). **Re-open** returns the gig to `proposed` for further edits.
@@ -595,7 +609,7 @@ Show setlist readiness and missing-parts context via linked setlist metrics in b
 
 ### Public (implemented)
 
-Organiser submits structured enquiry from band profile **Book** section: date, time, set duration, venue, budget, notes. Requires sign-in. Creates `bandie_booking_enquiries` record and direct message to band primary contact. Rate limits apply when entitlements are enforced (`booking_enquiry.send`).
+Organiser submits structured enquiry from band profile **Book** modal: optional linked gig, date, time, set duration, venue, budget, notes. **Organisers only**; sign-in required. Creates `bandie_booking_enquiries` record and direct message to band primary contact. When a gig is linked, also sends a formal gig invite via `bandie_organiser_invite_band_to_gig`. Rate limits apply when entitlements are enforced (`booking_enquiry.send`).
 
 ### Private (implemented)
 

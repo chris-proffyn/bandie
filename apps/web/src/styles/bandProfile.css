@@ -1427,6 +1427,16 @@
   gap: 0.85rem;
 }
 
+.band-booking-dialog-actions {
+  margin-top: 0.5rem;
+}
+
+.band-booking-gig-context {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
 .band-profile-booking-success {
   display: grid;
   gap: 0.85rem;

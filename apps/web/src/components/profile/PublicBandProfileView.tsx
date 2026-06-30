@@ -19,28 +19,31 @@ import {
 import { useBandNameFont } from '../../lib/useBandNameFont';
 import { BandSetFeesFields } from '../band/BandSetFeesFields';
 import { TestDataBadge } from '../common/TestDataBadge';
-import { GigInvitePanel } from '../gigs/GigInvitePanel';
 import type { FindGigContext } from '../../lib/findGigNavigation';
 import { buildFindGigUrl } from '../../lib/findGigNavigation';
-import type { GigBandInviteWithBand } from '@bandie/data';
+import { useAuth } from '../../context/AuthContext';
 import type { CSSProperties } from 'react';
 
 type PublicBandProfileViewProps = {
   profile: PublicBandProfile;
   variant?: 'public' | 'workspace';
   findGig?: FindGigContext | null;
-  existingGigInvite?: GigBandInviteWithBand | null;
-  onGigInvited?: () => void;
+  initialGigId?: string | null;
 };
 
 export function PublicBandProfileView({
   profile,
   variant = 'public',
   findGig = null,
-  existingGigInvite = null,
-  onGigInvited,
+  initialGigId = null,
 }: PublicBandProfileViewProps) {
   const isWorkspace = variant === 'workspace';
+  const { profile: userProfile, workspaceMode } = useAuth();
+  const showOrganiserBooking =
+    Boolean(userProfile?.is_organiser) && (!isWorkspace || workspaceMode === 'organiser');
+  const showBookingNav =
+    Boolean(profile.primaryContact) &&
+    (isWorkspace ? showOrganiserBooking : !userProfile || Boolean(userProfile?.is_organiser));
   const tagline = formatBandSubtitle(profile);
   const locationLabel = formatBandLocation(profile);
   const photos = profile.media.filter((item) => item.kind === 'photo');
@@ -60,7 +63,7 @@ export function PublicBandProfileView({
               <BandieLogo className="band-profile-brand-mark" />
               <span>Bandie</span>
             </Link>
-            {profile.primaryContact ? (
+            {showBookingNav ? (
               <a className="band-profile-button band-profile-button-primary" href="#book">
                 Book {profile.name}
               </a>
@@ -238,17 +241,9 @@ export function PublicBandProfileView({
           primaryContact={profile.primaryContact}
           setOffers={profile.setOffers}
           dynamicFeeOffers={profile.dynamicFeeOffers}
+          initialGigId={initialGigId ?? findGig?.gigId ?? null}
+          variant={variant}
         />
-
-        {isWorkspace && findGig ? (
-          <GigInvitePanel
-            bandId={profile.id}
-            bandName={profile.name}
-            findGig={findGig}
-            existingInvite={existingGigInvite}
-            onInvited={onGigInvited}
-          />
-        ) : null}
       </div>
 
       <footer className="band-profile-shell band-profile-footer">

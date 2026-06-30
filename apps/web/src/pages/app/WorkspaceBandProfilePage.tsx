@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import { getOrganiserGig, getPublicBandProfileBySlug, isActiveGigInviteStatus, type GigBandInviteWithBand, type PublicBandProfile } from '@bandie/data';
+import { getPublicBandProfileBySlug, type PublicBandProfile } from '@bandie/data';
 import { BackLink } from '../../components/navigation/BackLink';
 import { PublicBandProfileView } from '../../components/profile/PublicBandProfileView';
 import type { BackNavigationState } from '../../lib/backNavigation';
@@ -15,8 +15,6 @@ export function WorkspaceBandProfilePage() {
   const [profile, setProfile] = useState<PublicBandProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [missing, setMissing] = useState(false);
-  const [inviteRefreshKey, setInviteRefreshKey] = useState(0);
-  const [resolvedInvite, setResolvedInvite] = useState<GigBandInviteWithBand | null>(null);
 
   useEffect(() => {
     if (!slug) {
@@ -37,22 +35,6 @@ export function WorkspaceBandProfilePage() {
       })
       .finally(() => setLoading(false));
   }, [slug]);
-
-  useEffect(() => {
-    if (!profile || !findGig) {
-      setResolvedInvite(null);
-      return;
-    }
-
-    getOrganiserGig(findGig.gigId)
-      .then((gig) => {
-        const invite = gig?.bands.find(
-          (item) => item.band_id === profile.id && isActiveGigInviteStatus(item.invite_status),
-        );
-        setResolvedInvite(invite ?? null);
-      })
-      .catch(() => setResolvedInvite(null));
-  }, [profile, findGig, inviteRefreshKey]);
 
   if (loading) {
     return (
@@ -86,8 +68,7 @@ export function WorkspaceBandProfilePage() {
       profile={profile}
       variant="workspace"
       findGig={findGig}
-      existingGigInvite={resolvedInvite}
-      onGigInvited={() => setInviteRefreshKey((value) => value + 1)}
+      initialGigId={findGig?.gigId ?? null}
     />
   );
 }

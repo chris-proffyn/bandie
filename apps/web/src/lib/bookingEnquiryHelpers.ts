@@ -1,4 +1,10 @@
-import type { BandDynamicFeeOffer, BandSetOffer, OrganiserVenue, UserProfile } from '@bandie/data';
+import type {
+  BandDynamicFeeOffer,
+  BandSetOffer,
+  OrganiserGig,
+  OrganiserVenue,
+  UserProfile,
+} from '@bandie/data';
 import {
   formatOrganiserVenueAddress,
   formatOrganiserVenueLocation,
@@ -13,6 +19,7 @@ export type SetDurationOption = {
 };
 
 export type BookingEnquiryFormValues = {
+  selectedGigId: string;
   eventDate: string;
   eventTime: string;
   setDuration: string;
@@ -20,9 +27,12 @@ export type BookingEnquiryFormValues = {
   venue: string;
   budget: string;
   additionalNotes: string;
+  slotNumber: string;
+  slotDurationMinutes: string;
 };
 
 export const emptyBookingEnquiryForm = (): BookingEnquiryFormValues => ({
+  selectedGigId: '',
   eventDate: '',
   eventTime: '',
   setDuration: '',
@@ -30,7 +40,58 @@ export const emptyBookingEnquiryForm = (): BookingEnquiryFormValues => ({
   venue: '',
   budget: '',
   additionalNotes: '',
+  slotNumber: '',
+  slotDurationMinutes: '',
 });
+
+function isoToDateInput(iso: string): string {
+  const date = new Date(iso);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function isoToTimeInput(iso: string): string {
+  const date = new Date(iso);
+  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+}
+
+export function formatOrganiserGigOptionLabel(gig: OrganiserGig): string {
+  const when = new Date(gig.starts_at).toLocaleString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  return `${gig.title} — ${when}`;
+}
+
+export function bookingFormValuesFromGig(
+  gig: OrganiserGig,
+  setDurationOptions: SetDurationOption[],
+): Partial<BookingEnquiryFormValues> {
+  const venue = [gig.venue_name, gig.venue_address].filter(Boolean).join(', ');
+  let setDuration = '';
+
+  if (gig.default_slot_duration_minutes != null) {
+    const minutes = gig.default_slot_duration_minutes;
+    const match = setDurationOptions.find((option) => option.value.includes(String(minutes)));
+    setDuration = match?.value ?? `${minutes} minutes`;
+  }
+
+  return {
+    selectedGigId: gig.id,
+    eventDate: isoToDateInput(gig.starts_at),
+    eventTime: isoToTimeInput(gig.starts_at),
+    venue,
+    selectedVenueId: '',
+    setDuration,
+    slotDurationMinutes:
+      gig.default_slot_duration_minutes != null ? String(gig.default_slot_duration_minutes) : '',
+  };
+}
 
 export function buildSetDurationOptions(
   setOffers: BandSetOffer[],
@@ -171,8 +232,14 @@ export function composeBookingEnquiryMessage(
   values: BookingEnquiryFormValues,
   sender: BookingSenderDetails,
   selectedVenue?: OrganiserVenue | null,
+  gig?: Pick<OrganiserGig, 'title'> | null,
 ): string {
   const lines = [`Booking enquiry for ${bandName}`, ''];
+
+  if (gig?.title) {
+    lines.push(`Linked gig: ${gig.title}`);
+    lines.push('');
+  }
 
   lines.push('From');
   lines.push(`Name: ${sender.displayName}`);

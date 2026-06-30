@@ -310,11 +310,11 @@ Reference: `product-functional-requirements.md` §11. Capability keys: `gig.crea
 - [x] 10.9 Eight-step organiser workflow UI — placeholder create, venue, structure, invites with slot assignment, running order, confirm/re-open, branding when confirmed
 - [x] 10.10 Band invite detail — slot number and duration on `/app/:bandId/gigs/:gigId`
 - [x] 10.11 Data helpers — `buildGigSlotSchedule`, `buildGigWorkflowSteps`, `canConfirmOrganiserGig`, `confirmOrganiserGig`, `reopenOrganiserGig`, `updateGigBandSlot`
-- [x] 10.12 Directory-based band discovery for gig invites — `/app/bands?forGig=…`, profile invite modal, communications notification to band primary contact
+- [x] 10.12 Directory-based band discovery for gig invites — `/app/bands?forGig=…`, **Book** modal on band profile with optional gig link and slot assignment, communications notification to band primary contact
 
 ### 11. Booking enquiries
 
-- [x] 11.1 Enquiry form (public) — structured form on band profile; sends direct message to primary contact
+- [x] 11.1 Enquiry form — organiser-only **Book** modal on band profiles; optional gig link sends invite + structured enquiry
 - [x] 11.2 Enquiry management (private workspace) — dedicated booking enquiries inbox in communications
 - [x] 11.3 Notifications for new enquiries — communications summary badges and unread counts
 - [x] 11.4 Enquiry rate limits via entitlement service (`booking_enquiry.send`, `booking_enquiries.monthly_max_count`) when enforcing
@@ -403,9 +403,14 @@ Authoritative spec: entitlements spec §35 Phase E. Deferred until admin portal 
 
 ## Session notes
 
-**30 June 2026 — Gig invite via band directory**
-- Organisers find bands from gig detail via `/app/bands?forGig=…`; invite from band profile modal with gig, venue, and organiser contact preview
-- Migration `20260630250000` — `bandie_organiser_invite_band_to_gig` RPC, notification message to band primary contact, communications feed item
+**1 July 2026 — Organiser booking modal with gig link**
+- **Book {band}** is organiser-only on workspace and public band profiles; opens a modal (`BandBookingModal`) instead of an inline form
+- Organisers can link one of their active gigs in the modal; pre-fills date/time/venue and optionally assigns a slot; submit sends booking enquiry + formal gig invite
+- Removed separate **Invite to gig** panel and `GigInviteModal` — gig invites are now part of the booking flow
+- Docs: product functional requirements §§4, 11–12; build elements; product requirements
+
+**30 June 2026 — Gig invite via band directory** *(invite UI merged into Book modal 1 July 2026)*
+- Organisers find bands from gig detail via `/app/bands?forGig=…`; RPC `bandie_organiser_invite_band_to_gig` and communications feed item
 
 **30 June 2026 — Gig creation workflow (eight steps)**
 - Migration `20260630240000_bandie_gig_structure.sql` — slot count, default slot duration, per-band slot duration override
