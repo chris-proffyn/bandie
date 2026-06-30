@@ -4,6 +4,7 @@ import {
   getLaunchPromoStatus,
   listPublicPlanOffers,
   listUserSubscriptions,
+  loadPlatformEntitlementEnforcement,
   openBillingPortal,
   startPlanCheckout,
   type LaunchPromoStatus,
@@ -141,22 +142,25 @@ export function BillingPanel({
   const [leaderOffers, setLeaderOffers] = useState<PublicPlanOffer[]>([]);
   const [organiserOffers, setOrganiserOffers] = useState<PublicPlanOffer[]>([]);
   const [launchPromo, setLaunchPromo] = useState<LaunchPromoStatus | null>(null);
+  const [enforcementEnabled, setEnforcementEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(billingNotice ?? null);
 
   const refresh = useCallback(async () => {
     setError(null);
-    const [subs, leader, organiser, promo] = await Promise.all([
+    const [subs, leader, organiser, promo, enforcement] = await Promise.all([
       listUserSubscriptions(),
       showLeaderPlans ? listPublicPlanOffers('leader') : Promise.resolve([]),
       showOrganiserPlans ? listPublicPlanOffers('organiser') : Promise.resolve([]),
       getLaunchPromoStatus(),
+      loadPlatformEntitlementEnforcement(),
     ]);
     setSubscriptions(subs);
     setLeaderOffers(leader);
     setOrganiserOffers(organiser);
     setLaunchPromo(promo);
+    setEnforcementEnabled(enforcement);
   }, [showLeaderPlans, showOrganiserPlans]);
 
   useEffect(() => {
@@ -176,7 +180,8 @@ export function BillingPanel({
   const launchPromoActive = launchPromo?.active ?? false;
   const hasLaunchTrial = subscriptions.some((sub) => sub.isLaunchPromo);
   const showLeaderPlanTesting = Boolean(
-    showLeaderPlans && leaderSub?.isLaunchPromo && launchPromoActive,
+    showLeaderPlans &&
+      ((leaderSub?.isLaunchPromo && launchPromoActive) || enforcementEnabled),
   );
 
   async function handleUpgrade(planCode: string, planScope: EntitlementPlanScope) {
@@ -227,6 +232,8 @@ export function BillingPanel({
         <>
           <EntitlementTestPlanPanel
             visible={showLeaderPlanTesting}
+            subscriptionPlanName={leaderSub?.subscriptionPlanName ?? leaderSub?.planName}
+            isLaunchPromo={Boolean(leaderSub?.isLaunchPromo && launchPromoActive)}
             onUpdated={() => {
               refresh().catch((err) => {
                 setError(err instanceof Error ? err.message : 'Unable to refresh billing.');

@@ -377,7 +377,7 @@ Limits apply when entitlements are enforced. Band workspace features resolve fro
 
 Billing UI at `/app/profile` (Stripe checkout and Customer Portal when configured). See tracker Phase 15.
 
-**Launch promo plan testing:** While a user has active launch full-access (`source: launch_promo`, leader scope), they may choose to **operate as** Player Free, Player Plus, or Player Pro from the profile billing panel. This only affects entitlement checks when enforcement is enabled; launch access and subscription records are unchanged.
+**Launch promo plan testing:** While a user has active launch full-access (`source: launch_promo`, leader scope), they may choose to **operate as** Player Free, Player Plus, or Player Pro from the profile billing panel. When **entitlements are enforced** (platform toggle or env), the same **Test player plan limits** control is shown for any player — including Stripe subscribers — so limits and upgrade prompts can be verified without changing billing. Subscription records are unchanged.
 
 ### Workspace navigation (implemented)
 

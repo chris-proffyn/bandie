@@ -7,6 +7,7 @@ import {
   getEntitlementTestPlanSettings,
   isPlayerEntitlementTestPlanCode,
   resolveEffectiveLeaderPlanCode,
+  shouldApplyEntitlementTestPlanOverride,
   type PlayerEntitlementTestPlanCode,
 } from './entitlementTestPlan';
 import {
@@ -14,6 +15,8 @@ import {
   isLaunchPromoSubscription,
   isLaunchTrialExpired,
 } from './launchPromo';
+import { isEntitlementEnforcementEnabled } from './entitlementEnforcement';
+import { loadPlatformEntitlementEnforcement } from './platformSettings';
 
 export type UserSubscriptionSummary = {
   id: string;
@@ -108,6 +111,8 @@ export async function listUserSubscriptions(userId?: string): Promise<UserSubscr
   }
 
   const testSettings = await getEntitlementTestPlanSettings(resolvedUserId);
+  await loadPlatformEntitlementEnforcement();
+  const enforcementEnabled = isEntitlementEnforcementEnabled();
 
   return (data ?? [])
     .filter((row) => {
@@ -124,17 +129,22 @@ export async function listUserSubscriptions(userId?: string): Promise<UserSubscr
     const source = row.source as string;
     const planScope = row.plan_scope as EntitlementPlanScope;
     const isLaunchPromo = isLaunchPromoSubscription({ source, stripeSubscriptionId });
-    const testPlanOverride =
+    const canApplyTestOverride =
       planScope === 'leader' &&
-      isLaunchPromo &&
+      shouldApplyEntitlementTestPlanOverride(testSettings.leaderPlanCode, {
+        isLaunchPromo,
+        enforcementEnabled,
+      });
+    const testPlanOverride =
+      canApplyTestOverride &&
       isPlayerEntitlementTestPlanCode(testSettings.leaderPlanCode) &&
       testSettings.leaderPlanCode !== planRow.code
         ? testSettings.leaderPlanCode
         : null;
     const effectivePlanCode = resolveEffectiveLeaderPlanCode(
       planRow.code,
-      testPlanOverride,
-      isLaunchPromo && planScope === 'leader',
+      canApplyTestOverride ? testSettings.leaderPlanCode : null,
+      { isLaunchPromo, enforcementEnabled },
     );
     const effectivePlanName =
       effectivePlanCode === planRow.code

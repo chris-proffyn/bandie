@@ -10,14 +10,27 @@ import '../../styles/entitlements.css';
 
 type EntitlementTestPlanPanelProps = {
   visible: boolean;
+  subscriptionPlanName?: string;
+  isLaunchPromo?: boolean;
   onUpdated?: () => void;
 };
 
-export function EntitlementTestPlanPanel({ visible, onUpdated }: EntitlementTestPlanPanelProps) {
+export function EntitlementTestPlanPanel({
+  visible,
+  subscriptionPlanName,
+  isLaunchPromo = false,
+  onUpdated,
+}: EntitlementTestPlanPanelProps) {
   const [selected, setSelected] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+
+  const defaultOptionLabel = isLaunchPromo
+    ? 'Full launch access (Player Pro)'
+    : subscriptionPlanName
+      ? `Use my subscription (${subscriptionPlanName})`
+      : 'Use my subscription';
 
   const loadSettings = useCallback(async () => {
     if (!visible) {
@@ -51,7 +64,9 @@ export function EntitlementTestPlanPanel({ visible, onUpdated }: EntitlementTest
       setMessage(
         updated.leaderPlanCode
           ? `Operating as ${formatEntitlementTestPlanLabel(updated.leaderPlanCode)} for entitlement checks.`
-          : 'Using full launch access for entitlement checks.',
+          : isLaunchPromo
+            ? 'Using full launch access for entitlement checks.'
+            : 'Using your subscription plan for entitlement checks.',
       );
       onUpdated?.();
     } catch (err) {
@@ -65,9 +80,10 @@ export function EntitlementTestPlanPanel({ visible, onUpdated }: EntitlementTest
     <section className="billing-test-plan-panel" aria-labelledby="entitlement-test-plan-heading">
       <h3 id="entitlement-test-plan-heading">Test player plan limits</h3>
       <p className="billing-test-plan-intro">
-        During launch full access you can simulate Player Free, Plus, or Pro to verify limits and
-        upgrade prompts. Your launch access is unchanged — this only affects entitlement checks when
-        enforcement is enabled.
+        {isLaunchPromo
+          ? 'During launch full access you can simulate Player Free, Plus, or Pro to verify limits and upgrade prompts. Your launch access is unchanged.'
+          : 'Simulate Player Free, Plus, or Pro to verify limits and upgrade prompts. Your paid subscription is unchanged.'}{' '}
+        This only affects entitlement checks while enforcement is enabled.
       </p>
 
       <label className="billing-test-plan-field" htmlFor="entitlement-test-leader-plan">
@@ -79,7 +95,7 @@ export function EntitlementTestPlanPanel({ visible, onUpdated }: EntitlementTest
           disabled={loading}
           onChange={(event) => handleChange(event.target.value)}
         >
-          <option value="">Full launch access (Player Pro)</option>
+          <option value="">{defaultOptionLabel}</option>
           {PLAYER_ENTITLEMENT_TEST_PLAN_CODES.map((code) => (
             <option key={code} value={code}>
               {formatEntitlementTestPlanLabel(code)}

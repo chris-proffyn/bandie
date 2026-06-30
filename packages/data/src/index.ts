@@ -762,10 +762,12 @@ export type { LaunchPromoStatus } from './launchPromo';
 
 export {
   PLAYER_ENTITLEMENT_TEST_PLAN_CODES,
+  canConfigureEntitlementTestLeaderPlan,
   formatEntitlementTestPlanLabel,
   getEntitlementTestPlanSettings,
   isPlayerEntitlementTestPlanCode,
   resolveEffectiveLeaderPlanCode,
+  shouldApplyEntitlementTestPlanOverride,
   updateEntitlementTestLeaderPlan,
 } from './entitlementTestPlan';
 export type {

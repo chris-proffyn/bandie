@@ -1,7 +1,9 @@
 import { getCurrentSession } from './auth';
 import { getBandieClient } from './context';
+import { isEntitlementEnforcementEnabled } from './entitlementEnforcement';
 import { PLAN_DISPLAY_NAMES, type PlanCode } from './entitlementTypes';
 import { isLaunchPromoSubscription } from './launchPromo';
+import { isEntitlementsEnforcedOnPlatform } from './platformSettings';
 
 export const PLAYER_ENTITLEMENT_TEST_PLAN_CODES = [
   'player_free',
@@ -24,13 +26,24 @@ export function isPlayerEntitlementTestPlanCode(
   );
 }
 
+export function shouldApplyEntitlementTestPlanOverride(
+  testPlanCode: string | null | undefined,
+  options: { isLaunchPromo: boolean; enforcementEnabled: boolean },
+): boolean {
+  if (!isPlayerEntitlementTestPlanCode(testPlanCode)) {
+    return false;
+  }
+
+  return options.isLaunchPromo || options.enforcementEnabled;
+}
+
 export function resolveEffectiveLeaderPlanCode(
   subscriptionPlanCode: string,
   testPlanCode: string | null | undefined,
-  isLaunchPromo: boolean,
+  options: { isLaunchPromo: boolean; enforcementEnabled: boolean },
 ): string {
-  if (isLaunchPromo && isPlayerEntitlementTestPlanCode(testPlanCode)) {
-    return testPlanCode;
+  if (shouldApplyEntitlementTestPlanOverride(testPlanCode, options)) {
+    return testPlanCode as PlayerEntitlementTestPlanCode;
   }
 
   return subscriptionPlanCode;
@@ -96,6 +109,24 @@ async function userHasActiveLaunchPromoLeaderSubscription(userId: string): Promi
   });
 }
 
+export async function canConfigureEntitlementTestLeaderPlan(userId?: string): Promise<boolean> {
+  const session = await getCurrentSession();
+  const resolvedUserId = userId ?? session?.user?.id;
+  if (!resolvedUserId) {
+    return false;
+  }
+
+  if (await userHasActiveLaunchPromoLeaderSubscription(resolvedUserId)) {
+    return true;
+  }
+
+  if (isEntitlementEnforcementEnabled()) {
+    return true;
+  }
+
+  return isEntitlementsEnforcedOnPlatform();
+}
+
 export async function updateEntitlementTestLeaderPlan(
   planCode: PlayerEntitlementTestPlanCode | null,
 ): Promise<EntitlementTestPlanSettings> {
@@ -104,8 +135,10 @@ export async function updateEntitlementTestLeaderPlan(
     throw new Error('Sign in to update plan testing settings.');
   }
 
-  if (planCode && !(await userHasActiveLaunchPromoLeaderSubscription(session.user.id))) {
-    throw new Error('Plan testing is only available while you have launch full-access.');
+  if (planCode !== null && !(await canConfigureEntitlementTestLeaderPlan(session.user.id))) {
+    throw new Error(
+      'Plan testing is available during launch access or while entitlements are enforced.',
+    );
   }
 
   const client = getBandieClient();

@@ -2,7 +2,7 @@ import { getBandieClient } from './context';
 import { isEntitlementEnforcementEnabled } from './entitlementEnforcement';
 import {
   getEntitlementTestPlanSettings,
-  isPlayerEntitlementTestPlanCode,
+  shouldApplyEntitlementTestPlanOverride,
 } from './entitlementTestPlan';
 import { isLaunchPromoSubscription, isLaunchTrialExpired } from './launchPromo';
 import { logGateDecision } from './gateLogs';
@@ -227,15 +227,19 @@ async function loadActiveSubscription(
     planName: planRow.name,
   };
 
-  if (
-    planScope === 'leader' &&
-    isLaunchPromoSubscription({
+  if (planScope === 'leader') {
+    const isLaunchPromo = isLaunchPromoSubscription({
       source: data.source as string,
       stripeSubscriptionId: data.stripe_subscription_id as string | null,
-    })
-  ) {
+    });
     const { leaderPlanCode } = await getEntitlementTestPlanSettings(userId);
-    if (isPlayerEntitlementTestPlanCode(leaderPlanCode)) {
+    if (
+      leaderPlanCode &&
+      shouldApplyEntitlementTestPlanOverride(leaderPlanCode, {
+        isLaunchPromo,
+        enforcementEnabled: isEntitlementEnforcementEnabled(),
+      })
+    ) {
       const overridden = await loadPlanByCode(leaderPlanCode);
       if (overridden) {
         return overridden;
