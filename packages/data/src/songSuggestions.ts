@@ -376,6 +376,84 @@ export async function createSongSuggestionGroup(
   return mapGroup(data as Record<string, unknown>);
 }
 
+export type UpdateSongSuggestionGroupInput = {
+  name?: string;
+  description?: string | null;
+  preferredGenres?: string[];
+  preferredDecades?: string[];
+  vocalSuitability?: VocalSuitability;
+  targetSongCount?: number;
+  suggestionClosesAt?: string;
+  votingClosesAt?: string | null;
+  voteVisibility?: VoteVisibility;
+  allowVoteChanges?: boolean;
+};
+
+const NON_EDITABLE_GROUP_STATUSES: SongSuggestionGroupStatus[] = [
+  'confirmed',
+  'archived',
+  'cancelled',
+];
+
+export async function updateSongSuggestionGroup(
+  groupId: string,
+  input: UpdateSongSuggestionGroupInput,
+): Promise<SongSuggestionGroup> {
+  const session = await getCurrentSession();
+  if (!session?.user) {
+    throw new Error('Must be signed in to update a suggestion group.');
+  }
+
+  const existing = await getSongSuggestionGroup(groupId);
+  if (!existing) {
+    throw new Error('Suggestion group not found.');
+  }
+  if (NON_EDITABLE_GROUP_STATUSES.includes(existing.status)) {
+    throw new Error('This group can no longer be edited.');
+  }
+
+  const suggestionClosesAt = input.suggestionClosesAt ?? existing.suggestion_closes_at;
+  const votingClosesAt =
+    input.votingClosesAt !== undefined ? input.votingClosesAt : existing.voting_closes_at;
+
+  if (votingClosesAt && new Date(votingClosesAt).getTime() < new Date(suggestionClosesAt).getTime()) {
+    throw new Error('Voting must close on or after suggestions close.');
+  }
+
+  const client = getBandieClient();
+  const { data, error } = await client
+    .from('bandie_song_suggestion_groups')
+    .update({
+      updated_by: session.user.id,
+      ...(input.name !== undefined && { name: input.name.trim() }),
+      ...(input.description !== undefined && { description: input.description?.trim() || null }),
+      ...(input.preferredGenres !== undefined && { preferred_genres: input.preferredGenres }),
+      ...(input.preferredDecades !== undefined && { preferred_decades: input.preferredDecades }),
+      ...(input.vocalSuitability !== undefined && { vocal_suitability: input.vocalSuitability }),
+      ...(input.targetSongCount !== undefined && { target_song_count: input.targetSongCount }),
+      ...(input.suggestionClosesAt !== undefined && { suggestion_closes_at: input.suggestionClosesAt }),
+      ...(input.votingClosesAt !== undefined && { voting_closes_at: input.votingClosesAt }),
+      ...(input.voteVisibility !== undefined && { vote_visibility: input.voteVisibility }),
+      ...(input.allowVoteChanges !== undefined && { allow_vote_changes: input.allowVoteChanges }),
+    })
+    .eq('id', groupId)
+    .select('*')
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  await client.rpc('bandie_log_song_suggestion_event', {
+    p_group_id: groupId,
+    p_band_id: existing.band_id,
+    p_event_type: 'group_updated',
+    p_payload: {},
+  });
+
+  return mapGroup(data as Record<string, unknown>);
+}
+
 export type SubmitSongSuggestionInput = {
   songTitle: string;
   artist: string;

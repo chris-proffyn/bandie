@@ -25,6 +25,7 @@ import { useAuth } from '../../context/AuthContext';
 import { UpgradePromptModal } from '../../components/entitlements/UpgradePromptModal';
 import { SongsBandContextBar } from '../../components/songs/SongsBandContextBar';
 import { SubmitSongSuggestionPanel } from '../../components/songSuggestions/SubmitSongSuggestionPanel';
+import { SongSuggestionGroupFormPanel } from '../../components/songSuggestions/SongSuggestionGroupFormPanel';
 import { useUpgradePrompt } from '../../hooks/useUpgradePrompt';
 import '../../styles/songSuggestions.css';
 
@@ -39,6 +40,8 @@ function formatEvent(event: SongSuggestionGroupEvent): string {
   switch (event.event_type) {
     case 'group_created':
       return 'Group created';
+    case 'group_updated':
+      return 'Group details updated';
     case 'suggestion_submitted':
       return `Suggestion added: ${String(payload.song_title ?? 'song')}`;
     case 'suggestions_closed':
@@ -72,6 +75,7 @@ export function SongSuggestionGroupDetailPage() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionBusy, setActionBusy] = useState(false);
   const [showSuggest, setShowSuggest] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [overrideReasons, setOverrideReasons] = useState<Record<string, string>>({});
@@ -120,6 +124,10 @@ export function SongSuggestionGroupDetailPage() {
 
   const submitOpen = group ? isSongSuggestionSubmitOpen(group) : false;
   const votingOpen = group ? isSongSuggestionVotingOpen(group) : false;
+  const canEditGroup =
+    isLeader &&
+    group &&
+    !['confirmed', 'archived', 'cancelled'].includes(group.status);
 
   const membersVotedCount = useMemo(() => {
     const voters = new Set<string>();
@@ -344,6 +352,16 @@ export function SongSuggestionGroupDetailPage() {
         <section className="panel">
           <h2>Leader actions</h2>
           <div className="song-suggestion-leader-actions">
+            {canEditGroup ? (
+              <button
+                type="button"
+                className="directory-btn directory-btn-secondary"
+                disabled={actionBusy}
+                onClick={() => setShowEdit(true)}
+              >
+                Edit group
+              </button>
+            ) : null}
             {group.status === 'open_for_suggestions' ? (
               <button
                 type="button"
@@ -535,6 +553,18 @@ export function SongSuggestionGroupDetailPage() {
             Suggest a song
           </button>
         </div>
+      ) : null}
+
+      {showEdit && group && bandId ? (
+        <SongSuggestionGroupFormPanel
+          bandId={bandId}
+          group={group}
+          onClose={() => setShowEdit(false)}
+          onSaved={() => {
+            setShowEdit(false);
+            void loadDetail();
+          }}
+        />
       ) : null}
 
       {showSuggest && groupId ? (

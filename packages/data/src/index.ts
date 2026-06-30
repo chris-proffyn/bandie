@@ -452,6 +452,7 @@ export {
   getSongSuggestionGroup,
   getSongSuggestionGroupDetail,
   createSongSuggestionGroup,
+  updateSongSuggestionGroup,
   findSimilarSongSuggestions,
   submitSongSuggestion,
   voteOnSongSuggestion,
@@ -484,6 +485,7 @@ export type {
   SongSuggestionGroupEvent,
   SongSuggestionConfirmedSong,
   CreateSongSuggestionGroupInput,
+  UpdateSongSuggestionGroupInput,
   SubmitSongSuggestionInput,
   ConfirmSelectionItem,
 } from './songSuggestions';
