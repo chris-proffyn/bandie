@@ -293,6 +293,7 @@ Reference: `product-functional-requirements.md` §10; mockup `bandie_calendar_mo
 - [x] 9.3 Gig availability mode — leader proposes windows; may publish publicly
 - [x] 9.4 Member voting — available / maybe / no / pending; status rules (confirmed / provisional / proposed)
 - [x] 9.5 Public calendar publishing — confirmed and provisional on public profile
+- [x] 9.6 Repeating events — weekly and monthly (nth weekday) series for rehearsals and gig availability; `series_key` + `repeat_pattern` on `bandie_calendar_events`; per-occurrence voting and delete single vs whole series
 
 ### 10. Gig management
 

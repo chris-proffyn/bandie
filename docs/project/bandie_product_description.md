@@ -648,13 +648,12 @@ A band leader can propose a series of rehearsal events, including:
 
 Examples:
 
-- Every other Tuesday.
-- Every week.
-- Every four weeks.
-- Six sessions.
-- Weybridge Community Studios.
+- Every Tuesday, 20:00–22:00, Powerhouse Studios (weekly, 12 sessions).
+- Every other Tuesday (future: bi-weekly; MVP uses weekly with fewer sessions).
+- Every 1st Monday of the month, 20:00–23:00, The London Stone (monthly nth weekday).
+- Six sessions at Weybridge Community Studios.
 
-Members then indicate availability for each rehearsal.
+Members then indicate availability for each rehearsal (each generated session in a series).
 
 Availability states may include:
 
@@ -672,9 +671,9 @@ Gig mode is used to determine when the band can accept bookings.
 A band leader can propose gig availability windows, including:
 
 - Availability block name.
-- Date.
+- Date or repeating pattern (weekly or monthly nth weekday).
 - Time window.
-- Area/travel radius.
+- Location or area/travel radius (location field; radius in later versions).
 - Notes for members.
 
 Members vote on each proposed date.

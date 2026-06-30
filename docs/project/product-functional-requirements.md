@@ -515,11 +515,19 @@ Two modes: **Rehearsal** (internal only) and **Gig availability** (may publish p
 
 ### Rehearsal mode
 
-Band leader proposes series (name, dates, repeat pattern, sessions, location, notes). Members vote: available, maybe, no, pending. Never public.
+Band leader proposes a series (name, first session date/time, repeat pattern, number of sessions, location, notes). Members vote per session: available, maybe, no, pending. Never public.
+
+**Repeat patterns (MVP):**
+
+- **None** — single session.
+- **Weekly** — same weekday and time each week (e.g. every Tuesday 20:00–22:00 at Powerhouse Studios).
+- **Monthly (nth weekday)** — same ordinal weekday each month (e.g. every 1st Monday 20:00–23:00 at The London Stone). Ordinal options: 1st, 2nd, 3rd, 4th, or last occurrence of that weekday in the month.
+
+Creating a series generates one calendar row per session, linked by `series_key`. Leaders can delete a single occurrence or the entire series.
 
 ### Gig mode
 
-Band leader proposes availability windows. Members vote. Rules:
+Band leader proposes availability windows — single dates or repeating series using the same weekly / monthly patterns. Members vote on **each** occurrence independently. Rules:
 
 - 100% yes → confirmed
 - \>50% yes → provisional

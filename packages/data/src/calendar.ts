@@ -2,6 +2,12 @@ import { assertCanPerform, checkBandLeaderCapability } from './entitlements';
 import { isEntitlementEnforcementEnabled } from './entitlementEnforcement';
 import { getBandieClient } from './context';
 import { getCurrentSession } from './auth';
+import {
+  expandCalendarOccurrences,
+  repeatPatternFromInput,
+  serializeCalendarRepeatPattern,
+  type CalendarRepeatInput,
+} from './calendarRecurrence';
 
 export type CalendarEventType = 'rehearsal' | 'gig_availability';
 
@@ -50,6 +56,7 @@ export type CreateCalendarEventInput = {
   endsAt?: string | null;
   location?: string | null;
   notes?: string | null;
+  repeat?: CalendarRepeatInput;
 };
 
 export const CALENDAR_LEADER_ONLY_MESSAGE =
@@ -201,7 +208,7 @@ export async function listBandCalendarEventsWithVotes(
 
 export async function createCalendarEvent(
   input: CreateCalendarEventInput,
-): Promise<CalendarEvent> {
+): Promise<CalendarEvent[]> {
   const session = await getCurrentSession();
   if (!session?.user) {
     throw new Error('Must be signed in to create calendar events.');
@@ -219,42 +226,75 @@ export async function createCalendarEvent(
   const publishPublic =
     input.eventType === 'gig_availability' && tier === 'full' ? false : false;
 
+  const repeat = input.repeat ?? { kind: 'none' };
+  const repeatPattern = repeatPatternFromInput(repeat);
+  const seriesKey = repeatPattern ? crypto.randomUUID() : null;
+  const repeatPatternValue = repeatPattern
+    ? serializeCalendarRepeatPattern(repeatPattern)
+    : null;
+
+  const occurrences = expandCalendarOccurrences({
+    startsAt: new Date(input.startsAt),
+    endsAt: input.endsAt ? new Date(input.endsAt) : null,
+    repeat,
+  });
+
+  if (occurrences.length === 0) {
+    throw new Error('Unable to generate calendar occurrences for this repeat pattern.');
+  }
+
   const client = getBandieClient();
-  const { data, error } = await client
-    .from('bandie_calendar_events')
-    .insert({
-      band_id: input.bandId,
-      event_type: input.eventType,
-      title: input.title.trim(),
-      starts_at: input.startsAt,
-      ends_at: input.endsAt ?? null,
-      location: input.location?.trim() || null,
-      notes: input.notes?.trim() || null,
-      publish_public: publishPublic,
-      created_by: session.user.id,
-    })
-    .select('*')
-    .single();
+  const rows = occurrences.map((occurrence) => ({
+    band_id: input.bandId,
+    event_type: input.eventType,
+    title: input.title.trim(),
+    starts_at: occurrence.startsAt.toISOString(),
+    ends_at: occurrence.endsAt?.toISOString() ?? null,
+    location: input.location?.trim() || null,
+    notes: input.notes?.trim() || null,
+    series_key: seriesKey,
+    repeat_pattern: repeatPatternValue,
+    publish_public: publishPublic,
+    created_by: session.user.id,
+  }));
+
+  const { data, error } = await client.from('bandie_calendar_events').insert(rows).select('*');
 
   if (error) {
     throw new Error(error.message);
   }
 
+  const created = (data ?? []) as CalendarEvent[];
+
   if (input.eventType === 'gig_availability') {
-    const { error: seedError } = await client.rpc('bandie_seed_calendar_event_votes', {
-      p_event_id: data.id,
-    });
-    if (seedError) {
-      throw new Error(seedError.message);
+    for (const event of created) {
+      const { error: seedError } = await client.rpc('bandie_seed_calendar_event_votes', {
+        p_event_id: event.id,
+      });
+      if (seedError) {
+        throw new Error(seedError.message);
+      }
     }
   }
 
-  return data as CalendarEvent;
+  return created;
 }
 
 export async function deleteCalendarEvent(eventId: string): Promise<void> {
   const client = getBandieClient();
   const { error } = await client.from('bandie_calendar_events').delete().eq('id', eventId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function deleteCalendarEventSeries(seriesKey: string): Promise<void> {
+  const client = getBandieClient();
+  const { error } = await client
+    .from('bandie_calendar_events')
+    .delete()
+    .eq('series_key', seriesKey);
 
   if (error) {
     throw new Error(error.message);

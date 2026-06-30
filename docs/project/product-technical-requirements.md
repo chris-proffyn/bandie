@@ -157,7 +157,7 @@ All tables prefixed `bandie_`. Full schema to be defined in migrations. Conceptu
 | `bandie_band_song_part_storage` | Per-band Dropbox song-parts root folder mapping |
 | `bandie_setlists` | Setlist definitions |
 | `bandie_setlist_items` | Songs in setlist order |
-| `bandie_calendar_events` | Rehearsals and availability windows |
+| `bandie_calendar_events` | Rehearsals and availability windows (`series_key`, `repeat_pattern` for repeating series) |
 | `bandie_availability_votes` | Member votes on calendar events |
 | `bandie_gigs` | Gig records (enquiry through archived) |
 | `bandie_booking_enquiries` | Structured booking enquiry metadata (links to `bandie_user_messages`) |
@@ -240,7 +240,7 @@ Band workspace limits resolve from the **primary leader’s** active subscriptio
 - `gateLogs.ts` — gate decision logging
 
 **Calendar, gigs, booking (`@bandie/data`):**
-- `calendar.ts` — events, votes, `calendar.use` tier (`none` on Player Free; `full` on Player Plus / Player Pro)
+- `calendar.ts` — events, votes, repeating series (`calendarRecurrence.ts`: weekly, monthly nth weekday), `calendar.use` tier (`none` on Player Free; `full` on Player Plus / Player Pro)
 - `gigs.ts` — organiser gig CRUD, band invites, setlist assignment RPCs, `gig.create` limits (organiser scope)
 - `bookingEnquiries.ts` — send, inbox, `booking_enquiry.send` limits
 

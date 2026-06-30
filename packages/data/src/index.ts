@@ -576,6 +576,7 @@ export {
   getCalendarEventWithVotes,
   createCalendarEvent,
   deleteCalendarEvent,
+  deleteCalendarEventSeries,
   castAvailabilityVote,
   getBandCalendarTier,
   summarizeAvailabilityVotes,
@@ -585,6 +586,18 @@ export {
   AVAILABILITY_STATUS_LABELS,
   AVAILABILITY_VOTE_LABELS,
 } from './calendar';
+export {
+  expandCalendarOccurrences,
+  repeatPatternFromInput,
+  serializeCalendarRepeatPattern,
+  parseCalendarRepeatPattern,
+  formatCalendarRepeatPattern,
+  inferMonthlyOrdinal,
+  clampOccurrenceCount,
+  CALENDAR_DEFAULT_OCCURRENCE_COUNT,
+  CALENDAR_MAX_OCCURRENCE_COUNT,
+  CALENDAR_REPEAT_ORDINAL_OPTIONS,
+} from './calendarRecurrence';
 export type {
   CalendarEvent,
   CalendarEventType,
@@ -594,6 +607,12 @@ export type {
   AvailabilityVote,
   CreateCalendarEventInput,
 } from './calendar';
+export type {
+  CalendarRepeatInput,
+  CalendarRepeatKind,
+  CalendarRepeatPattern,
+  CalendarOccurrence,
+} from './calendarRecurrence';
 
 export {
   listOrganiserGigs,
