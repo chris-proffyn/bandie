@@ -760,6 +760,19 @@ export {
 } from './launchPromo';
 export type { LaunchPromoStatus } from './launchPromo';
 
+export {
+  PLAYER_ENTITLEMENT_TEST_PLAN_CODES,
+  formatEntitlementTestPlanLabel,
+  getEntitlementTestPlanSettings,
+  isPlayerEntitlementTestPlanCode,
+  resolveEffectiveLeaderPlanCode,
+  updateEntitlementTestLeaderPlan,
+} from './entitlementTestPlan';
+export type {
+  EntitlementTestPlanSettings,
+  PlayerEntitlementTestPlanCode,
+} from './entitlementTestPlan';
+
 export { logGateDecision, listGateDecisionLogs } from './gateLogs';
 export type { GateDecisionLog } from './gateLogs';
 

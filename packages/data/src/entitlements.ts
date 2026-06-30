@@ -1,6 +1,10 @@
 import { getBandieClient } from './context';
 import { isEntitlementEnforcementEnabled } from './entitlementEnforcement';
-import { isLaunchTrialExpired } from './launchPromo';
+import {
+  getEntitlementTestPlanSettings,
+  isPlayerEntitlementTestPlanCode,
+} from './entitlementTestPlan';
+import { isLaunchPromoSubscription, isLaunchTrialExpired } from './launchPromo';
 import { logGateDecision } from './gateLogs';
 import { EntitlementGateError } from './entitlementErrors';
 import type {
@@ -143,15 +147,12 @@ async function getBandPrimaryLeaderUserId(bandId: string): Promise<string | null
   return (data?.owner_user_id as string | undefined) ?? null;
 }
 
-async function loadFreePlanSubscription(
-  planScope: EntitlementPlanScope,
-): Promise<ActiveSubscription | null> {
+async function loadPlanByCode(planCode: string): Promise<ActiveSubscription | null> {
   const client = getBandieClient();
-  const freeCode = planScope === 'organiser' ? PLAN_CODES.ORGANISER_FREE : PLAN_CODES.PLAYER_FREE;
   const { data, error } = await client
     .from('bandie_plans')
     .select('id, code, name')
-    .eq('code', freeCode)
+    .eq('code', planCode)
     .eq('status', 'active')
     .maybeSingle();
 
@@ -170,6 +171,13 @@ async function loadFreePlanSubscription(
   };
 }
 
+async function loadFreePlanSubscription(
+  planScope: EntitlementPlanScope,
+): Promise<ActiveSubscription | null> {
+  const freeCode = planScope === 'organiser' ? PLAN_CODES.ORGANISER_FREE : PLAN_CODES.PLAYER_FREE;
+  return loadPlanByCode(freeCode);
+}
+
 async function loadActiveSubscription(
   userId: string,
   planScope: EntitlementPlanScope,
@@ -178,7 +186,7 @@ async function loadActiveSubscription(
   const { data, error } = await client
     .from('bandie_subscriptions')
     .select(
-      'plan_id, status, grace_period_ends_at, trial_end, stripe_subscription_id, bandie_plans!inner(code, name)',
+      'plan_id, status, grace_period_ends_at, trial_end, stripe_subscription_id, source, bandie_plans!inner(code, name)',
     )
     .eq('subject_type', 'user')
     .eq('subject_id', userId)
@@ -213,11 +221,29 @@ async function loadActiveSubscription(
   const plan = data.bandie_plans as { code: string; name: string } | { code: string; name: string }[];
   const planRow = Array.isArray(plan) ? plan[0] : plan;
 
-  return {
+  const subscription: ActiveSubscription = {
     planId: data.plan_id as string,
     planCode: planRow.code,
     planName: planRow.name,
   };
+
+  if (
+    planScope === 'leader' &&
+    isLaunchPromoSubscription({
+      source: data.source as string,
+      stripeSubscriptionId: data.stripe_subscription_id as string | null,
+    })
+  ) {
+    const { leaderPlanCode } = await getEntitlementTestPlanSettings(userId);
+    if (isPlayerEntitlementTestPlanCode(leaderPlanCode)) {
+      const overridden = await loadPlanByCode(leaderPlanCode);
+      if (overridden) {
+        return overridden;
+      }
+    }
+  }
+
+  return subscription;
 }
 
 async function loadPlanEntitlementValue(

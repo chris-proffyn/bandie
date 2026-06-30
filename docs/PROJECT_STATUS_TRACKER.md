@@ -55,7 +55,7 @@
 
 **Immediate task:** Run `supabase db push` for launch promo migration; enable **Enforce entitlements** at `/admin/entitlements`; confirm launch end date at `/admin/billing`
 
-**Launch promo (Option 2):** 30-day Player Pro / Organiser Plus trials via `bandie_subscriptions` (`source: launch_promo`); no Stripe until promo ends. See `/admin/billing` and `/app/profile` billing panel.
+**Launch promo (Option 2):** 30-day Player Pro / Organiser Plus trials via `bandie_subscriptions` (`source: launch_promo`); no Stripe until promo ends. See `/admin/billing` and `/app/profile` billing panel. During launch access, users can **simulate** Player Free / Plus / Pro from profile (**Test player plan limits**) to verify entitlement gates without ending the promo.
 
 **Before turning on enforcement in production:** smoke-test calendar, gigs, booking inbox, and `/admin`; turn on platform toggle for `entitlements_enforced` at launch
 
@@ -402,6 +402,12 @@ Authoritative spec: entitlements spec §35 Phase E. Deferred until admin portal 
 ---
 
 ## Session notes
+
+**29 June 2026 — Launch promo plan testing (profile)**
+- Migration `20260701130000_bandie_entitlement_test_plan_override.sql` — `bandie_profiles.entitlement_test_leader_plan_code` (`player_free` \| `player_plus` \| `player_pro` \| null)
+- `@bandie/data`: `entitlementTestPlan.ts` — `getEntitlementTestPlanSettings`, `updateEntitlementTestLeaderPlan`, `resolveEffectiveLeaderPlanCode`; `loadActiveSubscription` applies override for active `launch_promo` leader subscriptions
+- `/app/profile` billing panel: **Test player plan limits** selector when launch access is active; billing summary shows **Operating as** vs launch access plan
+- Docs: product functional requirements §6; product technical requirements §6
 
 **1 July 2026 — Communications type taxonomy**
 - Three explicit categories: **player invites**, **gig invites**, **general messages** (`CommunicationCategory` in `@bandie/data`)

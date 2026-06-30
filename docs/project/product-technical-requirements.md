@@ -134,7 +134,7 @@ All tables prefixed `bandie_`. Full schema to be defined in migrations. Conceptu
 
 | Entity | Purpose |
 |---|---|
-| `bandie_profiles` | Musician / player profile (display name, username, instruments, gear, directory visibility, player/organiser roles, leader contact fields) |
+| `bandie_profiles` | Musician / player profile (display name, username, instruments, gear, directory visibility, player/organiser roles, leader contact fields, optional `entitlement_test_leader_plan_code` for launch-promo tier simulation) |
 | `bandie_bands` | Band workspace + public profile |
 | `bandie_band_members` | User ↔ band with roles |
 | `bandie_band_invitations` | Email invitations with accept token |
@@ -220,6 +220,8 @@ RLS policies must enforce band membership for all private data.
 | `organiser_plus` | Organiser Plus | Organiser (paid) |
 
 Band workspace limits resolve from the **primary leader’s** active subscription (`plan_scope = leader`). Upgrade prompt labels use `PLAN_DISPLAY_NAMES` for known codes; live plan names also load from the DB on subscription join.
+
+**Launch promo plan override:** When a user has an active `launch_promo` leader subscription, `bandie_profiles.entitlement_test_leader_plan_code` may be set to `player_free`, `player_plus`, or `player_pro`. `loadActiveSubscription()` and `listUserSubscriptions()` resolve the **effective** plan from this override for entitlement checks and billing UI; the subscription row is unchanged. Cleared or null uses full launch access (Player Pro).
 
 **Player plan limits (seeded in `20260630190000`; authoritative in entitlements spec §20.2):**
 

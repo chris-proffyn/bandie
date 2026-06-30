@@ -11,6 +11,7 @@ import {
   type UserSubscriptionSummary,
   type EntitlementPlanScope,
 } from '@bandie/data';
+import { EntitlementTestPlanPanel } from './EntitlementTestPlanPanel';
 import '../../styles/entitlements.css';
 
 type BillingPanelProps = {
@@ -50,16 +51,30 @@ function ScopeSection({
     <section className="billing-scope-panel">
       <h3>{scopeTitle(scope)}</h3>
       {subscription ? (
-        <p className="billing-current-plan">
-          Current: <strong>{subscription.planName}</strong>
-          {subscription.isLaunchPromo && launchPromoActive && subscription.trialEnd
-            ? ` — launch access until ${formatLaunchPromoEndDate(subscription.trialEnd)}`
-            : null}
-          {subscription.source === 'stripe' ? ' (Stripe)' : ''}
-          {subscription.cancelAtPeriodEnd && subscription.currentPeriodEnd
-            ? ` — cancels ${new Date(subscription.currentPeriodEnd).toLocaleDateString()}`
-            : null}
-        </p>
+        <>
+          <p className="billing-current-plan">
+            {subscription.testPlanOverride ? (
+              <>
+                Operating as: <strong>{subscription.planName}</strong> (testing)
+                <span className="billing-plan-testing-note">
+                  {' '}
+                  — launch access: {subscription.subscriptionPlanName}
+                </span>
+              </>
+            ) : (
+              <>
+                Current: <strong>{subscription.planName}</strong>
+              </>
+            )}
+            {subscription.isLaunchPromo && launchPromoActive && subscription.trialEnd
+              ? ` — launch access until ${formatLaunchPromoEndDate(subscription.trialEnd)}`
+              : null}
+            {subscription.source === 'stripe' ? ' (Stripe)' : ''}
+            {subscription.cancelAtPeriodEnd && subscription.currentPeriodEnd
+              ? ` — cancels ${new Date(subscription.currentPeriodEnd).toLocaleDateString()}`
+              : null}
+          </p>
+        </>
       ) : (
         <p className="billing-current-plan">No active subscription found.</p>
       )}
@@ -160,6 +175,9 @@ export function BillingPanel({
   const organiserSub = subscriptions.find((sub) => sub.planScope === 'organiser');
   const launchPromoActive = launchPromo?.active ?? false;
   const hasLaunchTrial = subscriptions.some((sub) => sub.isLaunchPromo);
+  const showLeaderPlanTesting = Boolean(
+    showLeaderPlans && leaderSub?.isLaunchPromo && launchPromoActive,
+  );
 
   async function handleUpgrade(planCode: string, planScope: EntitlementPlanScope) {
     setLoading(true);
@@ -206,15 +224,25 @@ export function BillingPanel({
       {error ? <p className="form-error">{error}</p> : null}
 
       {showLeaderPlans ? (
-        <ScopeSection
-          scope="leader"
-          subscription={leaderSub}
-          offers={leaderOffers}
-          loading={loading}
-          launchPromoActive={launchPromoActive}
-          onUpgrade={(code) => handleUpgrade(code, 'leader')}
-          onManage={() => handleManage('leader')}
-        />
+        <>
+          <EntitlementTestPlanPanel
+            visible={showLeaderPlanTesting}
+            onUpdated={() => {
+              refresh().catch((err) => {
+                setError(err instanceof Error ? err.message : 'Unable to refresh billing.');
+              });
+            }}
+          />
+          <ScopeSection
+            scope="leader"
+            subscription={leaderSub}
+            offers={leaderOffers}
+            loading={loading}
+            launchPromoActive={launchPromoActive}
+            onUpgrade={(code) => handleUpgrade(code, 'leader')}
+            onManage={() => handleManage('leader')}
+          />
+        </>
       ) : null}
 
       {showOrganiserPlans ? (

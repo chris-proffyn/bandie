@@ -3,6 +3,13 @@ import { getBandieClient } from './context';
 import type { EntitlementPlanScope } from './entitlementTypes';
 import { PLAN_DISPLAY_NAMES, type PlanCode } from './entitlementTypes';
 import {
+  formatEntitlementTestPlanLabel,
+  getEntitlementTestPlanSettings,
+  isPlayerEntitlementTestPlanCode,
+  resolveEffectiveLeaderPlanCode,
+  type PlayerEntitlementTestPlanCode,
+} from './entitlementTestPlan';
+import {
   ensureLaunchTrialsExpired,
   isLaunchPromoSubscription,
   isLaunchTrialExpired,
@@ -22,6 +29,11 @@ export type UserSubscriptionSummary = {
   cancelAtPeriodEnd: boolean;
   billingInterval: string | null;
   isLaunchPromo: boolean;
+  /** Plan on the subscription record (before launch-promo test override). */
+  subscriptionPlanCode: string;
+  subscriptionPlanName: string;
+  /** When set, the user is simulating a lower player tier during launch access. */
+  testPlanOverride: PlayerEntitlementTestPlanCode | null;
 };
 
 export type PublicPlanOffer = {
@@ -95,6 +107,8 @@ export async function listUserSubscriptions(userId?: string): Promise<UserSubscr
     throw new Error(error.message);
   }
 
+  const testSettings = await getEntitlementTestPlanSettings(resolvedUserId);
+
   return (data ?? [])
     .filter((row) => {
       const stripeSubscriptionId = (row.stripe_subscription_id as string | null) ?? null;
@@ -108,12 +122,30 @@ export async function listUserSubscriptions(userId?: string): Promise<UserSubscr
     const planRow = Array.isArray(plan) ? plan[0] : plan;
     const stripeSubscriptionId = (row.stripe_subscription_id as string | null) ?? null;
     const source = row.source as string;
+    const planScope = row.plan_scope as EntitlementPlanScope;
+    const isLaunchPromo = isLaunchPromoSubscription({ source, stripeSubscriptionId });
+    const testPlanOverride =
+      planScope === 'leader' &&
+      isLaunchPromo &&
+      isPlayerEntitlementTestPlanCode(testSettings.leaderPlanCode) &&
+      testSettings.leaderPlanCode !== planRow.code
+        ? testSettings.leaderPlanCode
+        : null;
+    const effectivePlanCode = resolveEffectiveLeaderPlanCode(
+      planRow.code,
+      testPlanOverride,
+      isLaunchPromo && planScope === 'leader',
+    );
+    const effectivePlanName =
+      effectivePlanCode === planRow.code
+        ? planRow.name
+        : formatEntitlementTestPlanLabel(effectivePlanCode as PlayerEntitlementTestPlanCode);
 
     return {
       id: row.id as string,
-      planScope: row.plan_scope as EntitlementPlanScope,
-      planCode: planRow.code,
-      planName: planRow.name,
+      planScope,
+      planCode: effectivePlanCode,
+      planName: effectivePlanName,
       status: row.status as string,
       source,
       stripeCustomerId: (row.stripe_customer_id as string | null) ?? null,
@@ -122,7 +154,10 @@ export async function listUserSubscriptions(userId?: string): Promise<UserSubscr
       trialEnd: (row.trial_end as string | null) ?? null,
       cancelAtPeriodEnd: Boolean(row.cancel_at_period_end),
       billingInterval: planRow.billing_interval ?? null,
-      isLaunchPromo: isLaunchPromoSubscription({ source, stripeSubscriptionId }),
+      isLaunchPromo,
+      subscriptionPlanCode: planRow.code,
+      subscriptionPlanName: planRow.name,
+      testPlanOverride,
     };
   });
 }
