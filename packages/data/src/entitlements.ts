@@ -53,6 +53,7 @@ const REQUIRED_UPGRADE_PLAN: Record<string, PlanCode> = {
   'band.create': PLAN_CODES.PLAYER_PLUS,
   'band_directory.browse': PLAN_CODES.PLAYER_PLUS,
   'player_directory.browse': PLAN_CODES.PLAYER_PLUS,
+  'player_message.send': PLAN_CODES.PLAYER_PLUS,
 };
 
 const BOOLEAN_CAPABILITY_MESSAGES: Record<string, (planName: string) => string> = {
@@ -62,6 +63,8 @@ const BOOLEAN_CAPABILITY_MESSAGES: Record<string, (planName: string) => string> 
     `The band directory is not available on ${planName}. Upgrade to Player Plus to discover bands.`,
   'player_directory.browse': (planName) =>
     `The player directory is not available on ${planName}. Upgrade to Player Plus to find musicians.`,
+  'player_message.send': (planName) =>
+    `Direct messages to other players are not available on ${planName}. Upgrade to Player Plus to message musicians.`,
 };
 
 function allowedDecision(partial: Partial<GateDecision> = {}): GateDecision {

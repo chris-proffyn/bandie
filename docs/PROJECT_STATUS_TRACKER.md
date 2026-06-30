@@ -3,7 +3,7 @@
 **Document status:** Live project tracker  
 **Product:** Bandie  
 **Phase:** Phase 15 (billing) implemented — configure Stripe env vars and sync plans  
-**Last updated:** 30 June 2026 (player plan entitlements, UX polish, test-data toggles, docs sync)
+**Last updated:** 1 July 2026 (song suggestions implementation plan; Phase 20 added to roadmap)
 
 ---
 
@@ -33,6 +33,7 @@
 | Song-part file storage | **Dropbox** — leader OAuth, band song-parts root, upload/preview/download via Netlify (`bandie_dropbox_song_part_storage_spec.md`) |
 | Songs & repertoire (Phase 6) | Complete — dashboard, song folder, Dropbox uploads, part templates, in-app PDF view, soft delete |
 | Setlist management (Phase 7) | Complete — library, builder with drag reorder, live metrics, leader-only edit |
+| Song suggestions & voting (Phase 20) | **Not started** — spec + implementation plan ready; see `bandie_song_suggestions_voting_spec.md` |
 | Entitlement framework (Phase 8) | Complete — schema, seeds, service, gate hooks; enforcement off by default |
 | Calendar & gigs (Phases 9–10) | Complete — `/app/:bandId/calendar`; organiser gigs `/app/gigs`; band invites `/app/:bandId/gigs` |
 | Admin portal & metrics (Phases 12–14) | Complete — `/admin` (overview, accounts, metrics, editable plan catalogue, audit); enforcement toggle |
@@ -62,12 +63,14 @@
 Reference documents:
 - `docs/project/bandie_entitlements_admin_portal_functional_technical_spec.md` — authoritative for Phases 8, 12–15, 17
 - `docs/project/product-functional-requirements.md` §10–12 (calendar, gigs, booking)
+- `docs/project/bandie_song_suggestions_voting_spec.md` — Phase 20 functional/technical spec
+- `docs/project/bandie_song_suggestions_voting_implementation_plan.md` — Phase 20 task checklist
 - `docs/project/bandie_dropbox_song_part_storage_spec.md`
 - `docs/project/product-technical-requirements.md`
 
 ## Phase roadmap (unified)
 
-Single numbering for product features, monetisation, admin, and mobile. Sub-phases (e.g. 2b, 6b) remain for parallel tracks within an area.
+Single numbering for product features, monetisation, admin, and mobile. Sub-phases (e.g. 2b, 6b) remain for parallel tracks within an area. **Phases 0–20.**
 
 | Phase | Name | Status | Notes |
 |---|---|---|---|
@@ -84,8 +87,9 @@ Single numbering for product features, monetisation, admin, and mobile. Sub-phas
 | 17 | Open mic & event packs | Not started | `bandie_open_mic_jam_night_spec.md`; add-on entitlements |
 | 18 | Mobile app | Not started | Expo scaffold; core member flows |
 | 19 | System health & moderation | Not started | Job health, profile moderation, admin alerts |
+| **20** | **Song suggestions & voting** | **Not started** | Collaborative suggest/vote → confirm top N → skeleton setlist; see implementation plan |
 
-**Sequencing rationale:** Phase 8 before 9–10 so calendar/gigs use entitlement hooks from day one. Admin foundation (12) follows core product calendar/gigs. Billing (15) after entitlement admin (14) so limits and plans are operable before charging. Full admin pricing console remains post-MVP per entitlements spec §16.2.
+**Sequencing rationale:** Phase 8 before 9–10 so calendar/gigs use entitlement hooks from day one. Admin foundation (12) follows core product calendar/gigs. Billing (15) after entitlement admin (14) so limits and plans are operable before charging. **Phase 20** extends Songs/Setlists (6–7) with whole-band intake before catalogue growth; free-tier members may suggest/vote; skeleton setlist creation gated by `setlist.create`. Full admin pricing console remains post-MVP per entitlements spec §16.2.
 
 ## Blockers
 
@@ -105,6 +109,7 @@ Player profiles & dir     ██████████  musician profiles + /p
 Private workspace shell   ██████████  overview, leader, lineup parts, recruitment, invites
 Songs & repertoire        ██████████  Phase 6 — dashboard, Dropbox files, templates, soft delete
 Setlists                  ██████████  Phase 7 — library, builder, drag reorder, metrics
+Song suggestions          ░░░░░░░░░░  Phase 20 — spec + plan ready; not started
 Entitlements              ██████████  Phase 8 — schema, seeds, service, gate hooks
 Calendar & gigs           ██████████  Phases 9–10 — calendar, voting, gigs, setlist link
 Booking & admin           ██████████  Phases 11–14 — enquiry inbox, /admin, metrics, enforcement toggle
@@ -399,9 +404,84 @@ Authoritative spec: entitlements spec §35 Phase E. Deferred until admin portal 
 - [ ] 19.3 Public profile moderation and reported-content queue
 - [ ] 19.4 Admin alerts for failed jobs and webhooks
 
+### 20. Song suggestions and voting
+
+Authoritative spec: `docs/project/bandie_song_suggestions_voting_spec.md`  
+Task checklist: `docs/project/bandie_song_suggestions_voting_implementation_plan.md`
+
+**Principle:** Whole-band collaboration — all **approved** members (including free-tier) can suggest and vote; leader-only create/close/confirm. Skeleton setlist creation uses existing `setlist.create` entitlement. Reference voting UX: calendar availability (`calendar.ts`, `CalendarPage.tsx`).
+
+**v1 defaults (spec §20, confirmed 1 July 2026):** Submitter auto-vote `happy_to_play`; **vote visibility** chosen by leader at create (`member_visible` \| `aggregate_only`); separate suggestion/voting windows; leader **veto** with reason; leader may **reset votes** on ties; confirm with warning if votes incomplete; unlimited open groups; draft catalogue on skeleton setlist only; leader-only (no Band Admin).
+
+#### 20.1 Schema, RLS and RPCs
+
+- [ ] 20.1.1 Migration — `bandie_song_suggestion_groups`, `bandie_song_suggestions`, `bandie_song_suggestion_votes`, `bandie_song_suggestion_group_events`, `bandie_song_suggestion_confirmed_songs` (RLS in same migration)
+- [ ] 20.1.2 Indexes and view `bandie_song_suggestion_vote_summary`
+- [ ] 20.1.3 Security definer RPCs — create group, submit, vote, close/reopen, close voting, **veto**, **reset votes**, confirm selection
+- [ ] 20.1.4 `supabase db push` + RLS smoke test (leader, member, non-member)
+- [ ] 20.1.5 Update `supabase/migrations/README.md`
+
+#### 20.2 `@bandie/data` module
+
+- [ ] 20.2.1 `songSuggestions.ts` — types, list/detail, create group, submit, vote, leader transitions
+- [ ] 20.2.2 Ranking helpers — score, tie-break order, vote completion (active members)
+- [ ] 20.2.3 Duplicate warning on submit (non-blocking)
+- [ ] 20.2.4 Export from `packages/data/src/index.ts`
+
+#### 20.3 Web UI — core collaboration (Phase 1)
+
+- [ ] 20.3.1 Routes — `/app/:bandId/songs/suggestions`, `/app/:bandId/songs/suggestions/:groupId`, confirm flow
+- [ ] 20.3.2 Nav — Songs → Suggestions; active groups panel on Songs dashboard
+- [ ] 20.3.3 Create suggestion group modal — brief, target N, closing dates, **vote visibility**
+- [ ] 20.3.4 Group detail — suggest form, suggestion list, vote buttons, vote summary (respect visibility)
+- [ ] 20.3.5 Leader actions — close/reopen suggestions, close voting, **veto**, **reset votes**
+- [ ] 20.3.6 Confirm selection — ranked list, top N preview, tie highlight, override with reason
+- [ ] 20.3.7 Confirmed result read-only view
+- [ ] 20.3.8 Styles — `songSuggestions.css`; light modals per RSD UX §6.5
+- [ ] 20.3.9 Empty states per spec §6.3
+
+#### 20.4 Setlist and catalogue integration (Phase 2)
+
+- [ ] 20.4.1 RPC `create skeleton setlist from suggestion group` — draft setlist + setlist items in rank order
+- [ ] 20.4.2 Create draft `bandie_songs` (`not_started`) where not in catalogue; link provenance
+- [ ] 20.4.3 `CreateSkeletonSetlistModal` + `UpgradePromptModal` when `setlist.create` blocked
+- [ ] 20.4.4 Navigate to setlist builder on success
+
+#### 20.5 Automation, activity and polish (Phase 3)
+
+- [ ] 20.5.1 Scheduled auto-close suggestions at `suggestion_closes_at`
+- [ ] 20.5.2 Scheduled auto-close voting at `voting_closes_at` when set
+- [ ] 20.5.3 Group activity feed on detail page; optional communications reminders
+- [ ] 20.5.4 Filters and sorting — search, needs my vote, sort by score (spec §6.2)
+- [ ] 20.5.5 Analytics events — `song_suggestion_*` per spec §16
+
+#### 20.6 Documentation and acceptance
+
+- [ ] 20.6.1 `product-functional-requirements.md` — song suggestions section
+- [ ] 20.6.2 `product-technical-requirements.md` — tables and module
+- [ ] 20.6.3 Acceptance criteria §17.1–17.6 manual QA pass
+
+#### 20.7 Deferred (post-MVP)
+
+- [ ] 20.7.1 Band Admin role parity in permission matrix
+- [ ] 20.7.2 `draft` group status workflow
+- [ ] 20.7.3 Max open groups per subscription tier
+- [ ] 20.7.4 External metadata / embed enrichment (Spotify, YouTube)
+- [ ] 20.7.5 Member vote comments UI (`allow_member_comments`)
+
 ---
 
 ## Session notes
+
+**1 July 2026 — Song suggestions product decisions (Phase 20)**
+- Spec §19 resolved: auto submitter vote; leader-set vote visibility; leader discretion on confirm; **veto** with reason; separate windows; catalogue on skeleton setlist; unlimited groups
+- Tie-break: leader may reset votes for re-vote or decide at confirm; Band Admin no; vote comments schema-only defer; email defer
+- Docs updated: spec §19–§20, implementation plan §2 and §11, tracker §20
+
+**1 July 2026 — Song suggestions & voting (Phase 20 planning)**
+- Functional/technical spec: `docs/project/bandie_song_suggestions_voting_spec.md`
+- Implementation task plan: `docs/project/bandie_song_suggestions_voting_implementation_plan.md` — phased checklist (schema → data → UI → setlist integration → automation)
+- Tracker Phase 20 added; status **not started**; extends Songs (6) and Setlists (7); voting pattern aligns with calendar availability (9)
 
 **30 June 2026 — Player Free member-only scope**
 - Migration `20260701150000_bandie_player_free_member_scope.sql` — `band_directory.browse`, `player_directory.browse` capabilities; Player Free locked to invite-only band collaboration

@@ -16,6 +16,8 @@ import {
   type UserProfile,
 } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
+import { usePlayerWorkspaceAccess } from '../../hooks/usePlayerWorkspaceAccess';
+import { DirectMessageModal } from '../communications/DirectMessageModal';
 import { BackLink } from '../navigation/BackLink';
 import { PlayerInvitePanel } from '../band/PlayerInvitePanel';
 import {
@@ -63,13 +65,17 @@ function userProfileToDirectoryListing(profile: UserProfile): PlayerDirectoryLis
 }
 
 export function PlayerProfileView({ profileId, variant }: PlayerProfileViewProps) {
-  const { session, adminModeActive, bands } = useAuth();
+  const { session, adminModeActive, bands, profile: currentProfile, displayName } = useAuth();
+  const { access: playerAccess } = usePlayerWorkspaceAccess();
   const location = useLocation();
   const isWorkspace = variant === 'workspace';
   const [player, setPlayer] = useState<PlayerDirectoryListing | null>(null);
+  const [recipientProfile, setRecipientProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [adminRecruitBandId, setAdminRecruitBandId] = useState('');
+  const [messageModalOpen, setMessageModalOpen] = useState(false);
+  const [messageSentNotice, setMessageSentNotice] = useState<string | null>(null);
 
   useEffect(() => {
     if (!profileId) {
@@ -86,17 +92,20 @@ export function PlayerProfileView({ profileId, variant }: PlayerProfileViewProps
         if (!adminProfile) {
           setError('This player profile is not available.');
           setPlayer(null);
+          setRecipientProfile(null);
           return;
         }
         setPlayer(userProfileToDirectoryListing(adminProfile));
+        setRecipientProfile(adminProfile);
         setError(null);
         return;
       }
 
-      if (isWorkspace && session) {
+      if (session) {
         const sharedProfile = await getUserProfileById(profileId!);
         if (sharedProfile) {
           setPlayer(userProfileToDirectoryListing(sharedProfile));
+          setRecipientProfile(sharedProfile);
           setError(null);
           return;
         }
@@ -106,14 +115,22 @@ export function PlayerProfileView({ profileId, variant }: PlayerProfileViewProps
       if (!result) {
         setError('This player profile is not available.');
         setPlayer(null);
+        setRecipientProfile(null);
         return;
       }
       if (!result.open_to_deputy_invites && !result.open_to_member_invites) {
         setError('This player profile is not available.');
         setPlayer(null);
+        setRecipientProfile(null);
         return;
       }
       setPlayer(result);
+      if (session) {
+        const sharedProfile = await getUserProfileById(profileId!);
+        setRecipientProfile(sharedProfile);
+      } else {
+        setRecipientProfile(null);
+      }
       setError(null);
     }
 
@@ -157,6 +174,27 @@ export function PlayerProfileView({ profileId, variant }: PlayerProfileViewProps
     (adminModeActive
       ? Boolean(effectiveFindPlayers)
       : Boolean(findPlayersFromNav) && isBandLeaderRole(recruitingBand?.member_role));
+  const isOwnProfile = Boolean(
+    session?.user &&
+      recipientProfile &&
+      recipientProfile.user_id === session.user.id,
+  );
+  const canMessagePlayer =
+    Boolean(session?.user && recipientProfile && !isOwnProfile) && playerAccess.canSendPlayerMessage;
+  const messageRecipient = recipientProfile
+    ? {
+        userId: recipientProfile.user_id,
+        displayName: resolvePlayerDisplayName(userProfileToDirectoryListing(recipientProfile)),
+        username: recipientProfile.username,
+      }
+    : null;
+  const messageSender = session
+    ? {
+        displayName,
+        username: currentProfile?.username ?? null,
+        email: session.user.email ?? null,
+      }
+    : null;
 
   useEffect(() => {
     if (findPlayersFromNav?.bandId) {
@@ -242,6 +280,25 @@ export function PlayerProfileView({ profileId, variant }: PlayerProfileViewProps
               </Link>
             </div>
           ) : null}
+          {canMessagePlayer ? (
+            <div className="directory-tag-row" style={{ marginTop: '0.75rem' }}>
+              <button
+                type="button"
+                className="directory-btn directory-btn-primary"
+                onClick={() => {
+                  setMessageSentNotice(null);
+                  setMessageModalOpen(true);
+                }}
+              >
+                Message this player
+              </button>
+            </div>
+          ) : null}
+          {messageSentNotice ? (
+            <p className="directory-player-profile-meta" style={{ marginTop: '0.75rem' }}>
+              {messageSentNotice}
+            </p>
+          ) : null}
         </div>
       </section>
 
@@ -313,6 +370,17 @@ export function PlayerProfileView({ profileId, variant }: PlayerProfileViewProps
     return (
       <div className="workspace-directory-page directory-player-profile">
         {profileBody}
+        {messageRecipient && messageSender ? (
+          <DirectMessageModal
+            open={messageModalOpen}
+            onClose={() => setMessageModalOpen(false)}
+            sender={messageSender}
+            recipient={messageRecipient}
+            onSent={() => {
+              setMessageSentNotice('Message sent. Open Communications to view replies.');
+            }}
+          />
+        ) : null}
         {adminModeActive && !findPlayersFromNav ? (
           <AdminRecruitingBandSelector
             bands={bands}
@@ -364,7 +432,20 @@ export function PlayerProfileView({ profileId, variant }: PlayerProfileViewProps
         </div>
       </header>
 
-      <main className="directory-shell directory-player-profile">{profileBody}</main>
+      <main className="directory-shell directory-player-profile">
+        {profileBody}
+        {messageRecipient && messageSender ? (
+          <DirectMessageModal
+            open={messageModalOpen}
+            onClose={() => setMessageModalOpen(false)}
+            sender={messageSender}
+            recipient={messageRecipient}
+            onSent={() => {
+              setMessageSentNotice('Message sent. Open Communications in your workspace to view replies.');
+            }}
+          />
+        ) : null}
+      </main>
     </div>
   );
 }

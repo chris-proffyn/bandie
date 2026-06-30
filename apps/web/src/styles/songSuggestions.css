@@ -1,0 +1,229 @@
+.song-suggestions-page {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.song-suggestions-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.song-suggestions-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.song-suggestions-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.song-suggestion-card {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.song-suggestion-card:hover {
+  border-color: rgba(255, 204, 51, 0.35);
+}
+
+.song-suggestion-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.song-suggestion-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.song-suggestion-status-open_for_suggestions {
+  background: rgba(76, 175, 80, 0.16);
+  color: #bbf7d0;
+}
+
+.song-suggestion-status-suggestions_closed,
+.song-suggestion-status-voting_closed {
+  background: rgba(255, 193, 7, 0.16);
+  color: #fde68a;
+}
+
+.song-suggestion-status-confirmed {
+  background: rgba(99, 102, 241, 0.18);
+  color: #c7d2fe;
+}
+
+.song-suggestion-meta {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.song-suggestion-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.song-suggestion-tag {
+  display: inline-flex;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.song-suggestion-form-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.song-suggestion-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.song-suggestion-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.song-suggestion-row {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+}
+
+.song-suggestion-row-vetoed {
+  opacity: 0.72;
+  border-color: rgba(244, 67, 54, 0.25);
+}
+
+.song-suggestion-row-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.song-suggestion-row h3 {
+  margin: 0 0 0.2rem;
+}
+
+.song-suggestion-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  font-size: 0.88rem;
+}
+
+.song-suggestion-links a {
+  color: #93c5fd;
+}
+
+.song-suggestion-vote-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.song-suggestion-vote-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.song-suggestion-vote-btn {
+  min-height: 42px;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.2);
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.song-suggestion-vote-btn.active {
+  border-color: rgba(255, 204, 51, 0.55);
+  background: rgba(255, 204, 51, 0.14);
+}
+
+.song-suggestion-vote-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.song-suggestion-leader-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 0.5rem;
+}
+
+.song-suggestion-events {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.song-suggestion-confirm-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.song-suggestion-confirm-item {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+
+.song-suggestion-confirm-item.tie {
+  border-color: rgba(255, 193, 7, 0.35);
+}
+
+.song-suggestion-panel-intro {
+  margin: 0 0 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}

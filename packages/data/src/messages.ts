@@ -1,4 +1,5 @@
 import { getBandieClient } from './context';
+import { assertCanPerform } from './entitlements';
 import { normalizeUsername } from './username';
 
 export type UserMessage = {
@@ -84,6 +85,13 @@ export async function sendDirectMessageToUser(recipientUserId: string, body: str
     throw new Error('Must be signed in to send a message.');
   }
 
+  await assertCanPerform({
+    capability: 'player_message.send',
+    subjectType: 'user',
+    subjectId: user.id,
+    planScope: 'leader',
+  });
+
   const trimmedBody = body.trim();
   if (!trimmedBody) {
     throw new Error('Message cannot be empty.');
@@ -113,6 +121,13 @@ export async function sendDirectMessage(input: SendDirectMessageInput): Promise<
   if (!user) {
     throw new Error('Must be signed in to send a message.');
   }
+
+  await assertCanPerform({
+    capability: 'player_message.send',
+    subjectType: 'user',
+    subjectId: user.id,
+    planScope: 'leader',
+  });
 
   const body = input.body.trim();
   if (!body) {

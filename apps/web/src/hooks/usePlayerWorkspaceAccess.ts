@@ -6,6 +6,7 @@ const DEFAULT_ACCESS: PlayerWorkspaceAccess = {
   canCreateBand: true,
   canBrowseBandDirectory: true,
   canBrowsePlayerDirectory: true,
+  canSendPlayerMessage: true,
 };
 
 export function usePlayerWorkspaceAccess(): {

@@ -6,6 +6,8 @@
 **Intended audience:** Product, design, engineering, Cursor implementation workflow  
 **Last updated:** 30 June 2026  
 
+**Implementation plan:** [`bandie_song_suggestions_voting_implementation_plan.md`](./bandie_song_suggestions_voting_implementation_plan.md) — task checklist for engineering delivery.
+
 ---
 
 ## 1. Executive Summary
@@ -107,10 +109,12 @@ The initial release does not need to:
 | Change own vote while voting open | Yes | Yes | Yes | Yes | No |
 | Close suggestions | Yes | Optional | No | No | No |
 | Reopen suggestions | Yes | Optional | No | No | No |
-| Close voting | Yes | Optional | No | No | No |
-| Confirm final songs | Yes | Optional | No | No | No |
-| Create skeleton setlist | Yes | Optional, subject to entitlement | No | No | No |
-| Add selected songs to catalogue | Yes | Optional, subject to entitlement | No | No | No |
+| Close voting | Yes | No | No | No | No |
+| Veto a suggestion | Yes | No | No | No | No |
+| Reset votes (request re-vote) | Yes | No | No | No | No |
+| Confirm final songs | Yes | No | No | No | No |
+| Create skeleton setlist | Yes | No, subject to entitlement | No | No | No |
+| Add selected songs to catalogue | Yes | No, subject to entitlement | No | No | No |
 
 ### 4.3 Entitlement Principle
 
@@ -172,10 +176,11 @@ Band Leader or authorised Band Admin.
 | Maximum suggestions per member | Integer | Optional | Default could be unlimited or a configurable value. |
 | Suggestion closing date | Date/time | Yes | After this, members can no longer submit unless leader reopens. |
 | Voting closing date | Date/time | Optional | If blank, leader closes manually. Must be same as or after suggestion closing date. |
-| Visibility | Fixed | Yes | Private to approved band members. |
-| Allow member comments | Boolean | Optional | If enabled, members can add comments alongside votes. |
+| Workspace access | Fixed | Yes | Private to approved band members only. |
+| Vote visibility | Select | Yes | Set by leader at creation: **Show who voted how** (`member_visible`) or **Aggregate counts only** (`aggregate_only`). |
+| Allow member comments | Boolean | Optional | Schema ships in v1; UI deferred. If enabled later, members can add comments alongside votes. |
 | Allow vote changes | Boolean | Optional | Default true until voting closes. |
-| Tie-break mode | Select | Optional | Leader decides, most Happy votes, lowest Rather Not count, earliest submitted. Initial release can default to leader decides. |
+| Tie-break mode | Select | Optional | v1: leader resolves ties at confirm and may **reset votes** to request a re-vote. Automated modes (`happy_count`, etc.) deferred. |
 
 ### 5.2.3 Validation
 
@@ -247,10 +252,11 @@ Leaders should additionally see:
 - Close suggestions button.
 - Reopen suggestions button, if appropriate.
 - Close voting button.
+- **Veto suggestion** — remove a song from consideration with a required reason (e.g. not appropriate, explicit lyrics for a kids party).
+- **Reset votes** — clear votes on the group (or on tied songs) and prompt members to re-vote when results are too close to call.
 - Confirm final top N button.
-- Override / manually include / manually exclude controls, if enabled.
+- Override / manually include / manually exclude controls at confirm (with required reason when overriding rank).
 - Create skeleton setlist button after confirmation.
-- Export or copy summary.
 
 ---
 
@@ -315,8 +321,9 @@ Each approved band member can select exactly one of the following states for eac
 
 - Every approved band member can vote once per suggested song.
 - Votes can be changed until voting closes if `allow_vote_changes` is enabled.
-- Votes are visible in aggregate to the band.
-- Individual member votes may be visible or hidden depending on privacy setting. Recommended initial release: visible to band members because bands are small collaborative groups and need practical transparency.
+- Votes are visible in aggregate to the band always.
+- When `vote_visibility = member_visible`, individual member votes are shown (who voted 🙂 / 😐 / 🙁).
+- When `vote_visibility = aggregate_only`, members see counts only — not who voted which way. The leader always sees per-member votes.
 - Members should be able to filter to “Needs my vote”.
 - Voting remains open while suggestions are open.
 - Voting can remain open after suggestions are closed.
@@ -358,6 +365,15 @@ Recommended ranking order:
 5. Earliest submitted.
 
 The leader should still be able to make the final decision, especially where song suitability, vocalist range, instrumentation, gig context, or duplicate style matters.
+
+### 5.5.5 Ties and re-votes
+
+When songs are tied around the cutoff:
+
+- Highlight tied songs in the leader confirm view.
+- The leader may **pick the winner** at confirmation (default tie-break).
+- The leader may **reset votes** on the group (or on tied suggestions only) with an optional message, prompting members to vote again while voting remains open.
+- Record a `votes_reset` event in the activity log when votes are cleared.
 
 ---
 
@@ -451,6 +467,22 @@ Initial release can support either:
 
 Recommended initial approach: support leader-adjusted confirmation, but require a reason when manually overriding the ranked order.
 
+### 5.8.3 Leader veto
+
+Before or during voting (while the group is not `confirmed`), the band leader may **veto** a suggestion:
+
+- Sets suggestion status to `leader_vetoed`.
+- Requires a **veto reason** (e.g. not appropriate for the gig, explicit lyrics, wrong fit for audience).
+- Vetoed songs are excluded from ranking and cannot be selected at confirmation.
+- Remain visible in the group with veto badge and reason (audit transparency).
+- Notify the band that a suggestion was vetoed (in-app activity).
+
+Veto is distinct from confirmation override: veto removes a song from the pool; override adjusts the final top N among eligible songs.
+
+### 5.8.4 Manual adjustment at confirm
+
+Leader-adjusted confirmation: system proposes top N, but leader can include/exclude eligible songs before freezing. Require a reason when manually overriding the ranked order.
+
 Override reason examples:
 
 - Duplicate style with another selected song.
@@ -459,7 +491,7 @@ Override reason examples:
 - Already in catalogue.
 - Better suited for later.
 
-### 5.8.4 Frozen Result
+### 5.8.5 Frozen result
 
 A frozen confirmed result should include:
 
@@ -662,7 +694,10 @@ create table bandie_song_suggestion_groups (
   suggestion_closes_at timestamptz not null,
   voting_closes_at timestamptz,
 
-  allow_member_comments boolean not null default true,
+  vote_visibility text not null default 'member_visible'
+    check (vote_visibility in ('member_visible', 'aggregate_only')),
+
+  allow_member_comments boolean not null default false,
   allow_vote_changes boolean not null default true,
   tie_break_mode text not null default 'leader_decides'
     check (tie_break_mode in ('leader_decides', 'happy_count', 'lowest_rather_not', 'earliest_submitted')),
@@ -710,7 +745,11 @@ create table bandie_song_suggestions (
   existing_catalogue_song_id uuid references bandie_songs(id),
 
   status text not null default 'active'
-    check (status in ('active', 'withdrawn', 'selected', 'not_selected', 'converted_to_catalogue')),
+    check (status in ('active', 'withdrawn', 'leader_vetoed', 'selected', 'not_selected', 'converted_to_catalogue')),
+
+  leader_vetoed_at timestamptz,
+  leader_vetoed_by uuid references auth.users(id),
+  leader_veto_reason text,
 
   final_rank integer,
   final_score integer,
@@ -909,6 +948,14 @@ Sets status to `voting_closed` and locks votes.
 
 Freezes selected songs and creates confirmed snapshot.
 
+### `vetoSongSuggestion(suggestionId, reason)`
+
+Leader only — sets `leader_vetoed`, records reason, writes audit event.
+
+### `resetSongSuggestionVotes(groupId, options)`
+
+Leader only — deletes votes (whole group or tied subset), reopens voting if needed, writes `votes_reset` event, notifies members to re-vote.
+
 ### `createSkeletonSetlistFromSuggestionGroup(groupId, options)`
 
 Creates a draft setlist and optionally draft catalogue songs.
@@ -938,6 +985,8 @@ left join bandie_song_suggestion_votes v on v.suggestion_id = s.id
 where s.status = 'active'
 group by s.id, s.group_id, s.band_id;
 ```
+
+Ranking excludes `leader_vetoed` and `withdrawn` suggestions.
 
 Ranking query:
 
@@ -1221,31 +1270,48 @@ Useful metrics:
 
 ---
 
-## 19. Open Product Decisions
+## 19. Resolved product decisions
 
-1. Should the submitter’s own vote auto-default to Happy to play?
-2. Should individual votes be visible to all band members, or only aggregate counts?
-3. Should all members be required to vote before confirmation, or should leader discretion always override?
-4. Should the leader be able to manually include/exclude songs from the top N?
-5. Should voting close automatically on the suggestion closing date, or should suggestion and voting windows always be separate?
-6. Should a confirmed selected song automatically enter the band catalogue, or only when a skeleton setlist is created?
-7. Should there be a maximum number of open suggestion groups per band or per leader based on subscription tier?
+**Confirmed 1 July 2026** (product owner).
+
+| # | Decision | Resolution |
+|---|---|---|
+| 1 | Submitter auto-vote | **Yes** — auto `happy_to_play` on submit |
+| 2 | Vote visibility | **Leader chooses at group creation** — `member_visible` (who voted how) or `aggregate_only` (counts only). Leader always sees per-member votes. |
+| 3 | All members must vote before confirm | **No** — leader discretion; warn if votes incomplete |
+| 4 | Leader control over songs | **Veto rights** — leader can veto suggestions with required reason (not appropriate, explicit lyrics, etc.); plus include/exclude at confirm with override reason |
+| 5 | Suggestion vs voting close | **Separate windows** — voting can stay open after suggestions close |
+| 6 | Catalogue entry timing | **On skeleton setlist creation** — draft `bandie_songs`; confirm only freezes snapshot |
+| 7 | Max open groups per tier | **Unlimited** for v1 — no entitlement cap |
+
+**Additional v1 scope (1 July 2026):**
+
+| Topic | Resolution |
+|---|---|
+| Band Admin manages groups | **No** — leader-only for v1 |
+| `draft` group status | **No** — create as `open_for_suggestions` |
+| Vote comments | **Defer UI** — `allow_member_comments` + `comment` on votes in data model |
+| Email / push | **Defer** — in-app activity first |
+| Tie-break | Leader may **reset votes** and request re-vote; leader may also **decide** at confirm |
 
 ---
 
-## 20. Recommended Initial Defaults
+## 20. Confirmed implementation defaults
 
 For the first implementation:
 
 - All approved members, including free-tier members, can suggest and vote.
 - Submitter vote auto-defaults to Happy to play.
-- Votes are visible by member within the private band workspace.
+- Vote visibility is set by the leader when creating the group (`member_visible` or `aggregate_only`); leader always sees per-member votes.
 - Suggestions close at the configured date or manually by leader.
-- Voting remains open after suggestions close until manually closed or final confirmation.
+- Voting remains open after suggestions close until manually closed, voting deadline passes, or leader confirms.
 - Leader can confirm before all votes are cast, with a warning.
-- System proposes top N by score, but leader can override with a required reason.
+- Leader can **veto** suggestions with a required reason; vetoed songs are excluded from ranking.
+- On ties, leader can **reset votes** to request a re-vote or **decide** at confirmation.
+- System proposes top N by score among eligible songs; leader can override at confirm with a required reason.
 - Confirmed selected songs are frozen in a snapshot table.
 - Skeleton setlist creation creates draft catalogue songs where needed.
+- Unlimited open suggestion groups per band for v1.
 
 ---
 
