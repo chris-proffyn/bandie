@@ -1,3 +1,4 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
 import {
   bandSongFolderPath,
   bandSongPartFolderPath,
@@ -12,8 +13,15 @@ import {
   logSongPartActivity,
   recalculateSongReadiness,
 } from './songPartsServer';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import { slugifyBandName } from '@bandie/utils';
+
+function slugifySongTitle(title: string): string {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60);
+}
 
 type BandRow = { id: string; slug: string };
 type SongRow = {
@@ -71,7 +79,7 @@ async function resolveUniqueSongSlug(
   bandId: string,
   title: string,
 ): Promise<string> {
-  const base = slugifyBandName(title) || 'song';
+  const base = slugifySongTitle(title) || 'song';
   let candidate = base;
   let suffix = 2;
 

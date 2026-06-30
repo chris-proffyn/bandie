@@ -30,6 +30,41 @@ async function authorizedFetch(path: string, init: RequestInit = {}): Promise<Re
   return fetch(`/api${path}`, { ...init, headers });
 }
 
+async function parseCopyApiJson<T>(response: Response): Promise<T> {
+  const contentType = response.headers.get('content-type') ?? '';
+  const body = await response.text();
+
+  if (!contentType.includes('application/json')) {
+    if (body.trimStart().startsWith('<!')) {
+      throw new Error(
+        'Song copy API is unavailable. Start the app with npm run dev (Netlify on port 8888) or wait for deploy to finish.',
+      );
+    }
+
+    throw new Error(
+      body.trim()
+        ? `Song copy failed (${response.status}): ${body.trim().slice(0, 200)}`
+        : `Song copy failed (${response.status}).`,
+    );
+  }
+
+  return JSON.parse(body) as T;
+}
+
+function resolveCopyApiError(
+  response: Response,
+  payload: Record<string, unknown>,
+): string {
+  const candidates = [payload.error, payload.errorMessage, payload.message];
+  for (const candidate of candidates) {
+    if (typeof candidate === 'string' && candidate.trim()) {
+      return candidate.trim();
+    }
+  }
+
+  return `Unable to copy song to another band (${response.status}).`;
+}
+
 export async function copyBandSongToBand(input: CopyBandSongInput): Promise<CopyBandSongResult> {
   const session = await getCurrentSession();
   if (!session?.user) {
@@ -58,7 +93,7 @@ export async function copyBandSongToBand(input: CopyBandSongInput): Promise<Copy
     }),
   });
 
-  const payload = await response.json().catch(() => ({})) as {
+  const payload = await parseCopyApiJson<{
     result?: {
       songId: string;
       targetBandId: string;
@@ -66,10 +101,12 @@ export async function copyBandSongToBand(input: CopyBandSongInput): Promise<Copy
       copiedFiles: number;
     };
     error?: string;
-  };
+    errorMessage?: string;
+    message?: string;
+  }>(response);
 
   if (!response.ok || !payload.result) {
-    throw new Error(payload.error ?? 'Unable to copy song to another band.');
+    throw new Error(resolveCopyApiError(response, payload));
   }
 
   const song = await getBandSong(payload.result.targetBandId, payload.result.songId);
