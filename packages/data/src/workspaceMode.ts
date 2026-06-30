@@ -44,14 +44,6 @@ export function isPlayerWorkspaceRoute(pathname: string): boolean {
     return true;
   }
 
-  if (path.startsWith('/app/communications')) {
-    return true;
-  }
-
-  if (path.startsWith('/app/notifications')) {
-    return true;
-  }
-
   if (path.startsWith('/app/invites')) {
     return true;
   }
