@@ -93,14 +93,7 @@ export default function App() {
                 </WorkspaceModeRoute>
               }
             />
-            <Route
-              path="communications"
-              element={
-                <WorkspaceModeRoute mode="player">
-                  <CommunicationsPage />
-                </WorkspaceModeRoute>
-              }
-            />
+            <Route path="communications" element={<CommunicationsPage />} />
             <Route
               path="notifications"
               element={<Navigate to="/app/communications" replace />}
