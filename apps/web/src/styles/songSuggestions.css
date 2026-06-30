@@ -97,6 +97,38 @@
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
+.song-suggestion-filters {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: 14px;
+  margin-bottom: 1rem;
+}
+
+.song-suggestion-filters-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.song-suggestion-filters-head h3 {
+  margin: 0 0 0.25rem;
+}
+
+.song-suggestion-filters-grid {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.song-suggestion-filter-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.92rem;
+}
+
 .song-suggestion-form-actions {
   display: flex;
   flex-wrap: wrap;
@@ -110,6 +142,170 @@
   padding: 0;
   display: grid;
   gap: 1rem;
+}
+
+.song-suggestion-cards-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+}
+
+.song-suggestion-item-card {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.song-suggestion-item-card-vetoed {
+  opacity: 0.82;
+  border-color: rgba(220, 38, 38, 0.28);
+}
+
+.song-suggestion-item-card-voted {
+  border-width: 2px;
+}
+
+.song-suggestion-item-card-voted-happy_to_play {
+  border-color: rgba(22, 163, 74, 0.45);
+  box-shadow: 0 0 0 1px rgba(22, 163, 74, 0.12);
+}
+
+.song-suggestion-item-card-voted-meh {
+  border-color: rgba(217, 119, 6, 0.45);
+  box-shadow: 0 0 0 1px rgba(217, 119, 6, 0.12);
+}
+
+.song-suggestion-item-card-voted-rather_not {
+  border-color: rgba(220, 38, 38, 0.4);
+  box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.1);
+}
+
+.song-suggestion-item-card-needs-vote {
+  border-style: dashed;
+  border-color: rgba(15, 23, 42, 0.18);
+}
+
+.song-suggestion-item-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.song-suggestion-item-card-title-block {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.song-suggestion-item-card h3 {
+  margin: 0 0 0.15rem;
+  font-size: 1.05rem;
+  line-height: 1.25;
+}
+
+.song-suggestion-rank-badge {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 0.45rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  background: rgba(15, 23, 42, 0.08);
+  color: #0f172a;
+}
+
+.song-suggestion-my-vote-badge {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.65rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.song-suggestion-my-vote-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.song-suggestion-my-vote-badge-happy_to_play {
+  background: rgba(22, 163, 74, 0.12);
+  color: #166534;
+}
+
+.song-suggestion-my-vote-badge-meh {
+  background: rgba(217, 119, 6, 0.14);
+  color: #92400e;
+}
+
+.song-suggestion-my-vote-badge-rather_not {
+  background: rgba(220, 38, 38, 0.12);
+  color: #991b1b;
+}
+
+.song-suggestion-needs-vote-note {
+  margin: 0;
+  font-size: 0.86rem;
+  color: #64748b;
+}
+
+.song-suggestion-item-rationale {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.song-suggestion-veto-note {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #991b1b;
+}
+
+.song-suggestion-score-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.song-suggestion-score-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: rgba(15, 23, 42, 0.06);
+  color: #334155;
+}
+
+.surface-light .song-suggestion-tag {
+  background: rgba(15, 23, 42, 0.05);
+  border-color: rgba(15, 23, 42, 0.1);
+  color: #334155;
+}
+
+.song-suggestion-tag-mine {
+  background: rgba(255, 204, 51, 0.22);
+  border-color: rgba(180, 130, 0, 0.35);
+  color: #713f12;
+  font-weight: 700;
+}
+
+.surface-light .song-suggestion-links a {
+  color: #1d4ed8;
 }
 
 .song-suggestion-row {
@@ -166,12 +362,33 @@
   min-height: 42px;
   padding: 0.45rem 0.9rem;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(0, 0, 0, 0.2);
-  color: inherit;
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  background: #fff;
+  color: #0f172a;
   font: inherit;
   font-weight: 700;
   cursor: pointer;
+}
+
+.song-suggestion-vote-btn-happy_to_play.active {
+  border-color: rgba(22, 163, 74, 0.65);
+  background: rgba(22, 163, 74, 0.16);
+  color: #166534;
+  box-shadow: inset 0 0 0 1px rgba(22, 163, 74, 0.25);
+}
+
+.song-suggestion-vote-btn-meh.active {
+  border-color: rgba(217, 119, 6, 0.65);
+  background: rgba(217, 119, 6, 0.16);
+  color: #92400e;
+  box-shadow: inset 0 0 0 1px rgba(217, 119, 6, 0.25);
+}
+
+.song-suggestion-vote-btn-rather_not.active {
+  border-color: rgba(220, 38, 38, 0.6);
+  background: rgba(220, 38, 38, 0.14);
+  color: #991b1b;
+  box-shadow: inset 0 0 0 1px rgba(220, 38, 38, 0.22);
 }
 
 .song-suggestion-vote-btn.active {

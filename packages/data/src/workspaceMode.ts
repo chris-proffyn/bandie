@@ -67,6 +67,7 @@ export function isPlayerWorkspaceRoute(pathname: string): boolean {
       'players',
       'venues',
       'gigs',
+      'open-mic',
       'invites',
       'notifications',
       'communications',

@@ -469,6 +469,9 @@ export {
   songSuggestionGroupStatusClass,
   isSongSuggestionVotingOpen,
   isSongSuggestionSubmitOpen,
+  DEFAULT_SONG_SUGGESTION_LIST_FILTERS,
+  collectSongSuggestionFilterOptions,
+  filterAndSortSongSuggestions,
 } from './songSuggestions';
 export type {
   SongSuggestionGroupStatus,
@@ -485,6 +488,10 @@ export type {
   SongSuggestionGroupEvent,
   SongSuggestionConfirmedSong,
   CreateSongSuggestionGroupInput,
+  SongSuggestionVoteFilter,
+  SongSuggestionSortKey,
+  SongSuggestionListFilters,
+  SongSuggestionFilterOptions,
   UpdateSongSuggestionGroupInput,
   SubmitSongSuggestionInput,
   ConfirmSelectionItem,
@@ -724,6 +731,84 @@ export type {
   InviteBandToGigInput,
   UpdateGigBandSlotInput,
 } from './gigs';
+
+export {
+  OPEN_MIC_ORGANISER_ONLY_MESSAGE,
+  OPEN_MIC_STATUS_OPTIONS,
+  OPEN_MIC_EVENT_TYPE_OPTIONS,
+  OPEN_MIC_SIGNUP_MODE_OPTIONS,
+  listOrganiserOpenMicEvents,
+  getOpenMicEvent,
+  createOpenMicEvent,
+  updateOpenMicEvent,
+  publishOpenMicEvent,
+  cancelOpenMicEvent,
+  duplicateOpenMicEvent,
+  getPublicOpenMicEvent,
+  formatOpenMicEventStatus,
+  formatOpenMicEventType,
+  formatOpenMicSignupMode,
+  openMicStatusPillClass,
+  getOpenMicPublicUrl,
+  computeOpenMicDashboardMetrics,
+  resolveOpenMicVenueLabel,
+} from './openMicEvents';
+export type {
+  OpenMicEvent,
+  OpenMicEventSummary,
+  OpenMicEventStatus,
+  OpenMicEventType,
+  OpenMicSignupMode,
+  OpenMicVisibility,
+  OpenMicContactField,
+  PublicOpenMicEvent,
+  CreateOpenMicEventInput,
+  UpdateOpenMicEventInput,
+} from './openMicEvents';
+
+export {
+  listOpenMicSongs,
+  addOpenMicSong,
+  deleteOpenMicSong,
+  reorderOpenMicSongs,
+  applyInstrumentTemplate,
+  listOpenMicSignups,
+  requestOpenMicSlot,
+  approveOpenMicAssignment,
+  rejectOpenMicAssignment,
+  submitOpenMicSongSuggestion,
+  listOpenMicSongSuggestions,
+  getPublicOpenMicSongs,
+  listMyOpenMicAssignments,
+  computeOpenMicSongReadiness,
+  formatSongReadiness,
+} from './openMicSongs';
+export type {
+  OpenMicSong,
+  OpenMicSongSlot,
+  OpenMicPlayer,
+  OpenMicAssignment,
+  OpenMicSongSuggestion,
+  OpenMicSongWithSlots,
+  OpenMicAssignmentWithDetails,
+  PublicOpenMicSong,
+  PublicOpenMicSongSlot,
+  OpenMicSongReadiness,
+  OpenMicLiveStatus,
+  OpenMicSlotStatus,
+  OpenMicAssignmentStatus,
+  OpenMicSuggestionStatus,
+} from './openMicSongs';
+
+export {
+  startOpenMicEvent,
+  endOpenMicEvent,
+  updateOpenMicSongLiveStatus,
+  getOpenMicLiveDashboard,
+  subscribeOpenMicEvent,
+  getOpenMicEventSummary,
+} from './openMicLive';
+export type { OpenMicLiveDashboard, OpenMicEventSummaryStats } from './openMicLive';
 
 export {
   listMyBookingEnquiries,

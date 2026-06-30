@@ -62,6 +62,7 @@ export function getAppNavItems({
     return [
       { label: 'Find bands', to: '/app/bands', end: true },
       { label: 'My gigs', to: '/app/gigs' },
+      { label: 'Open mic', to: '/app/open-mic' },
       { label: 'My venues', to: '/app/venues' },
       {
         label: 'Communications',

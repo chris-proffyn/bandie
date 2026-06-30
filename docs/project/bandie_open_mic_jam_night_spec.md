@@ -4,7 +4,7 @@
 **Product:** Bandie  
 **Feature area:** Organiser tools / Open Mic & Jam Night Management  
 **Intended use:** Source material for Cursor implementation of web and mobile views  
-**Last updated:** 28 June 2026
+**Last updated:** 30 June 2026 (§19 product decisions locked)
 
 ---
 
@@ -1437,22 +1437,52 @@ Recommended handling:
 
 ---
 
-## 19. Open Questions
+## 19. Resolved product decisions
 
-1. Should organisers need a paid account to create open mic events?
-2. Should guest sign-up be allowed without login in MVP?
-3. Should song resources be shareable publicly, or only to confirmed players?
-4. Should public song lists be visible before sign-up, after sign-up, or only after assignment?
-5. Should open mic events appear in the public Bandie directory at launch?
-6. Should players be able to suggest songs, or only sign up to organiser-created songs?
-7. Should an event be linked to a venue entity from day one?
-8. Should player contact details be visible to other players or organiser only?
-9. Should organisers be able to export the running order as PDF/CSV?
-10. Should event history contribute to song popularity and player profiles?
+**Confirmed 30 June 2026** — authoritative for Phase 17 implementation.
+
+| # | Question | **Decision** |
+|---|---|---|
+| 1 | Paid account required? | **Yes — Organiser Plus (paid organiser plan) required.** Organiser Free cannot create open mic events. Gate on **create** (same monetisation rule as #2). |
+| 2 | When does entitlement gate apply? | **On create** — aligns with #1; no draft events on Organiser Free. |
+| 3 | Guest sign-up without login? | **Yes** — guest provides name + **email or phone** (organiser chooses required contact field). **Bandie members** (logged-in users) are **flagged** on sign-ups/assignments. |
+| 4 | Guest email verification? | **No** in MVP — capture contact only; no magic-link verification before slot confirmation. |
+| 5 | Players suggest songs? | **Yes** — players may **propose songs** for **organiser approval**; sign-up to organiser-created slots remains core flow. |
+| 6 | Public Bandie event directory? | **No** in MVP — share via globally unique slug URL + QR only. |
+| 7 | Public song list visibility? | **Organiser toggle** (`public_song_list_enabled`) — visible to anyone with event link when enabled. |
+| 8 | Song file/resource visibility? | **Not visible to non–Bandie members.** **Bandie members** may view when organiser enables per file/event policy. Never public to anonymous guests. |
+| 9 | Player contact visibility? | **Organiser only** for email/phone. **Display names visible to all** participants on the event. |
+| 10 | Link to venue entity? | **Optional** — pick saved `bandie_organiser_venues` row or enter ad hoc venue name/address. |
+| 11 | Organiser roles in MVP? | **Full spec roles** — Owner, Admin, Event Host, House Band per permission matrix §9.2 (implement `bandie_organiser_members` delegation). |
+| 12 | House band? | **House band flag** on event players — pre-assign slots; hide from public sign-up where configured. |
+| 13 | Event slug scope? | **Globally unique** slugs. |
+| 14 | Public URL path? | **`/events/:slug`** |
+| 15 | Event file storage? | **Dropbox** — reuse leader Dropbox integration where organiser is a band leader; link band song-part files rather than separate Supabase bucket for MVP. |
+| 16 | Export running order? | **PDF in MVP** (running order export); CSV defer. |
+| 17 | Recurring events? | **Duplicate event only** in MVP — no weekly/monthly recurrence. |
+| 18 | Add-on schema timing? | **Release 1** — ship `bandie_addons` / pack tables with first migration wave (supports future packs; primary gate remains Organiser Plus). |
+
+**Deferred (unchanged):** Event history → song/player popularity (#10 legacy item) — post-MVP.
+
+**Entitlements note:** This supersedes entitlements spec §20.1 #6 trial-on-free for open mic. Implementation must set `open_mic.create = false` (or equivalent) on `organiser_free` and require `organiser_plus` for create. Update entitlement seed in a dedicated migration when Phase 17 ships.
 
 ---
 
-## 20. Cursor Implementation Notes
+## 20. Confirmed implementation defaults
+
+Technical defaults following §19:
+
+- **Organiser model:** User-scoped event owner (`organiser_user_id`) **plus** `bandie_organiser_members` for delegated roles (Owner, Admin, Host, House Band).
+- **Public route:** `/events/:slug` with globally unique slug; anon RPC field allowlist.
+- **Player suggestions:** `bandie_open_mic_song_suggestions` (or equivalent) with `pending` / `approved` / `rejected` — organiser approves before song enters list.
+- **Member flag:** `bandie_open_mic_players.user_id` set when logged in; UI badge “Bandie member”.
+- **File access:** RLS checks authenticated Bandie user + organiser visibility flag; guests never read file bytes.
+- **Running order PDF:** Client-side print/PDF from live list (browser print-to-PDF) acceptable for MVP; server render defer.
+- **Recurrence:** `duplicateOpenMicEvent` only.
+
+---
+
+## 21. Cursor Implementation Notes
 
 When implementing this feature, keep the first version deliberately practical.
 

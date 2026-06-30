@@ -9,6 +9,7 @@ import {
   type VocalSuitability,
   type VoteVisibility,
 } from '@bandie/data';
+import { trackSongSuggestionGroupCreated } from '../../lib/analytics';
 
 function toDatetimeLocalValue(iso: string): string {
   const date = new Date(iso);
@@ -93,6 +94,11 @@ export function SongSuggestionGroupFormPanel({
         onClose();
       } else {
         const created = await createSongSuggestionGroup({ bandId, ...payload });
+        trackSongSuggestionGroupCreated({
+          bandId,
+          groupId: created.id,
+          targetSongCount: created.target_song_count,
+        });
         onSaved();
         navigate(`/app/${bandId}/songs/suggestions/${created.id}`);
       }

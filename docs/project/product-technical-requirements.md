@@ -60,6 +60,8 @@ Generic RSD rules in `docs/RSD_SYSTEM_ARCHITECTURE.md` apply unless explicitly o
 
 Web app deploys to Netlify with CI from GitHub. Separate Supabase projects per environment (dev/staging/production).
 
+**Manual testing default:** verify features on the **Netlify production deploy** after merge to `main` (not Vite-only localhost:5173). Serverless API routes and `apps/web/public/_redirects` apply on Netlify; allow the deploy to complete before QA. Local Netlify Dev (`npm run dev`, port 8888) is for development, not the default test environment.
+
 ### 2.5 Monorepo structure
 
 ```

@@ -3,7 +3,7 @@
 **Document status:** Live project tracker  
 **Product:** Bandie  
 **Phase:** Phase 15 (billing) implemented — configure Stripe env vars and sync plans  
-**Last updated:** 1 July 2026 (Phase 20 song suggestions & voting — implemented in repo; migration pending `db push`)
+**Last updated:** 27 June 2026 (Phase 17 Open mic MVP implemented)
 
 ---
 
@@ -33,11 +33,11 @@
 | Song-part file storage | **Dropbox** — leader OAuth, band song-parts root, upload/preview/download via Netlify (`bandie_dropbox_song_part_storage_spec.md`) |
 | Songs & repertoire (Phase 6) | Complete — dashboard, song folder, Dropbox uploads, part templates, in-app PDF view, soft delete |
 | Setlist management (Phase 7) | Complete — library, builder with drag reorder, live metrics, leader-only edit |
-| Song suggestions & voting (Phase 20) | **Implemented (web MVP)** — migration `20260701170000`; routes `/app/:bandId/songs/suggestions`; leader veto/confirm/skeleton setlist; automation deferred |
+| Song suggestions & voting (Phase 20) | **Implemented (web MVP)** — migration applied; routes `/app/:bandId/songs/suggestions`; filters/sort + analytics shipped; automation + manual QA pending |
 | Entitlement framework (Phase 8) | Complete — schema, seeds, service, gate hooks; enforcement off by default |
 | Calendar & gigs (Phases 9–10) | Complete — `/app/:bandId/calendar`; organiser gigs `/app/gigs`; band invites `/app/:bandId/gigs` |
 | Admin portal & metrics (Phases 12–14) | Complete — `/admin` (overview, accounts, metrics, editable plan catalogue, audit); enforcement toggle |
-| Billing (Phase 15) | Implemented — Stripe checkout, webhooks, `/app/profile` billing, `/admin/billing`; requires env vars + plan sync |
+| Open mic / jam nights (Phase 17) | **MVP shipped** — organiser workspace, public `/events/:slug`, songs/sign-up/live; Dropbox file UI deferred |
 
 ## Active constraints
 
@@ -65,6 +65,8 @@ Reference documents:
 - `docs/project/product-functional-requirements.md` §10–12 (calendar, gigs, booking)
 - `docs/project/bandie_song_suggestions_voting_spec.md` — Phase 20 functional/technical spec
 - `docs/project/bandie_song_suggestions_voting_implementation_plan.md` — Phase 20 task checklist
+- `docs/project/bandie_open_mic_jam_night_spec.md` — Phase 17 functional/technical spec
+- `docs/project/bandie_open_mic_jam_night_implementation_plan.md` — Phase 17 task checklist
 - `docs/project/bandie_dropbox_song_part_storage_spec.md`
 - `docs/project/product-technical-requirements.md`
 
@@ -84,12 +86,12 @@ Single numbering for product features, monetisation, admin, and mobile. Sub-phas
 | **14** | **Entitlement admin** | **Complete** | Editable plan catalogue, draft/publish, overrides, gate logs, enforcement toggle |
 | **15** | **Billing integration** | **Implemented** | Stripe checkout, webhooks, portal, admin billing page; env + plan sync required |
 | 16 | Activity, notifications & polish | Partial | Comms hub done; activity feed, push, release verification |
-| 17 | Open mic & event packs | Not started | `bandie_open_mic_jam_night_spec.md`; add-on entitlements |
+| 17 | Open mic & event packs | **MVP shipped** | Organiser Plus gate; songs/sign-up/live; PDF print export; Dropbox link UI deferred |
 | 18 | Mobile app | Not started | Expo scaffold; core member flows |
 | 19 | System health & moderation | Not started | Job health, profile moderation, admin alerts |
 | **20** | **Song suggestions & voting** | **Implemented (web MVP)** | Suggest/vote/confirm → skeleton setlist; scheduled close + analytics deferred |
 
-**Sequencing rationale:** Phase 8 before 9–10 so calendar/gigs use entitlement hooks from day one. Admin foundation (12) follows core product calendar/gigs. Billing (15) after entitlement admin (14) so limits and plans are operable before charging. **Phase 20** extends Songs/Setlists (6–7) with whole-band intake before catalogue growth; free-tier members may suggest/vote; skeleton setlist creation gated by `setlist.create`. Full admin pricing console remains post-MVP per entitlements spec §16.2.
+**Sequencing rationale:** Phase 8 before 9–10 so calendar/gigs use entitlement hooks from day one. Admin foundation (12) follows core product calendar/gigs. Billing (15) after entitlement admin (14) so limits and plans are operable before charging. **Phase 20** extends Songs/Setlists (6–7) with whole-band intake before catalogue growth. **Phase 17** extends organiser workspace (2d, 10–11) with live event operations; reuses setlist reorder patterns and optional band song linking. Full admin pricing console remains post-MVP per entitlements spec §16.2.
 
 ## Blockers
 
@@ -109,11 +111,12 @@ Player profiles & dir     ██████████  musician profiles + /p
 Private workspace shell   ██████████  overview, leader, lineup parts, recruitment, invites
 Songs & repertoire        ██████████  Phase 6 — dashboard, Dropbox files, templates, soft delete
 Setlists                  ██████████  Phase 7 — library, builder, drag reorder, metrics
-Song suggestions          ████████░░  Phase 20 — web MVP shipped; db push + Phase 3 polish pending
+Song suggestions          ████████░░  Phase 20 — filters/analytics done; automation + manual QA pending
 Entitlements              ██████████  Phase 8 — schema, seeds, service, gate hooks
 Calendar & gigs           ██████████  Phases 9–10 — calendar, voting, gigs, setlist link
 Booking & admin           ██████████  Phases 11–14 — enquiry inbox, /admin, metrics, enforcement toggle
 Billing                   ░░░░░░░░░░  Phase 15 (next)
+Open mic / jam nights     ████████░░  Phase 17 — MVP shipped (Dropbox file UI + walk-up RPCs deferred)
 Mobile app                ░░░░░░░░░░  Phase 18 (deferred)
 Release verification      ░░░░░░░░░░  Phase 16 — production smoke + a11y pass
 ```
@@ -382,12 +385,60 @@ Consolidates deferred communications, activity feed, and release verification. P
 
 ### 17. Open mic and event packs
 
-Authoritative spec: `bandie_open_mic_jam_night_spec.md`; monetisation via entitlements spec §6.4, §21 Phase 4 (add-on tables, not a separate billing path).
+Authoritative spec: [`bandie_open_mic_jam_night_spec.md`](project/bandie_open_mic_jam_night_spec.md)  
+Task checklist: [`bandie_open_mic_jam_night_implementation_plan.md`](project/bandie_open_mic_jam_night_implementation_plan.md)  
+Monetisation: **Organiser Plus required** (`open_mic.create`); Organiser Free denied; add-on schema Release 1
 
-- [ ] 17.1 Add-on schema — `bandie_addons`, `bandie_addon_entitlements`, `bandie_subject_addons`
-- [ ] 17.2 Open mic / jam night product flows per open mic spec
-- [ ] 17.3 One-off and pack entitlements (`open_mic.create`, `open_mic.monthly_max_count`)
-- [ ] 17.4 Admin visibility for open mic events in metrics
+**Principle:** User-scoped event owner + **`bandie_organiser_members`** delegated roles (Owner, Admin, Host, House Band). Live control room for tablet use. Guest sign-up allowed; **Bandie members flagged**; song files via **Dropbox** for band leaders.
+
+**Locked decisions (30 June 2026):** See spec §19 and implementation plan §2 — paid organiser plan, player song suggestions, PDF export, global slug `/events/:slug`, contact privacy (names public), house band flag.
+
+#### 17.1 Release 1 — Event setup and promotion
+
+- [x] 17.1.1 Migration — `bandie_open_mic_events`, `bandie_organiser_members`, activity log, **add-on tables**, entitlement seed fix
+- [x] 17.1.2 RPCs — create, update, publish, cancel, duplicate, public get-by-slug
+- [x] 17.1.3 `@bandie/data` `openMicEvents.ts` — CRUD, publish, Organiser Plus gate on create
+- [x] 17.1.4 Routes — `/app/open-mic`, `/app/open-mic/:eventId`, public **`/events/:slug`**
+- [x] 17.1.5 UI — events dashboard, create flow, overview, poster (HTML/CSS + QR + A4 print)
+- [x] 17.1.6 Organiser nav link; upgrade prompt for Organiser Free
+
+#### 17.2 Release 2 — Song list, sign-up, and player suggestions
+
+- [x] 17.2.1 Migration — songs, slots, players, assignments, **song suggestions**, instrument templates
+- [x] 17.2.2 RPCs — song/slot CRUD, sign-up, **song suggestion submit**, moderation approve/reject
+- [x] 17.2.3 Data layer — readiness helpers, Bandie member flag on public sign-up
+- [x] 17.2.4 UI — song list builder, public sign-up, suggestion form, moderation queue
+
+#### 17.3 Release 3 — Live running order
+
+- [x] 17.3.1 Live status RPCs — start, update live status, end event
+- [x] 17.3.2 Supabase Realtime subscription + 8s polling fallback
+- [x] 17.3.3 Live control room UI
+- [x] 17.3.4 Event summary + **print-to-PDF running order export**
+
+#### 17.4 Release 4 — Dropbox song resources
+
+- [x] 17.4.1 `bandie_open_mic_event_files` metadata + RLS (schema only)
+- [ ] 17.4.2 Link band Dropbox part files; organiser visibility controls
+- [ ] 17.4.3 Import from band song list
+
+#### 17.5 Admin and analytics
+
+- [ ] 17.5.1 Admin metrics and `open_mic_*` analytics events
+- [ ] 17.5.2 Manual add-on assign UI (pack schema from 17.1)
+
+#### 17.6 Documentation and acceptance
+
+- [ ] 17.6.1 `product-functional-requirements.md` — open mic section
+- [ ] 17.6.2 `product-technical-requirements.md` — tables, routes, module
+- [ ] 17.6.3 Manual QA — create → publish → sign-up → suggest song → live night → PDF export
+
+#### 17.7 Deferred (post-MVP)
+
+- [ ] 17.7.1 Public event directory; recurrence; stage display
+- [ ] 17.7.2 CSV export; guest magic-link verification
+- [ ] 17.7.3 Waitlist, fair rotation, offline mode
+- [ ] 17.7.4 Supabase Storage for non-Dropbox organisers
 
 ### 18. Mobile app
 
@@ -452,8 +503,8 @@ Task checklist: `docs/project/bandie_song_suggestions_voting_implementation_plan
 - [ ] 20.5.1 Scheduled auto-close suggestions at `suggestion_closes_at`
 - [ ] 20.5.2 Scheduled auto-close voting at `voting_closes_at` when set
 - [x] 20.5.3 Group activity feed on detail page; optional communications reminders
-- [ ] 20.5.4 Filters and sorting — search, needs my vote, sort by score (spec §6.2)
-- [ ] 20.5.5 Analytics events — `song_suggestion_*` per spec §16
+- [x] 20.5.4 Filters and sorting — search, needs my vote, sort by score (spec §6.2)
+- [x] 20.5.5 Analytics events — `song_suggestion_*` per spec §16
 
 #### 20.6 Documentation and acceptance
 
@@ -472,6 +523,34 @@ Task checklist: `docs/project/bandie_song_suggestions_voting_implementation_plan
 ---
 
 ## Session notes
+
+**27 June 2026 — Phase 17 Open mic / jam nights MVP implemented**
+- Migrations `20260702100000_bandie_open_mic_events.sql`, `20260702110000_bandie_open_mic_songs_signup.sql` applied via `supabase db push`
+- Data: `openMicEvents.ts`, `openMicSongs.ts`, `openMicLive.ts`; `open_mic.create` Organiser Plus gate + upgrade messaging
+- Web: organiser routes `/app/open-mic/*`, public `/events/:slug`, poster, song list, moderation, live control room
+- Deferred: Dropbox file linking UI (17.4.2–17.4.3), walk-up/ad-hoc song RPCs, drag reorder in live room, manual QA pass
+
+**30 June 2026 — Open mic product decisions locked (Phase 17)**
+- All 18 product questions answered; recorded in spec §19–§20 and implementation plan §2 + §16
+- **Organiser Plus required** (no free trial); gate on create; entitlement seed update pending at ship
+- Guest sign-up: email or phone (organiser chooses); Bandie members flagged; no magic-link MVP
+- **Player song suggestions** with organiser approval; house band flag; full organiser delegated roles
+- Public **`/events/:slug`** (global unique); no public directory; song list organiser toggle
+- Files via **Dropbox** for band leaders; visible to **Bandie members only** when organiser enables
+- Contact: organiser-only; **names visible to all**; **PDF running order** in MVP; add-on schema Release 1
+
+**30 June 2026 — Open mic / jam night (Phase 17 planning)**
+- Reviewed `bandie_open_mic_jam_night_spec.md` (1477 lines) — organiser live event workspace: songs, instrument slots, player sign-up, live control room, file resources
+- Implementation plan: `docs/project/bandie_open_mic_jam_night_implementation_plan.md` — four spec releases + entitlements/add-ons + deferred backlog; checkbox task breakdown
+- Tracker Phase 17 expanded with release-aligned checklist; v1 defaults documented (user-scoped organiser, guest sign-up, no public directory)
+- Aligns with existing organiser gigs/venues, `open_mic.create` entitlement seed, setlist reorder patterns
+
+**30 June 2026 — Phase 20 UI polish and analytics**
+- Song suggestion group detail: filter/sort panel (search, vote status incl. needs my vote, suggester, genre, decade, sort keys, top-N toggle) — `SongSuggestionListControls`, `@bandie/data` `filterAndSortSongSuggestions`
+- Analytics: `song_suggestion_*` events in `apps/web/src/lib/analytics.ts` wired for create, submit, vote cast/change, close suggestions/voting, confirm, skeleton setlist
+
+**30 June 2026 — Testing default: Netlify production**
+- Manual QA and feature verification default to the **Netlify deploy from `main`**, not local Vite (5173). API routes require Netlify (`_redirects` + functions). Wait for deploy after push before retesting.
 
 **29 June 2026 — Copy song between bands**
 - `POST /api/bands/songs/copy` — Netlify `songs-copy-to-band`; `songCopyServer.ts` copies DB rows + Dropbox `copy_v2` per file into target band tree

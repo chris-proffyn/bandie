@@ -50,6 +50,7 @@ const REQUIRED_UPGRADE_PLAN: Record<string, PlanCode> = {
   'venues.max_count': PLAN_CODES.ORGANISER_PLUS,
   'booking_enquiries.monthly_max_count': PLAN_CODES.ORGANISER_PLUS,
   'gigs.active_max_count': PLAN_CODES.ORGANISER_PLUS,
+  'open_mic.create': PLAN_CODES.ORGANISER_PLUS,
   'band.create': PLAN_CODES.PLAYER_PLUS,
   'band_directory.browse': PLAN_CODES.PLAYER_PLUS,
   'player_directory.browse': PLAN_CODES.PLAYER_PLUS,
@@ -65,6 +66,8 @@ const BOOLEAN_CAPABILITY_MESSAGES: Record<string, (planName: string) => string> 
     `The player directory is not available on ${planName}. Upgrade to Player Plus to find musicians.`,
   'player_message.send': (planName) =>
     `Direct messages to other players are not available on ${planName}. Upgrade to Player Plus to message musicians.`,
+  'open_mic.create': (planName) =>
+    `Open mic and jam night events are not available on ${planName}. Upgrade to Organiser Plus to host open mic nights.`,
 };
 
 function allowedDecision(partial: Partial<GateDecision> = {}): GateDecision {

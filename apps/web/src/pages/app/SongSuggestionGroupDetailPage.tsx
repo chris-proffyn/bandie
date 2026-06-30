@@ -2,11 +2,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   SONG_SUGGESTION_GROUP_STATUS_LABELS,
-  SONG_SUGGESTION_VOTE_LABELS,
+  DEFAULT_SONG_SUGGESTION_LIST_FILTERS,
   closeSongSuggestionVoting,
   closeSongSuggestions,
+  collectSongSuggestionFilterOptions,
   confirmSongSuggestionGroup,
   createSkeletonSetlistFromSuggestionGroup,
+  filterAndSortSongSuggestions,
   getSongSuggestionGroupDetail,
   isSongSuggestionSubmitOpen,
   isSongSuggestionVotingOpen,
@@ -17,6 +19,7 @@ import {
   vetoSongSuggestion,
   voteOnSongSuggestion,
   type SongSuggestionGroupEvent,
+  type SongSuggestionListFilters,
   type SongSuggestionVoteState,
   type SongSuggestionWithSummary,
   isBandLeaderRole,
@@ -24,16 +27,20 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { UpgradePromptModal } from '../../components/entitlements/UpgradePromptModal';
 import { SongsBandContextBar } from '../../components/songs/SongsBandContextBar';
+import { SongSuggestionListControls } from '../../components/songSuggestions/SongSuggestionListControls';
+import { SongSuggestionCard } from '../../components/songSuggestions/SongSuggestionCard';
 import { SubmitSongSuggestionPanel } from '../../components/songSuggestions/SubmitSongSuggestionPanel';
 import { SongSuggestionGroupFormPanel } from '../../components/songSuggestions/SongSuggestionGroupFormPanel';
 import { useUpgradePrompt } from '../../hooks/useUpgradePrompt';
+import {
+  trackSongSuggestionGroupConfirmed,
+  trackSongSuggestionSetlistCreated,
+  trackSongSuggestionVoteCast,
+  trackSongSuggestionVoteChanged,
+  trackSongSuggestionsClosed,
+  trackSongSuggestionVotingClosed,
+} from '../../lib/analytics';
 import '../../styles/songSuggestions.css';
-
-const VOTE_EMOJI: Record<SongSuggestionVoteState, string> = {
-  happy_to_play: '🙂',
-  meh: '😐',
-  rather_not: '🙁',
-};
 
 function formatEvent(event: SongSuggestionGroupEvent): string {
   const payload = event.event_payload;
@@ -77,6 +84,9 @@ export function SongSuggestionGroupDetailPage() {
   const [showSuggest, setShowSuggest] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [listFilters, setListFilters] = useState<SongSuggestionListFilters>(
+    DEFAULT_SONG_SUGGESTION_LIST_FILTERS,
+  );
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [overrideReasons, setOverrideReasons] = useState<Record<string, string>>({});
   const [detail, setDetail] = useState<Awaited<ReturnType<typeof getSongSuggestionGroupDetail>>>(null);
@@ -122,8 +132,25 @@ export function SongSuggestionGroupDetailPage() {
   );
   const rankedActive = useMemo(() => rankSongSuggestions(activeSuggestions), [activeSuggestions]);
 
+  const filterOptions = useMemo(
+    () => collectSongSuggestionFilterOptions(suggestions),
+    [suggestions],
+  );
+
   const submitOpen = group ? isSongSuggestionSubmitOpen(group) : false;
   const votingOpen = group ? isSongSuggestionVotingOpen(group) : false;
+
+  const displayedSuggestions = useMemo(() => {
+    if (!group) {
+      return suggestions;
+    }
+
+    return filterAndSortSongSuggestions(suggestions, listFilters, {
+      targetSongCount: group.target_song_count,
+      votingOpen,
+    });
+  }, [group, listFilters, suggestions, votingOpen]);
+
   const canEditGroup =
     isLeader &&
     group &&
@@ -156,14 +183,44 @@ export function SongSuggestionGroupDetailPage() {
   }
 
   async function handleVote(suggestionId: string, voteState: SongSuggestionVoteState) {
-    await runAction(() => voteOnSongSuggestion(suggestionId, voteState));
+    const previousVote =
+      suggestions.find((row) => row.id === suggestionId)?.my_vote ?? null;
+
+    await runAction(async () => {
+      await voteOnSongSuggestion(suggestionId, voteState);
+      if (!bandId || !groupId) {
+        return;
+      }
+
+      if (previousVote && previousVote !== voteState) {
+        trackSongSuggestionVoteChanged({
+          bandId,
+          groupId,
+          suggestionId,
+          voteState,
+          previousVoteState: previousVote,
+        });
+      } else if (!previousVote) {
+        trackSongSuggestionVoteCast({
+          bandId,
+          groupId,
+          suggestionId,
+          voteState,
+        });
+      }
+    });
   }
 
   async function handleCloseSuggestions() {
     if (!groupId || !window.confirm('Close suggestions? Members will no longer be able to add songs.')) {
       return;
     }
-    await runAction(() => closeSongSuggestions(groupId));
+    await runAction(async () => {
+      await closeSongSuggestions(groupId);
+      if (bandId) {
+        trackSongSuggestionsClosed({ bandId, groupId });
+      }
+    });
   }
 
   async function handleReopenSuggestions() {
@@ -181,7 +238,12 @@ export function SongSuggestionGroupDetailPage() {
     if (!groupId || !window.confirm('Close voting for this group?')) {
       return;
     }
-    await runAction(() => closeSongSuggestionVoting(groupId));
+    await runAction(async () => {
+      await closeSongSuggestionVoting(groupId);
+      if (bandId) {
+        trackSongSuggestionVotingClosed({ bandId, groupId });
+      }
+    });
   }
 
   async function handleResetVotes() {
@@ -253,6 +315,13 @@ export function SongSuggestionGroupDetailPage() {
 
     await runAction(async () => {
       await confirmSongSuggestionGroup(groupId, selections);
+      if (bandId) {
+        trackSongSuggestionGroupConfirmed({
+          bandId,
+          groupId,
+          selectedCount: selections.length,
+        });
+      }
       setShowConfirm(false);
     });
   }
@@ -263,6 +332,9 @@ export function SongSuggestionGroupDetailPage() {
     }
     await runAction(async () => {
       const { setlistId } = await createSkeletonSetlistFromSuggestionGroup(groupId);
+      if (bandId) {
+        trackSongSuggestionSetlistCreated({ bandId, groupId, setlistId });
+      }
       navigate(`/app/${bandId}/setlists/${setlistId}`);
     });
   }
@@ -569,6 +641,7 @@ export function SongSuggestionGroupDetailPage() {
 
       {showSuggest && groupId ? (
         <SubmitSongSuggestionPanel
+          bandId={bandId}
           groupId={groupId}
           onClose={() => setShowSuggest(false)}
           onSubmitted={() => void loadDetail()}
@@ -577,99 +650,41 @@ export function SongSuggestionGroupDetailPage() {
 
       <section className="panel">
         <h2>Suggestions ({suggestions.length})</h2>
+        {suggestions.length > 0 ? (
+          <SongSuggestionListControls
+            filters={listFilters}
+            options={filterOptions}
+            resultCount={displayedSuggestions.length}
+            totalCount={suggestions.length}
+            votingOpen={votingOpen}
+            onChange={setListFilters}
+          />
+        ) : null}
         {suggestions.length === 0 ? (
           <p className="workspace-empty-note">
             No suggestions yet.{submitOpen ? ' Be the first to add one.' : ''}
           </p>
+        ) : displayedSuggestions.length === 0 ? (
+          <p className="workspace-empty-note">
+            No suggestions match these filters. Try clearing filters or broadening your search.
+          </p>
         ) : (
-          <ul className="song-suggestion-list">
-            {suggestions.map((row) => (
-              <li
+          <div className="song-suggestion-cards-grid">
+            {displayedSuggestions.map((row) => (
+              <SongSuggestionCard
                 key={row.id}
-                className={`song-suggestion-row${
-                  row.status === 'leader_vetoed' ? ' song-suggestion-row-vetoed' : ''
-                }`}
-              >
-                <div className="song-suggestion-row-head">
-                  <div>
-                    <h3>
-                      {row.proposed_rank > 0 && row.status === 'active' ? `#${row.proposed_rank} ` : ''}
-                      {row.song_title}
-                    </h3>
-                    <p className="song-suggestion-meta">{row.artist}</p>
-                    {row.rationale ? <p>{row.rationale}</p> : null}
-                    {row.status === 'leader_vetoed' && row.leader_veto_reason ? (
-                      <p className="song-suggestion-meta">Vetoed: {row.leader_veto_reason}</p>
-                    ) : null}
-                  </div>
-                  {isLeader && row.status === 'active' ? (
-                    <button
-                      type="button"
-                      className="directory-btn directory-btn-secondary"
-                      disabled={actionBusy}
-                      onClick={() => void handleVeto(row)}
-                    >
-                      Veto
-                    </button>
-                  ) : null}
-                </div>
-
-                {(row.youtube_url || row.spotify_url) && (
-                  <div className="song-suggestion-links">
-                    {row.youtube_url ? (
-                      <a href={row.youtube_url} target="_blank" rel="noreferrer">
-                        YouTube
-                      </a>
-                    ) : null}
-                    {row.spotify_url ? (
-                      <a href={row.spotify_url} target="_blank" rel="noreferrer">
-                        Spotify
-                      </a>
-                    ) : null}
-                  </div>
-                )}
-
-                <div className="song-suggestion-vote-summary">
-                  <span>Score {row.vote_summary.score}</span>
-                  <span>🙂 {row.vote_summary.happy_count}</span>
-                  <span>😐 {row.vote_summary.meh_count}</span>
-                  <span>🙁 {row.vote_summary.rather_not_count}</span>
-                  {group.vote_visibility === 'aggregate_only' && !isLeader ? (
-                    <span>· Votes are aggregate only</span>
-                  ) : null}
-                </div>
-
-                {row.votes.length > 0 ? (
-                  <div className="song-suggestion-tags">
-                    {row.votes.map((vote) => (
-                      <span key={vote.id} className="song-suggestion-tag">
-                        {vote.display_name ?? vote.username ?? 'Member'}:{' '}
-                        {VOTE_EMOJI[vote.vote_state]} {SONG_SUGGESTION_VOTE_LABELS[vote.vote_state]}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-
-                {votingOpen && row.status === 'active' ? (
-                  <div className="song-suggestion-vote-buttons">
-                    {(['happy_to_play', 'meh', 'rather_not'] as const).map((voteState) => (
-                      <button
-                        key={voteState}
-                        type="button"
-                        className={`song-suggestion-vote-btn${
-                          row.my_vote === voteState ? ' active' : ''
-                        }`}
-                        disabled={actionBusy}
-                        onClick={() => void handleVote(row.id, voteState)}
-                      >
-                        {VOTE_EMOJI[voteState]} {SONG_SUGGESTION_VOTE_LABELS[voteState]}
-                      </button>
-                    ))}
-                  </div>
-                ) : null}
-              </li>
+                row={row}
+                sortBy={listFilters.sortBy}
+                votingOpen={votingOpen}
+                voteVisibility={group.vote_visibility}
+                isLeader={isLeader}
+                currentUserId={user?.id ?? null}
+                actionBusy={actionBusy}
+                onVote={(suggestionId, voteState) => void handleVote(suggestionId, voteState)}
+                onVeto={(suggestion) => void handleVeto(suggestion)}
+              />
             ))}
-          </ul>
+          </div>
         )}
       </section>
 

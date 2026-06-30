@@ -59,6 +59,12 @@ GitHub Actions runs lint and build on push/PR to `main` (`.github/workflows/ci.y
 
 Netlify deploys from `main` using `netlify.toml`.
 
+### Testing (default)
+
+**Manual QA and feature verification use the Netlify production deploy** (auto-deploy from `main`), not local Vite on port 5173. Netlify API routes (`/api/...`) and `_redirects` only apply on the deployed site or `npm run dev` (port 8888). After pushing changes, wait for the Netlify build to finish before retesting.
+
+Local `npm run dev` (8888) remains available for development when needed; it is not the default test target.
+
 ### Supabase
 
 ```bash

@@ -42,6 +42,12 @@ import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
 import { SignupPage } from './pages/auth/SignupPage';
 import { HomePage } from './pages/HomePage';
 import { PublicBandProfilePage } from './pages/PublicBandProfilePage';
+import { PublicOpenMicEventPage } from './pages/PublicOpenMicEventPage';
+import { OpenMicEventsDashboardPage } from './pages/app/OpenMicEventsDashboardPage';
+import { OpenMicEventOverviewPage } from './pages/app/OpenMicEventOverviewPage';
+import { OpenMicPosterPage } from './pages/app/OpenMicPosterPage';
+import { OpenMicSongListPage } from './pages/app/OpenMicSongListPage';
+import { OpenMicLiveControlPage } from './pages/app/OpenMicLiveControlPage';
 
 function RedirectToBandOverview() {
   const { bandId } = useParams();
@@ -72,6 +78,7 @@ export default function App() {
     <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/bands/:slug" element={<PublicBandProfilePage />} />
+        <Route path="/events/:slug" element={<PublicOpenMicEventPage />} />
         <Route path="/invite/:token" element={<AcceptInvitePage />} />
 
         <Route element={<GuestRoute />}>
@@ -158,6 +165,46 @@ export default function App() {
               element={
                 <WorkspaceModeRoute mode="organiser">
                   <OrganiserGigsDashboardPage />
+                </WorkspaceModeRoute>
+              }
+            />
+            <Route
+              path="open-mic/:eventId/live"
+              element={
+                <WorkspaceModeRoute mode="organiser">
+                  <OpenMicLiveControlPage />
+                </WorkspaceModeRoute>
+              }
+            />
+            <Route
+              path="open-mic/:eventId/songs"
+              element={
+                <WorkspaceModeRoute mode="organiser">
+                  <OpenMicSongListPage />
+                </WorkspaceModeRoute>
+              }
+            />
+            <Route
+              path="open-mic/:eventId/poster"
+              element={
+                <WorkspaceModeRoute mode="organiser">
+                  <OpenMicPosterPage />
+                </WorkspaceModeRoute>
+              }
+            />
+            <Route
+              path="open-mic/:eventId"
+              element={
+                <WorkspaceModeRoute mode="organiser">
+                  <OpenMicEventOverviewPage />
+                </WorkspaceModeRoute>
+              }
+            />
+            <Route
+              path="open-mic"
+              element={
+                <WorkspaceModeRoute mode="organiser">
+                  <OpenMicEventsDashboardPage />
                 </WorkspaceModeRoute>
               }
             />

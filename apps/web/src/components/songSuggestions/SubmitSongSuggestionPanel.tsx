@@ -4,14 +4,17 @@ import {
   submitSongSuggestion,
   type SubmitSongSuggestionInput,
 } from '@bandie/data';
+import { trackSongSuggestionAdded } from '../../lib/analytics';
 
 type SubmitSongSuggestionPanelProps = {
+  bandId: string;
   groupId: string;
   onClose: () => void;
   onSubmitted: () => void;
 };
 
 export function SubmitSongSuggestionPanel({
+  bandId,
   groupId,
   onClose,
   onSubmitted,
@@ -49,7 +52,8 @@ export function SubmitSongSuggestionPanel({
     setSubmitting(true);
     setError(null);
     try {
-      await submitSongSuggestion(groupId, form);
+      const suggestionId = await submitSongSuggestion(groupId, form);
+      trackSongSuggestionAdded({ bandId, groupId, suggestionId });
       onSubmitted();
       onClose();
     } catch (err) {

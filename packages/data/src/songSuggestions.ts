@@ -112,6 +112,7 @@ export type SongSuggestionWithSummary = SongSuggestion & {
   votes: SongSuggestionVote[];
   my_vote: SongSuggestionVoteState | null;
   proposed_rank: number;
+  suggester_display_name: string | null;
 };
 
 export type SongSuggestionGroupListItem = SongSuggestionGroup & {
@@ -720,8 +721,14 @@ export async function getSongSuggestionGroupDetail(
   }
 
   const votesBySuggestion = new Map<string, SongSuggestionVote[]>();
-  const voterIds = [...new Set((votes ?? []).map((row) => row.member_user_id as string))];
-  const profiles = await loadMemberProfiles(voterIds);
+  const profileUserIds = new Set<string>();
+  for (const row of votes ?? []) {
+    profileUserIds.add(row.member_user_id as string);
+  }
+  for (const row of suggestions ?? []) {
+    profileUserIds.add(row.suggested_by as string);
+  }
+  const profiles = await loadMemberProfiles([...profileUserIds]);
 
   for (const row of votes ?? []) {
     const suggestionId = row.suggestion_id as string;
@@ -757,6 +764,7 @@ export async function getSongSuggestionGroupDetail(
     const suggestionVotes = votesBySuggestion.get(suggestion.id) ?? [];
     const myVote =
       suggestionVotes.find((vote) => vote.member_user_id === viewerId)?.vote_state ?? null;
+    const suggesterProfile = profiles.get(suggestion.suggested_by);
 
     return {
       ...suggestion,
@@ -764,6 +772,8 @@ export async function getSongSuggestionGroupDetail(
       votes: hideMemberVotes ? [] : suggestionVotes,
       my_vote: myVote,
       proposed_rank: 0,
+      suggester_display_name:
+        suggesterProfile?.display_name ?? suggesterProfile?.username ?? null,
     };
   });
 
@@ -800,6 +810,206 @@ export function isSongSuggestionSubmitOpen(group: SongSuggestionGroup): boolean 
     group.status === 'open_for_suggestions' &&
     new Date(group.suggestion_closes_at).getTime() > Date.now()
   );
+}
+
+export type SongSuggestionVoteFilter =
+  | 'all'
+  | 'needs_my_vote'
+  | 'voted_happy'
+  | 'voted_meh'
+  | 'voted_rather_not';
+
+export type SongSuggestionSortKey =
+  | 'score'
+  | 'happy_votes'
+  | 'rather_not_votes'
+  | 'newest'
+  | 'artist'
+  | 'title';
+
+export type SongSuggestionListFilters = {
+  searchQuery: string;
+  voteFilter: SongSuggestionVoteFilter;
+  suggestedByUserId: string;
+  genre: string;
+  decade: string;
+  sortBy: SongSuggestionSortKey;
+  topNOnly: boolean;
+};
+
+export const DEFAULT_SONG_SUGGESTION_LIST_FILTERS: SongSuggestionListFilters = {
+  searchQuery: '',
+  voteFilter: 'all',
+  suggestedByUserId: '',
+  genre: '',
+  decade: '',
+  sortBy: 'score',
+  topNOnly: false,
+};
+
+export type SongSuggestionFilterOptions = {
+  suggesters: Array<{ userId: string; label: string }>;
+  genres: string[];
+  decades: string[];
+};
+
+export function collectSongSuggestionFilterOptions(
+  rows: SongSuggestionWithSummary[],
+  suggesterLabels: Map<string, string> = new Map(),
+): SongSuggestionFilterOptions {
+  const suggesterMap = new Map<string, string>();
+  const genres = new Set<string>();
+  const decades = new Set<string>();
+
+  for (const row of rows) {
+    if (!suggesterMap.has(row.suggested_by)) {
+      suggesterMap.set(
+        row.suggested_by,
+        suggesterLabels.get(row.suggested_by) ??
+          row.suggester_display_name ??
+          'Band member',
+      );
+    }
+
+    if (row.suggested_genre?.trim()) {
+      genres.add(row.suggested_genre.trim());
+    }
+    if (row.decade?.trim()) {
+      decades.add(row.decade.trim());
+    }
+  }
+
+  return {
+    suggesters: [...suggesterMap.entries()]
+      .map(([userId, label]) => ({ userId, label }))
+      .sort((a, b) => a.label.localeCompare(b.label)),
+    genres: [...genres].sort((a, b) => a.localeCompare(b)),
+    decades: [...decades].sort((a, b) => a.localeCompare(b)),
+  };
+}
+
+function matchesSongSuggestionSearch(row: SongSuggestionWithSummary, query: string): boolean {
+  const normalized = query.trim().toLowerCase();
+  if (!normalized) {
+    return true;
+  }
+
+  return (
+    row.song_title.toLowerCase().includes(normalized) ||
+    row.artist.toLowerCase().includes(normalized)
+  );
+}
+
+function matchesSongSuggestionVoteFilter(
+  row: SongSuggestionWithSummary,
+  voteFilter: SongSuggestionVoteFilter,
+  votingOpen: boolean,
+): boolean {
+  switch (voteFilter) {
+    case 'all':
+      return true;
+    case 'needs_my_vote':
+      return row.status === 'active' && votingOpen && row.my_vote === null;
+    case 'voted_happy':
+      return row.my_vote === 'happy_to_play';
+    case 'voted_meh':
+      return row.my_vote === 'meh';
+    case 'voted_rather_not':
+      return row.my_vote === 'rather_not';
+    default:
+      return true;
+  }
+}
+
+function sortSongSuggestionsByKey(
+  rows: SongSuggestionWithSummary[],
+  sortBy: SongSuggestionSortKey,
+): SongSuggestionWithSummary[] {
+  const sorted = [...rows];
+
+  switch (sortBy) {
+    case 'score':
+      return rankSongSuggestions(sorted);
+    case 'happy_votes':
+      sorted.sort(
+        (a, b) =>
+          b.vote_summary.happy_count - a.vote_summary.happy_count ||
+          b.vote_summary.score - a.vote_summary.score,
+      );
+      break;
+    case 'rather_not_votes':
+      sorted.sort(
+        (a, b) =>
+          b.vote_summary.rather_not_count - a.vote_summary.rather_not_count ||
+          a.vote_summary.score - b.vote_summary.score,
+      );
+      break;
+    case 'newest':
+      sorted.sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      );
+      break;
+    case 'artist':
+      sorted.sort(
+        (a, b) =>
+          a.artist.localeCompare(b.artist) || a.song_title.localeCompare(b.song_title),
+      );
+      break;
+    case 'title':
+      sorted.sort(
+        (a, b) =>
+          a.song_title.localeCompare(b.song_title) || a.artist.localeCompare(b.artist),
+      );
+      break;
+    default:
+      break;
+  }
+
+  return sorted.map((row, index) => ({ ...row, proposed_rank: index + 1 }));
+}
+
+export function filterAndSortSongSuggestions(
+  rows: SongSuggestionWithSummary[],
+  filters: SongSuggestionListFilters,
+  options: { targetSongCount: number; votingOpen: boolean },
+): SongSuggestionWithSummary[] {
+  const rankedActive = rankSongSuggestions(rows.filter((row) => row.status === 'active'));
+
+  const filtered = rows.filter((row) => {
+    if (!matchesSongSuggestionSearch(row, filters.searchQuery)) {
+      return false;
+    }
+
+    if (filters.suggestedByUserId && row.suggested_by !== filters.suggestedByUserId) {
+      return false;
+    }
+
+    if (filters.genre && (row.suggested_genre ?? '').trim() !== filters.genre) {
+      return false;
+    }
+
+    if (filters.decade && (row.decade ?? '').trim() !== filters.decade) {
+      return false;
+    }
+
+    if (!matchesSongSuggestionVoteFilter(row, filters.voteFilter, options.votingOpen)) {
+      return false;
+    }
+
+    if (filters.topNOnly) {
+      if (row.status !== 'active') {
+        return false;
+      }
+      const ranked = rankedActive.find((active) => active.id === row.id);
+      if (!ranked || ranked.proposed_rank > options.targetSongCount) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  return sortSongSuggestionsByKey(filtered, filters.sortBy);
 }
 
 export async function createSkeletonSetlistFromSuggestionGroup(

@@ -234,6 +234,6 @@ Phases 0–5 constitute the **core product MVP** as defined in `PRODUCT_REQUIREM
 
 **Completed:** Delivery map Phases 0–5; Phase 6 partial (communications); tracker Phases 0–15 on web  
 **Tracker alignment:** Phases 0–15 complete on web; remote DB migrated through `20260630190000`  
-**Next:** Phase 16 polish, Phase 17 open mic, Phase 18 mobile
+**Next:** Phase 16 polish, Phase 17 open mic ([implementation plan](project/bandie_open_mic_jam_night_implementation_plan.md)), Phase 18 mobile
 
 See `docs/PROJECT_STATUS_TRACKER.md` for the unified phase roadmap and item-level checklist (Phases 0–19).
