@@ -23,8 +23,6 @@ export type BookingEnquiryFormValues = {
   eventDate: string;
   eventTime: string;
   setDuration: string;
-  selectedVenueId: string;
-  venue: string;
   budget: string;
   additionalNotes: string;
   slotNumber: string;
@@ -36,8 +34,6 @@ export const emptyBookingEnquiryForm = (): BookingEnquiryFormValues => ({
   eventDate: '',
   eventTime: '',
   setDuration: '',
-  selectedVenueId: '',
-  venue: '',
   budget: '',
   additionalNotes: '',
   slotNumber: '',
@@ -72,7 +68,6 @@ export function bookingFormValuesFromGig(
   gig: OrganiserGig,
   setDurationOptions: SetDurationOption[],
 ): Partial<BookingEnquiryFormValues> {
-  const venue = [gig.venue_name, gig.venue_address].filter(Boolean).join(', ');
   let setDuration = '';
 
   if (gig.default_slot_duration_minutes != null) {
@@ -85,12 +80,25 @@ export function bookingFormValuesFromGig(
     selectedGigId: gig.id,
     eventDate: isoToDateInput(gig.starts_at),
     eventTime: isoToTimeInput(gig.starts_at),
-    venue,
-    selectedVenueId: '',
     setDuration,
     slotDurationMinutes:
       gig.default_slot_duration_minutes != null ? String(gig.default_slot_duration_minutes) : '',
   };
+}
+
+export function resolveGigVenueForEnquiry(
+  detail: (OrganiserGig & { venue?: OrganiserVenue | null }) | null,
+): { venue: OrganiserVenue | null; summary: string | null } {
+  if (!detail) {
+    return { venue: null, summary: null };
+  }
+
+  if (detail.venue) {
+    return { venue: detail.venue, summary: null };
+  }
+
+  const summary = [detail.venue_name, detail.venue_address].filter(Boolean).join(', ');
+  return { venue: null, summary: summary || null };
 }
 
 export function buildSetDurationOptions(
@@ -231,13 +239,16 @@ export function composeBookingEnquiryMessage(
   bandName: string,
   values: BookingEnquiryFormValues,
   sender: BookingSenderDetails,
-  selectedVenue?: OrganiserVenue | null,
-  gig?: Pick<OrganiserGig, 'title'> | null,
+  options?: {
+    gig?: Pick<OrganiserGig, 'title'> | null;
+    gigVenue?: OrganiserVenue | null;
+    gigVenueSummary?: string | null;
+  },
 ): string {
   const lines = [`Booking enquiry for ${bandName}`, ''];
 
-  if (gig?.title) {
-    lines.push(`Linked gig: ${gig.title}`);
+  if (options?.gig?.title) {
+    lines.push(`Linked gig: ${options.gig.title}`);
     lines.push('');
   }
 
@@ -262,10 +273,12 @@ export function composeBookingEnquiryMessage(
   lines.push(`Time: ${values.eventTime.trim() ? formatDisplayTime(values.eventTime) : 'To be confirmed'}`);
   lines.push(`Set duration: ${values.setDuration}`);
 
-  if (selectedVenue) {
-    lines.push(...formatBookingVenueMessageLines(selectedVenue));
-  } else {
-    lines.push(`Venue: ${values.venue.trim()}`);
+  if (options?.gigVenue) {
+    lines.push(...formatBookingVenueMessageLines(options.gigVenue));
+  } else if (options?.gigVenueSummary) {
+    lines.push(`Venue: ${options.gigVenueSummary}`);
+  } else if (options?.gig?.title) {
+    lines.push('Venue: To be confirmed on gig');
   }
 
   lines.push(`Budget: ${formatBudgetLabel(values.budget)}`);
@@ -281,5 +294,5 @@ export function composeBookingEnquiryMessage(
 }
 
 export function isBookingEnquiryFormValid(values: BookingEnquiryFormValues): boolean {
-  return Boolean(values.eventDate.trim() && values.setDuration.trim() && values.venue.trim());
+  return Boolean(values.eventDate.trim() && values.setDuration.trim());
 }

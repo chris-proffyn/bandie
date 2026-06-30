@@ -7,7 +7,6 @@ import {
   getOrganiserGig,
   inviteBandToGig,
   isActiveGigInviteStatus,
-  listMyOrganiserVenues,
   listOrganiserGigs,
   sendBookingEnquiry,
   type BandDynamicFeeOffer,
@@ -15,7 +14,6 @@ import {
   type GigBandInviteWithBand,
   type OrganiserGig,
   type OrganiserGigDetail,
-  type OrganiserVenue,
   type PublicBandPrimaryContact,
   type UserProfile,
 } from '@bandie/data';
@@ -24,10 +22,10 @@ import {
   buildSetDurationOptions,
   composeBookingEnquiryMessage,
   emptyBookingEnquiryForm,
-  formatBookingVenueSummary,
   formatOrganiserGigOptionLabel,
   isBookingEnquiryFormValid,
   resolveBookingSenderDetails,
+  resolveGigVenueForEnquiry,
   type BookingEnquiryFormValues,
   type BookingSenderDetails,
 } from '../../lib/bookingEnquiryHelpers';
@@ -67,7 +65,6 @@ export function BandBookingModal({
     const base = emptyBookingEnquiryForm();
     return initialGigId ? { ...base, selectedGigId: initialGigId } : base;
   });
-  const [venues, setVenues] = useState<OrganiserVenue[]>([]);
   const [gigs, setGigs] = useState<OrganiserGig[]>([]);
   const [selectedGigDetail, setSelectedGigDetail] = useState<OrganiserGigDetail | null>(null);
   const [loadingGigs, setLoadingGigs] = useState(false);
@@ -85,14 +82,14 @@ export function BandBookingModal({
     [user, profile, displayName],
   );
 
-  const selectedVenue = useMemo(
-    () => venues.find((venue) => venue.id === form.selectedVenueId) ?? null,
-    [venues, form.selectedVenueId],
-  );
-
   const selectedGig = useMemo(
     () => gigs.find((gig) => gig.id === form.selectedGigId) ?? selectedGigDetail,
     [gigs, form.selectedGigId, selectedGigDetail],
+  );
+
+  const gigVenue = useMemo(
+    () => resolveGigVenueForEnquiry(selectedGigDetail),
+    [selectedGigDetail],
   );
 
   const existingInvite = useMemo<GigBandInviteWithBand | null>(() => {
@@ -136,19 +133,17 @@ export function BandBookingModal({
     let cancelled = false;
     setLoadingGigs(true);
 
-    Promise.all([listOrganiserGigs(), listMyOrganiserVenues()])
-      .then(([gigRows, venueRows]) => {
+    listOrganiserGigs()
+      .then((gigRows) => {
         if (cancelled) {
           return;
         }
 
         setGigs(gigRows.filter((gig) => ACTIVE_GIG_STATUSES.includes(gig.status)));
-        setVenues(venueRows);
       })
       .catch(() => {
         if (!cancelled) {
           setGigs([]);
-          setVenues([]);
         }
       })
       .finally(() => {
@@ -225,32 +220,6 @@ export function BandBookingModal({
     updateField('selectedGigId', gigId);
   }
 
-  function handleVenueSelect(venueId: string) {
-    if (!venueId) {
-      setForm((current) => ({ ...current, selectedVenueId: '' }));
-      return;
-    }
-
-    const venue = venues.find((item) => item.id === venueId);
-    if (!venue) {
-      return;
-    }
-
-    setForm((current) => ({
-      ...current,
-      selectedVenueId: venueId,
-      venue: formatBookingVenueSummary(venue),
-    }));
-  }
-
-  function handleVenueTextChange(value: string) {
-    setForm((current) => ({
-      ...current,
-      venue: value,
-      selectedVenueId: '',
-    }));
-  }
-
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
 
@@ -272,18 +241,18 @@ export function BandBookingModal({
       }
 
       const durationMatch = form.setDuration.match(/(\d+)\s*min/i);
+      const venueSummary = gigVenue.venue?.name ?? gigVenue.summary ?? null;
+
       await sendBookingEnquiry({
         bandId,
         recipientUserId: primaryContact.user_id,
-        body: composeBookingEnquiryMessage(
-          bandName,
-          form,
-          sender,
-          selectedVenue,
-          selectedGig ? { title: selectedGig.title } : null,
-        ),
+        body: composeBookingEnquiryMessage(bandName, form, sender, {
+          gig: selectedGig ? { title: selectedGig.title } : null,
+          gigVenue: gigVenue.venue,
+          gigVenueSummary: gigVenue.summary,
+        }),
         preferredDate: form.eventDate || null,
-        venueSummary: form.venue.trim() || selectedVenue?.name || null,
+        venueSummary,
         setDurationMinutes: durationMatch ? Number(durationMatch[1]) : null,
         metadata: {
           event_time: form.eventTime || null,
@@ -309,7 +278,7 @@ export function BandBookingModal({
   return createPortal(
     <div className="gigs-dialog-backdrop" role="presentation" onClick={onClose}>
       <div
-        className="gigs-dialog band-booking-dialog"
+        className="gigs-dialog band-booking-dialog surface-light"
         role="dialog"
         aria-modal="true"
         aria-labelledby="band-booking-modal-title"
@@ -352,6 +321,7 @@ export function BandBookingModal({
             ) : (
               <p className="directory-field-hint">
                 Choosing a gig sends a formal gig invite to the band leader alongside this enquiry.
+                Venue details come from the linked gig.
               </p>
             )}
           </div>
@@ -452,41 +422,6 @@ export function BandBookingModal({
                 value={form.budget}
                 onChange={(event) => updateField('budget', event.target.value)}
                 placeholder="e.g. 800"
-              />
-            </div>
-            <div className="auth-field band-profile-booking-field-full">
-              <label htmlFor="band-booking-venue">Venue</label>
-              {venues.length ? (
-                <>
-                  <select
-                    id="band-booking-venue-select"
-                    className="band-profile-booking-venue-select"
-                    value={form.selectedVenueId}
-                    onChange={(event) => handleVenueSelect(event.target.value)}
-                  >
-                    <option value="">Select one of your venues</option>
-                    {venues.map((venue) => (
-                      <option key={venue.id} value={venue.id}>
-                        {venue.name}
-                      </option>
-                    ))}
-                  </select>
-                  <p className="directory-field-hint">
-                    Or enter a different venue below. Manage venues in{' '}
-                    <Link to="/app/venues" onClick={onClose}>
-                      My venues
-                    </Link>
-                    .
-                  </p>
-                </>
-              ) : null}
-              <input
-                id="band-booking-venue"
-                type="text"
-                value={form.venue}
-                onChange={(event) => handleVenueTextChange(event.target.value)}
-                placeholder="Venue name and town or city"
-                required
               />
             </div>
             <div className="auth-field band-profile-booking-field-full">

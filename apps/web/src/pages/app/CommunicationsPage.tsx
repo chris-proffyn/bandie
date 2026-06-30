@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getCommunicationSummary, type CommunicationFilter } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
 import { CommunicationsFeed } from '../../components/communications/CommunicationsFeed';
@@ -8,10 +8,16 @@ import { OutgoingInvitesPanel } from '../../components/communications/OutgoingIn
 import { UserMessagesPanel } from '../../components/communications/UserMessagesPanel';
 import '../../styles/communications.css';
 
-const FILTER_OPTIONS: { value: CommunicationFilter; label: string }[] = [
+type FilterOption = {
+  value: CommunicationFilter;
+  label: string;
+  playerOnly?: boolean;
+};
+
+const FILTER_OPTIONS: FilterOption[] = [
   { value: 'all', label: 'All' },
-  { value: 'invites', label: 'Invites' },
-  { value: 'enquiries', label: 'Booking enquiries' },
+  { value: 'player_invites', label: 'Player invites', playerOnly: true },
+  { value: 'gig_invites', label: 'Gig invites' },
   { value: 'messages', label: 'Messages' },
 ];
 
@@ -21,6 +27,7 @@ export function CommunicationsPage() {
 
   const [filter, setFilter] = useState<CommunicationFilter>('all');
   const [hideResolvedInvites, setHideResolvedInvites] = useState(true);
+  const [hideReadMessages, setHideReadMessages] = useState(true);
   const [summary, setSummary] = useState({
     pendingInvitations: 0,
     pendingPlayerOutreach: 0,
@@ -30,6 +37,11 @@ export function CommunicationsPage() {
     total: 0,
   });
   const [loadingSummary, setLoadingSummary] = useState(true);
+
+  const visibleFilters = useMemo(
+    () => FILTER_OPTIONS.filter((option) => !(option.playerOnly && isOrganiserView)),
+    [isOrganiserView],
+  );
 
   const refreshSummary = useCallback(async () => {
     setLoadingSummary(true);
@@ -55,9 +67,8 @@ export function CommunicationsPage() {
     void refreshSummary();
   }, [refreshSummary]);
 
-  const pendingInvites = isOrganiserView
-    ? 0
-    : summary.pendingInvitations + summary.pendingPlayerOutreach;
+  const pendingPlayerInvites = summary.pendingInvitations + summary.pendingPlayerOutreach;
+  const pendingGeneralMessages = summary.unreadMessages + summary.unreadBookingEnquiries;
 
   return (
     <div className="communications-page">
@@ -67,8 +78,8 @@ export function CommunicationsPage() {
           <h1>Communications</h1>
           <p className="my-bands-lead">
             {isOrganiserView
-              ? 'Gig invitations you have sent, booking enquiries, and direct messages with bands and organisers across Bandie.'
-              : 'Invitations and messages across Bandie — sent and received. Accept invites, reply to messages, and track invites you have sent as a band leader.'}
+              ? 'Gig invites, booking enquiries, and direct messages with bands and organisers. Gig invites and player invites are actionable; general messages can be hidden once read.'
+              : 'Player invites from band leaders, gig invites from organisers, and general messages. Accept or decline invites here; hide read messages when you are caught up.'}
             {loadingSummary ? null : summary.total > 0 ? (
               <>
                 {' '}
@@ -81,7 +92,7 @@ export function CommunicationsPage() {
       </header>
 
       <div className="communications-filter-bar" role="tablist" aria-label="Communication filters">
-        {FILTER_OPTIONS.map((option) => (
+        {visibleFilters.map((option) => (
           <button
             key={option.value}
             type="button"
@@ -91,14 +102,14 @@ export function CommunicationsPage() {
             onClick={() => setFilter(option.value)}
           >
             {option.label}
-            {option.value === 'invites' && pendingInvites > 0 ? (
-              <span className="communications-filter-badge">{pendingInvites}</span>
+            {option.value === 'player_invites' && pendingPlayerInvites > 0 ? (
+              <span className="communications-filter-badge">{pendingPlayerInvites}</span>
             ) : null}
-            {option.value === 'messages' && summary.unreadMessages > 0 ? (
-              <span className="communications-filter-badge">{summary.unreadMessages}</span>
+            {option.value === 'gig_invites' && summary.unreadGigInvites > 0 ? (
+              <span className="communications-filter-badge">{summary.unreadGigInvites}</span>
             ) : null}
-            {option.value === 'enquiries' && summary.unreadBookingEnquiries > 0 ? (
-              <span className="communications-filter-badge">{summary.unreadBookingEnquiries}</span>
+            {option.value === 'messages' && pendingGeneralMessages > 0 ? (
+              <span className="communications-filter-badge">{pendingGeneralMessages}</span>
             ) : null}
             {option.value === 'all' && summary.total > 0 ? (
               <span className="communications-filter-badge">{summary.total}</span>
@@ -107,14 +118,25 @@ export function CommunicationsPage() {
         ))}
       </div>
 
-      {filter === 'all' || filter === 'invites' ? (
+      {filter === 'all' || filter === 'player_invites' || filter === 'gig_invites' ? (
         <label className="communications-hide-resolved-toggle">
           <input
             type="checkbox"
             checked={hideResolvedInvites}
             onChange={(event) => setHideResolvedInvites(event.target.checked)}
           />
-          Hide accepted & declined invites
+          Hide resolved invites
+        </label>
+      ) : null}
+
+      {filter === 'messages' ? (
+        <label className="communications-hide-resolved-toggle">
+          <input
+            type="checkbox"
+            checked={hideReadMessages}
+            onChange={(event) => setHideReadMessages(event.target.checked)}
+          />
+          Hide read messages
         </label>
       ) : null}
 
@@ -128,34 +150,38 @@ export function CommunicationsPage() {
         </section>
       ) : null}
 
-      {filter === 'invites' && isOrganiserView ? (
+      {filter === 'gig_invites' ? (
         <section className="panel communications-section">
           <div className="communications-section-head">
             <div>
-              <h2>Gig invitations</h2>
+              <h2>Gig invites</h2>
               <p className="profile-section-intro">
-                Gig invites you have sent to bands from the directory, including notification
-                previews and band responses.
+                {isOrganiserView
+                  ? 'Formal gig invitations you have sent to bands, with band responses.'
+                  : 'Gig invitations from organisers linked to a specific gig. Accept or decline here, or open the gig for setlist and slot details.'}
               </p>
             </div>
+            {summary.unreadGigInvites > 0 ? (
+              <span className="communications-count-badge">{summary.unreadGigInvites}</span>
+            ) : null}
           </div>
           <CommunicationsFeed
-            filter="invites"
+            filter="gig_invites"
             hideResolvedInvites={hideResolvedInvites}
             onChanged={refreshSummary}
           />
         </section>
       ) : null}
 
-      {filter === 'invites' && !isOrganiserView ? (
+      {filter === 'player_invites' && !isOrganiserView ? (
         <>
           <section className="panel communications-section">
             <div className="communications-section-head">
               <div>
-                <h2>Sent invites</h2>
+                <h2>Sent player invites</h2>
                 <p className="profile-section-intro">
                   Join and audition invites you have sent to players, plus email membership
-                  invitations — including accepted and declined outcomes.
+                  invitations.
                 </p>
               </div>
             </div>
@@ -168,34 +194,20 @@ export function CommunicationsPage() {
           <section className="panel communications-section">
             <div className="communications-section-head">
               <div>
-                <h2>Received invites from bands</h2>
+                <h2>Received player invites</h2>
                 <p className="profile-section-intro">
-                  Join or audition invites sent from the player directory, with any message from the
-                  band leader.
+                  Join or audition invites from band leaders, and email invitations to join a band
+                  workspace.
                 </p>
               </div>
-              {summary.pendingPlayerOutreach > 0 ? (
-                <span className="communications-count-badge">{summary.pendingPlayerOutreach}</span>
+              {pendingPlayerInvites > 0 ? (
+                <span className="communications-count-badge">{pendingPlayerInvites}</span>
               ) : null}
             </div>
             <IncomingPlayerOutreachPanel
               onChanged={refreshSummary}
               hideResolvedInvites={hideResolvedInvites}
             />
-          </section>
-
-          <section className="panel communications-section">
-            <div className="communications-section-head">
-              <div>
-                <h2>Received band membership invitations</h2>
-                <p className="profile-section-intro">
-                  Email invitations to join a band workspace as a member, admin, or viewer.
-                </p>
-              </div>
-              {summary.pendingInvitations > 0 ? (
-                <span className="communications-count-badge">{summary.pendingInvitations}</span>
-              ) : null}
-            </div>
             <IncomingBandInvitationsPanel
               onChanged={refreshSummary}
               hideResolvedInvites={hideResolvedInvites}
@@ -204,39 +216,26 @@ export function CommunicationsPage() {
         </>
       ) : null}
 
-      {filter === 'enquiries' ? (
-        <section className="panel communications-section">
-          <div className="communications-section-head">
-            <div>
-              <h2>Booking enquiries</h2>
-              <p className="profile-section-intro">
-                {isOrganiserView
-                  ? 'Booking enquiries you have sent to bands from public profiles, with venue and date context.'
-                  : 'Structured booking requests from public band profiles, with venue and date context.'}
-              </p>
-            </div>
-            {summary.unreadBookingEnquiries > 0 ? (
-              <span className="communications-count-badge">{summary.unreadBookingEnquiries}</span>
-            ) : null}
-          </div>
-          <CommunicationsFeed filter="enquiries" onChanged={refreshSummary} />
-        </section>
-      ) : null}
-
       {filter === 'messages' ? (
         <section className="panel communications-section">
           <div className="communications-section-head">
             <div>
-              <h2>Direct messages</h2>
+              <h2>General messages</h2>
               <p className="profile-section-intro">
-                Send messages to other Bandie users, reply to conversations, and track read status.
+                Direct messages and booking enquiries that are not formal invites. Reply inline or
+                hide read items when you are up to date.
               </p>
             </div>
-            {summary.unreadMessages > 0 ? (
-              <span className="communications-count-badge">{summary.unreadMessages}</span>
+            {pendingGeneralMessages > 0 ? (
+              <span className="communications-count-badge">{pendingGeneralMessages}</span>
             ) : null}
           </div>
-          <UserMessagesPanel onChanged={refreshSummary} />
+          <UserMessagesPanel onChanged={refreshSummary} showMessageList={false} />
+          <CommunicationsFeed
+            filter="messages"
+            hideReadMessages={hideReadMessages}
+            onChanged={refreshSummary}
+          />
         </section>
       ) : null}
     </div>

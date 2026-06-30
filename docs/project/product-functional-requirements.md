@@ -288,40 +288,42 @@ Both flows use the `bandie_create_player_outreach` RPC; join invites also create
 
 ### Workspace communications
 
-Player and organiser workspace users share a communications hub at `/app/communications` for cross-band and organiser interaction.
+Player and organiser workspace users share a communications hub at `/app/communications`. Communications are grouped into **three explicit types**:
 
-**Organiser workspace**
-- Nav **Communications** badge includes booking enquiries and sent gig invites
-- **Booking enquiries** — structured enquiries sent to bands from profile **Book** flow (and received when applicable)
-- **Gig invitations sent** — outbound band invites from gig planning
-- Filter views: **All**, **Booking enquiries**, **Messages** (no band membership **Invites** tab)
+| Type | Description | Actions |
+|---|---|---|
+| **Player invites** | Band leaders invite players to join (permanent member) or audition (temporary/deputy) | Accept, decline, revoke (sender) |
+| **Gig invites** | Organisers invite band leaders to a specific gig | Accept, decline (band leader); view gig |
+| **General messages** | Direct messages and booking enquiries (not formal invites) | Reply, mark read; **hide read** toggle |
 
-**Player workspace**
+`@bandie/data` exposes `CommunicationCategory`, `getCommunicationCategory()`, and filters `player_invites`, `gig_invites`, `messages`.
 
 **Filter views**
-- **All** — chronological feed of every invitation and message
-- **Invites** — band membership invitations and player outreach (join/audition)
-- **Messages** — direct messages with compose, reply, and read status
+- **All** — chronological feed across all types
+- **Player invites** (player workspace only) — sent and received player outreach and band membership invitations
+- **Gig invites** — sent and received gig invitations with inline accept/decline for band leaders
+- **General messages** — direct messages and booking enquiries; optional **Hide read messages**
 
-**Band membership invitations**
-- Lists pending email invitations matched to the signed-in user (excludes join invites already shown via player outreach)
-- Accept or decline one invitation, or accept all
+**Player invites**
+- Join and audition outreach from the player directory, plus email band membership invitations
+- Accept or decline received invites; band leaders can revoke pending sent invites
+- **Hide resolved invites** toggle on All, Player invites, and Gig invites views
 
-**Player outreach**
-- Join and audition invites sent from the player directory by band leaders
-- Shows band name, role/part, optional message, and inviter name
-- Accept or decline; join accepts also complete the linked band membership invitation
+**Gig invites**
+- Linked to `bandie_gig_bands` and surfaced via `bandie_list_my_gig_invite_communications`
+- Band leaders accept or decline from Communications (RPC `bandie_respond_gig_invite`) without leaving the hub
+- Organisers see sent gig invites and band responses
 
-**Direct messages**
-- Send a message to another Bandie user by username
-- Received and sent sections with timestamps
-- Reply inline to any message in a thread (`reply_to_message_id`)
-- Recipients can mark messages as read; unread count included in nav badge
+**General messages**
+- Direct messages by username (`bandie_user_messages`), excluding bodies already represented as booking enquiries or gig-invite notifications
+- Booking enquiries appear here (structured metadata + message thread)
+- Recipients mark items read; **Hide read messages** filters read received items and read booking enquiries
 
-**Sent invites (band leaders)**
-- Pending, accepted, and declined join/audition invites sent from the player directory
-- Pending and resolved email membership invitations sent from band overview
-- Shown in **All** and **Invites** views; revoke available only while pending
+**Organiser workspace**
+- Nav **Communications** badge includes gig invites, booking enquiries, and unread messages
+- No **Player invites** tab (organisers do not receive player outreach)
+
+**Player workspace**
 
 **Routing**
 - Post-auth and app entry redirect to `/app/communications` when pending invitations or player outreach exist

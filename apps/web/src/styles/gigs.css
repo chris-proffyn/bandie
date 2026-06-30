@@ -827,6 +827,67 @@
   cursor: not-allowed;
 }
 
+/* Portaled dialogs sit outside .app-shell — reset dark auth/band-profile form tokens */
+.gigs-dialog .auth-field label {
+  color: #111827;
+}
+
+.gigs-dialog .auth-field input,
+.gigs-dialog .auth-field select,
+.gigs-dialog .auth-field textarea {
+  border: 1px solid #dfe4f1;
+  background: #fff;
+  color: #121826;
+}
+
+.gigs-dialog .auth-field input::placeholder,
+.gigs-dialog .auth-field textarea::placeholder {
+  color: #6b7280;
+}
+
+.gigs-dialog .auth-field input:focus-visible,
+.gigs-dialog .auth-field select:focus-visible,
+.gigs-dialog .auth-field textarea:focus-visible {
+  outline: 2px solid #ffcc33;
+  outline-offset: 2px;
+}
+
+.gigs-dialog .directory-field-hint {
+  color: #6b7280;
+}
+
+.gigs-dialog .directory-field-hint a {
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.gigs-dialog .band-profile-booking-sender {
+  margin-bottom: 0;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.gigs-dialog .band-profile-booking-sender-label,
+.gigs-dialog .band-profile-booking-sender-grid dt,
+.gigs-dialog .band-profile-booking-sender-hint {
+  color: #6b7280;
+}
+
+.gigs-dialog .band-profile-booking-sender-grid dd {
+  color: #111827;
+}
+
+.gigs-dialog .band-profile-booking-sender-hint a {
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.gigs-dialog .auth-message-error {
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
 .gigs-form {
   display: grid;
   gap: 0.85rem;

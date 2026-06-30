@@ -4,7 +4,8 @@ import {
   acceptBandInvitation,
   declineBandInvitation,
   filterCommunications,
-  filterResolvedSentCommunications,
+  filterReadGeneralMessages,
+  filterResolvedInviteCommunications,
   formatBandMemberRoleLabel,
   formatGigInviteStatus,
   formatInvitationStatusLabel,
@@ -16,6 +17,7 @@ import {
   markMessageRead,
   markBookingEnquiryRead,
   replyToMessage,
+  respondToGigInvitation,
   BOOKING_ENQUIRY_STATUS_LABELS,
   respondToPlayerOutreach,
   revokeBandInvitation,
@@ -28,6 +30,7 @@ import { useAuth } from '../../context/AuthContext';
 type CommunicationsFeedProps = {
   filter: CommunicationFilter;
   hideResolvedInvites?: boolean;
+  hideReadMessages?: boolean;
   onChanged?: () => void;
 };
 
@@ -76,7 +79,7 @@ function FeedItem({
     return (
       <li className="communications-feed-item">
         <div className="communications-feed-head">
-          <span className="communications-type-badge">Band invitation</span>
+          <span className="communications-type-badge">Player invite</span>
           <span className="communications-item-meta">{formatTimestamp(item.created_at)}</span>
         </div>
         <strong>{invitation.band_name}</strong>
@@ -180,7 +183,7 @@ function FeedItem({
       <li className="communications-feed-item">
         <div className="communications-feed-head">
           <span className="communications-type-badge communications-type-badge-sent">Sent</span>
-          <span className="communications-type-badge">Band invitation</span>
+          <span className="communications-type-badge">Player invite</span>
           <span className="communications-item-meta">{formatTimestamp(item.created_at)}</span>
         </div>
         <strong>{invitation.band_name}</strong>
@@ -253,13 +256,14 @@ function FeedItem({
   if (item.kind === 'gig_invitation') {
     const invite = item.invite;
     const isUnread = invite.invite_status === 'pending' && !invite.message_read_at;
+    const awaitingResponse = invite.invite_status === 'pending';
 
     return (
       <li
         className={`communications-feed-item ${isUnread ? 'communications-message-item-unread' : ''}`}
       >
         <div className="communications-feed-head">
-          <span className="communications-type-badge">Gig invitation</span>
+          <span className="communications-type-badge">Gig invite</span>
           <span className="communications-item-meta">{formatTimestamp(item.created_at)}</span>
         </div>
         <strong>{invite.gig_title}</strong>
@@ -270,7 +274,38 @@ function FeedItem({
         <p className="communications-message-body">{invite.message_body}</p>
         {error ? <div className="auth-message auth-message-error">{error}</div> : null}
         <div className="communications-item-actions">
-          {isUnread ? (
+          {awaitingResponse ? (
+            <>
+              <button
+                type="button"
+                className="auth-button auth-button-secondary"
+                disabled={acting}
+                onClick={() => {
+                  void runAction(async () => {
+                    await respondToGigInvitation(invite.gig_band_id, false);
+                    await markGigInviteNotificationRead(invite);
+                  });
+                }}
+              >
+                Decline
+              </button>
+              <button
+                type="button"
+                className="auth-button"
+                disabled={acting}
+                onClick={() => {
+                  void runAction(async () => {
+                    await respondToGigInvitation(invite.gig_band_id, true);
+                    await markGigInviteNotificationRead(invite);
+                    await refreshBands();
+                  });
+                }}
+              >
+                Accept
+              </button>
+            </>
+          ) : null}
+          {isUnread && !awaitingResponse ? (
             <button
               type="button"
               className="auth-button auth-button-secondary"
@@ -288,7 +323,7 @@ function FeedItem({
             to={`/app/${invite.band_id}/gigs/${invite.gig_id}`}
             className="directory-btn directory-btn-secondary"
           >
-            View gig invite
+            View gig
           </Link>
         </div>
       </li>
@@ -302,7 +337,7 @@ function FeedItem({
       <li className="communications-feed-item">
         <div className="communications-feed-head">
           <span className="communications-type-badge communications-type-badge-sent">Sent</span>
-          <span className="communications-type-badge">Gig invitation</span>
+          <span className="communications-type-badge">Gig invite</span>
           <span className="communications-item-meta">{formatTimestamp(item.created_at)}</span>
         </div>
         <strong>{invite.band_name}</strong>
@@ -489,6 +524,7 @@ function FeedItem({
 export function CommunicationsFeed({
   filter,
   hideResolvedInvites = false,
+  hideReadMessages = false,
   onChanged,
 }: CommunicationsFeedProps) {
   const { user } = useAuth();
@@ -502,15 +538,17 @@ export function CommunicationsFeed({
 
     try {
       const allItems = await listCommunications();
-      const filtered = filterCommunications(allItems, filter);
-      setItems(filterResolvedSentCommunications(filtered, hideResolvedInvites));
+      let filtered = filterCommunications(allItems, filter);
+      filtered = filterResolvedInviteCommunications(filtered, hideResolvedInvites);
+      filtered = filterReadGeneralMessages(filtered, user?.id ?? '', hideReadMessages);
+      setItems(filtered);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load communications.');
       setItems([]);
     } finally {
       setLoading(false);
     }
-  }, [filter, hideResolvedInvites]);
+  }, [filter, hideResolvedInvites, hideReadMessages, user?.id]);
 
   useEffect(() => {
     void loadFeed();
@@ -525,11 +563,18 @@ export function CommunicationsFeed({
   }
 
   if (!items.length) {
+    const hideResolvedNote =
+      hideResolvedInvites &&
+      (filter === 'all' || filter === 'player_invites' || filter === 'gig_invites');
+    const hideReadNote = hideReadMessages && filter === 'messages';
+
     return (
       <p className="workspace-empty-note">
-        {hideResolvedInvites && (filter === 'all' || filter === 'invites')
-          ? 'No open communications in this view. Uncheck “Hide accepted & declined invites” to see resolved invites.'
-          : 'No communications in this view yet. Invitations and messages from across Bandie will appear here.'}
+        {hideResolvedNote
+          ? 'No open invites in this view. Uncheck “Hide resolved invites” to see accepted and declined invites.'
+          : hideReadNote
+            ? 'No unread messages in this view. Uncheck “Hide read messages” to see your full message history.'
+            : 'No communications in this view yet.'}
       </p>
     );
   }

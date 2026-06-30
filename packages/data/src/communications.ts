@@ -24,7 +24,44 @@ import {
 } from './gigInviteCommunications';
 import { isResolvedInviteStatus } from './invitationStatus';
 
-export type CommunicationFilter = 'all' | 'invites' | 'messages' | 'enquiries';
+export type CommunicationFilter = 'all' | 'player_invites' | 'gig_invites' | 'messages';
+
+/** High-level communication categories used across the product. */
+export type CommunicationCategory = 'player_invite' | 'gig_invite' | 'general_message';
+
+export const COMMUNICATION_CATEGORY_LABELS: Record<CommunicationCategory, string> = {
+  player_invite: 'Player invite',
+  gig_invite: 'Gig invite',
+  general_message: 'General message',
+};
+
+export function getCommunicationCategory(item: CommunicationItem): CommunicationCategory {
+  switch (item.kind) {
+    case 'band_invitation':
+    case 'player_outreach':
+    case 'sent_band_invitation':
+    case 'sent_player_outreach':
+      return 'player_invite';
+    case 'gig_invitation':
+    case 'sent_gig_invitation':
+      return 'gig_invite';
+    case 'message':
+    case 'booking_enquiry':
+      return 'general_message';
+  }
+}
+
+export function isPlayerInviteCommunication(item: CommunicationItem): boolean {
+  return getCommunicationCategory(item) === 'player_invite';
+}
+
+export function isGigInviteCommunication(item: CommunicationItem): boolean {
+  return getCommunicationCategory(item) === 'gig_invite';
+}
+
+export function isGeneralMessageCommunication(item: CommunicationItem): boolean {
+  return getCommunicationCategory(item) === 'general_message';
+}
 
 export type CommunicationSummary = {
   pendingInvitations: number;
@@ -233,26 +270,18 @@ export function filterCommunications(
     return items;
   }
 
-  if (filter === 'invites') {
-    return items.filter(
-      (item) =>
-        item.kind === 'band_invitation' ||
-        item.kind === 'player_outreach' ||
-        item.kind === 'sent_band_invitation' ||
-        item.kind === 'sent_player_outreach' ||
-        item.kind === 'gig_invitation' ||
-        item.kind === 'sent_gig_invitation',
-    );
+  if (filter === 'player_invites') {
+    return items.filter(isPlayerInviteCommunication);
   }
 
-  if (filter === 'enquiries') {
-    return items.filter((item) => item.kind === 'booking_enquiry');
+  if (filter === 'gig_invites') {
+    return items.filter(isGigInviteCommunication);
   }
 
-  return items.filter((item) => item.kind === 'message');
+  return items.filter(isGeneralMessageCommunication);
 }
 
-export function filterResolvedSentCommunications(
+export function filterResolvedInviteCommunications(
   items: CommunicationItem[],
   hideResolved: boolean,
 ): CommunicationItem[] {
@@ -283,6 +312,46 @@ export function filterResolvedSentCommunications(
 
     if (item.kind === 'sent_gig_invitation') {
       return item.invite.invite_status === 'pending';
+    }
+
+    return true;
+  });
+}
+
+/** @deprecated Use filterResolvedInviteCommunications */
+export function filterResolvedSentCommunications(
+  items: CommunicationItem[],
+  hideResolved: boolean,
+): CommunicationItem[] {
+  return filterResolvedInviteCommunications(items, hideResolved);
+}
+
+export function filterReadGeneralMessages(
+  items: CommunicationItem[],
+  currentUserId: string,
+  hideRead: boolean,
+): CommunicationItem[] {
+  if (!hideRead || !currentUserId) {
+    return items;
+  }
+
+  return items.filter((item) => {
+    if (item.kind === 'message') {
+      const isIncoming = item.message.recipient_user_id === currentUserId;
+      if (!isIncoming) {
+        return true;
+      }
+
+      return item.message.read_at == null;
+    }
+
+    if (item.kind === 'booking_enquiry') {
+      const isIncoming = item.enquiry.recipient_user_id === currentUserId;
+      if (!isIncoming) {
+        return true;
+      }
+
+      return item.enquiry.status === 'new';
     }
 
     return true;

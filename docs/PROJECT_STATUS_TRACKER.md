@@ -403,6 +403,13 @@ Authoritative spec: entitlements spec §35 Phase E. Deferred until admin portal 
 
 ## Session notes
 
+**1 July 2026 — Communications type taxonomy**
+- Three explicit categories: **player invites**, **gig invites**, **general messages** (`CommunicationCategory` in `@bandie/data`)
+- Communications tabs: All, Player invites (player workspace), Gig invites, Messages
+- Gig invites: accept/decline inline in Communications for band leaders
+- General messages: hide read toggle; booking enquiries grouped with direct messages
+- Docs: product functional requirements § workspace communications; product technical requirements
+
 **1 July 2026 — Organiser booking modal with gig link**
 - **Book {band}** is organiser-only on workspace and public band profiles; opens a modal (`BandBookingModal`) instead of an inline form
 - Organisers can link one of their active gigs in the modal; pre-fills date/time/venue and optionally assigns a slot; submit sends booking enquiry + formal gig invite

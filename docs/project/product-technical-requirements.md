@@ -182,7 +182,7 @@ RLS policies must enforce band membership for all private data.
 - `listPendingInvitationsForCurrentUser`, `acceptBandInvitation`, `declineBandInvitation`, `acceptAllPendingInvitations` — band invitations
 - `listMyPendingPlayerOutreach`, `respondToPlayerOutreach`, `countMyPendingPlayerOutreach` — player outreach inbox
 - `listMyMessages`, `sendDirectMessage`, `replyToMessage`, `markMessageRead`, `countUnreadMessages` — direct messages
-- `listCommunications`, `filterCommunications`, `getCommunicationSummary`, `getNotificationSummary` — unified feed and nav badge (includes booking enquiries)
+- `listCommunications`, `filterCommunications`, `filterResolvedInviteCommunications`, `filterReadGeneralMessages`, `getCommunicationCategory`, `getCommunicationSummary`, `getNotificationSummary` — unified feed (three categories: player invite, gig invite, general message) and nav badge
 - `listMyBookingEnquiries`, `sendBookingEnquiry`, `markBookingEnquiryRead` — structured booking enquiries
 - RPCs: `bandie_list_my_pending_invitations`, `bandie_decline_invitation`, `bandie_list_my_pending_player_outreach`, `bandie_respond_to_player_outreach`, `bandie_list_my_messages`, `bandie_count_my_unread_messages`, `bandie_list_my_booking_enquiries`, `bandie_count_booking_enquiries_sent_this_month`
 

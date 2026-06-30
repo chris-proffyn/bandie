@@ -12,6 +12,7 @@ import { useAuth } from '../../context/AuthContext';
 type UserMessagesPanelProps = {
   onChanged?: () => void;
   showCompose?: boolean;
+  showMessageList?: boolean;
   filter?: 'all' | 'received' | 'sent';
 };
 
@@ -177,6 +178,7 @@ function MessageList({
 export function UserMessagesPanel({
   onChanged,
   showCompose = true,
+  showMessageList = true,
   filter = 'all',
 }: UserMessagesPanelProps) {
   const { user } = useAuth();
@@ -295,9 +297,9 @@ export function UserMessagesPanel({
       {error ? <div className="auth-message auth-message-error">{error}</div> : null}
       {success ? <div className="auth-message auth-message-success">{success}</div> : null}
 
-      {loading ? (
+      {showMessageList && loading ? (
         <p className="workspace-empty-note">Loading messages…</p>
-      ) : receivedMessages.length === 0 && sentMessages.length === 0 ? (
+      ) : showMessageList && receivedMessages.length === 0 && sentMessages.length === 0 ? (
         <p className="workspace-empty-note">
           No messages yet. Send a note to another Bandie user by username, or browse the{' '}
           <Link to="/app/players" className="profile-preview-link">
@@ -305,7 +307,7 @@ export function UserMessagesPanel({
           </Link>{' '}
           to find musicians.
         </p>
-      ) : (
+      ) : showMessageList ? (
         <>
           {showReceived ? (
             <section className="communications-message-group" aria-label="Received messages">
@@ -358,7 +360,7 @@ export function UserMessagesPanel({
             </section>
           ) : null}
         </>
-      )}
+      ) : null}
     </div>
   );
 }
