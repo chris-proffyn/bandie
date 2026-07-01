@@ -258,7 +258,7 @@ Band workspace limits resolve from the **primary leader’s** active subscriptio
 - `gateLogs.ts` — gate decision logging
 
 **Calendar, gigs, booking (`@bandie/data`):**
-- `calendar.ts` — events, votes, repeating series (`calendarRecurrence.ts`: weekly, monthly nth weekday), `calendar.use` tier (`none` on Player Free; `full` on Player Plus / Player Pro)
+- `calendar.ts` — events, votes (`castAvailabilityVote` for all approved members on rehearsal and gig events), repeating series (`calendarRecurrence.ts`: weekly, monthly nth weekday); `calendar.use` gates leader create/publish only (`none` on Player Free leader; `full` on Player Plus / Player Pro)
 - `songSuggestions.ts` — suggestion groups, submit/vote, leader close/veto/reset/confirm, ranking, skeleton setlist from confirmed group (`setlist.create` when enforcing)
 - `gigs.ts` — organiser gig CRUD, band invites, setlist assignment RPCs, `gig.create` limits (organiser scope)
 - `bookingEnquiries.ts` — send, inbox, `booking_enquiry.send` limits

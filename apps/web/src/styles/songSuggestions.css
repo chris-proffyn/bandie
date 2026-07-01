@@ -195,6 +195,35 @@
   align-items: flex-start;
 }
 
+.song-suggestion-item-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.song-suggestion-withdraw-btn {
+  border: none;
+  background: transparent;
+  color: #b91c1c;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.35rem 0;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  cursor: pointer;
+}
+
+.song-suggestion-withdraw-btn:hover:not(:disabled) {
+  color: #991b1b;
+}
+
+.song-suggestion-withdraw-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .song-suggestion-item-card-title-block {
   display: flex;
   gap: 0.65rem;

@@ -17,6 +17,7 @@ import {
   resetSongSuggestionVotes,
   songSuggestionGroupStatusClass,
   vetoSongSuggestion,
+  withdrawSongSuggestion,
   voteOnSongSuggestion,
   clearSongSuggestionVote,
   type SongSuggestionGroupEvent,
@@ -40,6 +41,7 @@ import {
   trackSongSuggestionVoteCast,
   trackSongSuggestionVoteChanged,
   trackSongSuggestionVoteCleared,
+  trackSongSuggestionWithdrawn,
   trackSongSuggestionsClosed,
   trackSongSuggestionVotingClosed,
 } from '../../lib/analytics';
@@ -64,6 +66,8 @@ function formatEvent(event: SongSuggestionGroupEvent): string {
       return payload.message ? `Votes reset — ${String(payload.message)}` : 'Votes reset for re-vote';
     case 'suggestion_vetoed':
       return `Leader vetoed: ${String(payload.song_title ?? 'song')}`;
+    case 'suggestion_withdrawn':
+      return `Suggestion removed: ${String(payload.song_title ?? 'song')}`;
     case 'group_confirmed':
       return 'Group confirmed';
     case 'setlist_created':
@@ -238,6 +242,27 @@ export function SongSuggestionGroupDetailPage() {
         suggestionId,
         previousVoteState: previousVote,
       });
+    });
+  }
+
+  async function handleWithdraw(suggestion: SongSuggestionWithSummary) {
+    if (
+      !window.confirm(
+        `Remove "${suggestion.song_title}" from this group? You can suggest another song while suggestions are still open.`,
+      )
+    ) {
+      return;
+    }
+
+    await runAction(async () => {
+      await withdrawSongSuggestion(suggestion.id);
+      if (bandId && groupId) {
+        trackSongSuggestionWithdrawn({
+          bandId,
+          groupId,
+          suggestionId: suggestion.id,
+        });
+      }
     });
   }
 
@@ -690,6 +715,7 @@ export function SongSuggestionGroupDetailPage() {
                 key={row.id}
                 row={row}
                 sortBy={listFilters.sortBy}
+                suggestionsOpen={submitOpen}
                 votingOpen={votingOpen}
                 voteVisibility={group.vote_visibility}
                 allowVoteChanges={group.allow_vote_changes}
@@ -698,6 +724,7 @@ export function SongSuggestionGroupDetailPage() {
                 actionBusy={actionBusy}
                 onVote={(suggestionId, voteState) => void handleVote(suggestionId, voteState)}
                 onClearVote={(suggestionId) => void handleClearVote(suggestionId)}
+                onWithdraw={(suggestion) => void handleWithdraw(suggestion)}
                 onVeto={(suggestion) => void handleVeto(suggestion)}
               />
             ))}

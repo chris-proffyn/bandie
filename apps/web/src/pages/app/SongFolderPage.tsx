@@ -166,7 +166,7 @@ export function SongFolderPage() {
 
       <SongMetadataPanel song={song} onEdit={() => setShowEditSong(true)} />
 
-      <details className="panel songs-part-folders-section songs-collapsible-section">
+      <details className="panel songs-part-folders-section songs-collapsible-section" open>
         <summary className="songs-collapsible-summary">
           <div className="songs-collapsible-summary-text">
             <h2>Part folders</h2>

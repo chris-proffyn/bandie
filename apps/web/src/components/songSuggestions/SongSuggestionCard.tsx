@@ -15,6 +15,7 @@ const VOTE_EMOJI: Record<SongSuggestionVoteState, string> = {
 type SongSuggestionCardProps = {
   row: SongSuggestionWithSummary;
   sortBy: SongSuggestionSortKey;
+  suggestionsOpen: boolean;
   votingOpen: boolean;
   voteVisibility: VoteVisibility;
   allowVoteChanges: boolean;
@@ -23,6 +24,7 @@ type SongSuggestionCardProps = {
   actionBusy: boolean;
   onVote: (suggestionId: string, voteState: SongSuggestionVoteState) => void;
   onClearVote: (suggestionId: string) => void;
+  onWithdraw: (row: SongSuggestionWithSummary) => void;
   onVeto: (row: SongSuggestionWithSummary) => void;
 };
 
@@ -36,6 +38,7 @@ function showRank(
 export function SongSuggestionCard({
   row,
   sortBy,
+  suggestionsOpen,
   votingOpen,
   voteVisibility,
   allowVoteChanges,
@@ -44,11 +47,17 @@ export function SongSuggestionCard({
   actionBusy,
   onVote,
   onClearVote,
+  onWithdraw,
   onVeto,
 }: SongSuggestionCardProps) {
   const isVetoed = row.status === 'leader_vetoed';
   const canVote = votingOpen && row.status === 'active';
   const canClearVote = canVote && Boolean(row.my_vote) && allowVoteChanges;
+  const canWithdraw =
+    suggestionsOpen &&
+    row.status === 'active' &&
+    currentUserId != null &&
+    row.suggested_by === currentUserId;
   const hideMemberVotes = voteVisibility === 'aggregate_only' && !isLeader;
 
   return (
@@ -73,16 +82,28 @@ export function SongSuggestionCard({
             <p className="song-suggestion-meta">{row.artist}</p>
           </div>
         </div>
-        {isLeader && row.status === 'active' ? (
-          <button
-            type="button"
-            className="directory-btn directory-btn-secondary"
-            disabled={actionBusy}
-            onClick={() => onVeto(row)}
-          >
-            Veto
-          </button>
-        ) : null}
+        <div className="song-suggestion-item-card-actions">
+          {canWithdraw ? (
+            <button
+              type="button"
+              className="song-suggestion-withdraw-btn"
+              disabled={actionBusy}
+              onClick={() => onWithdraw(row)}
+            >
+              Remove
+            </button>
+          ) : null}
+          {isLeader && row.status === 'active' ? (
+            <button
+              type="button"
+              className="directory-btn directory-btn-secondary"
+              disabled={actionBusy}
+              onClick={() => onVeto(row)}
+            >
+              Veto
+            </button>
+          ) : null}
+        </div>
       </header>
 
       {row.my_vote ? (

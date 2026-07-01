@@ -80,7 +80,7 @@ Member-only area scoped to a selected band:
 - Workspace communications (`/app/communications`) — invitations, player outreach, direct messages, **booking enquiries**
 - Songs dashboard and song folders with **Dropbox song-part storage** — **done (web MVP)**
 - Setlist management — **done (web)** — library, builder, drag reorder, metrics
-- Calendar (rehearsal + gig availability) — **done (web)** — `/app/:bandId/calendar`
+- Calendar (rehearsal + gig availability) — **done (web)** — `/app/:bandId/calendar`; all approved members vote availability on rehearsals and gigs
 - Gig management — **done (web)** — organiser-owned: `/app/gigs` (create, invite bands); band side: `/app/:bandId/gigs` (invites, setlist assignment)
 - Activity feed — **planned** (Phase 16)
 - Platform admin portal — **done** — `/admin` for app admins (metrics, editable plan catalogue, entitlements draft/publish, overrides, gate logs, audit); separate from in-app admin mode

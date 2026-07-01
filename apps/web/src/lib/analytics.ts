@@ -127,6 +127,15 @@ export function trackSongSuggestionVoteCleared(
   });
 }
 
+export function trackSongSuggestionWithdrawn(
+  context: SongSuggestionAnalyticsContext & { suggestionId: string },
+): void {
+  track('song_suggestion_withdrawn', {
+    feature: 'song_suggestions',
+    ...context,
+  });
+}
+
 export function trackSongSuggestionsClosed(context: SongSuggestionAnalyticsContext): void {
   track('song_suggestions_closed', {
     feature: 'song_suggestions',

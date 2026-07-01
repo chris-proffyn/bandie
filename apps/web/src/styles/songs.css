@@ -513,7 +513,102 @@
 }
 
 .songs-part-folder-layout {
-  align-items: start;
+  align-items: stretch;
+}
+
+.songs-part-folder-aside {
+  position: sticky;
+  top: 1rem;
+  align-self: start;
+}
+
+.songs-part-files-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 0;
+}
+
+.songs-part-files-card .songs-side-card-header p {
+  margin: 0.35rem 0 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.songs-part-files-empty {
+  margin: 0;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.songs-part-file-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+
+.songs-part-file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 0;
+  border-top: 1px solid #eef2f7;
+}
+
+.songs-part-file-item:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.songs-part-file-main {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.songs-part-file-copy {
+  min-width: 0;
+}
+
+.songs-part-file-copy strong {
+  display: block;
+  font-weight: 800;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.songs-part-file-copy small {
+  display: block;
+  margin-top: 0.15rem;
+  color: #6b7280;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.songs-part-file-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  flex-shrink: 0;
+}
+
+.songs-part-file-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: nowrap;
+}
+
+.songs-part-file-action-btn {
+  min-height: 36px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.88rem;
+  white-space: nowrap;
 }
 
 .songs-file-row-compact {
@@ -1056,6 +1151,21 @@
 
   .songs-file-row {
     grid-template-columns: 1fr;
+  }
+
+  .songs-part-file-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .songs-part-file-meta {
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .songs-part-folder-aside {
+    position: static;
   }
 
   .songs-hide-sm {

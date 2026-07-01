@@ -250,7 +250,7 @@ export function SongPartFolderPage() {
       {actionError ? <div className="songs-error">{actionError}</div> : null}
 
       <section className="songs-content-grid songs-part-folder-layout">
-        <div className="panel">
+        <div className="songs-side-card surface-light songs-part-files-card">
           <div className="songs-side-card-header">
             <div>
               <h2>Files</h2>
@@ -274,51 +274,60 @@ export function SongPartFolderPage() {
           </div>
 
           {files.length === 0 ? (
-            <p>No files in this folder yet. Upload a chart, lyric sheet, or other part file below.</p>
+            <p className="songs-part-files-empty">
+              No files in this folder yet.
+              {canManageSongParts
+                ? ' Use the upload panel to add a chart, lyric sheet, or other part file.'
+                : ' Ask your band leader to upload files for this part.'}
+            </p>
           ) : (
-            files.map((file) => (
-              <div key={file.id} className="songs-file-row songs-file-row-compact">
-                <div className="songs-table-link">
-                  <span className="songs-file-icon">{fileTypeLabel(file)}</span>
-                  <div>
-                    {file.display_name}
-                    <small className="songs-artist">
-                      {new Date(file.created_at).toLocaleDateString(undefined, {
-                        day: 'numeric',
-                        month: 'short',
-                      })}
-                    </small>
+            <ul className="songs-part-file-list">
+              {files.map((file) => (
+                <li key={file.id} className="songs-part-file-item">
+                  <div className="songs-part-file-main">
+                    <span className="songs-file-icon">{fileTypeLabel(file)}</span>
+                    <div className="songs-part-file-copy">
+                      <strong>{file.display_name}</strong>
+                      <small>
+                        {new Date(file.created_at).toLocaleDateString(undefined, {
+                          day: 'numeric',
+                          month: 'short',
+                        })}
+                      </small>
+                    </div>
                   </div>
-                </div>
-                <span className={`songs-pill ${file.status === 'current' ? 'green' : 'amber'}`}>
-                  {formatSongPartFileStatus(file.status)}
-                </span>
-                <div className="songs-file-row-actions">
-                  {canPreviewSongPartFile(file) ? (
-                    <button
-                      type="button"
-                      className="directory-btn directory-btn-secondary"
-                      disabled={file.status === 'unavailable'}
-                      onClick={() => setViewerFile(file)}
-                    >
-                      View
-                    </button>
-                  ) : null}
-                  <button
-                    type="button"
-                    className="directory-btn directory-btn-secondary"
-                    disabled={actionId === file.id || file.status === 'unavailable'}
-                    onClick={() => void handleDownload(file)}
-                  >
-                    Download
-                  </button>
-                </div>
-              </div>
-            ))
+                  <div className="songs-part-file-meta">
+                    <span className={`songs-pill ${file.status === 'current' ? 'green' : 'amber'}`}>
+                      {formatSongPartFileStatus(file.status)}
+                    </span>
+                    <div className="songs-part-file-actions">
+                      {canPreviewSongPartFile(file) ? (
+                        <button
+                          type="button"
+                          className="directory-btn directory-btn-secondary songs-part-file-action-btn"
+                          disabled={file.status === 'unavailable'}
+                          onClick={() => setViewerFile(file)}
+                        >
+                          View
+                        </button>
+                      ) : null}
+                      <button
+                        type="button"
+                        className="directory-btn directory-btn-secondary songs-part-file-action-btn"
+                        disabled={actionId === file.id || file.status === 'unavailable'}
+                        onClick={() => void handleDownload(file)}
+                      >
+                        Download
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
 
-        <aside className="songs-side-stack">
+        <aside className="songs-side-stack songs-part-folder-aside">
           <SongPartUploadPanel
             bandId={bandId}
             songId={songId}

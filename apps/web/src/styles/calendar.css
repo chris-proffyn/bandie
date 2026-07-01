@@ -18,8 +18,7 @@
   flex-shrink: 0;
 }
 
-.calendar-header-actions .directory-btn,
-.calendar-header-actions .auth-button {
+.calendar-header-actions .directory-btn {
   width: auto;
   flex: 0 0 auto;
   min-height: 42px;

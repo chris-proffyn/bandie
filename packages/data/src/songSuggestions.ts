@@ -596,6 +596,17 @@ export async function clearSongSuggestionVote(suggestionId: string): Promise<voi
   }
 }
 
+export async function withdrawSongSuggestion(suggestionId: string): Promise<void> {
+  const client = getBandieClient();
+  const { error } = await client.rpc('bandie_withdraw_song_suggestion', {
+    p_suggestion_id: suggestionId,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
 export async function closeSongSuggestions(groupId: string): Promise<void> {
   const client = getBandieClient();
   const { error } = await client.rpc('bandie_close_song_suggestions', { p_group_id: groupId });
@@ -804,7 +815,9 @@ export async function getSongSuggestionGroupDetail(
 
   const hideMemberVotes = group.vote_visibility === 'aggregate_only' && !isLeader;
 
-  const withSummary: SongSuggestionWithSummary[] = (suggestions ?? []).map((row) => {
+  const withSummary: SongSuggestionWithSummary[] = (suggestions ?? [])
+    .filter((row) => (row.status as string) !== 'withdrawn')
+    .map((row) => {
     const suggestion = mapSuggestion(row as Record<string, unknown>);
     const summary = summaryMap.get(suggestion.id) ?? {
       suggestion_id: suggestion.id,

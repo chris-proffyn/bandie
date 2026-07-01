@@ -573,7 +573,7 @@ Leader creates a named group with brief, target number of songs, suggestion clos
 
 ### Member participation
 
-Members submit song title, artist, optional YouTube/Spotify links and rationale. Submitter receives an automatic `happy_to_play` vote. Members vote 🙂 / 😐 / 🙁 while voting is open; they may change or **clear** their vote while voting is open when the group allows vote changes. Duplicate title+artist shows a non-blocking warning.
+Members submit song title, artist, optional YouTube/Spotify links and rationale. Submitter receives an automatic `happy_to_play` vote. Members may **withdraw their own suggestions** while the suggestion window is still open (freeing a slot when per-member limits apply). Members vote 🙂 / 😐 / 🙁 while voting is open; they may change or **clear** their vote while voting is open when the group allows vote changes. Duplicate title+artist shows a non-blocking warning.
 
 ### Live ranking
 
@@ -589,7 +589,7 @@ Confirmed songs appear in a read-only ranked list. Leader may **create skeleton 
 
 ### Deferred (post-MVP)
 
-Scheduled auto-close at deadline, vote comment UI, email reminders, Band Admin parity, draft group status, max open groups per tier.
+Scheduled auto-close at deadline, vote comment UI, email reminders, Band Admin parity, draft group status, max open groups per tier, **per-member suggestion limit UI** (leaders set max N suggestions per member at group creation; backend enforcement exists but the create/edit group form does not expose the field yet).
 
 ---
 
@@ -611,6 +611,10 @@ Band leader proposes a series (name, first session date/time, repeat pattern, nu
 - **Monthly (nth weekday)** — same ordinal weekday each month (e.g. every 1st Monday 20:00–23:00 at The London Stone). Ordinal options: 1st, 2nd, 3rd, 4th, or last occurrence of that weekday in the month.
 
 Creating a series generates one calendar row per session, linked by `series_key`. Leaders can delete a single occurrence or the entire series.
+
+### Member voting
+
+All **approved band members** (including **Player Free**) can vote on **both** rehearsal and gig availability events. Voting is not gated by the band leader’s `calendar.use` entitlement — members only need band membership. Leaders create and delete events; members respond with **available**, **maybe**, **not available**, or **pending** on each occurrence. Gig availability votes drive proposed / provisional / confirmed status and optional public publish; rehearsal votes are internal only and do not change public calendar output.
 
 ### Gig mode
 

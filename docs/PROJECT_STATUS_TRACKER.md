@@ -299,7 +299,7 @@ Reference: `product-functional-requirements.md` §10; mockup `bandie_calendar_mo
 - [x] 9.1 Calendar data model (`bandie_calendar_events`, `bandie_availability_votes`; RLS)
 - [x] 9.2 Rehearsal mode — leader proposes series; internal only
 - [x] 9.3 Gig availability mode — leader proposes windows; may publish publicly
-- [x] 9.4 Member voting — available / maybe / no / pending; status rules (confirmed / provisional / proposed)
+- [x] 9.4 Member voting — available / maybe / no / pending on **rehearsal and gig** events (all approved members, any plan); gig status rules (confirmed / provisional / proposed)
 - [x] 9.5 Public calendar publishing — confirmed and provisional on public profile
 - [x] 9.6 Repeating events — weekly and monthly (nth weekday) series for rehearsals and gig availability; `series_key` + `repeat_pattern` on `bandie_calendar_events`; per-occurrence voting and delete single vs whole series
 
@@ -471,7 +471,7 @@ Task checklist: `docs/project/bandie_song_suggestions_voting_implementation_plan
 
 - [x] 20.1.1 Migration — `bandie_song_suggestion_groups`, `bandie_song_suggestions`, `bandie_song_suggestion_votes`, `bandie_song_suggestion_group_events`, `bandie_song_suggestion_confirmed_songs` (RLS in same migration)
 - [x] 20.1.2 Indexes and view `bandie_song_suggestion_vote_summary`
-- [x] 20.1.3 Security definer RPCs — create group, submit, vote, close/reopen, close voting, **veto**, **reset votes**, confirm selection
+- [x] 20.1.3 Security definer RPCs — create group, submit, vote, **withdraw own suggestion**, clear vote, close/reopen, close voting, **veto**, **reset votes**, confirm selection
 - [x] 20.1.4 `supabase db push` + RLS smoke test (leader, member, non-member)
 - [x] 20.1.5 Update `supabase/migrations/README.md`
 
@@ -487,7 +487,7 @@ Task checklist: `docs/project/bandie_song_suggestions_voting_implementation_plan
 - [x] 20.3.1 Routes — `/app/:bandId/songs/suggestions`, `/app/:bandId/songs/suggestions/:groupId`, confirm flow
 - [x] 20.3.2 Nav — Songs → Suggestions; active groups panel on Songs dashboard
 - [x] 20.3.3 Create suggestion group modal — brief, target N, closing dates, **vote visibility**
-- [x] 20.3.4 Group detail — suggest form, suggestion list, vote buttons, vote summary (respect visibility)
+- [x] 20.3.4 Group detail — suggest form, suggestion list, vote buttons, **withdraw own suggestion while open**, vote summary (respect visibility)
 - [x] 20.3.5 Leader actions — close/reopen suggestions, close voting, **veto**, **reset votes**
 - [x] 20.3.6 Confirm selection — ranked list, top N preview, tie highlight, override with reason
 - [x] 20.3.7 Confirmed result read-only view
@@ -522,10 +522,15 @@ Task checklist: `docs/project/bandie_song_suggestions_voting_implementation_plan
 - [ ] 20.7.3 Max open groups per subscription tier
 - [ ] 20.7.4 External metadata / embed enrichment (Spotify, YouTube)
 - [ ] 20.7.5 Member vote comments UI (`allow_member_comments`)
+- [ ] 20.7.6 Per-member suggestion limit UI (`max_suggestions_per_member` on create/edit group — backend enforced on submit)
 
 ---
 
 ## Session notes
+
+**1 July 2026 — Rehearsal availability voting (calendar UI)**
+- `CalendarPage.tsx` — vote summary and actions now render for rehearsal events (previously gig availability only); backend and RLS already supported both types
+- Docs: `product-functional-requirements.md` §10 member voting; `product-technical-requirements.md` calendar module; `CALENDAR_LEADER_ONLY_MESSAGE` copy
 
 **27 June 2026 — Platform access mode (Beta / Promo)**
 - Spec: `bandie_platform_access_mode_spec.md`; migration `20260704100000_bandie_platform_access_mode.sql`

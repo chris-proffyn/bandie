@@ -265,7 +265,11 @@ export function CalendarPage() {
             Gigs
           </Link>
           {canManage ? (
-            <button type="button" className="auth-button" onClick={() => setShowCreate(true)}>
+            <button
+              type="button"
+              className="directory-btn directory-btn-primary"
+              onClick={() => setShowCreate(true)}
+            >
               Add event
             </button>
           ) : null}
@@ -489,26 +493,24 @@ export function CalendarPage() {
 
                 {event.notes ? <p className="calendar-event-notes">{event.notes}</p> : null}
 
-                {event.event_type === 'gig_availability' ? (
-                  <div className="calendar-votes">
-                    <p className="calendar-vote-summary">
-                      {voteSummary.available} available · {voteSummary.maybe} maybe · {voteSummary.no}{' '}
-                      no · {voteSummary.pending} pending
-                    </p>
-                    <div className="calendar-vote-actions">
-                      {(['available', 'maybe', 'no'] as const).map((vote) => (
-                        <button
-                          key={vote}
-                          type="button"
-                          className={`directory-btn directory-btn-secondary ${myVote?.vote === vote ? 'active' : ''}`}
-                          onClick={() => void handleVote(event.id, vote)}
-                        >
-                          {AVAILABILITY_VOTE_LABELS[vote]}
-                        </button>
-                      ))}
-                    </div>
+                <div className="calendar-votes">
+                  <p className="calendar-vote-summary">
+                    {voteSummary.available} available · {voteSummary.maybe} maybe · {voteSummary.no} no ·{' '}
+                    {voteSummary.pending} pending
+                  </p>
+                  <div className="calendar-vote-actions">
+                    {(['available', 'maybe', 'no'] as const).map((vote) => (
+                      <button
+                        key={vote}
+                        type="button"
+                        className={`directory-btn directory-btn-secondary ${myVote?.vote === vote ? 'active' : ''}`}
+                        onClick={() => void handleVote(event.id, vote)}
+                      >
+                        {AVAILABILITY_VOTE_LABELS[vote]}
+                      </button>
+                    ))}
                   </div>
-                ) : null}
+                </div>
 
                 {canManage ? (
                   <button

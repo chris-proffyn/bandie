@@ -60,7 +60,7 @@ export type CreateCalendarEventInput = {
 };
 
 export const CALENDAR_LEADER_ONLY_MESSAGE =
-  'Only band leaders can create or edit calendar events. Members can vote on gig availability.';
+  'Only band leaders can create or edit calendar events. Members can vote on rehearsal and gig availability.';
 
 export const AVAILABILITY_STATUS_LABELS: Record<AvailabilityStatus, string> = {
   proposed: 'Proposed',
