@@ -16,9 +16,11 @@ import {
   type OpenMicSongSuggestion,
   type OpenMicSongWithSlots,
 } from '@bandie/data';
+import { ImportFromBandSongDialog } from '../../components/openMic/ImportFromBandSongDialog';
 import '../../styles/gigs.css';
 import '../../styles/workspace.css';
 import '../../styles/openMic.css';
+import '../../styles/songs.css';
 
 export function OpenMicSongListPage() {
   const { eventId } = useParams();
@@ -27,6 +29,7 @@ export function OpenMicSongListPage() {
   const [suggestions, setSuggestions] = useState<OpenMicSongSuggestion[]>([]);
   const [title, setTitle] = useState('');
   const [artist, setArtist] = useState('');
+  const [showImportDialog, setShowImportDialog] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [eventTitle, setEventTitle] = useState('');
@@ -66,6 +69,14 @@ export function OpenMicSongListPage() {
     }
     return [...names];
   }, [songs]);
+
+  const importedBandSongIds = useMemo(
+    () =>
+      songs
+        .filter((song) => song.source_type === 'band_song' && song.source_song_id)
+        .map((song) => song.source_song_id as string),
+    [songs],
+  );
 
   async function handleAddSong(formEvent: FormEvent) {
     formEvent.preventDefault();
@@ -114,6 +125,13 @@ export function OpenMicSongListPage() {
             <h2>Add song</h2>
             <p className="workspace-section-intro">Standard parts are applied automatically from your event template.</p>
           </div>
+          <button
+            type="button"
+            className="directory-btn directory-btn-secondary"
+            onClick={() => setShowImportDialog(true)}
+          >
+            Import from band
+          </button>
         </header>
         <form className="auth-form" onSubmit={handleAddSong}>
           <div className="gig-detail-grid">
@@ -336,6 +354,15 @@ export function OpenMicSongListPage() {
           </div>
         ) : null}
       </section>
+
+      {showImportDialog && eventId ? (
+        <ImportFromBandSongDialog
+          eventId={eventId}
+          importedSourceSongIds={importedBandSongIds}
+          onClose={() => setShowImportDialog(false)}
+          onImported={() => void load()}
+        />
+      ) : null}
     </div>
   );
 }

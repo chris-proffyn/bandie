@@ -925,6 +925,9 @@ export const DEFAULT_SONG_SUGGESTION_LIST_FILTERS: SongSuggestionListFilters = {
   topNOnly: false,
 };
 
+/** Select value for the Suggested by filter when hiding the current user's suggestions. */
+export const SONG_SUGGESTION_FILTER_EXCLUDE_ME = '__exclude_me__';
+
 export type SongSuggestionFilterOptions = {
   suggesters: Array<{ userId: string; label: string }>;
   genres: string[];
@@ -1049,7 +1052,7 @@ function sortSongSuggestionsByKey(
 export function filterAndSortSongSuggestions(
   rows: SongSuggestionWithSummary[],
   filters: SongSuggestionListFilters,
-  options: { targetSongCount: number; votingOpen: boolean },
+  options: { targetSongCount: number; votingOpen: boolean; currentUserId?: string | null },
 ): SongSuggestionWithSummary[] {
   const rankedActive = rankSongSuggestions(rows.filter((row) => row.status === 'active'));
 
@@ -1058,8 +1061,14 @@ export function filterAndSortSongSuggestions(
       return false;
     }
 
-    if (filters.suggestedByUserId && row.suggested_by !== filters.suggestedByUserId) {
-      return false;
+    if (filters.suggestedByUserId) {
+      if (filters.suggestedByUserId === SONG_SUGGESTION_FILTER_EXCLUDE_ME) {
+        if (options.currentUserId && row.suggested_by === options.currentUserId) {
+          return false;
+        }
+      } else if (row.suggested_by !== filters.suggestedByUserId) {
+        return false;
+      }
     }
 
     if (filters.genre && (row.suggested_genre ?? '').trim() !== filters.genre) {

@@ -492,6 +492,7 @@ export {
   isSongSuggestionVotingOpen,
   isSongSuggestionSubmitOpen,
   DEFAULT_SONG_SUGGESTION_LIST_FILTERS,
+  SONG_SUGGESTION_FILTER_EXCLUDE_ME,
   collectSongSuggestionFilterOptions,
   filterAndSortSongSuggestions,
 } from './songSuggestions';
@@ -801,6 +802,7 @@ export type {
 export {
   listOpenMicSongs,
   addOpenMicSong,
+  importOpenMicSongsFromBand,
   deleteOpenMicSong,
   reorderOpenMicSongs,
   applyInstrumentTemplate,
@@ -823,6 +825,7 @@ export type {
   OpenMicSongSuggestion,
   OpenMicSongWithSlots,
   OpenMicAssignmentWithDetails,
+  ImportOpenMicSongsFromBandResult,
   PublicOpenMicSong,
   PublicOpenMicSongSlot,
   OpenMicSongReadiness,

@@ -352,6 +352,39 @@ export async function addOpenMicSong(
   return normalizeSong(data as Record<string, unknown>);
 }
 
+export type ImportOpenMicSongsFromBandResult = {
+  imported: OpenMicSong[];
+  skippedCount: number;
+};
+
+export async function importOpenMicSongsFromBand(
+  eventId: string,
+  bandId: string,
+  songIds: string[],
+): Promise<ImportOpenMicSongsFromBandResult> {
+  const uniqueIds = [...new Set(songIds.filter(Boolean))];
+  if (uniqueIds.length === 0) {
+    return { imported: [], skippedCount: 0 };
+  }
+
+  const client = getBandieClient();
+  const { data, error } = await client.rpc('bandie_import_open_mic_songs_from_band', {
+    p_event_id: eventId,
+    p_band_id: bandId,
+    p_song_ids: uniqueIds,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const imported = (data ?? []).map((row: Record<string, unknown>) => normalizeSong(row));
+  return {
+    imported,
+    skippedCount: uniqueIds.length - imported.length,
+  };
+}
+
 export async function deleteOpenMicSong(songId: string): Promise<void> {
   const client = getBandieClient();
   const { error } = await client.from('bandie_open_mic_songs').delete().eq('id', songId);

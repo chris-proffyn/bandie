@@ -159,8 +159,9 @@ export function SongSuggestionGroupDetailPage() {
     return filterAndSortSongSuggestions(suggestions, listFilters, {
       targetSongCount: group.target_song_count,
       votingOpen,
+      currentUserId: user?.id ?? null,
     });
-  }, [group, listFilters, suggestions, votingOpen]);
+  }, [group, listFilters, suggestions, user?.id, votingOpen]);
 
   const canEditGroup =
     isLeader &&
@@ -699,6 +700,7 @@ export function SongSuggestionGroupDetailPage() {
             resultCount={displayedSuggestions.length}
             totalCount={suggestions.length}
             votingOpen={votingOpen}
+            currentUserId={user?.id ?? null}
             onChange={setListFilters}
           />
         ) : null}

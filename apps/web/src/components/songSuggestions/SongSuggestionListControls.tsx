@@ -1,5 +1,6 @@
 import {
   DEFAULT_SONG_SUGGESTION_LIST_FILTERS,
+  SONG_SUGGESTION_FILTER_EXCLUDE_ME,
   type SongSuggestionFilterOptions,
   type SongSuggestionListFilters,
   type SongSuggestionSortKey,
@@ -12,6 +13,7 @@ type SongSuggestionListControlsProps = {
   resultCount: number;
   totalCount: number;
   votingOpen: boolean;
+  currentUserId?: string | null;
   onChange: (filters: SongSuggestionListFilters) => void;
 };
 
@@ -41,6 +43,7 @@ export function SongSuggestionListControls({
   resultCount,
   totalCount,
   votingOpen,
+  currentUserId,
   onChange,
 }: SongSuggestionListControlsProps) {
   function update<K extends keyof SongSuggestionListFilters>(
@@ -118,6 +121,9 @@ export function SongSuggestionListControls({
             onChange={(event) => update('suggestedByUserId', event.target.value)}
           >
             <option value="">Anyone</option>
+            {currentUserId ? (
+              <option value={SONG_SUGGESTION_FILTER_EXCLUDE_ME}>Exclude me</option>
+            ) : null}
             {options.suggesters.map((suggester) => (
               <option key={suggester.userId} value={suggester.userId}>
                 {suggester.label}
