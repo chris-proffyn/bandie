@@ -1,0 +1,11 @@
+:root {
+  /*
+   * Shared layout breakpoints (use these literal values in @media queries):
+   * --bp-sm: 640px
+   * --bp-md: 768px
+   * --bp-lg: 900px  (app header mobile menu)
+   * --bp-xl: 1060px (directory hero)
+   * --bp-2xl: 1100px (songs/setlists sidebars)
+   */
+  --touch-target-min: 44px;
+}

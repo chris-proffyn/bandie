@@ -274,7 +274,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 42px;
+  min-height: var(--touch-target-min);
   padding: 0 1rem;
   border-radius: 999px;
   border: 1px solid transparent;
@@ -834,11 +834,6 @@
   font-size: 0.82rem;
 }
 
-@media (max-width: 1060px) {
-  .directory-band-listing-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
 
 .directory-player-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -940,9 +935,11 @@
   min-height: 148px;
 }
 
-@media (max-width: 1060px) {
+
+@media (max-width: 900px) {
+  .directory-band-listing-grid,
   .directory-player-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
   }
 }
 

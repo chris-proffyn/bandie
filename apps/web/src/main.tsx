@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import './lib/bandieClient';
 import './index.css';
+import './styles/breakpoints.css';
 import './styles/brand.css';
 import './styles/entitlements.css';
 import './styles/calendar.css';

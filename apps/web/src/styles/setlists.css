@@ -94,12 +94,14 @@
   box-sizing: border-box;
   width: 100%;
   max-width: 100%;
+  min-height: var(--touch-target-min);
   border: 1px solid #dfe4f1;
   background: #fff;
   border-radius: 12px;
   padding: 0.7rem 0.8rem;
   color: #121826;
   font: inherit;
+  font-size: 16px;
 }
 
 .setlists-show-archived-checkbox {
@@ -481,13 +483,19 @@
 @media (max-width: 1100px) {
   .setlists-metrics,
   .setlists-grid,
-  .setlists-builder,
   .setlists-details-form {
     grid-template-columns: 1fr 1fr;
   }
 
   .setlists-grid {
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .setlists-builder,
+  .setlists-filters {
+    grid-template-columns: 1fr;
   }
 }
 

@@ -68,6 +68,7 @@ export function SongsDashboardPage() {
     key: 'all',
     sort: 'recent',
   });
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const loadDashboard = useCallback(async () => {
     if (!bandId) {
@@ -123,6 +124,15 @@ export function SongsDashboardPage() {
   const snapshots = useMemo(() => computeReadinessSnapshots(songs.filter((song) => !song.is_deleted)), [songs]);
   const genres = useMemo(() => collectSongGenres(songs.filter((song) => !song.is_deleted)), [songs]);
   const keys = useMemo(() => collectSongKeys(songs.filter((song) => !song.is_deleted)), [songs]);
+  const hasAdvancedFilters = useMemo(
+    () =>
+      (filters.genre ?? 'all') !== 'all' ||
+      (filters.readiness ?? 'all') !== 'all' ||
+      (filters.key ?? 'all') !== 'all' ||
+      (filters.sort ?? 'recent') !== 'recent' ||
+      showDeleted,
+    [filters.genre, filters.readiness, filters.key, filters.sort, showDeleted],
+  );
 
   if (!bandId) {
     return null;
@@ -266,69 +276,80 @@ export function SongsDashboardPage() {
 
           <div className="songs-filters">
             <input
+              className="songs-filters-search"
               placeholder="Search songs, artist, notes…"
               value={filters.search ?? ''}
               onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value }))}
             />
-            <select
-              value={filters.genre ?? 'all'}
-              onChange={(event) => setFilters((current) => ({ ...current, genre: event.target.value }))}
+            <button
+              type="button"
+              className="songs-filters-toggle directory-btn directory-btn-secondary"
+              aria-expanded={mobileFiltersOpen}
+              onClick={() => setMobileFiltersOpen((open) => !open)}
             >
-              <option value="all">All genres</option>
-              {genres.map((genre) => (
-                <option key={genre} value={genre}>
-                  {genre}
-                </option>
-              ))}
-            </select>
-            <select
-              value={filters.readiness ?? 'all'}
-              onChange={(event) =>
-                setFilters((current) => ({
-                  ...current,
-                  readiness: event.target.value as SongListFilters['readiness'],
-                }))
-              }
-            >
-              <option value="all">Any readiness</option>
-              <option value="gig_ready">Gig ready</option>
-              <option value="in_progress">In progress</option>
-              <option value="not_started">Not started</option>
-              <option value="needs_review">Needs review</option>
-            </select>
-            <select
-              value={filters.key ?? 'all'}
-              onChange={(event) => setFilters((current) => ({ ...current, key: event.target.value }))}
-            >
-              <option value="all">Any key</option>
-              {keys.map((key) => (
-                <option key={key} value={key}>
-                  {key}
-                </option>
-              ))}
-            </select>
-            <select
-              value={filters.sort ?? 'recent'}
-              onChange={(event) =>
-                setFilters((current) => ({
-                  ...current,
-                  sort: event.target.value as SongListFilters['sort'],
-                }))
-              }
-            >
-              <option value="recent">Sort: Recently added</option>
-              <option value="title">Sort: Title</option>
-              <option value="played">Sort: Most played</option>
-              <option value="readiness">Sort: Readiness</option>
-            </select>
-            <label className="songs-show-deleted-checkbox">
-              <input
-                type="checkbox"
-                checked={showDeleted}
-                onChange={(event) => setShowDeleted(event.target.checked)}
-              />
-              Show deleted songs
-            </label>
+              {mobileFiltersOpen ? 'Hide filters' : hasAdvancedFilters ? 'Filters (active)' : 'Filters'}
+            </button>
+            <div className={`songs-filters-advanced-fields${mobileFiltersOpen ? ' is-open' : ''}`}>
+                <select
+                  value={filters.genre ?? 'all'}
+                  onChange={(event) => setFilters((current) => ({ ...current, genre: event.target.value }))}
+                >
+                  <option value="all">All genres</option>
+                  {genres.map((genre) => (
+                    <option key={genre} value={genre}>
+                      {genre}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={filters.readiness ?? 'all'}
+                  onChange={(event) =>
+                    setFilters((current) => ({
+                      ...current,
+                      readiness: event.target.value as SongListFilters['readiness'],
+                    }))
+                  }
+                >
+                  <option value="all">Any readiness</option>
+                  <option value="gig_ready">Gig ready</option>
+                  <option value="in_progress">In progress</option>
+                  <option value="not_started">Not started</option>
+                  <option value="needs_review">Needs review</option>
+                </select>
+                <select
+                  value={filters.key ?? 'all'}
+                  onChange={(event) => setFilters((current) => ({ ...current, key: event.target.value }))}
+                >
+                  <option value="all">Any key</option>
+                  {keys.map((key) => (
+                    <option key={key} value={key}>
+                      {key}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={filters.sort ?? 'recent'}
+                  onChange={(event) =>
+                    setFilters((current) => ({
+                      ...current,
+                      sort: event.target.value as SongListFilters['sort'],
+                    }))
+                  }
+                >
+                  <option value="recent">Sort: Recently added</option>
+                  <option value="title">Sort: Title</option>
+                  <option value="played">Sort: Most played</option>
+                  <option value="readiness">Sort: Readiness</option>
+                </select>
+                <label className="songs-show-deleted-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={showDeleted}
+                    onChange={(event) => setShowDeleted(event.target.checked)}
+                  />
+                  Show deleted songs
+                </label>
+            </div>
           </div>
 
           {loading ? (

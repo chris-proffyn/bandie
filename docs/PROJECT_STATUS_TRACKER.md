@@ -3,7 +3,7 @@
 **Document status:** Live project tracker  
 **Product:** Bandie  
 **Phase:** Phase 15 (billing) implemented — configure Stripe env vars and sync plans  
-**Last updated:** 27 June 2026 (Platform access mode — Beta / Promo)
+**Last updated:** 1 July 2026 (Mobile web UI Phases 1–2)
 
 ---
 
@@ -17,7 +17,7 @@
 | Governance docs (requirements, delivery map) | Complete |
 | Web app scaffold (Vite + React + TypeScript) | Complete |
 | Bandie homepage (Phase 1) | Complete |
-| Mobile app (Phase 18) | Not started (placeholder only) |
+| Mobile app (Phase 18) | Deferred — responsive web app on mobile (Phases 1–2 shipped) |
 | Supabase schema / migrations | Platform + Bandie through `20260701170000` (song suggestions); applied to remote (`supabase db push`) |
 | Authentication & band membership (Phase 2) | Complete |
 | Public band profile (Phase 3) | Complete |
@@ -527,6 +527,12 @@ Task checklist: `docs/project/bandie_song_suggestions_voting_implementation_plan
 ---
 
 ## Session notes
+
+**1 July 2026 — Mobile web UI optimization (Phases 1–2)**
+- Checkpoint tag: `checkpoint/pre-mobile-web-ui`
+- Phase 1: calendar responsive layout; app header 44px tap targets + menu close on navigate/Escape; setlist builder stacks at 900px; songs/setlists form inputs 16px/44px; safe-area insets on app shell
+- Phase 2: calendar member vote cards on mobile; songs filter drawer; shared `breakpoints.css` tokens; directory listing grids skip cramped 2-column step at 900px
+- Native Phase 18 remains deferred pending web-on-mobile validation
 
 **1 July 2026 — Rehearsal availability voting (calendar UI)**
 - `CalendarPage.tsx` — vote summary and actions now render for rehearsal events (previously gig availability only); backend and RLS already supported both types

@@ -300,9 +300,104 @@
 
 .calendar-delete-btn {
   justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target-min);
+  padding: 0.5rem 0.75rem;
   background: none;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
   color: var(--text-muted);
   cursor: pointer;
+  font: inherit;
+}
+
+.calendar-member-vote-cards {
+  display: none;
+  list-style: none;
+  margin: 0;
   padding: 0;
+  gap: 0.65rem;
+}
+
+.calendar-member-vote-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.calendar-member-vote-card.is-current-user {
+  border-color: rgba(255, 141, 168, 0.35);
+  background: rgba(255, 141, 168, 0.08);
+}
+
+.calendar-member-vote-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.calendar-member-vote-card-head strong {
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .calendar-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .calendar-header-actions {
+    width: 100%;
+  }
+
+  .calendar-header-actions .directory-btn {
+    flex: 1 1 auto;
+    min-height: var(--touch-target-min);
+  }
+
+  .calendar-event-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .calendar-event-actions {
+    width: 100%;
+  }
+
+  .calendar-event-actions .directory-btn {
+    flex: 1 1 auto;
+    min-height: var(--touch-target-min);
+  }
+
+  .calendar-vote-actions-row .directory-btn {
+    flex: 1 1 auto;
+    min-height: var(--touch-target-min);
+  }
+
+  .calendar-form-actions {
+    flex-direction: column;
+  }
+
+  .calendar-form-actions .directory-btn {
+    width: 100%;
+    min-height: var(--touch-target-min);
+  }
+}
+
+@media (max-width: 720px) {
+  .calendar-member-vote-table-wrap {
+    display: none;
+  }
+
+  .calendar-member-vote-cards {
+    display: grid;
+  }
 }
