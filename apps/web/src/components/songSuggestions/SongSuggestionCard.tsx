@@ -36,6 +36,21 @@ function showRank(
   return sortBy === 'score' && row.proposed_rank > 0 && row.status === 'active';
 }
 
+function TrashIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-8 0h8m-9 4v7a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-7M10 11v6M14 11v6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function SongSuggestionCard({
   row,
   sortBy,
@@ -94,9 +109,10 @@ export function SongSuggestionCard({
               type="button"
               className="song-suggestion-withdraw-btn"
               disabled={actionBusy}
+              aria-label={`Remove ${row.song_title}`}
               onClick={() => onWithdraw(row)}
             >
-              Remove
+              <TrashIcon />
             </button>
           ) : null}
           {canVeto ? (

@@ -184,21 +184,26 @@ export function SongSuggestionGroupFormPanel({
             />
           </div>
           <div className="auth-field song-suggestion-selection-field">
-            <label htmlFor="ssg-selection-mode">Selection mode</label>
-            <label className="song-suggestion-filter-checkbox" htmlFor="ssg-selection-mode">
-              <input
-                id="ssg-selection-mode"
-                type="checkbox"
-                checked={form.selectionMode === 'inclusive'}
-                onChange={(event) =>
-                  setForm((c) => ({
-                    ...c,
-                    selectionMode: event.target.checked ? 'inclusive' : 'best',
-                  }))
-                }
-              />
-              Inclusive
-            </label>
+            <div className="song-suggestion-selection-row">
+              <span className="song-suggestion-selection-field-label" id="ssg-selection-mode-label">
+                Selection mode
+              </span>
+              <label className="song-suggestion-selection-toggle" htmlFor="ssg-selection-mode">
+                <input
+                  id="ssg-selection-mode"
+                  type="checkbox"
+                  checked={form.selectionMode === 'inclusive'}
+                  aria-labelledby="ssg-selection-mode-label ssg-selection-mode-text"
+                  onChange={(event) =>
+                    setForm((c) => ({
+                      ...c,
+                      selectionMode: event.target.checked ? 'inclusive' : 'best',
+                    }))
+                  }
+                />
+                <span id="ssg-selection-mode-text">Inclusive</span>
+              </label>
+            </div>
             <p className="song-suggestion-mode-note">
               {form.selectionMode === 'inclusive'
                 ? inclusiveEligible

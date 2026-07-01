@@ -169,6 +169,48 @@
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
+.song-suggestion-selection-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.song-suggestion-selection-field-label {
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.song-suggestion-selection-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.35;
+  cursor: pointer;
+}
+
+.auth-field .song-suggestion-selection-toggle input[type='checkbox'],
+.song-suggestion-selection-toggle input[type='checkbox'] {
+  width: 1.05rem;
+  height: 1.05rem;
+  min-width: 1.05rem;
+  min-height: 1.05rem;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.2);
+  accent-color: #ffcc33;
+  cursor: pointer;
+}
+
 .song-suggestion-filter-checkbox {
   display: inline-flex;
   align-items: center;
@@ -212,7 +254,12 @@
 }
 
 .song-suggestion-selection-field .song-suggestion-mode-note {
-  margin-top: 0.35rem;
+  margin-top: 0.65rem;
+}
+
+.app-main .surface-light .song-suggestion-selection-toggle input[type='checkbox'],
+.app-shell .surface-light .song-suggestion-selection-toggle input[type='checkbox'] {
+  accent-color: #1d4ed8;
 }
 
 .song-suggestion-form-actions {
@@ -295,18 +342,24 @@
 }
 
 .song-suggestion-withdraw-btn {
-  border: none;
-  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  margin: -0.35rem -0.35rem -0.35rem 0;
+  padding: 0;
+  border: 1px solid rgba(185, 28, 28, 0.22);
+  border-radius: 10px;
+  background: rgba(185, 28, 28, 0.08);
   color: #b91c1c;
-  font-size: 0.875rem;
-  font-weight: 600;
-  padding: 0.35rem 0;
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
   cursor: pointer;
 }
 
 .song-suggestion-withdraw-btn:hover:not(:disabled) {
+  background: rgba(185, 28, 28, 0.14);
+  border-color: rgba(185, 28, 28, 0.35);
   color: #991b1b;
 }
 

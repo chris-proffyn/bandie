@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import type { AppNavMenuSection } from '../../lib/appNavigation';
+import '../../styles/auth.css';
 import { AppNavLinks } from './AppNavLinks';
 
 type AppHeaderMenuModalProps = {
