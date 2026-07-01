@@ -213,6 +213,12 @@ RLS policies must enforce band membership for all private data.
 **Admin mode (`@bandie/data`):**
 - `isCurrentUserAppAdmin`, `setBandieAdminModeActive`, `isBandieAdminModeActive` — client-side admin mode flag; admins bypass membership checks when active
 
+**Admin accounts (`@bandie/data`):**
+- `listAdminUserAccounts`, `listAdminBandAccounts` — paginated directory (20 per page) with subscription, test-plan, and band summary fields
+- `adminUpdateUserWorkspaceRoles`, `adminUpdateUserEntitlementTestPlan`, `adminSetUserSubscriptionPlan`, `adminSetUserSubscriptionTrialEnd` — admin-only account management (audit-logged); Stripe subscriptions are read-only
+- RPCs: `bandie_admin_list_user_accounts`, `bandie_admin_count_user_accounts`, `bandie_admin_list_band_accounts`, `bandie_admin_count_band_accounts`, `bandie_admin_update_user_workspace_roles`, `bandie_admin_update_user_entitlement_test_plan`, `bandie_admin_set_user_subscription_plan`, `bandie_admin_set_user_subscription_trial_end`
+- Legacy search helpers `searchAdminUsers`, `searchAdminBands` retained for billing lookup
+
 **Entitlements (`@bandie/data`):**
 - `canPerform`, `assertCanPerform`, `checkBandLeaderCapability`, `checkUserOrganiserCapability`
 - `isEntitlementEnforcementEnabled` — env (`VITE_BANDIE_ENFORCE_ENTITLEMENTS`) OR platform setting (`entitlements_enforced`)
@@ -404,7 +410,7 @@ Breakpoints: mobile 0–639px, tablet 640–1023px, desktop 1024px+.
 | `/app/:bandId/gigs` | Protected | Band gig invitations |
 | `/app/:bandId/gigs/:gigId` | Protected | Band gig invitation detail (accept/reject, setlist) |
 | `/admin` | Protected (app admin) | Platform admin overview |
-| `/admin/accounts` | Protected (app admin) | User/band search |
+| `/admin/accounts` | Protected (app admin) | Paginated user/band directory, subscription and test-plan management, organiser invites |
 | `/admin/metrics` | Protected (app admin) | Platform metrics |
 | `/admin/entitlements` | Protected (app admin) | Entitlement admin and enforcement toggle |
 | `/admin/audit` | Protected (app admin) | Admin audit log |

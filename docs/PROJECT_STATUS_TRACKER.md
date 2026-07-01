@@ -524,6 +524,11 @@ Task checklist: `docs/project/bandie_song_suggestions_voting_implementation_plan
 
 ## Session notes
 
+**30 June 2026 — Admin accounts management**
+- Migration `20260703120000_bandie_admin_accounts.sql` — paginated user/band list RPCs; admin update RPCs for workspace roles, test plan override, non-Stripe plan and trial end
+- Data: `adminAccounts.ts`; UI: paginated Users/Bands tabs on `/admin/accounts` with per-user manage panel
+- Docs: `product-functional-requirements.md` and `product-technical-requirements.md` updated
+
 **30 June 2026 — Organiser invitations (admin portal)**
 - Migration `20260702140000_bandie_organiser_invitations.sql` — `bandie_organiser_invitations` table; admin-only RPCs to create/list/revoke; invitee accept/decline via `/invite/:token`
 - Data: `organiserInvitations.ts`; communications summary includes pending organiser invites

@@ -866,6 +866,22 @@ export {
 export type { AdminSearchUser, AdminSearchBand, AuditEvent, AdminOverviewCounts } from './adminPortal';
 
 export {
+  ADMIN_ACCOUNTS_PAGE_SIZE,
+  listAdminUserAccounts,
+  listAdminBandAccounts,
+  adminUpdateUserWorkspaceRoles,
+  adminUpdateUserEntitlementTestPlan,
+  adminSetUserSubscriptionPlan,
+  adminSetUserSubscriptionTrialEnd,
+  formatAdminAccountDate,
+  formatAdminWorkspaceRoles,
+  isStripeBilledSubscription,
+  toDateTimeLocalValue,
+  fromDateTimeLocalValue,
+} from './adminAccounts';
+export type { AdminUserAccount, AdminBandAccount, AdminAccountsPage } from './adminAccounts';
+
+export {
   listPlansWithEntitlements,
   listCapabilities,
   formatEntitlementValueForInput,

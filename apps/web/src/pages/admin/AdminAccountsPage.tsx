@@ -1,45 +1,38 @@
-import { useState } from 'react';
-import {
-  searchAdminBands,
-  searchAdminUsers,
-  type AdminSearchBand,
-  type AdminSearchUser,
-} from '@bandie/data';
+import { useState, type FormEvent } from 'react';
 import { AdminOrganiserInvitesPanel } from '../../components/admin/AdminOrganiserInvitesPanel';
+import { AdminAccountsBandsPanel } from '../../components/admin/AdminAccountsBandsPanel';
+import { AdminAccountsUsersPanel } from '../../components/admin/AdminAccountsUsersPanel';
+
+type AccountsTab = 'users' | 'bands';
 
 export function AdminAccountsPage() {
+  const [activeTab, setActiveTab] = useState<AccountsTab>('users');
   const [query, setQuery] = useState('');
-  const [users, setUsers] = useState<AdminSearchUser[]>([]);
-  const [bands, setBands] = useState<AdminSearchBand[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [appliedQuery, setAppliedQuery] = useState('');
+  const [reloadToken, setReloadToken] = useState(0);
 
-  async function handleSearch(event: React.FormEvent) {
+  function handleSearch(event: FormEvent) {
     event.preventDefault();
-    setLoading(true);
-    setError(null);
+    setAppliedQuery(query.trim());
+    setReloadToken((value) => value + 1);
+  }
 
-    try {
-      const [userRows, bandRows] = await Promise.all([
-        searchAdminUsers(query),
-        searchAdminBands(query),
-      ]);
-      setUsers(userRows);
-      setBands(bandRows);
-    } catch (err) {
-      setUsers([]);
-      setBands([]);
-      setError(err instanceof Error ? err.message : 'Search failed.');
-    } finally {
-      setLoading(false);
-    }
+  function handleClearSearch() {
+    setQuery('');
+    setAppliedQuery('');
+    setReloadToken((value) => value + 1);
   }
 
   return (
-    <div className="admin-main">
+    <div className="admin-main admin-accounts-page">
       <section className="panel">
         <p className="my-bands-eyebrow">Accounts</p>
-        <h2>User, band and organiser search</h2>
+        <h2>Users and bands</h2>
+        <p className="workspace-section-intro">
+          Browse paginated users and bands, manage workspace roles, subscription plans, promo expiry,
+          and entitlement test-plan overrides. Stripe-billed subscriptions remain read-only here.
+        </p>
+
         <form className="admin-search-bar" onSubmit={handleSearch}>
           <div className="auth-field">
             <label htmlFor="adminAccountSearch">Search</label>
@@ -51,56 +44,43 @@ export function AdminAccountsPage() {
               placeholder="Search by name, username, email, band…"
             />
           </div>
-          <button type="submit" className="auth-button" disabled={loading}>
-            {loading ? 'Searching…' : 'Search'}
+          <button type="submit" className="auth-button">
+            Search
           </button>
+          {appliedQuery ? (
+            <button type="button" className="auth-button auth-button-secondary" onClick={handleClearSearch}>
+              Clear
+            </button>
+          ) : null}
         </form>
-        {error ? <div className="auth-message auth-message-error">{error}</div> : null}
       </section>
 
-      <section className="panel">
-        <h3>Users</h3>
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Username</th>
-              <th>Email</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user.user_id}>
-                <td>{user.display_name ?? '—'}</td>
-                <td>{user.username ?? '—'}</td>
-                <td>{user.email ?? '—'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
+      <div className="admin-accounts-tabs" role="tablist" aria-label="Accounts views">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'users'}
+          className={`admin-plan-pill${activeTab === 'users' ? ' is-selected' : ''}`}
+          onClick={() => setActiveTab('users')}
+        >
+          <span className="admin-plan-pill-name">Users</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'bands'}
+          className={`admin-plan-pill${activeTab === 'bands' ? ' is-selected' : ''}`}
+          onClick={() => setActiveTab('bands')}
+        >
+          <span className="admin-plan-pill-name">Bands</span>
+        </button>
+      </div>
 
-      <section className="panel">
-        <h3>Bands</h3>
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Slug</th>
-              <th>Owner</th>
-            </tr>
-          </thead>
-          <tbody>
-            {bands.map((band) => (
-              <tr key={band.band_id}>
-                <td>{band.name}</td>
-                <td>{band.slug}</td>
-                <td>{band.owner_display_name ?? band.owner_user_id}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
+      {activeTab === 'users' ? (
+        <AdminAccountsUsersPanel query={appliedQuery} reloadToken={reloadToken} />
+      ) : (
+        <AdminAccountsBandsPanel query={appliedQuery} reloadToken={reloadToken} />
+      )}
 
       <AdminOrganiserInvitesPanel />
     </div>

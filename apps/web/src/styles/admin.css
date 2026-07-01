@@ -497,6 +497,150 @@
   word-break: break-all;
 }
 
+.admin-accounts-page {
+  gap: 1rem;
+}
+
+.admin-accounts-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.admin-accounts-section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.admin-accounts-section-head h3 {
+  margin: 0 0 0.35rem;
+}
+
+.admin-table-wrap {
+  overflow-x: auto;
+}
+
+.admin-accounts-table tr.is-selected td {
+  background: rgba(255, 204, 51, 0.08);
+}
+
+.admin-account-date-stack {
+  display: grid;
+  gap: 0.15rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.admin-account-editor {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.admin-account-editor-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.admin-account-editor-head h4 {
+  margin: 0 0 0.35rem;
+}
+
+.admin-account-editor-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.admin-account-fieldset {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+}
+
+.admin-account-fieldset legend {
+  padding: 0 0.25rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.admin-checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 0.55rem;
+  font-weight: 600;
+}
+
+.admin-account-subscription-panels {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.admin-account-subscription-panel {
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: var(--surface-elevated);
+}
+
+.admin-account-subscription-panel h5 {
+  margin: 0 0 0.5rem;
+}
+
+.admin-account-meta,
+.admin-account-note {
+  margin: 0 0 0.65rem;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.admin-account-note a {
+  color: #ffcc33;
+}
+
+.admin-account-editor-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.admin-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.admin-pagination-summary,
+.admin-pagination-page {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.admin-pagination-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+a.admin-compact-button {
+  text-decoration: none;
+}
+
 @media (max-width: 900px) {
   .admin-shell {
     grid-template-columns: 1fr;

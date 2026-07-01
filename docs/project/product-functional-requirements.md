@@ -356,8 +356,7 @@ Admin mode is a client-side flag (`setBandieAdminModeActive`); RLS still enforce
 Bandie app admins (`is_app_admin`) also have a dedicated **`/admin`** portal (separate from in-app admin mode):
 
 - Overview counts (users, bands, songs, setlists, gigs)
-- User and band search
-- **Invite organiser** — platform admins create email-specific organiser invitations from `/admin/accounts`; shareable `/invite/:token` link (same pattern as band member invites; Bandie does not send email)
+- **Accounts** (`/admin/accounts`) — paginated user and band directory with search; per-user management of workspace roles, subscription plans, launch-promo / trial expiry, and entitlement test-plan override; per-band summary (owner, leader plan, member and song counts); organiser invitations
 - Platform metrics (DAU/WAU/MAU, content totals, tier distribution) with CSV export
 - Entitlement admin — **editable plan catalogue** (five plans: **Player Free**, **Player Plus**, **Player Pro**, **Organiser Free**, **Organiser Plus**; plan codes unchanged): select a plan from grouped pills (Player / Organiser), then edit metadata and capabilities in one panel; draft/publish workflow, manual overrides, gate decision logs, enforcement toggle
 - Audit log
@@ -365,6 +364,26 @@ Bandie app admins (`is_app_admin`) also have a dedicated **`/admin`** portal (se
 Plan display names are stored in `bandie_plans.name` and surfaced in upgrade prompts via `PLAN_DISPLAY_NAMES` for known plan codes. Authoritative limits remain in `bandie_plan_entitlements`.
 
 Authoritative spec: `bandie_entitlements_admin_portal_functional_technical_spec.md` §20.2.
+
+#### Accounts management (`/admin/accounts`)
+
+Platform admins use the Accounts screen to browse and manage live users and bands.
+
+**Users table (paginated, 20 per page):**
+- Loads on page open (most recent profiles first); optional search filters by display name, username, or email
+- Columns: name, username, email, workspace roles (player / organiser), leader plan, organiser plan, test plan override, promo/trial end dates, active entitlement override count
+- **Manage user** panel (per row): view full subscription detail; change workspace roles (`is_player`, `is_organiser`); set **Test player plan limits** override (`entitlement_test_leader_plan_code` — same values as profile billing: Player Free, Plus, Pro, or cleared); change assigned plan for **non-Stripe** subscriptions (`source` = `system`, `manual`, `migration`, or `launch_promo`); extend or set **trial / promo end** (`trial_end`) on non-Stripe subscriptions
+- Stripe-billed subscriptions are read-only here (plan changes via Stripe / billing admin); admin changes are audit-logged
+
+**Bands table (paginated, 20 per page):**
+- Loads on page open; optional search by band name or slug
+- Columns: name, slug, primary leader, leader email, effective leader plan, member count, active song count, created date
+- Band entitlements resolve from the primary leader’s user subscription — admins adjust the leader’s plan on the user row
+- Link opens the band workspace (`/app/:bandId`) for support context
+
+**Organiser invitations** remain on the same page (admin-only email-token invites).
+
+Billing-specific tools (Stripe catalogue sync, webhook log, subscription lookup by email) stay on `/admin/billing`.
 
 ### Player subscription tiers (band leader plans)
 
