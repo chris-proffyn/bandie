@@ -281,7 +281,9 @@ export function ImportFromBandSongDialog({
             >
               {submitting
                 ? 'Importing…'
-                : `Import ${selectedSongIds.length || ''} song${selectedSongIds.length === 1 ? '' : 's'}`.trim()}
+                : selectedSongIds.length > 0
+                  ? `Import ${selectedSongIds.length} song${selectedSongIds.length === 1 ? '' : 's'}`
+                  : 'Import songs'}
             </button>
           </div>
         </form>
