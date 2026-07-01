@@ -11,4 +11,5 @@
 /api/billing/create-portal /.netlify/functions/billing-create-portal 200
 /api/billing/stripe-webhook /.netlify/functions/billing-stripe-webhook 200
 /api/billing/setup-stripe-plans /.netlify/functions/billing-setup-stripe-plans 200
+/api/feedback/submit /.netlify/functions/feedback-submit 200
 /*    /index.html   200

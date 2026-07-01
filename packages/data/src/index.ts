@@ -1057,3 +1057,6 @@ export {
   formatPlanDisplayName,
 } from './billing';
 export type { UserSubscriptionSummary, PublicPlanOffer } from './billing';
+
+export { submitFeedback } from './feedback';
+export type { SubmitFeedbackInput } from './feedback';

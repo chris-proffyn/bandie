@@ -79,6 +79,11 @@
   to = "/.netlify/functions/billing-setup-stripe-plans"
   status = 200
 
+[[redirects]]
+  from = "/api/feedback/submit"
+  to = "/.netlify/functions/feedback-submit"
+  status = 200
+
 # SPA fallback — production/deploy only (skipped during netlify dev)
 [[redirects]]
   from = "/*"

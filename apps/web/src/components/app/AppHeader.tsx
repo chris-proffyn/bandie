@@ -10,6 +10,7 @@ import { usePlatformAccessMode } from '../../hooks/usePlatformAccessMode';
 import { PlatformAccessModePill } from '../platform/PlatformAccessModePill';
 import { BandieLogo } from '../brand/BandieLogo';
 import { AppNavLinks } from './AppNavLinks';
+import { FeedbackDialog } from './FeedbackDialog';
 
 type AppHeaderProps = {
   bandId?: string;
@@ -38,10 +39,11 @@ function MenuIcon({ open }: { open: boolean }) {
 
 export function AppHeader({ bandId }: AppHeaderProps) {
   const location = useLocation();
-  const { displayName, logout, adminModeActive, workspaceMode, canSwitchWorkspaceMode, session, isAppAdmin } =
+  const { displayName, logout, adminModeActive, workspaceMode, canSwitchWorkspaceMode, session, isAppAdmin, user } =
     useAuth();
   const { access: playerAccess } = usePlayerWorkspaceAccess();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
   const [planPill, setPlanPill] = useState<ReturnType<typeof resolveWorkspacePlanPill> | null>(null);
   const platformAccessMode = usePlatformAccessMode();
@@ -119,6 +121,11 @@ export function AppHeader({ bandId }: AppHeaderProps) {
     return `${planPill.label} plan — view billing`;
   }, [planPill]);
 
+  function openFeedback() {
+    setMenuOpen(false);
+    setFeedbackOpen(true);
+  }
+
   function handleLogout() {
     setMenuOpen(false);
     void logout();
@@ -152,6 +159,15 @@ export function AppHeader({ bandId }: AppHeaderProps) {
           </div>
 
           <div className="app-header-identity">
+            {session ? (
+              <button
+                type="button"
+                className="app-header-feedback-btn"
+                onClick={openFeedback}
+              >
+                Feedback
+              </button>
+            ) : null}
             <span className="app-header-display-name">{displayName}</span>
             <button
               type="button"
@@ -193,6 +209,16 @@ export function AppHeader({ bandId }: AppHeaderProps) {
           </div>
         ) : null}
       </div>
+
+      {session ? (
+        <FeedbackDialog
+          open={feedbackOpen}
+          onClose={() => setFeedbackOpen(false)}
+          displayName={displayName}
+          email={user?.email ?? null}
+          pageUrl={`${window.location.origin}${location.pathname}${location.search}`}
+        />
+      ) : null}
     </header>
   );
 }
