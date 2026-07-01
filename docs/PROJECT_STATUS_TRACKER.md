@@ -423,7 +423,7 @@ Monetisation: **Organiser Plus required** (`open_mic.create`); Organiser Free de
 
 - [x] 17.4.1 `bandie_open_mic_event_files` metadata + RLS (schema only)
 - [ ] 17.4.2 Link band Dropbox part files; organiser visibility controls
-- [ ] 17.4.3 Import from band song list
+- [x] 17.4.3 Import from band song list
 
 #### 17.5 Admin and analytics
 
@@ -580,7 +580,7 @@ Task checklist: `docs/project/bandie_song_suggestions_voting_implementation_plan
 - Migrations `20260702100000_bandie_open_mic_events.sql`, `20260702110000_bandie_open_mic_songs_signup.sql` applied via `supabase db push`
 - Data: `openMicEvents.ts`, `openMicSongs.ts`, `openMicLive.ts`; `open_mic.create` Organiser Plus gate + upgrade messaging
 - Web: organiser routes `/app/open-mic/*`, public `/events/:slug`, poster, song list, moderation, live control room
-- Deferred: Dropbox file linking UI (17.4.2–17.4.3), walk-up/ad-hoc song RPCs, drag reorder in live room, manual QA pass
+- Deferred: Dropbox file linking UI (17.4.2), walk-up/ad-hoc song RPCs, drag reorder in live room, manual QA pass
 
 **30 June 2026 — Open mic product decisions locked (Phase 17)**
 - All 18 product questions answered; recorded in spec §19–§20 and implementation plan §2 + §16
