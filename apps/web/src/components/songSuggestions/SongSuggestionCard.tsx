@@ -5,6 +5,7 @@ import {
   type SongSuggestionWithSummary,
   type VoteVisibility,
 } from '@bandie/data';
+import { SongSuggestionSuggester } from './SongSuggestionSuggester';
 
 const VOTE_EMOJI: Record<SongSuggestionVoteState, string> = {
   happy_to_play: '🙂',
@@ -53,11 +54,15 @@ export function SongSuggestionCard({
   const isVetoed = row.status === 'leader_vetoed';
   const canVote = votingOpen && row.status === 'active';
   const canClearVote = canVote && Boolean(row.my_vote) && allowVoteChanges;
-  const canWithdraw =
+  const canMemberWithdraw =
     suggestionsOpen &&
     row.status === 'active' &&
     currentUserId != null &&
     row.suggested_by === currentUserId;
+  const canLeaderRemove =
+    suggestionsOpen && row.status === 'active' && isLeader;
+  const canRemove = canMemberWithdraw || canLeaderRemove;
+  const canVeto = isLeader && row.status === 'active' && !suggestionsOpen;
   const hideMemberVotes = voteVisibility === 'aggregate_only' && !isLeader;
 
   return (
@@ -80,10 +85,11 @@ export function SongSuggestionCard({
           <div>
             <h3>{row.song_title}</h3>
             <p className="song-suggestion-meta">{row.artist}</p>
+            <SongSuggestionSuggester row={row} className="song-suggestion-item-suggester" />
           </div>
         </div>
         <div className="song-suggestion-item-card-actions">
-          {canWithdraw ? (
+          {canRemove ? (
             <button
               type="button"
               className="song-suggestion-withdraw-btn"
@@ -93,7 +99,7 @@ export function SongSuggestionCard({
               Remove
             </button>
           ) : null}
-          {isLeader && row.status === 'active' ? (
+          {canVeto ? (
             <button
               type="button"
               className="directory-btn directory-btn-secondary"
@@ -126,11 +132,8 @@ export function SongSuggestionCard({
         <p className="song-suggestion-veto-note">Vetoed: {row.leader_veto_reason}</p>
       ) : null}
 
-      {(row.suggested_genre || row.decade || row.suggester_display_name) && (
+      {(row.suggested_genre || row.decade) && (
         <div className="song-suggestion-tags">
-          {row.suggester_display_name ? (
-            <span className="song-suggestion-tag">Suggested by {row.suggester_display_name}</span>
-          ) : null}
           {row.suggested_genre ? (
             <span className="song-suggestion-tag">{row.suggested_genre}</span>
           ) : null}

@@ -10,7 +10,7 @@ import {
   type SongSuggestionSelectionMode,
   type SongSuggestionWithSummary,
 } from '@bandie/data';
-import { bandInitials } from '../../lib/profileHelpers';
+import { SongSuggestionSuggester } from './SongSuggestionSuggester';
 
 type SongSuggestionRankingTableProps = {
   bandId: string;
@@ -23,27 +23,6 @@ type SongSuggestionRankingTableProps = {
   confirmedRows?: SongSuggestionConfirmedSong[];
   vetoedCount?: number;
 };
-
-function suggesterLabel(row: SongSuggestionWithSummary): string {
-  return row.suggester_display_name?.trim() || 'Member';
-}
-
-function SongSuggestionRankingSuggesterCell({ row }: { row: SongSuggestionWithSummary }) {
-  const label = suggesterLabel(row);
-
-  return (
-    <div className="song-suggestion-ranking-suggester">
-      <span className="song-suggestion-ranking-suggester-avatar" aria-hidden="true">
-        {row.suggester_profile_image_url ? (
-          <img src={row.suggester_profile_image_url} alt="" />
-        ) : (
-          <span>{bandInitials(label)}</span>
-        )}
-      </span>
-      <span className="song-suggestion-ranking-suggester-name">{label}</span>
-    </div>
-  );
-}
 
 export function SongSuggestionRankingTable({
   bandId,
@@ -197,7 +176,7 @@ export function SongSuggestionRankingTable({
                       <div className="song-suggestion-ranking-artist">{row.artist}</div>
                     </td>
                     <td>
-                      <SongSuggestionRankingSuggesterCell row={row} />
+                      <SongSuggestionSuggester row={row} />
                     </td>
                     <td>{row.vote_summary.score}</td>
                     <td>

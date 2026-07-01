@@ -9,7 +9,7 @@ import { resolveWorkspacePlanPill } from '../../lib/planPill';
 import { usePlatformAccessMode } from '../../hooks/usePlatformAccessMode';
 import { PlatformAccessModePill } from '../platform/PlatformAccessModePill';
 import { BandieLogo } from '../brand/BandieLogo';
-import { AppNavLinks } from './AppNavLinks';
+import { AppHeaderMenuModal } from './AppHeaderMenuModal';
 import { FeedbackDialog } from './FeedbackDialog';
 
 type AppHeaderProps = {
@@ -64,28 +64,6 @@ export function AppHeader({ bandId }: AppHeaderProps) {
   }, [location.pathname]);
 
   useEffect(() => {
-    if (!menuOpen) {
-      return;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        setMenuOpen(false);
-      }
-    }
-
-    document.body.style.overflow = 'hidden';
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [menuOpen]);
-
-  useEffect(() => {
     if (!session) {
       setNotificationCount(0);
       return;
@@ -115,10 +93,10 @@ export function AppHeader({ bandId }: AppHeaderProps) {
     }
 
     if (planPill.planName) {
-      return `${planPill.planName} plan — view billing`;
+      return `${planPill.planName} plan`;
     }
 
-    return `${planPill.label} plan — view billing`;
+    return `${planPill.label} plan`;
   }, [planPill]);
 
   function openFeedback() {
@@ -148,13 +126,12 @@ export function AppHeader({ bandId }: AppHeaderProps) {
             {adminModeActive ? <span className="app-admin-badge">Admin mode</span> : null}
             {platformAccessMode ? <PlatformAccessModePill status={platformAccessMode} /> : null}
             {planPill ? (
-              <Link
-                to="/app/profile"
+              <span
                 className={`app-plan-pill app-plan-pill-${planPill.tone}`}
                 title={planPillTitle}
               >
                 {planPill.label}
-              </Link>
+              </span>
             ) : null}
           </div>
 
@@ -182,33 +159,18 @@ export function AppHeader({ bandId }: AppHeaderProps) {
           </div>
         </div>
 
-        {menuOpen ? (
-          <div id="app-header-menu" className="app-header-menu-panel">
-            {menuSections.map((section) => (
-              <section key={section.id} className="app-header-menu-section">
-                <h2 className="app-header-menu-section-label">{section.label}</h2>
-                <nav className="app-header-menu-section-nav" aria-label={section.label}>
-                  <AppNavLinks items={section.items} onNavigate={closeMenu} />
-                </nav>
-              </section>
-            ))}
-
-            <div className="app-header-menu-footer">
-              {!adminModeActive && canSwitchWorkspaceMode ? (
-                <span className="app-workspace-mode-badge">{WORKSPACE_MODE_LABELS[workspaceMode]}</span>
-              ) : null}
-              {isAppAdmin ? (
-                <Link to="/admin" className="app-header-nav-link" onClick={closeMenu}>
-                  Admin portal
-                </Link>
-              ) : null}
-              <button type="button" className="app-header-sign-out" onClick={handleLogout}>
-                Sign out
-              </button>
-            </div>
-          </div>
-        ) : null}
       </div>
+
+      <AppHeaderMenuModal
+        open={menuOpen}
+        onClose={closeMenu}
+        sections={menuSections}
+        workspaceModeLabel={
+          !adminModeActive && canSwitchWorkspaceMode ? WORKSPACE_MODE_LABELS[workspaceMode] : null
+        }
+        showAdminPortal={isAppAdmin}
+        onLogout={handleLogout}
+      />
 
       {session ? (
         <FeedbackDialog

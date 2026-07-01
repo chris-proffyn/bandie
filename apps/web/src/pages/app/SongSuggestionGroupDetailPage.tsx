@@ -70,7 +70,9 @@ function formatEvent(event: SongSuggestionGroupEvent): string {
     case 'suggestion_vetoed':
       return `Leader vetoed: ${String(payload.song_title ?? 'song')}`;
     case 'suggestion_withdrawn':
-      return `Suggestion removed: ${String(payload.song_title ?? 'song')}`;
+      return payload.removed_by_leader
+        ? `Leader removed suggestion: ${String(payload.song_title ?? 'song')}`
+        : `Suggestion removed: ${String(payload.song_title ?? 'song')}`;
     case 'group_confirmed':
       return 'Group confirmed';
     case 'setlist_created':
@@ -297,11 +299,13 @@ export function SongSuggestionGroupDetailPage() {
   }
 
   async function handleWithdraw(suggestion: SongSuggestionWithSummary) {
-    if (
-      !window.confirm(
-        `Remove "${suggestion.song_title}" from this group? You can suggest another song while suggestions are still open.`,
-      )
-    ) {
+    const isOwn = user?.id != null && suggestion.suggested_by === user.id;
+    const message =
+      isLeader && !isOwn
+        ? `Remove "${suggestion.song_title}" from this group? The member can suggest another song while suggestions are still open.`
+        : `Remove "${suggestion.song_title}" from this group? You can suggest another song while suggestions are still open.`;
+
+    if (!window.confirm(message)) {
       return;
     }
 
@@ -801,22 +805,32 @@ export function SongSuggestionGroupDetailPage() {
       </section>
 
       {detail?.events.length ? (
-        <section className="panel">
-          <h2>Activity</h2>
-          <ul className="song-suggestion-events">
-            {detail.events.map((event) => (
-              <li key={event.id}>
-                {new Date(event.created_at).toLocaleString('en-GB', {
-                  day: 'numeric',
-                  month: 'short',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}{' '}
-                — {formatEvent(event)}
-              </li>
-            ))}
-          </ul>
-        </section>
+        <details className="panel song-suggestion-collapsible-section">
+          <summary className="song-suggestion-collapsible-summary">
+            <div className="song-suggestion-collapsible-summary-text">
+              <h2>Activity</h2>
+              <p>
+                {detail.events.length} event{detail.events.length === 1 ? '' : 's'}
+              </p>
+            </div>
+            <span className="song-suggestion-collapsible-chevron" aria-hidden="true" />
+          </summary>
+          <div className="song-suggestion-collapsible-body">
+            <ul className="song-suggestion-events">
+              {detail.events.map((event) => (
+                <li key={event.id}>
+                  {new Date(event.created_at).toLocaleString('en-GB', {
+                    day: 'numeric',
+                    month: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}{' '}
+                  — {formatEvent(event)}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </details>
       ) : null}
 
       {upgradeDecision ? (

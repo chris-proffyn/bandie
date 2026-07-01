@@ -183,7 +183,7 @@ export function SongSuggestionGroupFormPanel({
               required
             />
           </div>
-          <div className="auth-field">
+          <div className="auth-field song-suggestion-selection-field">
             <label htmlFor="ssg-selection-mode">Selection mode</label>
             <label className="song-suggestion-filter-checkbox" htmlFor="ssg-selection-mode">
               <input

@@ -121,6 +121,8 @@
 
 .song-suggestion-tag {
   display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   padding: 0.2rem 0.55rem;
   border-radius: 999px;
   font-size: 0.75rem;
@@ -171,7 +173,46 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  margin-top: 0.15rem;
   font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.35;
+  cursor: pointer;
+}
+
+.auth-field .song-suggestion-filter-checkbox input[type='checkbox'],
+.song-suggestion-filter-checkbox input[type='checkbox'] {
+  width: 1.05rem;
+  height: 1.05rem;
+  min-width: 1.05rem;
+  min-height: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.2);
+  accent-color: #ffcc33;
+  cursor: pointer;
+}
+
+.auth-field .song-suggestion-tag input[type='checkbox'],
+.song-suggestion-tag input[type='checkbox'] {
+  width: 0.95rem;
+  height: 0.95rem;
+  min-width: 0.95rem;
+  min-height: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
+  accent-color: #ffcc33;
+  cursor: pointer;
+}
+
+.song-suggestion-selection-field .song-suggestion-mode-note {
+  margin-top: 0.35rem;
 }
 
 .song-suggestion-form-actions {
@@ -535,6 +576,69 @@
   color: var(--text-muted);
 }
 
+.song-suggestion-collapsible-section {
+  padding: 0;
+  overflow: hidden;
+}
+
+.song-suggestion-collapsible-summary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.song-suggestion-collapsible-summary::-webkit-details-marker {
+  display: none;
+}
+
+.song-suggestion-collapsible-summary-text h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.15rem;
+  letter-spacing: -0.03em;
+}
+
+.song-suggestion-collapsible-summary-text p {
+  margin: 0;
+  color: #bbb6aa;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.song-suggestion-collapsible-chevron {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6f3ea;
+  display: grid;
+  place-items: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.song-suggestion-collapsible-chevron::before {
+  content: '+';
+}
+
+.song-suggestion-collapsible-section[open] .song-suggestion-collapsible-chevron::before {
+  content: '−';
+}
+
+.song-suggestion-collapsible-body {
+  padding: 0 1.5rem 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.song-suggestion-collapsible-section[open] .song-suggestion-collapsible-body {
+  padding-top: 1.25rem;
+}
+
 .song-suggestion-confirm-list {
   list-style: none;
   margin: 0;
@@ -553,7 +657,8 @@
 }
 
 .song-suggestion-confirm-item.tie {
-  border-color: rgba(255, 193, 7, 0.35);
+  background: rgba(255, 237, 213, 0.85);
+  border-color: rgba(217, 119, 6, 0.2);
 }
 
 .song-suggestion-panel-intro {
@@ -592,6 +697,11 @@
 .app-shell .surface-light .song-suggestion-filter-checkbox {
   color: #1f2937;
   font-weight: 600;
+}
+
+.app-main .surface-light .song-suggestion-filter-checkbox input[type='checkbox'],
+.app-shell .surface-light .song-suggestion-filter-checkbox input[type='checkbox'] {
+  accent-color: #1d4ed8;
 }
 
 .app-main .surface-light .song-suggestion-item-rationale,
@@ -711,6 +821,7 @@
   color: #6b7280;
 }
 
+.song-suggestion-suggester,
 .song-suggestion-ranking-suggester {
   display: flex;
   align-items: center;
@@ -718,6 +829,7 @@
   min-width: 0;
 }
 
+.song-suggestion-suggester-avatar,
 .song-suggestion-ranking-suggester-avatar {
   flex-shrink: 0;
   width: 2rem;
@@ -733,12 +845,14 @@
   letter-spacing: -0.03em;
 }
 
+.song-suggestion-suggester-avatar img,
 .song-suggestion-ranking-suggester-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
+.song-suggestion-suggester-name,
 .song-suggestion-ranking-suggester-name {
   font-size: 0.88rem;
   font-weight: 650;
@@ -746,6 +860,15 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.song-suggestion-item-suggester {
+  margin-top: 0.45rem;
+}
+
+.app-main .surface-light .song-suggestion-suggester-name,
+.app-shell .surface-light .song-suggestion-suggester-name {
+  color: #111827;
 }
 
 .song-suggestion-ranking-row-selected td {
@@ -757,7 +880,12 @@
 }
 
 .song-suggestion-ranking-row-tie td {
-  box-shadow: inset 0 0 0 1px rgba(217, 119, 6, 0.35);
+  background: rgba(255, 237, 213, 0.85);
+}
+
+.song-suggestion-ranking-row-selected.song-suggestion-ranking-row-tie td,
+.song-suggestion-ranking-row-below.song-suggestion-ranking-row-tie td {
+  background: rgba(255, 237, 213, 0.85);
 }
 
 .song-suggestion-ranking-status {
