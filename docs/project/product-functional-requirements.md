@@ -399,7 +399,7 @@ Limits apply when entitlements are enforced. Band workspace features resolve fro
 
 Billing UI at `/app/profile` (Stripe checkout and Customer Portal when configured). See tracker Phase 15.
 
-**Launch promo plan testing:** While a user has active launch full-access (`source: launch_promo`, leader scope), they may choose to **operate as** Player Free, Player Plus, or Player Pro from the profile billing panel. When **entitlements are enforced** (platform toggle or env), the same **Test player plan limits** control is shown for any player — including Stripe subscribers — so limits and upgrade prompts can be verified without changing billing. Subscription records are unchanged.
+**Plan testing (default free-tier experience):** New accounts default to **Player Free** entitlement limits (`entitlement_test_leader_plan_code = player_free`) even when launch promo, beta, or platform access offers grant full subscription access. Organisers default to **Organiser Free** (`entitlement_test_organiser_plan_code = organiser_free`) on profile creation or when organiser role is granted. Users may change simulated tiers from `/app/profile` billing (**Test player plan limits** / **Test organiser plan limits**) or clear the override to use their subscription plan. Subscription records are unchanged.
 
 ### Workspace navigation (implemented)
 

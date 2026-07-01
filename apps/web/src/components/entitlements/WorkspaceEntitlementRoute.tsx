@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import {
   checkUserLeaderCapability,
   checkUserOrganiserCapability,
+  isPlanCapabilityEnabledForUser,
   type EntitlementPlanScope,
 } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
@@ -12,6 +13,8 @@ type WorkspaceEntitlementRouteProps = {
   planScope?: EntitlementPlanScope;
   children: ReactNode;
   redirectTo?: string;
+  /** When true, gate on plan entitlements even if platform enforcement is disabled. */
+  planGated?: boolean;
 };
 
 export function WorkspaceEntitlementRoute({
@@ -19,6 +22,7 @@ export function WorkspaceEntitlementRoute({
   planScope = 'leader',
   children,
   redirectTo = '/app',
+  planGated = false,
 }: WorkspaceEntitlementRouteProps) {
   const { user } = useAuth();
   const [allowed, setAllowed] = useState<boolean | null>(null);
@@ -30,8 +34,11 @@ export function WorkspaceEntitlementRoute({
     }
 
     let cancelled = false;
-    const check =
-      planScope === 'organiser'
+    const check = planGated
+      ? isPlanCapabilityEnabledForUser(user.id, capability, planScope).then((enabled) => ({
+          allowed: enabled,
+        }))
+      : planScope === 'organiser'
         ? checkUserOrganiserCapability(user.id, capability)
         : checkUserLeaderCapability(user.id, capability);
 
@@ -50,7 +57,7 @@ export function WorkspaceEntitlementRoute({
     return () => {
       cancelled = true;
     };
-  }, [capability, planScope, user]);
+  }, [capability, planGated, planScope, user]);
 
   if (allowed === null) {
     return (
@@ -86,6 +93,7 @@ export function BandDirectoryAccessRoute({
       capability={capability}
       planScope={planScope}
       redirectTo={redirectTo}
+      planGated
     >
       {children}
     </WorkspaceEntitlementRoute>

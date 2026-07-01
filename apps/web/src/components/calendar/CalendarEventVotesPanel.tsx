@@ -1,11 +1,12 @@
 import {
   AVAILABILITY_VOTE_LABELS,
-  availabilityVoteClass,
   summarizeAvailabilityVotes,
   type AvailabilityVote,
   type CalendarEventVote,
   type CalendarMemberAvailabilityRow,
 } from '@bandie/data';
+
+const MEMBER_VOTE_COLUMNS: AvailabilityVote[] = ['available', 'maybe', 'no', 'pending'];
 
 type CalendarEventVotesPanelProps = {
   votes: CalendarEventVote[];
@@ -53,22 +54,54 @@ export function CalendarEventVotesPanel({
         {memberRows.length === 0 ? (
           <p className="calendar-member-votes-empty">No active band members yet.</p>
         ) : (
-          <ul className="calendar-member-vote-list">
-            {memberRows.map((row) => (
-              <li
-                key={row.userId}
-                className={`calendar-member-vote-row${row.isCurrentUser ? ' is-current-user' : ''}`}
-              >
-                <span className="calendar-member-vote-name">
-                  {row.displayName}
-                  {row.isCurrentUser ? <span className="calendar-member-vote-you">You</span> : null}
-                </span>
-                <span className={availabilityVoteClass(row.vote)}>
-                  {AVAILABILITY_VOTE_LABELS[row.vote]}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <div className="calendar-member-vote-table-wrap">
+            <table className="calendar-member-vote-table">
+              <thead>
+                <tr>
+                  <th scope="col">Member</th>
+                  {MEMBER_VOTE_COLUMNS.map((vote) => (
+                    <th key={vote} scope="col" className="calendar-member-vote-table-status">
+                      {AVAILABILITY_VOTE_LABELS[vote]}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {memberRows.map((row) => (
+                  <tr
+                    key={row.userId}
+                    className={row.isCurrentUser ? 'is-current-user' : undefined}
+                  >
+                    <th scope="row" className="calendar-member-vote-table-name">
+                      <span>{row.displayName}</span>
+                      {row.isCurrentUser ? (
+                        <span className="calendar-member-vote-you">You</span>
+                      ) : null}
+                    </th>
+                    {MEMBER_VOTE_COLUMNS.map((vote) => (
+                      <td
+                        key={vote}
+                        className={`calendar-member-vote-table-cell calendar-member-vote-table-cell-${vote}${
+                          row.vote === vote ? ' is-active' : ''
+                        }`}
+                        aria-label={
+                          row.vote === vote
+                            ? `${row.displayName}: ${AVAILABILITY_VOTE_LABELS[vote]}`
+                            : undefined
+                        }
+                      >
+                        {row.vote === vote ? (
+                          <span className="calendar-availability-tick" aria-hidden="true">
+                            ✓
+                          </span>
+                        ) : null}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

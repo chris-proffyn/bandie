@@ -136,7 +136,7 @@ All tables prefixed `bandie_`. Full schema to be defined in migrations. Conceptu
 
 | Entity | Purpose |
 |---|---|
-| `bandie_profiles` | Musician / player profile (display name, username, instruments, gear, directory visibility, player/organiser roles, leader contact fields, optional `entitlement_test_leader_plan_code` for launch-promo tier simulation) |
+| `bandie_profiles` | Musician / player profile (display name, username, instruments, gear, directory visibility, player/organiser roles, leader contact fields, optional `entitlement_test_leader_plan_code` and `entitlement_test_organiser_plan_code` for tier simulation — default `player_free` / `organiser_free` on signup) |
 | `bandie_bands` | Band workspace + public profile |
 | `bandie_band_members` | User ↔ band with roles |
 | `bandie_band_invitations` | Email invitations with accept token |
@@ -235,7 +235,7 @@ RLS policies must enforce band membership for all private data.
 
 Band workspace limits resolve from the **primary leader’s** active subscription (`plan_scope = leader`). Upgrade prompt labels use `PLAN_DISPLAY_NAMES` for known codes; live plan names also load from the DB on subscription join.
 
-**Launch promo plan override:** When a user has an active `launch_promo` leader subscription, `bandie_profiles.entitlement_test_leader_plan_code` may be set to `player_free`, `player_plus`, or `player_pro`. `loadActiveSubscription()` and `listUserSubscriptions()` resolve the **effective** plan from this override for entitlement checks and billing UI; the subscription row is unchanged. Cleared or null uses full launch access (Player Pro).
+**Entitlement test plan override:** `bandie_profiles.entitlement_test_leader_plan_code` defaults to `player_free` on signup; `entitlement_test_organiser_plan_code` defaults to `organiser_free` when `is_organiser` is true. Either may be set to a simulated tier (`player_free` \| `player_plus` \| `player_pro`; `organiser_free` \| `organiser_plus`) or cleared (null) to use the subscription plan. `loadActiveSubscription()` and `listUserSubscriptions()` resolve the **effective** plan from these overrides; `canPerform()` enforces limits when a test plan is set even if platform-wide entitlement enforcement is off. Subscription rows are unchanged.
 
 **Player plan limits (seeded in `20260630190000`; authoritative in entitlements spec §20.2):**
 
@@ -312,7 +312,7 @@ Authoritative spec: `docs/project/bandie_dropbox_song_part_storage_spec.md`
 - Flows: register, login, logout, password reset
 - Session persisted in `localStorage` with auto-refresh and URL detection
 - Sign-out navigates to `/` before clearing session (avoids redirect to `/login`)
-- Post-auth routing based on band membership and pending invitations/outreach (`routeAfterAuth`); pending items route to `/app/communications`
+- Post-auth routing based on band membership and pending invitations/outreach (`routeAfterAuth`); pending items route to `/app/communications`. Player-mode users without directory entitlements are sent to `/app` (My bands), not `/app/bands`.
 - App membership via `platform_user_app_memberships` (multi-tenant pattern)
 - Display name resolution: profile `display_name` → auth `user_metadata.display_name` → email local-part → `"Band member"`
 

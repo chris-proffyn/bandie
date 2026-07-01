@@ -622,6 +622,12 @@ Task checklist: `docs/project/bandie_song_suggestions_voting_implementation_plan
 - `/app/profile` billing panel: **Test player plan limits** selector when launch access is active; billing summary shows **Operating as** vs launch access plan
 - Docs: product functional requirements §6; product technical requirements §6
 
+**4 July 2026 — Default free-tier test plan on join**
+- Migration `20260704130000_bandie_entitlement_test_plan_defaults.sql` — `entitlement_test_organiser_plan_code`; `bandie_apply_default_entitlement_test_plans()`; signup trigger defaults `player_free` / `organiser_free`; backfill existing profiles; organiser invite accept applies defaults on ON CONFLICT path
+- `@bandie/data`: organiser test plan codes; `updateEntitlementTestOrganiserPlan`, `hasActiveTestPlanSimulation`; entitlements enforce when test plan set even if platform enforcement off
+- `/app/profile` billing: always show player and organiser **Test plan limits** panels; launch promo copy notes default Player Free experience
+- Docs: product functional requirements §6; product technical requirements §6
+
 **1 July 2026 — Communications type taxonomy**
 - Three explicit categories: **player invites**, **gig invites**, **general messages** (`CommunicationCategory` in `@bandie/data`)
 - Communications tabs: All, Player invites (player workspace), Gig invites, Messages

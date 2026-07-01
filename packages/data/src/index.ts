@@ -637,6 +637,7 @@ export {
   checkBandLeaderCapability,
   checkUserLeaderCapability,
   checkUserOrganiserCapability,
+  isPlanCapabilityEnabledForUser,
   getUsageSummaryForUser,
   getBandUsageSummary,
   listPublicPlans,
@@ -997,16 +998,25 @@ export type { LaunchPromoStatus } from './launchPromo';
 
 export {
   PLAYER_ENTITLEMENT_TEST_PLAN_CODES,
+  ORGANISER_ENTITLEMENT_TEST_PLAN_CODES,
   canConfigureEntitlementTestLeaderPlan,
+  canConfigureEntitlementTestPlans,
   formatEntitlementTestPlanLabel,
   getEntitlementTestPlanSettings,
+  hasActiveTestPlanSimulation,
+  isOrganiserEntitlementTestPlanCode,
   isPlayerEntitlementTestPlanCode,
   resolveEffectiveLeaderPlanCode,
+  resolveEffectiveOrganiserPlanCode,
   shouldApplyEntitlementTestPlanOverride,
+  shouldApplyLeaderTestPlanOverride,
+  shouldApplyOrganiserTestPlanOverride,
   updateEntitlementTestLeaderPlan,
+  updateEntitlementTestOrganiserPlan,
 } from './entitlementTestPlan';
 export type {
   EntitlementTestPlanSettings,
+  OrganiserEntitlementTestPlanCode,
   PlayerEntitlementTestPlanCode,
 } from './entitlementTestPlan';
 

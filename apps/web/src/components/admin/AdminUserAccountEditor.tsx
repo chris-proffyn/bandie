@@ -114,15 +114,6 @@ export function AdminUserAccountEditor({ account, onSaved, onCancel }: AdminUser
         await adminSetUserSubscriptionPlan(account.user_id, 'leader', leaderPlanCode);
       }
 
-      if (
-        account.organiser_subscription_id &&
-        !organiserStripe &&
-        organiserPlanCode &&
-        organiserPlanCode !== account.organiser_plan_code
-      ) {
-        await adminSetUserSubscriptionPlan(account.user_id, 'organiser', organiserPlanCode);
-      }
-
       if (account.leader_subscription_id && !leaderStripe) {
         const nextLeaderTrial = fromDateTimeLocalValue(leaderTrialEnd);
         const currentLeaderTrial = account.leader_trial_end ?? null;
@@ -131,10 +122,29 @@ export function AdminUserAccountEditor({ account, onSaved, onCancel }: AdminUser
         }
       }
 
+      if (
+        isOrganiser &&
+        !organiserStripe &&
+        organiserPlanCode &&
+        (!account.organiser_subscription_id || organiserPlanCode !== account.organiser_plan_code)
+      ) {
+        await adminSetUserSubscriptionPlan(account.user_id, 'organiser', organiserPlanCode);
+      }
+
       if (account.organiser_subscription_id && !organiserStripe) {
         const nextOrganiserTrial = fromDateTimeLocalValue(organiserTrialEnd);
         const currentOrganiserTrial = account.organiser_trial_end ?? null;
         if (nextOrganiserTrial !== currentOrganiserTrial) {
+          await adminSetUserSubscriptionTrialEnd(account.user_id, 'organiser', nextOrganiserTrial);
+        }
+      } else if (
+        isOrganiser &&
+        !organiserStripe &&
+        organiserTrialEnd.trim() &&
+        !account.organiser_subscription_id
+      ) {
+        const nextOrganiserTrial = fromDateTimeLocalValue(organiserTrialEnd);
+        if (nextOrganiserTrial) {
           await adminSetUserSubscriptionTrialEnd(account.user_id, 'organiser', nextOrganiserTrial);
         }
       }
@@ -309,8 +319,40 @@ export function AdminUserAccountEditor({ account, onSaved, onCancel }: AdminUser
                 Current promo end: {formatAdminAccountDate(account.organiser_trial_end)}
               </p>
             </>
+          ) : isOrganiser ? (
+            <>
+              <p className="admin-account-note">
+                No organiser subscription yet. Choose a plan below and save to create one.
+              </p>
+              <div className="auth-field">
+                <label htmlFor={`organiser-plan-new-${account.user_id}`}>Assigned plan</label>
+                <select
+                  id={`organiser-plan-new-${account.user_id}`}
+                  value={organiserPlanCode}
+                  onChange={(event) => setOrganiserPlanCode(event.target.value)}
+                >
+                  {ORGANISER_PLAN_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="auth-field">
+                <label htmlFor={`organiser-trial-new-${account.user_id}`}>Promo / trial ends</label>
+                <input
+                  id={`organiser-trial-new-${account.user_id}`}
+                  type="datetime-local"
+                  value={organiserTrialEnd}
+                  onChange={(event) => setOrganiserTrialEnd(event.target.value)}
+                />
+              </div>
+            </>
           ) : (
-            <p className="admin-account-note">No active organiser subscription.</p>
+            <p className="admin-account-note">
+              No active organiser subscription. Enable the Organiser workspace role above, then assign
+              a plan here.
+            </p>
           )}
         </section>
       </div>

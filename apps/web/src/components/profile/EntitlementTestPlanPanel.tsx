@@ -2,35 +2,63 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   formatEntitlementTestPlanLabel,
   getEntitlementTestPlanSettings,
+  ORGANISER_ENTITLEMENT_TEST_PLAN_CODES,
   PLAYER_ENTITLEMENT_TEST_PLAN_CODES,
   updateEntitlementTestLeaderPlan,
+  updateEntitlementTestOrganiserPlan,
+  type EntitlementPlanScope,
+  type OrganiserEntitlementTestPlanCode,
   type PlayerEntitlementTestPlanCode,
 } from '@bandie/data';
 import '../../styles/entitlements.css';
 
 type EntitlementTestPlanPanelProps = {
+  scope: EntitlementPlanScope;
   visible: boolean;
   subscriptionPlanName?: string;
   isLaunchPromo?: boolean;
   onUpdated?: () => void;
 };
 
+const PLAN_OPTIONS = {
+  leader: PLAYER_ENTITLEMENT_TEST_PLAN_CODES,
+  organiser: ORGANISER_ENTITLEMENT_TEST_PLAN_CODES,
+} as const;
+
+const PANEL_COPY = {
+  leader: {
+    title: 'Test player plan limits',
+    intro:
+      'Your account starts on Player Free limits so you can experience the product as a new member. Change this to simulate Plus or Pro, or use your full subscription plan.',
+    subscriptionLabel: 'Use subscription plan',
+  },
+  organiser: {
+    title: 'Test organiser plan limits',
+    intro:
+      'Your organiser workspace starts on Organiser Free limits. Change this to simulate Organiser Plus, or use your full subscription plan.',
+    subscriptionLabel: 'Use subscription plan',
+  },
+} as const;
+
 export function EntitlementTestPlanPanel({
+  scope,
   visible,
   subscriptionPlanName,
   isLaunchPromo = false,
   onUpdated,
 }: EntitlementTestPlanPanelProps) {
+  const copy = PANEL_COPY[scope];
+  const planOptions = PLAN_OPTIONS[scope];
   const [selected, setSelected] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  const defaultOptionLabel = isLaunchPromo
-    ? 'Full launch access (Player Pro)'
+  const subscriptionOptionLabel = isLaunchPromo
+    ? `Full launch access (${subscriptionPlanName ?? 'subscription plan'})`
     : subscriptionPlanName
       ? `Use my subscription (${subscriptionPlanName})`
-      : 'Use my subscription';
+      : copy.subscriptionLabel;
 
   const loadSettings = useCallback(async () => {
     if (!visible) {
@@ -38,8 +66,9 @@ export function EntitlementTestPlanPanel({
     }
 
     const settings = await getEntitlementTestPlanSettings();
-    setSelected(settings.leaderPlanCode ?? '');
-  }, [visible]);
+    const planCode = scope === 'leader' ? settings.leaderPlanCode : settings.organiserPlanCode;
+    setSelected(planCode ?? '');
+  }, [scope, visible]);
 
   useEffect(() => {
     loadSettings().catch((err) => {
@@ -57,13 +86,19 @@ export function EntitlementTestPlanPanel({
     setMessage(null);
 
     try {
-      const planCode =
-        nextValue === '' ? null : (nextValue as PlayerEntitlementTestPlanCode);
-      const updated = await updateEntitlementTestLeaderPlan(planCode);
-      setSelected(updated.leaderPlanCode ?? '');
+      const planCode = nextValue === '' ? null : nextValue;
+      const updated =
+        scope === 'leader'
+          ? await updateEntitlementTestLeaderPlan(planCode as PlayerEntitlementTestPlanCode | null)
+          : await updateEntitlementTestOrganiserPlan(
+              planCode as OrganiserEntitlementTestPlanCode | null,
+            );
+      const activePlanCode =
+        scope === 'leader' ? updated.leaderPlanCode : updated.organiserPlanCode;
+      setSelected(activePlanCode ?? '');
       setMessage(
-        updated.leaderPlanCode
-          ? `Operating as ${formatEntitlementTestPlanLabel(updated.leaderPlanCode)} for entitlement checks.`
+        activePlanCode
+          ? `Operating as ${formatEntitlementTestPlanLabel(activePlanCode)} for entitlement checks.`
           : isLaunchPromo
             ? 'Using full launch access for entitlement checks.'
             : 'Using your subscription plan for entitlement checks.',
@@ -77,26 +112,21 @@ export function EntitlementTestPlanPanel({
   }
 
   return (
-    <section className="billing-test-plan-panel" aria-labelledby="entitlement-test-plan-heading">
-      <h3 id="entitlement-test-plan-heading">Test player plan limits</h3>
-      <p className="billing-test-plan-intro">
-        {isLaunchPromo
-          ? 'During launch full access you can simulate Player Free, Plus, or Pro to verify limits and upgrade prompts. Your launch access is unchanged.'
-          : 'Simulate Player Free, Plus, or Pro to verify limits and upgrade prompts. Your paid subscription is unchanged.'}{' '}
-        This only affects entitlement checks while enforcement is enabled.
-      </p>
+    <section className="billing-test-plan-panel" aria-labelledby={`entitlement-test-plan-${scope}`}>
+      <h3 id={`entitlement-test-plan-${scope}`}>{copy.title}</h3>
+      <p className="billing-test-plan-intro">{copy.intro}</p>
 
-      <label className="billing-test-plan-field" htmlFor="entitlement-test-leader-plan">
+      <label className="billing-test-plan-field" htmlFor={`entitlement-test-${scope}-plan`}>
         <span>Operate as</span>
         <select
-          id="entitlement-test-leader-plan"
+          id={`entitlement-test-${scope}-plan`}
           className="billing-test-plan-select"
           value={selected}
           disabled={loading}
           onChange={(event) => handleChange(event.target.value)}
         >
-          <option value="">{defaultOptionLabel}</option>
-          {PLAYER_ENTITLEMENT_TEST_PLAN_CODES.map((code) => (
+          <option value="">{subscriptionOptionLabel}</option>
+          {planOptions.map((code) => (
             <option key={code} value={code}>
               {formatEntitlementTestPlanLabel(code)}
             </option>

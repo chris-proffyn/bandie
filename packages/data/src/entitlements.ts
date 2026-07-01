@@ -2,9 +2,11 @@ import { getBandieClient } from './context';
 import { isEntitlementEnforcementEnabled } from './entitlementEnforcement';
 import {
   getEntitlementTestPlanSettings,
-  shouldApplyEntitlementTestPlanOverride,
+  hasActiveTestPlanSimulation,
+  shouldApplyLeaderTestPlanOverride,
+  shouldApplyOrganiserTestPlanOverride,
 } from './entitlementTestPlan';
-import { isLaunchPromoSubscription, isLaunchTrialExpired } from './launchPromo';
+import { isLaunchTrialExpired } from './launchPromo';
 import { logGateDecision } from './gateLogs';
 import { EntitlementGateError } from './entitlementErrors';
 import type {
@@ -246,19 +248,19 @@ async function loadActiveSubscription(
   };
 
   if (planScope === 'leader') {
-    const isLaunchPromo = isLaunchPromoSubscription({
-      source: data.source as string,
-      stripeSubscriptionId: data.stripe_subscription_id as string | null,
-    });
     const { leaderPlanCode } = await getEntitlementTestPlanSettings(userId);
-    if (
-      leaderPlanCode &&
-      shouldApplyEntitlementTestPlanOverride(leaderPlanCode, {
-        isLaunchPromo,
-        enforcementEnabled: isEntitlementEnforcementEnabled(),
-      })
-    ) {
+    if (shouldApplyLeaderTestPlanOverride(leaderPlanCode)) {
       const overridden = await loadPlanByCode(leaderPlanCode);
+      if (overridden) {
+        return overridden;
+      }
+    }
+  }
+
+  if (planScope === 'organiser') {
+    const { organiserPlanCode } = await getEntitlementTestPlanSettings(userId);
+    if (shouldApplyOrganiserTestPlanOverride(organiserPlanCode)) {
+      const overridden = await loadPlanByCode(organiserPlanCode);
       if (overridden) {
         return overridden;
       }
@@ -456,10 +458,6 @@ async function resolveBillingUserId(input: EntitlementCheckInput): Promise<strin
 }
 
 export async function canPerform(input: EntitlementCheckInput): Promise<GateDecision> {
-  if (!isEntitlementEnforcementEnabled()) {
-    return allowedDecision({ capability: input.capability });
-  }
-
   const client = getBandieClient();
   const {
     data: { user },
@@ -474,6 +472,15 @@ export async function canPerform(input: EntitlementCheckInput): Promise<GateDeci
   }
 
   const billingUserId = await resolveBillingUserId(input);
+  const planScope = resolvePlanScope(input);
+  const enforce =
+    isEntitlementEnforcementEnabled() ||
+    (billingUserId != null && (await hasActiveTestPlanSimulation(billingUserId, planScope)));
+
+  if (!enforce) {
+    return allowedDecision({ capability: input.capability });
+  }
+
   if (!billingUserId) {
     return deniedDecision({
       reasonCode: 'plan_missing',
@@ -482,7 +489,6 @@ export async function canPerform(input: EntitlementCheckInput): Promise<GateDeci
     });
   }
 
-  const planScope = resolvePlanScope(input);
   const subscription = await loadActiveSubscription(billingUserId, planScope);
   if (!subscription) {
     return deniedDecision({
@@ -608,6 +614,35 @@ export async function checkUserOrganiserCapability(
     requestedAmount,
     planScope: 'organiser',
   });
+}
+
+function isBooleanPlanCapabilityEnabled(
+  capabilityKey: string,
+  entitlementValue: EntitlementValue,
+): boolean {
+  if (capabilityKey === 'calendar.use') {
+    return entitlementValue === 'basic' || entitlementValue === 'full';
+  }
+
+  if (capabilityKey.endsWith('.max_count')) {
+    return typeof entitlementValue === 'number' || isUnlimitedLimit(entitlementValue);
+  }
+
+  return entitlementValue === true;
+}
+
+export async function isPlanCapabilityEnabledForUser(
+  userId: string,
+  capability: string,
+  planScope: EntitlementPlanScope = 'leader',
+): Promise<boolean> {
+  const subscription = await loadActiveSubscription(userId, planScope);
+  if (!subscription) {
+    return false;
+  }
+
+  const capabilityValue = await resolveEntitlementValue(subscription, userId, capability);
+  return isBooleanPlanCapabilityEnabled(capability, capabilityValue);
 }
 
 export async function getUsageSummaryForUser(

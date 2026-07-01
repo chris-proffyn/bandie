@@ -135,35 +135,95 @@
   font-size: 0.92rem;
 }
 
-.calendar-member-vote-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 0.45rem;
+.calendar-member-vote-table-wrap {
+  overflow-x: auto;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
 }
 
-.calendar-member-vote-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.55rem 0.7rem;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+.calendar-member-vote-table {
+  width: 100%;
+  min-width: 28rem;
+  border-collapse: collapse;
+  font-size: 0.92rem;
 }
 
-.calendar-member-vote-row.is-current-user {
-  border-color: rgba(255, 141, 168, 0.35);
-  background: rgba(255, 141, 168, 0.08);
+.calendar-member-vote-table th,
+.calendar-member-vote-table td {
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: center;
+  vertical-align: middle;
 }
 
-.calendar-member-vote-name {
+.calendar-member-vote-table thead th {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.calendar-member-vote-table tbody tr:last-child th,
+.calendar-member-vote-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.calendar-member-vote-table-name {
+  text-align: left;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.calendar-member-vote-table-name span {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  font-weight: 600;
+}
+
+.calendar-member-vote-table tbody tr.is-current-user {
+  background: rgba(255, 141, 168, 0.08);
+}
+
+.calendar-member-vote-table-status {
+  min-width: 4.5rem;
+}
+
+.calendar-member-vote-table-cell {
+  color: rgba(255, 255, 255, 0.18);
+}
+
+.calendar-availability-tick {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.calendar-member-vote-table-cell-available.is-active .calendar-availability-tick {
+  background: rgba(76, 175, 80, 0.18);
+  color: #9ae6b4;
+}
+
+.calendar-member-vote-table-cell-maybe.is-active .calendar-availability-tick {
+  background: rgba(255, 193, 7, 0.15);
+  color: #fde68a;
+}
+
+.calendar-member-vote-table-cell-no.is-active .calendar-availability-tick {
+  background: rgba(239, 68, 68, 0.16);
+  color: #fca5a5;
+}
+
+.calendar-member-vote-table-cell-pending.is-active .calendar-availability-tick {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
 }
 
 .calendar-member-vote-you {

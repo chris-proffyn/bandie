@@ -1,5 +1,5 @@
 import { getCurrentSession } from './auth';
-import { checkUserLeaderCapability } from './entitlements';
+import { isPlanCapabilityEnabledForUser } from './entitlements';
 
 export type PlayerWorkspaceAccess = {
   canCreateBand: boolean;
@@ -22,16 +22,16 @@ export async function getPlayerWorkspaceAccess(userId?: string): Promise<PlayerW
   }
 
   const [createBand, bandDirectory, playerDirectory, playerMessage] = await Promise.all([
-    checkUserLeaderCapability(resolvedUserId, 'band.create'),
-    checkUserLeaderCapability(resolvedUserId, 'band_directory.browse'),
-    checkUserLeaderCapability(resolvedUserId, 'player_directory.browse'),
-    checkUserLeaderCapability(resolvedUserId, 'player_message.send'),
+    isPlanCapabilityEnabledForUser(resolvedUserId, 'band.create', 'leader'),
+    isPlanCapabilityEnabledForUser(resolvedUserId, 'band_directory.browse', 'leader'),
+    isPlanCapabilityEnabledForUser(resolvedUserId, 'player_directory.browse', 'leader'),
+    isPlanCapabilityEnabledForUser(resolvedUserId, 'player_message.send', 'leader'),
   ]);
 
   return {
-    canCreateBand: createBand.allowed,
-    canBrowseBandDirectory: bandDirectory.allowed,
-    canBrowsePlayerDirectory: playerDirectory.allowed,
-    canSendPlayerMessage: playerMessage.allowed,
+    canCreateBand: createBand,
+    canBrowseBandDirectory: bandDirectory,
+    canBrowsePlayerDirectory: playerDirectory,
+    canSendPlayerMessage: playerMessage,
   };
 }

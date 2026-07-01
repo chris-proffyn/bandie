@@ -3,10 +3,10 @@ import { getPlayerWorkspaceAccess, type PlayerWorkspaceAccess } from '@bandie/da
 import { useAuth } from '../context/AuthContext';
 
 const DEFAULT_ACCESS: PlayerWorkspaceAccess = {
-  canCreateBand: true,
-  canBrowseBandDirectory: true,
-  canBrowsePlayerDirectory: true,
-  canSendPlayerMessage: true,
+  canCreateBand: false,
+  canBrowseBandDirectory: false,
+  canBrowsePlayerDirectory: false,
+  canSendPlayerMessage: false,
 };
 
 export function usePlayerWorkspaceAccess(): {

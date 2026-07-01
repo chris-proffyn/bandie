@@ -5,9 +5,11 @@ import { PLAN_DISPLAY_NAMES, type PlanCode } from './entitlementTypes';
 import {
   formatEntitlementTestPlanLabel,
   getEntitlementTestPlanSettings,
-  isPlayerEntitlementTestPlanCode,
   resolveEffectiveLeaderPlanCode,
-  shouldApplyEntitlementTestPlanOverride,
+  resolveEffectiveOrganiserPlanCode,
+  shouldApplyLeaderTestPlanOverride,
+  shouldApplyOrganiserTestPlanOverride,
+  type OrganiserEntitlementTestPlanCode,
   type PlayerEntitlementTestPlanCode,
 } from './entitlementTestPlan';
 import {
@@ -15,8 +17,6 @@ import {
   isLaunchPromoSubscription,
   isLaunchTrialExpired,
 } from './launchPromo';
-import { isEntitlementEnforcementEnabled } from './entitlementEnforcement';
-import { loadPlatformEntitlementEnforcement } from './platformSettings';
 
 export type UserSubscriptionSummary = {
   id: string;
@@ -35,8 +35,8 @@ export type UserSubscriptionSummary = {
   /** Plan on the subscription record (before launch-promo test override). */
   subscriptionPlanCode: string;
   subscriptionPlanName: string;
-  /** When set, the user is simulating a lower player tier during launch access. */
-  testPlanOverride: PlayerEntitlementTestPlanCode | null;
+  /** When set, the user is simulating a lower tier than their subscription record. */
+  testPlanOverride: PlayerEntitlementTestPlanCode | OrganiserEntitlementTestPlanCode | null;
 };
 
 export type PublicPlanOffer = {
@@ -111,8 +111,6 @@ export async function listUserSubscriptions(userId?: string): Promise<UserSubscr
   }
 
   const testSettings = await getEntitlementTestPlanSettings(resolvedUserId);
-  await loadPlatformEntitlementEnforcement();
-  const enforcementEnabled = isEntitlementEnforcementEnabled();
 
   return (data ?? [])
     .filter((row) => {
@@ -129,27 +127,36 @@ export async function listUserSubscriptions(userId?: string): Promise<UserSubscr
     const source = row.source as string;
     const planScope = row.plan_scope as EntitlementPlanScope;
     const isLaunchPromo = isLaunchPromoSubscription({ source, stripeSubscriptionId });
-    const canApplyTestOverride =
-      planScope === 'leader' &&
-      shouldApplyEntitlementTestPlanOverride(testSettings.leaderPlanCode, {
-        isLaunchPromo,
-        enforcementEnabled,
-      });
+    const leaderTestPlan = testSettings.leaderPlanCode;
+    const organiserTestPlan = testSettings.organiserPlanCode;
+    const canApplyLeaderOverride = shouldApplyLeaderTestPlanOverride(leaderTestPlan);
+    const canApplyOrganiserOverride = shouldApplyOrganiserTestPlanOverride(organiserTestPlan);
+    const effectivePlanCode =
+      planScope === 'leader'
+        ? resolveEffectiveLeaderPlanCode(
+            planRow.code,
+            canApplyLeaderOverride ? leaderTestPlan : null,
+          )
+        : resolveEffectiveOrganiserPlanCode(
+            planRow.code,
+            canApplyOrganiserOverride ? organiserTestPlan : null,
+          );
     const testPlanOverride =
-      canApplyTestOverride &&
-      isPlayerEntitlementTestPlanCode(testSettings.leaderPlanCode) &&
-      testSettings.leaderPlanCode !== planRow.code
-        ? testSettings.leaderPlanCode
-        : null;
-    const effectivePlanCode = resolveEffectiveLeaderPlanCode(
-      planRow.code,
-      canApplyTestOverride ? testSettings.leaderPlanCode : null,
-      { isLaunchPromo, enforcementEnabled },
-    );
+      planScope === 'leader' &&
+      canApplyLeaderOverride &&
+      leaderTestPlan !== planRow.code
+        ? leaderTestPlan
+        : planScope === 'organiser' &&
+            canApplyOrganiserOverride &&
+            organiserTestPlan !== planRow.code
+          ? organiserTestPlan
+          : null;
     const effectivePlanName =
       effectivePlanCode === planRow.code
         ? planRow.name
-        : formatEntitlementTestPlanLabel(effectivePlanCode as PlayerEntitlementTestPlanCode);
+        : formatEntitlementTestPlanLabel(
+            effectivePlanCode as PlayerEntitlementTestPlanCode | OrganiserEntitlementTestPlanCode,
+          );
 
     return {
       id: row.id as string,

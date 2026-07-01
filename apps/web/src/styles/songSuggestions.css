@@ -25,15 +25,41 @@
 .song-suggestion-card {
   display: grid;
   gap: 0.75rem;
+  width: 100%;
   padding: 1rem 1.1rem;
   border: 1px solid var(--border-subtle);
   border-radius: 16px;
   text-decoration: none;
   color: inherit;
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
 }
 
 .song-suggestion-card:hover {
-  border-color: rgba(255, 204, 51, 0.35);
+  background: rgba(255, 204, 51, 0.12);
+  border-color: rgba(255, 204, 51, 0.45);
+  box-shadow: inset 0 0 0 1px rgba(255, 204, 51, 0.18);
+}
+
+.song-suggestion-card:focus-visible {
+  outline: 2px solid #ffcc33;
+  outline-offset: 2px;
+  background: rgba(255, 204, 51, 0.12);
+  border-color: rgba(255, 204, 51, 0.45);
+}
+
+.song-suggestion-card:active {
+  transform: translateY(1px);
+  background: rgba(255, 204, 51, 0.16);
+}
+
+.song-suggestion-card-head h3 {
+  margin: 0 0 0.25rem;
 }
 
 .song-suggestion-card-head {

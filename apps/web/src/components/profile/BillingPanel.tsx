@@ -4,7 +4,6 @@ import {
   getLaunchPromoStatus,
   listPublicPlanOffers,
   listUserSubscriptions,
-  loadPlatformEntitlementEnforcement,
   openBillingPortal,
   startPlanCheckout,
   type LaunchPromoStatus,
@@ -142,25 +141,22 @@ export function BillingPanel({
   const [leaderOffers, setLeaderOffers] = useState<PublicPlanOffer[]>([]);
   const [organiserOffers, setOrganiserOffers] = useState<PublicPlanOffer[]>([]);
   const [launchPromo, setLaunchPromo] = useState<LaunchPromoStatus | null>(null);
-  const [enforcementEnabled, setEnforcementEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(billingNotice ?? null);
 
   const refresh = useCallback(async () => {
     setError(null);
-    const [subs, leader, organiser, promo, enforcement] = await Promise.all([
+    const [subs, leader, organiser, promo] = await Promise.all([
       listUserSubscriptions(),
       showLeaderPlans ? listPublicPlanOffers('leader') : Promise.resolve([]),
       showOrganiserPlans ? listPublicPlanOffers('organiser') : Promise.resolve([]),
       getLaunchPromoStatus(),
-      loadPlatformEntitlementEnforcement(),
     ]);
     setSubscriptions(subs);
     setLeaderOffers(leader);
     setOrganiserOffers(organiser);
     setLaunchPromo(promo);
-    setEnforcementEnabled(enforcement);
   }, [showLeaderPlans, showOrganiserPlans]);
 
   useEffect(() => {
@@ -179,10 +175,8 @@ export function BillingPanel({
   const organiserSub = subscriptions.find((sub) => sub.planScope === 'organiser');
   const launchPromoActive = launchPromo?.active ?? false;
   const hasLaunchTrial = subscriptions.some((sub) => sub.isLaunchPromo);
-  const showLeaderPlanTesting = Boolean(
-    showLeaderPlans &&
-      ((leaderSub?.isLaunchPromo && launchPromoActive) || enforcementEnabled),
-  );
+  const showLeaderPlanTesting = showLeaderPlans;
+  const showOrganiserPlanTesting = showOrganiserPlans;
 
   async function handleUpgrade(planCode: string, planScope: EntitlementPlanScope) {
     setLoading(true);
@@ -218,10 +212,11 @@ export function BillingPanel({
 
       {launchPromoActive && hasLaunchTrial && launchPromo?.endsAt ? (
         <p className="billing-notice billing-launch-promo-notice">
-          Launch access — you have full Player Pro
-          {showOrganiserPlans ? ' and Organiser Plus' : ''} features until{' '}
+          Launch access is active on your account until{' '}
           <strong>{formatLaunchPromoEndDate(launchPromo.endsAt)}</strong>
           {launchPromo.daysRemaining != null ? ` (${launchPromo.daysRemaining} day(s) left)` : null}.
+          You start on Player Free limits by default — use the plan testing controls below to
+          simulate other tiers or use full launch access.
         </p>
       ) : null}
 
@@ -231,6 +226,7 @@ export function BillingPanel({
       {showLeaderPlans ? (
         <>
           <EntitlementTestPlanPanel
+            scope="leader"
             visible={showLeaderPlanTesting}
             subscriptionPlanName={leaderSub?.subscriptionPlanName ?? leaderSub?.planName}
             isLaunchPromo={Boolean(leaderSub?.isLaunchPromo && launchPromoActive)}
@@ -253,15 +249,28 @@ export function BillingPanel({
       ) : null}
 
       {showOrganiserPlans ? (
-        <ScopeSection
-          scope="organiser"
-          subscription={organiserSub}
-          offers={organiserOffers}
-          loading={loading}
-          launchPromoActive={launchPromoActive}
-          onUpgrade={(code) => handleUpgrade(code, 'organiser')}
-          onManage={() => handleManage('organiser')}
-        />
+        <>
+          <EntitlementTestPlanPanel
+            scope="organiser"
+            visible={showOrganiserPlanTesting}
+            subscriptionPlanName={organiserSub?.subscriptionPlanName ?? organiserSub?.planName}
+            isLaunchPromo={Boolean(organiserSub?.isLaunchPromo && launchPromoActive)}
+            onUpdated={() => {
+              refresh().catch((err) => {
+                setError(err instanceof Error ? err.message : 'Unable to refresh billing.');
+              });
+            }}
+          />
+          <ScopeSection
+            scope="organiser"
+            subscription={organiserSub}
+            offers={organiserOffers}
+            loading={loading}
+            launchPromoActive={launchPromoActive}
+            onUpgrade={(code) => handleUpgrade(code, 'organiser')}
+            onManage={() => handleManage('organiser')}
+          />
+        </>
       ) : null}
     </section>
   );

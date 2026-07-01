@@ -244,7 +244,7 @@ export default function App() {
               path="players"
               element={
                 <WorkspaceModeRoute mode="player">
-                  <WorkspaceEntitlementRoute capability="player_directory.browse">
+                  <WorkspaceEntitlementRoute capability="player_directory.browse" planGated>
                     <WorkspacePlayerDirectoryPage />
                   </WorkspaceEntitlementRoute>
                 </WorkspaceModeRoute>
