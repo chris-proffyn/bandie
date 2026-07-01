@@ -32,7 +32,16 @@ export const SONG_SUGGESTION_SELECTION_MODE_LABELS: Record<SongSuggestionSelecti
 };
 
 export const SONG_SUGGESTION_SELECTION_MODE_BRIEF =
-  'Best picks the highest-scoring songs overall. Inclusive guarantees each member who suggested at least one song gets their top-scoring entry when the target count is at least the band size; any remaining slots still go to the next best scores.';
+  'Best picks the highest-scoring songs overall. Inclusive mode means each member who suggests at least one song will have at least one song in the final selection when the target count is at least the band size; any remaining slots still go to the next best scores.';
+
+export const SONG_SUGGESTION_INCLUSIVE_SELECTION_EXPLANATION =
+  'Each member who suggests at least one song will have at least one song in the final selection. Any remaining slots are filled by the next highest scores.';
+
+export function songSuggestionInclusiveSelectionPendingExplanation(
+  bandMemberCount: number,
+): string {
+  return `Inclusive selection is enabled, but the target must be at least ${bandMemberCount} songs before each member who suggests is guaranteed at least one song. Until then, Best ranking applies.`;
+}
 
 export type VocalSuitability =
   | 'any'

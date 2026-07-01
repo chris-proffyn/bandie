@@ -18,6 +18,8 @@ import {
   reopenSongSuggestions,
   resetSongSuggestionVotes,
   SONG_SUGGESTION_SELECTION_MODE_LABELS,
+  SONG_SUGGESTION_INCLUSIVE_SELECTION_EXPLANATION,
+  songSuggestionInclusiveSelectionPendingExplanation,
   songSuggestionGroupStatusClass,
   vetoSongSuggestion,
   withdrawSongSuggestion,
@@ -507,6 +509,13 @@ export function SongSuggestionGroupDetailPage() {
                 })}`
               : ''}
           </p>
+          {group.selection_mode === 'inclusive' ? (
+            <p className="song-suggestion-mode-note">
+              {inclusiveSelectionActive
+                ? SONG_SUGGESTION_INCLUSIVE_SELECTION_EXPLANATION
+                : songSuggestionInclusiveSelectionPendingExplanation(bandMemberCount)}
+            </p>
+          ) : null}
         </div>
         <div className="song-suggestions-header-actions">
           <Link
@@ -643,7 +652,7 @@ export function SongSuggestionGroupDetailPage() {
           <p className="song-suggestion-panel-intro">
             Select up to {group.target_song_count} songs (or override with a reason).
             {inclusiveSelectionActive
-              ? ' Inclusive mode guarantees each member who suggested gets their highest-scoring song when possible.'
+              ? ` ${SONG_SUGGESTION_INCLUSIVE_SELECTION_EXPLANATION}`
               : ' Tied scores are highlighted.'}
           </p>
           <ul className="song-suggestion-confirm-list">

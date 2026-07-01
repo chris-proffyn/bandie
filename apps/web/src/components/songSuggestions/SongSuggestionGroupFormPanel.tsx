@@ -4,6 +4,8 @@ import {
   SONG_SUGGESTION_DECADE_OPTIONS,
   SONG_SUGGESTION_GENRE_OPTIONS,
   SONG_SUGGESTION_SELECTION_MODE_BRIEF,
+  SONG_SUGGESTION_INCLUSIVE_SELECTION_EXPLANATION,
+  songSuggestionInclusiveSelectionPendingExplanation,
   createSongSuggestionGroup,
   listBandMembersWithProfiles,
   updateSongSuggestionGroup,
@@ -207,10 +209,10 @@ export function SongSuggestionGroupFormPanel({
             <p className="song-suggestion-mode-note">
               {form.selectionMode === 'inclusive'
                 ? inclusiveEligible
-                  ? `Active for this band (${bandMemberCount} members): each member who suggests gets their highest-scoring song, then remaining slots fill by score.`
+                  ? `Active for this band (${bandMemberCount} members): ${SONG_SUGGESTION_INCLUSIVE_SELECTION_EXPLANATION}`
                   : bandMemberCount != null
-                    ? `Set the target to at least ${bandMemberCount} songs to activate Inclusive for this band. Until then, Best ranking applies.`
-                    : 'Inclusive activates when the target is at least the band size.'
+                    ? songSuggestionInclusiveSelectionPendingExplanation(bandMemberCount)
+                    : 'Inclusive selection activates when the target is at least the band size.'
                 : 'Best ranks purely by score — the top songs win.'}
             </p>
           </div>

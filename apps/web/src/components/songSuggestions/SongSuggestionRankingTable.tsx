@@ -5,6 +5,7 @@ import {
   isSongSuggestionInAutoSelection,
   isInclusiveSelectionActive,
   SONG_SUGGESTION_SELECTION_MODE_LABELS,
+  SONG_SUGGESTION_INCLUSIVE_SELECTION_EXPLANATION,
   type SongSuggestionConfirmedSong,
   type SongSuggestionGroupStatus,
   type SongSuggestionSelectionMode,
@@ -124,7 +125,7 @@ export function SongSuggestionRankingTable({
           <h2>Live ranking</h2>
           <p className="song-suggestion-ranking-intro">
             {inclusiveActive
-              ? `${selectionModeLabel} mode: each member who suggested gets their highest-scoring song, then remaining slots fill by score up to ${targetSongCount}.`
+              ? `${selectionModeLabel} mode: ${SONG_SUGGESTION_INCLUSIVE_SELECTION_EXPLANATION} Up to ${targetSongCount} songs can be selected in total.`
               : `${selectionModeLabel} mode: songs ranked by score (highest first). The top ${targetSongCount} are proposed when voting closes unless the leader adjusts the final selection.`}
           </p>
         </div>

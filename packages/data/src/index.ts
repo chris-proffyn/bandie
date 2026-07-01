@@ -467,6 +467,8 @@ export {
   SONG_SUGGESTION_GROUP_STATUS_LABELS,
   SONG_SUGGESTION_SELECTION_MODE_LABELS,
   SONG_SUGGESTION_SELECTION_MODE_BRIEF,
+  SONG_SUGGESTION_INCLUSIVE_SELECTION_EXPLANATION,
+  songSuggestionInclusiveSelectionPendingExplanation,
   listBandSongSuggestionGroups,
   getSongSuggestionGroup,
   getSongSuggestionGroupDetail,
