@@ -6,6 +6,9 @@ import {
   createEntitlementDraft,
   createEntitlementOverride,
   deleteEntitlementOverride,
+  formatPlatformAccessModeEndDate,
+  getPlatformAccessModeConfig,
+  getPlatformAccessModeStatus,
   isEntitlementsEnforcedOnPlatform,
   listEntitlementDraftItems,
   listEntitlementDrafts,
@@ -14,10 +17,13 @@ import {
   listPlansWithEntitlements,
   publishEntitlementDraft,
   setEntitlementsEnforced,
+  setPlatformAccessMode,
   type EntitlementDraft,
   type EntitlementDraftItem,
   type EntitlementOverride,
   type GateDecisionLog,
+  type PlatformAccessMode,
+  type PlatformAccessModeStatus,
   type PlanWithEntitlements,
 } from '@bandie/data';
 
@@ -29,6 +35,12 @@ export function AdminEntitlementsPage() {
   const [overrides, setOverrides] = useState<EntitlementOverride[]>([]);
   const [gateLogs, setGateLogs] = useState<GateDecisionLog[]>([]);
   const [enforced, setEnforced] = useState(false);
+  const [accessModeStatus, setAccessModeStatus] = useState<PlatformAccessModeStatus | null>(null);
+  const [accessModeForm, setAccessModeForm] = useState({
+    mode: 'off' as PlatformAccessMode,
+    endsAtLocal: '',
+    note: '',
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [draftName, setDraftName] = useState('');
@@ -54,18 +66,29 @@ export function AdminEntitlementsPage() {
     setError(null);
 
     try {
-      const [planRows, draftRows, overrideRows, logRows, enforcedOnPlatform] = await Promise.all([
+      const [planRows, draftRows, overrideRows, logRows, enforcedOnPlatform, accessConfig, accessStatus] =
+        await Promise.all([
         listPlansWithEntitlements(),
         listEntitlementDrafts(),
         listEntitlementOverrides(),
         listGateDecisionLogs(50),
         isEntitlementsEnforcedOnPlatform(),
+        getPlatformAccessModeConfig(),
+        getPlatformAccessModeStatus(),
       ]);
       setPlans(planRows);
       setDrafts(draftRows);
       setOverrides(overrideRows);
       setGateLogs(logRows);
       setEnforced(enforcedOnPlatform);
+      setAccessModeStatus(accessStatus);
+      setAccessModeForm({
+        mode: accessConfig.mode,
+        endsAtLocal: accessConfig.endsAt
+          ? new Date(accessConfig.endsAt).toISOString().slice(0, 16)
+          : '',
+        note: accessConfig.note ?? '',
+      });
       if (!selectedDraftId && draftRows[0]) {
         setSelectedDraftId(draftRows[0].id);
       }
@@ -163,6 +186,23 @@ export function AdminEntitlementsPage() {
     }
   }
 
+  async function handleSaveAccessMode() {
+    try {
+      const endsAt = accessModeForm.endsAtLocal
+        ? new Date(accessModeForm.endsAtLocal).toISOString()
+        : null;
+      const status = await setPlatformAccessMode({
+        mode: accessModeForm.mode,
+        endsAt: accessModeForm.mode === 'off' ? null : endsAt,
+        note: accessModeForm.note || null,
+      });
+      setAccessModeStatus(status);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to save platform access mode.');
+    }
+  }
+
   async function handleCreateOverride() {
     try {
       await createEntitlementOverride({
@@ -192,6 +232,76 @@ export function AdminEntitlementsPage() {
           Enforce entitlements on platform
         </label>
         {error ? <div className="auth-message auth-message-error">{error}</div> : null}
+      </section>
+
+      <section className="panel">
+        <h3>Platform access mode</h3>
+        <p className="my-bands-lead">
+          Beta or Promo mode grants full platform access to all users until the end date. Roles and
+          membership are unchanged. Launch promo trials (Billing) are separate.
+        </p>
+        {accessModeStatus?.active ? (
+          <p className="my-bands-lead">
+            <strong>
+              {accessModeStatus.label} is active
+              {accessModeStatus.endsAt
+                ? ` until ${formatPlatformAccessModeEndDate(accessModeStatus.endsAt)}`
+                : ' (no end date)'}
+            </strong>
+            {accessModeStatus.daysRemaining != null
+              ? ` — ${accessModeStatus.daysRemaining} day(s) remaining`
+              : null}
+          </p>
+        ) : (
+          <p className="my-bands-lead">No beta or promo window is active.</p>
+        )}
+        <div className="gig-detail-grid">
+          <div className="auth-field">
+            <label htmlFor="platform-access-mode">Mode</label>
+            <select
+              id="platform-access-mode"
+              value={accessModeForm.mode}
+              onChange={(event) =>
+                setAccessModeForm((current) => ({
+                  ...current,
+                  mode: event.target.value as PlatformAccessMode,
+                }))
+              }
+            >
+              <option value="off">Off — normal plan limits</option>
+              <option value="beta">Beta — launch full access</option>
+              <option value="promo">Promo — campaign full access</option>
+            </select>
+          </div>
+          <div className="auth-field">
+            <label htmlFor="platform-access-ends">Ends at (optional)</label>
+            <input
+              id="platform-access-ends"
+              type="datetime-local"
+              value={accessModeForm.endsAtLocal}
+              disabled={accessModeForm.mode === 'off'}
+              onChange={(event) =>
+                setAccessModeForm((current) => ({ ...current, endsAtLocal: event.target.value }))
+              }
+            />
+          </div>
+        </div>
+        <div className="auth-field">
+          <label htmlFor="platform-access-note">Internal note</label>
+          <input
+            id="platform-access-note"
+            value={accessModeForm.note}
+            onChange={(event) =>
+              setAccessModeForm((current) => ({ ...current, note: event.target.value }))
+            }
+            placeholder="e.g. Summer promo for organiser upgrades"
+          />
+        </div>
+        <div className="gig-detail-actions">
+          <button type="button" className="auth-button" onClick={() => void handleSaveAccessMode()}>
+            Save access mode
+          </button>
+        </div>
       </section>
 
       <section className="panel">

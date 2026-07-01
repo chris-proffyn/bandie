@@ -6,6 +6,8 @@ import { usePlayerWorkspaceAccess } from '../../hooks/usePlayerWorkspaceAccess';
 import { getAppNavItems } from '../../lib/appNavigation';
 import { BANDIE_BRAND_NAME } from '../../lib/brand';
 import { resolveWorkspacePlanPill } from '../../lib/planPill';
+import { usePlatformAccessMode } from '../../hooks/usePlatformAccessMode';
+import { PlatformAccessModePill } from '../platform/PlatformAccessModePill';
 import { BandieLogo } from '../brand/BandieLogo';
 
 type AppHeaderProps = {
@@ -20,6 +22,7 @@ export function AppHeader({ bandId }: AppHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
   const [planPill, setPlanPill] = useState<ReturnType<typeof resolveWorkspacePlanPill> | null>(null);
+  const platformAccessMode = usePlatformAccessMode();
   const navItems = getAppNavItems({
     bandId,
     workspaceMode,
@@ -109,6 +112,7 @@ export function AppHeader({ bandId }: AppHeaderProps) {
 
         <div className={`app-header-account ${menuOpen ? 'app-header-account-open' : ''}`}>
           {adminModeActive ? <span className="app-admin-badge">Admin mode</span> : null}
+          {platformAccessMode ? <PlatformAccessModePill status={platformAccessMode} /> : null}
           {planPill ? (
             <Link
               to="/app/profile"

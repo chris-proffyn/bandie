@@ -7,13 +7,19 @@ import {
   type AdminBandAccount,
 } from '@bandie/data';
 import { AdminPagination } from './AdminPagination';
+import { TestDataBadge } from '../common/TestDataBadge';
 
 type AdminAccountsBandsPanelProps = {
   query: string;
   reloadToken: number;
+  hideTestData: boolean;
 };
 
-export function AdminAccountsBandsPanel({ query, reloadToken }: AdminAccountsBandsPanelProps) {
+export function AdminAccountsBandsPanel({
+  query,
+  reloadToken,
+  hideTestData,
+}: AdminAccountsBandsPanelProps) {
   const [page, setPage] = useState<{
     rows: AdminBandAccount[];
     total: number;
@@ -31,6 +37,7 @@ export function AdminAccountsBandsPanel({ query, reloadToken }: AdminAccountsBan
         query,
         limit: ADMIN_ACCOUNTS_PAGE_SIZE,
         offset,
+        hideTestData,
       });
       setPage({
         rows: result.rows,
@@ -43,7 +50,7 @@ export function AdminAccountsBandsPanel({ query, reloadToken }: AdminAccountsBan
     } finally {
       setLoading(false);
     }
-  }, [query]);
+  }, [hideTestData, query]);
 
   useEffect(() => {
     void loadBands(0);
@@ -67,7 +74,11 @@ export function AdminAccountsBandsPanel({ query, reloadToken }: AdminAccountsBan
       {loading ? <p className="workspace-empty-note">Loading bands…</p> : null}
 
       {!loading && page.rows.length === 0 ? (
-        <p className="workspace-empty-note">No bands matched this search.</p>
+        <p className="workspace-empty-note">
+          {hideTestData
+            ? 'No live bands matched this search. Try showing test data.'
+            : 'No bands matched this search.'}
+        </p>
       ) : null}
 
       {!loading && page.rows.length > 0 ? (
@@ -90,7 +101,12 @@ export function AdminAccountsBandsPanel({ query, reloadToken }: AdminAccountsBan
               <tbody>
                 {page.rows.map((band) => (
                   <tr key={band.band_id}>
-                    <td>{band.name}</td>
+                    <td>
+                      <div className="admin-account-name-cell">
+                        <span>{band.name}</span>
+                        <TestDataBadge testUser={band.test_user} />
+                      </div>
+                    </td>
                     <td>{band.slug}</td>
                     <td>
                       <div className="admin-account-date-stack">

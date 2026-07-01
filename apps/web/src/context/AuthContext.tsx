@@ -20,6 +20,7 @@ import {
   listUserBands,
   ensureLaunchTrialsExpired,
   loadPlatformEntitlementEnforcement,
+  loadPlatformAccessMode,
   onAuthStateChange,
   resolveDisplayName,
   resolveWorkspaceMode,
@@ -180,6 +181,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           refreshBands(),
           refreshProfile(),
           loadPlatformEntitlementEnforcement(),
+          loadPlatformAccessMode(),
           ensureLaunchTrialsExpired(),
           trackSessionActive(),
         ]);

@@ -10,13 +10,19 @@ import {
 } from '@bandie/data';
 import { AdminPagination } from './AdminPagination';
 import { AdminUserAccountEditor } from './AdminUserAccountEditor';
+import { TestDataBadge } from '../common/TestDataBadge';
 
 type AdminAccountsUsersPanelProps = {
   query: string;
   reloadToken: number;
+  hideTestData: boolean;
 };
 
-export function AdminAccountsUsersPanel({ query, reloadToken }: AdminAccountsUsersPanelProps) {
+export function AdminAccountsUsersPanel({
+  query,
+  reloadToken,
+  hideTestData,
+}: AdminAccountsUsersPanelProps) {
   const [page, setPage] = useState<{
     rows: AdminUserAccount[];
     total: number;
@@ -35,6 +41,7 @@ export function AdminAccountsUsersPanel({ query, reloadToken }: AdminAccountsUse
         query,
         limit: ADMIN_ACCOUNTS_PAGE_SIZE,
         offset,
+        hideTestData,
       });
       setPage({
         rows: result.rows,
@@ -50,7 +57,7 @@ export function AdminAccountsUsersPanel({ query, reloadToken }: AdminAccountsUse
     } finally {
       setLoading(false);
     }
-  }, [query]);
+  }, [hideTestData, query]);
 
   useEffect(() => {
     setSelectedUserId(null);
@@ -77,7 +84,11 @@ export function AdminAccountsUsersPanel({ query, reloadToken }: AdminAccountsUse
       {loading ? <p className="workspace-empty-note">Loading users…</p> : null}
 
       {!loading && page.rows.length === 0 ? (
-        <p className="workspace-empty-note">No users matched this search.</p>
+        <p className="workspace-empty-note">
+          {hideTestData
+            ? 'No live users matched this search. Try showing test data.'
+            : 'No users matched this search.'}
+        </p>
       ) : null}
 
       {!loading && page.rows.length > 0 ? (
@@ -100,7 +111,12 @@ export function AdminAccountsUsersPanel({ query, reloadToken }: AdminAccountsUse
               <tbody>
                 {page.rows.map((user) => (
                   <tr key={user.user_id} className={selectedUserId === user.user_id ? 'is-selected' : ''}>
-                    <td>{user.display_name ?? '—'}</td>
+                    <td>
+                      <div className="admin-account-name-cell">
+                        <span>{user.display_name ?? '—'}</span>
+                        <TestDataBadge testUser={user.test_user} />
+                      </div>
+                    </td>
                     <td>{user.username ?? '—'}</td>
                     <td>{user.email ?? '—'}</td>
                     <td>{formatAdminWorkspaceRoles(user.is_player, user.is_organiser)}</td>
@@ -122,13 +138,10 @@ export function AdminAccountsUsersPanel({ query, reloadToken }: AdminAccountsUse
                       <button
                         type="button"
                         className="admin-compact-button"
-                        onClick={() =>
-                          setSelectedUserId((current) =>
-                            current === user.user_id ? null : user.user_id,
-                          )
-                        }
+                        aria-pressed={selectedUserId === user.user_id}
+                        onClick={() => setSelectedUserId(user.user_id)}
                       >
-                        {selectedUserId === user.user_id ? 'Close' : 'Manage'}
+                        Manage
                       </button>
                     </td>
                   </tr>

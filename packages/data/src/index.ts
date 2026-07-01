@@ -606,8 +606,10 @@ export type { CopyBandSongInput, CopyBandSongResult } from './songCopy';
 export {
   initBandieEntitlementEnforcement,
   isEntitlementEnforcementEnabled,
+  isPlatformAccessModeActive,
   resolveEntitlementEnforcement,
   setPlatformEntitlementEnforcement,
+  setPlatformAccessModeState,
 } from './entitlementEnforcement';
 
 export { EntitlementGateError, isEntitlementGateError } from './entitlementErrors';
@@ -905,6 +907,7 @@ export type { AdminSearchUser, AdminSearchBand, AuditEvent, AdminOverviewCounts 
 
 export {
   ADMIN_ACCOUNTS_PAGE_SIZE,
+  getAdminTestDataCounts,
   listAdminUserAccounts,
   listAdminBandAccounts,
   adminUpdateUserWorkspaceRoles,
@@ -917,7 +920,7 @@ export {
   toDateTimeLocalValue,
   fromDateTimeLocalValue,
 } from './adminAccounts';
-export type { AdminUserAccount, AdminBandAccount, AdminAccountsPage } from './adminAccounts';
+export type { AdminUserAccount, AdminBandAccount, AdminAccountsPage, AdminTestDataCounts } from './adminAccounts';
 
 export {
   listPlansWithEntitlements,
@@ -953,6 +956,23 @@ export {
   setEntitlementsEnforced,
   isEntitlementsEnforcedOnPlatform,
 } from './platformSettings';
+
+export {
+  PLATFORM_ACCESS_MODE_KEY,
+  buildPlatformAccessModeStatus,
+  formatPlatformAccessModeEndDate,
+  getPlatformAccessModeConfig,
+  getPlatformAccessModeStatus,
+  getPlatformAccessModeTitle,
+  loadPlatformAccessMode,
+  parsePlatformAccessModeConfig,
+  setPlatformAccessMode,
+} from './platformAccessMode';
+export type {
+  PlatformAccessMode,
+  PlatformAccessModeConfig,
+  PlatformAccessModeStatus,
+} from './platformAccessMode';
 
 export {
   LAUNCH_PROMO_ENDS_AT_KEY,

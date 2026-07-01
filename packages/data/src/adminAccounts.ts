@@ -12,6 +12,7 @@ export type AdminUserAccount = {
   email: string | null;
   is_player: boolean;
   is_organiser: boolean;
+  test_user: boolean;
   entitlement_test_leader_plan_code: string | null;
   leader_subscription_id: string | null;
   leader_plan_code: string | null;
@@ -38,6 +39,7 @@ export type AdminBandAccount = {
   owner_user_id: string;
   owner_display_name: string | null;
   owner_email: string | null;
+  test_user: boolean;
   leader_plan_code: string | null;
   leader_plan_name: string | null;
   leader_subscription_source: string | null;
@@ -54,10 +56,32 @@ export type AdminAccountsPage<T> = {
   offset: number;
 };
 
+export type AdminTestDataCounts = {
+  test_user_count: number;
+  test_band_count: number;
+};
+
+export async function getAdminTestDataCounts(): Promise<AdminTestDataCounts> {
+  const client = getBandieClient();
+  const { data, error } = await client.rpc('bandie_admin_test_data_counts');
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const row = Array.isArray(data) ? data[0] : data;
+
+  return {
+    test_user_count: (row as AdminTestDataCounts | null)?.test_user_count ?? 0,
+    test_band_count: (row as AdminTestDataCounts | null)?.test_band_count ?? 0,
+  };
+}
+
 export async function listAdminUserAccounts(options: {
   query?: string;
   limit?: number;
   offset?: number;
+  hideTestData?: boolean;
 }): Promise<AdminAccountsPage<AdminUserAccount>> {
   const client = getBandieClient();
   const query = options.query?.trim() ?? '';
@@ -69,9 +93,11 @@ export async function listAdminUserAccounts(options: {
       p_query: query || null,
       p_limit: limit,
       p_offset: offset,
+      p_hide_test_data: options.hideTestData ?? false,
     }),
     client.rpc('bandie_admin_count_user_accounts', {
       p_query: query || null,
+      p_hide_test_data: options.hideTestData ?? false,
     }),
   ]);
 
@@ -95,6 +121,7 @@ export async function listAdminBandAccounts(options: {
   query?: string;
   limit?: number;
   offset?: number;
+  hideTestData?: boolean;
 }): Promise<AdminAccountsPage<AdminBandAccount>> {
   const client = getBandieClient();
   const query = options.query?.trim() ?? '';
@@ -106,9 +133,11 @@ export async function listAdminBandAccounts(options: {
       p_query: query || null,
       p_limit: limit,
       p_offset: offset,
+      p_hide_test_data: options.hideTestData ?? false,
     }),
     client.rpc('bandie_admin_count_band_accounts', {
       p_query: query || null,
+      p_hide_test_data: options.hideTestData ?? false,
     }),
   ]);
 

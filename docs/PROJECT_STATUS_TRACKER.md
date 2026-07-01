@@ -3,7 +3,7 @@
 **Document status:** Live project tracker  
 **Product:** Bandie  
 **Phase:** Phase 15 (billing) implemented — configure Stripe env vars and sync plans  
-**Last updated:** 27 June 2026 (Jam night vs open mic differentiation)
+**Last updated:** 27 June 2026 (Platform access mode — Beta / Promo)
 
 ---
 
@@ -526,6 +526,17 @@ Task checklist: `docs/project/bandie_song_suggestions_voting_implementation_plan
 ---
 
 ## Session notes
+
+**27 June 2026 — Platform access mode (Beta / Promo)**
+- Spec: `bandie_platform_access_mode_spec.md`; migration `20260704100000_bandie_platform_access_mode.sql`
+- Data: `platformAccessMode.ts`; bypass entitlements when beta/promo active (`entitlementEnforcement.ts`)
+- Admin: Entitlements page — mode, end date, internal note
+- UI: Beta/Promo pill in `AppHeader` and `MarketingNav`
+- Docs: `product-functional-requirements.md` §12c
+
+**30 June 2026 — Admin accounts hide test data**
+- Migration `20260703160000_bandie_admin_accounts_hide_test_data.sql` — `p_hide_test_data` on admin list/count RPCs; `test_user` on list rows; `bandie_admin_test_data_counts`
+- UI: **Hide test data** toggle on `/admin/accounts` and `/admin` overview; session preference `bandie:admin:hide-test-data`; **Test data** badges on account rows
 
 **30 June 2026 — Admin accounts management**
 - Migration `20260703120000_bandie_admin_accounts.sql` — paginated user/band list RPCs; admin update RPCs for workspace roles, test plan override, non-Stripe plan and trial end

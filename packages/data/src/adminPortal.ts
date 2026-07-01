@@ -108,12 +108,23 @@ export type AdminOverviewCounts = {
   gigs: number;
 };
 
-export async function getAdminOverviewCounts(): Promise<AdminOverviewCounts> {
+export async function getAdminOverviewCounts(options?: {
+  hideTestData?: boolean;
+}): Promise<AdminOverviewCounts> {
   const client = getBandieClient();
+  const hideTestData = options?.hideTestData ?? false;
+
+  const usersQuery = client.from('bandie_profiles').select('user_id', { count: 'exact', head: true });
+  const bandsQuery = client.from('bandie_bands').select('id', { count: 'exact', head: true });
+
+  if (hideTestData) {
+    usersQuery.eq('test_user', false);
+    bandsQuery.eq('test_user', false);
+  }
 
   const [users, bands, songs, setlists, gigs] = await Promise.all([
-    client.from('bandie_profiles').select('user_id', { count: 'exact', head: true }),
-    client.from('bandie_bands').select('id', { count: 'exact', head: true }),
+    usersQuery,
+    bandsQuery,
     client
       .from('bandie_songs')
       .select('id', { count: 'exact', head: true })

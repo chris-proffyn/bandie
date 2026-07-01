@@ -1,23 +1,48 @@
 import { useEffect, useState } from 'react';
-import { getAdminOverviewCounts, type AdminOverviewCounts } from '@bandie/data';
+import { getAdminOverviewCounts, getAdminTestDataCounts, type AdminOverviewCounts } from '@bandie/data';
+import { AdminTestDataToggle } from '../../components/admin/AdminTestDataToggle';
+import {
+  readAdminHideTestData,
+  saveAdminHideTestData,
+} from '../../lib/adminTestDataPreference';
 
 export function AdminOverviewPage() {
   const [counts, setCounts] = useState<AdminOverviewCounts | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [hideTestData, setHideTestData] = useState(() => readAdminHideTestData());
+  const [testDataCounts, setTestDataCounts] = useState({ test_user_count: 0, test_band_count: 0 });
 
   useEffect(() => {
-    getAdminOverviewCounts()
-      .then(setCounts)
+    Promise.all([
+      getAdminOverviewCounts({ hideTestData }),
+      getAdminTestDataCounts(),
+    ])
+      .then(([nextCounts, nextTestDataCounts]) => {
+        setCounts(nextCounts);
+        setTestDataCounts(nextTestDataCounts);
+        setError(null);
+      })
       .catch((err) => {
         setError(err instanceof Error ? err.message : 'Unable to load overview.');
       });
-  }, []);
+  }, [hideTestData]);
+
+  function handleHideTestDataChange(nextHideTestData: boolean) {
+    setHideTestData(nextHideTestData);
+    saveAdminHideTestData(nextHideTestData);
+  }
 
   return (
     <section className="panel">
       <p className="my-bands-eyebrow">Phase 12</p>
       <h2>Platform overview</h2>
       <p className="my-bands-lead">Read-only counts across users, bands, and content.</p>
+      <AdminTestDataToggle
+        hideTestData={hideTestData}
+        testUserCount={testDataCounts.test_user_count}
+        testBandCount={testDataCounts.test_band_count}
+        onChange={handleHideTestDataChange}
+      />
       {error ? <div className="auth-message auth-message-error">{error}</div> : null}
       <div className="admin-overview-grid">
         <article className="admin-overview-card">

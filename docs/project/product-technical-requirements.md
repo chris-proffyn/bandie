@@ -216,7 +216,7 @@ RLS policies must enforce band membership for all private data.
 **Admin accounts (`@bandie/data`):**
 - `listAdminUserAccounts`, `listAdminBandAccounts` — paginated directory (20 per page) with subscription, test-plan, and band summary fields
 - `adminUpdateUserWorkspaceRoles`, `adminUpdateUserEntitlementTestPlan`, `adminSetUserSubscriptionPlan`, `adminSetUserSubscriptionTrialEnd` — admin-only account management (audit-logged); Stripe subscriptions are read-only
-- RPCs: `bandie_admin_list_user_accounts`, `bandie_admin_count_user_accounts`, `bandie_admin_list_band_accounts`, `bandie_admin_count_band_accounts`, `bandie_admin_update_user_workspace_roles`, `bandie_admin_update_user_entitlement_test_plan`, `bandie_admin_set_user_subscription_plan`, `bandie_admin_set_user_subscription_trial_end`
+- RPCs: `bandie_admin_list_user_accounts`, `bandie_admin_count_user_accounts`, `bandie_admin_list_band_accounts`, `bandie_admin_count_band_accounts`, `bandie_admin_test_data_counts`, `bandie_admin_update_user_workspace_roles`, `bandie_admin_update_user_entitlement_test_plan`, `bandie_admin_set_user_subscription_plan`, `bandie_admin_set_user_subscription_trial_end` — list/count RPCs accept `p_hide_test_data` to exclude `test_user` rows; list responses include `test_user`
 - Legacy search helpers `searchAdminUsers`, `searchAdminBands` retained for billing lookup
 
 **Entitlements (`@bandie/data`):**

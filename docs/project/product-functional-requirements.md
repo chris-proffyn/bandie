@@ -369,6 +369,8 @@ Authoritative spec: `bandie_entitlements_admin_portal_functional_technical_spec.
 
 Platform admins use the Accounts screen to browse and manage live users and bands.
 
+**Hide test data:** When fictitious seed users or bands exist (`test_user = true`), a **Hide test data** toggle appears on `/admin/accounts` and `/admin` overview. Preference is stored in session storage (`bandie:admin:hide-test-data`) and filters paginated user/band lists server-side; visible test rows show a **Test data** badge.
+
 **Users table (paginated, 20 per page):**
 - Loads on page open (most recent profiles first); optional search filters by display name, username, or email
 - Columns: name, username, email, workspace roles (player / organiser), leader plan, organiser plan, test plan override, promo/trial end dates, active entitlement override count
@@ -738,6 +740,24 @@ Organiser Plus users create and manage live music evenings from `/app/open-mic`.
 - Sign-up modes: open, moderated, invite-only, organiser-only.
 - Duplicate event copies structure (parts, house band, songs/slots) not player assignments.
 - Dropbox file linking and walk-up player RPCs deferred from MVP.
+
+---
+
+## 12c. Platform access mode (Beta / Promo)
+
+**Spec:** `bandie_platform_access_mode_spec.md`
+
+Platform admins can enable **Beta** or **Promo** mode for a defined period. While active, all users receive full platform access (entitlement gates bypassed). User roles, band membership, and workspace mode switching are unchanged.
+
+| Mode | Use |
+|---|---|
+| **Beta** | Initial launch — everyone explores the full product |
+| **Promo** | Campaigns — attract sign-ups or encourage upgrades before limits return |
+
+- Controlled in **Admin → Entitlements → Platform access mode** (mode + optional end date).
+- **Beta** or **Promo** pill shown in app and marketing navigation while active.
+- Separate from **launch promo trials** (new sign-up subscription assignment on Billing page).
+- `VITE_BANDIE_ENFORCE_ENTITLEMENTS=true` overrides bypass in production safety builds.
 
 ---
 

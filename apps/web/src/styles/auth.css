@@ -363,6 +363,34 @@
   color: #ffcc33;
 }
 
+.app-platform-mode-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.app-platform-mode-pill-beta {
+  background: rgba(97, 227, 194, 0.14);
+  border: 1px solid rgba(97, 227, 194, 0.4);
+  color: #61e3c2;
+}
+
+.app-platform-mode-pill-promo {
+  background: rgba(255, 140, 66, 0.14);
+  border: 1px solid rgba(255, 140, 66, 0.4);
+  color: #ffb07a;
+}
+
+.nav-platform-mode-pill {
+  margin-right: 0.35rem;
+}
+
 .app-workspace-mode-badge {
   display: inline-flex;
   align-items: center;

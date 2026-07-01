@@ -1,7 +1,13 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
+import { getAdminTestDataCounts } from '@bandie/data';
 import { AdminOrganiserInvitesPanel } from '../../components/admin/AdminOrganiserInvitesPanel';
 import { AdminAccountsBandsPanel } from '../../components/admin/AdminAccountsBandsPanel';
 import { AdminAccountsUsersPanel } from '../../components/admin/AdminAccountsUsersPanel';
+import { AdminTestDataToggle } from '../../components/admin/AdminTestDataToggle';
+import {
+  readAdminHideTestData,
+  saveAdminHideTestData,
+} from '../../lib/adminTestDataPreference';
 
 type AccountsTab = 'users' | 'bands';
 
@@ -10,6 +16,22 @@ export function AdminAccountsPage() {
   const [query, setQuery] = useState('');
   const [appliedQuery, setAppliedQuery] = useState('');
   const [reloadToken, setReloadToken] = useState(0);
+  const [hideTestData, setHideTestData] = useState(() => readAdminHideTestData());
+  const [testDataCounts, setTestDataCounts] = useState({ test_user_count: 0, test_band_count: 0 });
+
+  useEffect(() => {
+    getAdminTestDataCounts()
+      .then((counts) => setTestDataCounts(counts))
+      .catch(() => {
+        setTestDataCounts({ test_user_count: 0, test_band_count: 0 });
+      });
+  }, [reloadToken]);
+
+  function handleHideTestDataChange(nextHideTestData: boolean) {
+    setHideTestData(nextHideTestData);
+    saveAdminHideTestData(nextHideTestData);
+    setReloadToken((value) => value + 1);
+  }
 
   function handleSearch(event: FormEvent) {
     event.preventDefault();
@@ -53,6 +75,13 @@ export function AdminAccountsPage() {
             </button>
           ) : null}
         </form>
+
+        <AdminTestDataToggle
+          hideTestData={hideTestData}
+          testUserCount={testDataCounts.test_user_count}
+          testBandCount={testDataCounts.test_band_count}
+          onChange={handleHideTestDataChange}
+        />
       </section>
 
       <div className="admin-accounts-tabs" role="tablist" aria-label="Accounts views">
@@ -77,9 +106,17 @@ export function AdminAccountsPage() {
       </div>
 
       {activeTab === 'users' ? (
-        <AdminAccountsUsersPanel query={appliedQuery} reloadToken={reloadToken} />
+        <AdminAccountsUsersPanel
+          query={appliedQuery}
+          reloadToken={reloadToken}
+          hideTestData={hideTestData}
+        />
       ) : (
-        <AdminAccountsBandsPanel query={appliedQuery} reloadToken={reloadToken} />
+        <AdminAccountsBandsPanel
+          query={appliedQuery}
+          reloadToken={reloadToken}
+          hideTestData={hideTestData}
+        />
       )}
 
       <AdminOrganiserInvitesPanel />

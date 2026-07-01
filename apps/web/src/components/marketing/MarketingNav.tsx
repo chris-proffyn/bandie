@@ -3,12 +3,15 @@ import { Link } from 'react-router-dom';
 import { homepageContent } from '../../content/homepageContent';
 import { useAuth } from '../../context/AuthContext';
 import { trackNavClick } from '../../lib/analytics';
+import { usePlatformAccessMode } from '../../hooks/usePlatformAccessMode';
+import { PlatformAccessModePill } from '../platform/PlatformAccessModePill';
 import { BandieLogo } from '../brand/BandieLogo';
 
 export function MarketingNav() {
   const { nav } = homepageContent;
   const { session, displayName, isAppAdmin, adminModeActive, loading, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const platformAccessMode = usePlatformAccessMode();
 
   function handleLogout() {
     setMenuOpen(false);
@@ -45,6 +48,9 @@ export function MarketingNav() {
       </div>
 
       <div className={`nav-actions ${menuOpen ? 'nav-actions-open' : ''}`}>
+        {platformAccessMode ? (
+          <PlatformAccessModePill status={platformAccessMode} className="nav-platform-mode-pill" />
+        ) : null}
         {loading ? (
           <span className="nav-auth-placeholder" aria-hidden="true" />
         ) : session ? (

@@ -1,4 +1,5 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useId, useState, type FormEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import {
   adminSetUserSubscriptionPlan,
@@ -33,6 +34,7 @@ type AdminUserAccountEditorProps = {
 };
 
 export function AdminUserAccountEditor({ account, onSaved, onCancel }: AdminUserAccountEditorProps) {
+  const titleId = useId();
   const [isPlayer, setIsPlayer] = useState(account.is_player);
   const [isOrganiser, setIsOrganiser] = useState(account.is_organiser);
   const [testPlanCode, setTestPlanCode] = useState(account.entitlement_test_leader_plan_code ?? '');
@@ -59,6 +61,23 @@ export function AdminUserAccountEditor({ account, onSaved, onCancel }: AdminUser
     setError(null);
     setMessage(null);
   }, [account]);
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        onCancel();
+      }
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onCancel]);
 
   const leaderStripe = isStripeBilledSubscription(account.leader_stripe_subscription_id);
   const organiserStripe = isStripeBilledSubscription(account.organiser_stripe_subscription_id);
@@ -129,11 +148,19 @@ export function AdminUserAccountEditor({ account, onSaved, onCancel }: AdminUser
     }
   }
 
-  return (
-    <form className="admin-account-editor auth-form" onSubmit={handleSubmit}>
+  return createPortal(
+    <div className="admin-dialog-backdrop" role="presentation" onClick={onCancel}>
+      <form
+        className="admin-dialog admin-account-editor auth-form"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        onSubmit={handleSubmit}
+        onClick={(event) => event.stopPropagation()}
+      >
       <div className="admin-account-editor-head">
         <div>
-          <h4>
+          <h4 id={titleId}>
             Manage {account.display_name ?? account.username ?? account.email ?? account.user_id}
           </h4>
           <p className="workspace-section-intro">
@@ -297,10 +324,15 @@ export function AdminUserAccountEditor({ account, onSaved, onCancel }: AdminUser
       ) : null}
 
       <div className="admin-account-editor-actions">
+        <button type="button" className="auth-button auth-button-secondary" onClick={onCancel}>
+          Cancel
+        </button>
         <button type="submit" className="auth-button" disabled={saving}>
           {saving ? 'Saving…' : 'Save changes'}
         </button>
       </div>
     </form>
+    </div>,
+    document.body,
   );
 }

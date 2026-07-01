@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import { GuestRoute, ProtectedRoute } from './components/auth/ProtectedRoute';
 import { WorkspaceModeRoute } from './components/auth/WorkspaceModeRoute';
@@ -50,6 +51,7 @@ import { OpenMicSongListPage } from './pages/app/OpenMicSongListPage';
 import { OpenMicLiveControlPage } from './pages/app/OpenMicLiveControlPage';
 import { OpenMicHouseBandPage } from './pages/app/OpenMicHouseBandPage';
 import { OpenMicJamSlotsPage } from './pages/app/OpenMicJamSlotsPage';
+import { bootstrapPlatformAccessMode } from './hooks/usePlatformAccessMode';
 
 function RedirectToBandOverview() {
   const { bandId } = useParams();
@@ -76,6 +78,10 @@ function RedirectAppAdminToPortal() {
 }
 
 export default function App() {
+  useEffect(() => {
+    void bootstrapPlatformAccessMode();
+  }, []);
+
   return (
     <Routes>
         <Route path="/" element={<HomePage />} />
