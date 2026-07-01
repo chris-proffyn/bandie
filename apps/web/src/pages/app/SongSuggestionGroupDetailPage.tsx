@@ -674,6 +674,8 @@ export function SongSuggestionGroupDetailPage() {
         <SubmitSongSuggestionPanel
           bandId={bandId}
           groupId={groupId}
+          isLeader={isLeader}
+          currentUserId={user?.id ?? null}
           onClose={() => setShowSuggest(false)}
           onSubmitted={() => void loadDetail()}
         />

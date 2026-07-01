@@ -510,6 +510,8 @@ export type SubmitSongSuggestionInput = {
   spotifyUrl?: string | null;
   otherMediaUrl?: string | null;
   rationale?: string | null;
+  /** Leader-only: attribute the suggestion to another active band member. */
+  suggestedByUserId?: string | null;
 };
 
 export async function findSimilarSongSuggestions(
@@ -559,6 +561,7 @@ export async function submitSongSuggestion(
     p_spotify_url: input.spotifyUrl ?? null,
     p_other_media_url: input.otherMediaUrl ?? null,
     p_rationale: input.rationale ?? null,
+    p_suggested_by_user_id: input.suggestedByUserId ?? null,
   });
 
   if (error) {

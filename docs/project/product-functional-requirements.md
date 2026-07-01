@@ -591,7 +591,7 @@ Leader creates a named group with brief, target number of songs, suggestion clos
 
 ### Member participation
 
-Members submit song title, artist, optional YouTube/Spotify links and rationale. Submitter receives an automatic `happy_to_play` vote. Members may **withdraw their own suggestions** while the suggestion window is still open (freeing a slot when per-member limits apply). Members vote 🙂 / 😐 / 🙁 while voting is open; they may change or **clear** their vote while voting is open when the group allows vote changes. Duplicate title+artist shows a non-blocking warning.
+Members submit song title, artist, optional YouTube/Spotify links and rationale. Submitter receives an automatic `happy_to_play` vote. **Band leaders** may add suggestions **on behalf of** any active member (attributed to that member for limits, display, and withdrawal). Members may **withdraw their own suggestions** while the suggestion window is still open (freeing a slot when per-member limits apply). Members vote 🙂 / 😐 / 🙁 while voting is open; they may change or **clear** their vote while voting is open when the group allows vote changes. Duplicate title+artist shows a non-blocking warning.
 
 ### Live ranking
 

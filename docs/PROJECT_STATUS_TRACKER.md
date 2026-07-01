@@ -528,6 +528,10 @@ Task checklist: `docs/project/bandie_song_suggestions_voting_implementation_plan
 
 ## Session notes
 
+**1 July 2026 — Song suggestion on behalf of member**
+- Migration `20260705130000_bandie_song_suggestion_on_behalf.sql` — `p_suggested_by_user_id` on submit RPC; leader-only proxy; suggester gets auto-vote and per-member limits
+- UI: leader **Suggest on behalf of** selector on add-suggestion form
+
 **1 July 2026 — Mobile web UI optimization (Phases 1–2)**
 - Checkpoint tag: `checkpoint/pre-mobile-web-ui`
 - Phase 1: calendar responsive layout; app header 44px tap targets + menu close on navigate/Escape; setlist builder stacks at 900px; songs/setlists form inputs 16px/44px; safe-area insets on app shell

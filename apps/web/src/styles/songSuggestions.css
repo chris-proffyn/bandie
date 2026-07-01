@@ -162,6 +162,11 @@
   justify-content: flex-end;
 }
 
+.song-suggestion-on-behalf-note {
+  margin: 0.35rem 0 0;
+  font-size: 0.88rem;
+}
+
 .song-suggestion-list {
   list-style: none;
   margin: 0;

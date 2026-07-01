@@ -180,6 +180,10 @@
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: clip;
   padding-bottom: env(safe-area-inset-bottom, 0);
   background: #101014;
   color: #f6f3ea;
@@ -201,22 +205,32 @@
   align-items: center;
   justify-content: flex-start;
   gap: 1rem;
-  padding: 0.85rem max(1.25rem, env(safe-area-inset-right, 0))
-    0.85rem max(1.25rem, env(safe-area-inset-left, 0));
-  max-width: 1400px;
-  margin: 0 auto;
   width: 100%;
+  max-width: 1400px;
+  min-width: 0;
+  margin: 0 auto;
+  padding-top: 0.85rem;
+  padding-bottom: 0.85rem;
+  padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+  padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
 }
 
 .app-header-brand {
   display: inline-flex;
   align-items: center;
   gap: 0.65rem;
+  min-width: 0;
   color: #f6f3ea;
   text-decoration: none;
   font-weight: 800;
   letter-spacing: -0.03em;
-  flex-shrink: 0;
+  flex: 1 1 auto;
+}
+
+.app-header-brand > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .app-header-brand-mark {
@@ -227,6 +241,7 @@
 
 .app-header-toggle {
   display: none;
+  flex-shrink: 0;
   margin-left: auto;
   min-height: 44px;
   padding: 0.45rem 0.85rem;
@@ -322,7 +337,10 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  max-width: 100%;
   min-width: 0;
+  overflow-x: clip;
 }
 
 .app-body-with-sidebar {
@@ -459,8 +477,14 @@
 }
 
 .app-main {
-  padding: 1.5rem max(1.5rem, env(safe-area-inset-right, 0)) 1.5rem
-    max(1.5rem, env(safe-area-inset-left, 0));
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: clip;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+  padding-left: max(1.5rem, env(safe-area-inset-left, 0px));
+  padding-right: max(1.5rem, env(safe-area-inset-right, 0px));
 }
 
 .band-workspace-header {
@@ -925,16 +949,52 @@
   line-height: 1.45;
 }
 
+.app-page-header-actions,
+.songs-header-actions,
+.setlists-header-actions,
+.calendar-header-actions,
+.gigs-header-actions,
+.song-suggestions-header-actions,
+.directory-header-actions,
+.my-bands-header-actions,
+.user-profile-page-header-actions,
+.songs-side-card-header-actions,
+.band-parts-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.app-page-header-actions > :is(a, button),
+.songs-header-actions > :is(a, button),
+.setlists-header-actions > :is(a, button),
+.calendar-header-actions > :is(a, button),
+.gigs-header-actions > :is(a, button),
+.song-suggestions-header-actions > :is(a, button),
+.directory-header-actions > :is(a, button),
+.my-bands-header-actions > :is(a, button),
+.user-profile-page-header-actions > :is(a, button),
+.songs-side-card-header-actions > :is(a, button),
+.band-parts-header-actions > :is(a, button) {
+  max-width: 100%;
+  min-width: 0;
+}
+
+:is(.songs-header, .setlists-header, .gigs-header, .calendar-header) > :first-child {
+  min-width: 0;
+  flex: 1 1 16rem;
+}
+
 .user-profile-page-save {
   flex-shrink: 0;
   margin: 0;
 }
 
 .user-profile-page-header-actions {
-  display: flex;
   align-items: center;
   gap: 0.75rem;
-  flex-shrink: 0;
 }
 
 .user-profile-page .panel {
@@ -943,13 +1003,58 @@
 
 @media (max-width: 900px) {
   .app-header-inner {
-    flex-wrap: wrap;
-    align-items: flex-start;
+    flex-wrap: nowrap;
+    align-items: center;
   }
 
   .app-header-toggle {
     display: inline-flex;
     align-items: center;
+  }
+
+  :is(.songs-header, .setlists-header, .gigs-header, .calendar-header) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .app-page-header-actions,
+  .songs-header-actions,
+  .setlists-header-actions,
+  .calendar-header-actions,
+  .gigs-header-actions,
+  .song-suggestions-header-actions,
+  .directory-header-actions,
+  .my-bands-header-actions,
+  .user-profile-page-header-actions,
+  .songs-side-card-header-actions,
+  .band-parts-header-actions {
+    width: 100%;
+  }
+
+  .app-page-header-actions > :is(a, button).directory-btn,
+  .songs-header-actions > :is(a, button).directory-btn,
+  .setlists-header-actions > :is(a, button).directory-btn,
+  .calendar-header-actions > :is(a, button).directory-btn,
+  .gigs-header-actions > :is(a, button).directory-btn,
+  .song-suggestions-header-actions > :is(a, button).directory-btn,
+  .directory-header-actions > :is(a, button).directory-btn,
+  .my-bands-header-actions > :is(a, button).directory-btn,
+  .user-profile-page-header-actions > :is(a, button).directory-btn,
+  .songs-side-card-header-actions > :is(a, button).directory-btn,
+  .band-parts-header-actions > :is(a, button).directory-btn,
+  .app-page-header-actions > :is(a, button).auth-button,
+  .songs-header-actions > :is(a, button).auth-button,
+  .setlists-header-actions > :is(a, button).auth-button,
+  .calendar-header-actions > :is(a, button).auth-button,
+  .gigs-header-actions > :is(a, button).auth-button,
+  .song-suggestions-header-actions > :is(a, button).auth-button,
+  .directory-header-actions > :is(a, button).auth-button,
+  .my-bands-header-actions > :is(a, button).auth-button,
+  .user-profile-page-header-actions > :is(a, button).auth-button,
+  .songs-side-card-header-actions > :is(a, button).auth-button,
+  .band-parts-header-actions > :is(a, button).auth-button {
+    flex: 1 1 calc(50% - 0.3rem);
+    min-width: min(100%, 10rem);
   }
 
   .app-header-nav,
@@ -1005,7 +1110,9 @@
   }
 
   .app-main {
-    padding: 1rem max(1rem, env(safe-area-inset-right, 0)) 1rem
-      max(1rem, env(safe-area-inset-left, 0));
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    padding-left: max(1rem, env(safe-area-inset-left, 0px));
+    padding-right: max(1rem, env(safe-area-inset-right, 0px));
   }
 }
