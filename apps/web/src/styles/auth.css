@@ -349,74 +349,56 @@
   margin-bottom: 0;
 }
 
-.app-admin-badge {
+.app-admin-badge,
+.app-platform-mode-pill,
+.app-workspace-mode-badge,
+.app-plan-pill {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 28px;
+  padding: 0 0.7rem;
   border-radius: 999px;
-  padding: 0.25rem 0.65rem;
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  background: rgba(255, 204, 51, 0.14);
-  border: 1px solid rgba(255, 204, 51, 0.35);
-  color: #ffcc33;
-}
-
-.app-platform-mode-pill {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  padding: 0.25rem 0.65rem;
+  border: 1px solid transparent;
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
+  line-height: 1;
+}
+
+.app-admin-badge {
+  background: rgba(255, 204, 51, 0.14);
+  border-color: rgba(255, 204, 51, 0.35);
+  color: #ffcc33;
 }
 
 .app-platform-mode-pill-beta {
   background: rgba(97, 227, 194, 0.14);
-  border: 1px solid rgba(97, 227, 194, 0.4);
+  border-color: rgba(97, 227, 194, 0.4);
   color: #61e3c2;
 }
 
 .app-platform-mode-pill-promo {
   background: rgba(255, 140, 66, 0.14);
-  border: 1px solid rgba(255, 140, 66, 0.4);
+  border-color: rgba(255, 140, 66, 0.4);
   color: #ffb07a;
 }
 
 .nav-platform-mode-pill {
-  margin-right: 0.35rem;
+  margin-right: 0;
 }
 
 .app-workspace-mode-badge {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  padding: 0.25rem 0.65rem;
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   background: rgba(255, 94, 126, 0.14);
-  border: 1px solid rgba(255, 94, 126, 0.35);
+  border-color: rgba(255, 94, 126, 0.35);
   color: #ff8da8;
 }
 
 .app-plan-pill {
-  display: inline-flex;
-  align-items: center;
-  min-height: 28px;
-  border-radius: 999px;
-  padding: 0.25rem 0.65rem;
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   text-decoration: none;
-  white-space: nowrap;
 }
 
 .app-plan-pill:hover,
@@ -426,7 +408,7 @@
 
 .app-plan-pill-free {
   background: rgba(148, 163, 184, 0.14);
-  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-color: rgba(148, 163, 184, 0.35);
   color: #cbd5e1;
 }
 
@@ -438,7 +420,7 @@
 
 .app-plan-pill-plus {
   background: rgba(99, 102, 241, 0.16);
-  border: 1px solid rgba(129, 140, 248, 0.4);
+  border-color: rgba(129, 140, 248, 0.4);
   color: #a5b4fc;
 }
 
@@ -450,7 +432,7 @@
 
 .app-plan-pill-pro {
   background: rgba(255, 204, 51, 0.14);
-  border: 1px solid rgba(255, 204, 51, 0.35);
+  border-color: rgba(255, 204, 51, 0.35);
   color: #ffcc33;
 }
 
@@ -462,7 +444,7 @@
 
 .app-plan-pill-organiser {
   background: rgba(52, 211, 153, 0.14);
-  border: 1px solid rgba(52, 211, 153, 0.35);
+  border-color: rgba(52, 211, 153, 0.35);
   color: #6ee7b7;
 }
 

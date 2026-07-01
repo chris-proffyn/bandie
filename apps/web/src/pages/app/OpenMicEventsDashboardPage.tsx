@@ -3,9 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   checkUserOrganiserCapability,
   computeOpenMicDashboardMetrics,
+  countCancelledOpenMicEvents,
   createOpenMicEvent,
   createOrganiserVenue,
   EntitlementGateError,
+  filterOpenMicEventsForDashboard,
   formatOpenMicEventStatus,
   formatOpenMicEventType,
   formatOrganiserVenueAddress,
@@ -21,6 +23,7 @@ import { useAuth } from '../../context/AuthContext';
 import { UpgradePromptModal } from '../../components/entitlements/UpgradePromptModal';
 import { useUpgradePrompt } from '../../hooks/useUpgradePrompt';
 import '../../styles/gigs.css';
+import '../../styles/openMic.css';
 import '../../styles/workspace.css';
 
 type VenueChoice = '' | 'new' | string;
@@ -37,6 +40,7 @@ export function OpenMicEventsDashboardPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [showCancelledEvents, setShowCancelledEvents] = useState(false);
   const [form, setForm] = useState({
     title: '',
     startsAt: '',
@@ -92,6 +96,11 @@ export function OpenMicEventsDashboardPage() {
   }, [showCreate, loadVenues]);
 
   const metrics = useMemo(() => computeOpenMicDashboardMetrics(events), [events]);
+  const cancelledCount = useMemo(() => countCancelledOpenMicEvents(events), [events]);
+  const visibleEvents = useMemo(
+    () => filterOpenMicEventsForDashboard(events, { includeCancelled: showCancelledEvents }),
+    [events, showCancelledEvents],
+  );
 
   const selectedVenue = useMemo(
     () => venues.find((venue) => venue.id === form.venueChoice) ?? null,
@@ -361,15 +370,36 @@ export function OpenMicEventsDashboardPage() {
       ) : null}
 
       <section className="panel">
-        <h2>Your events</h2>
+        <div className="gigs-events-section-head">
+          <h2>Your events</h2>
+          {cancelledCount > 0 ? (
+            <button
+              type="button"
+              className={`directory-btn directory-btn-secondary open-mic-cancelled-toggle${
+                showCancelledEvents ? ' is-active' : ''
+              }`}
+              aria-pressed={showCancelledEvents}
+              onClick={() => setShowCancelledEvents((current) => !current)}
+            >
+              {showCancelledEvents ? 'Hide cancelled' : 'Show cancelled'}
+              <span className="open-mic-cancelled-toggle-count">
+                ({cancelledCount} cancelled)
+              </span>
+            </button>
+          ) : null}
+        </div>
         {loading ? <p className="workspace-empty-note">Loading events…</p> : null}
-        {!loading && events.length === 0 ? (
+        {!loading && visibleEvents.length === 0 ? (
           <p className="workspace-empty-note">
-            No open mic events yet. Create your first event to get a public sign-up page and poster.
+            {events.length === 0
+              ? 'No open mic events yet. Create your first event to get a public sign-up page and poster.'
+              : `No active events. Show cancelled to view ${cancelledCount} cancelled event${
+                  cancelledCount === 1 ? '' : 's'
+                }.`}
           </p>
         ) : null}
         <ul className="gigs-list">
-          {events.map((event) => {
+          {visibleEvents.map((event) => {
             const venueLabel = event.venue?.name ?? event.venue_name ?? 'Venue TBC';
             const starts = new Date(event.starts_at).toLocaleString('en-GB', {
               weekday: 'short',

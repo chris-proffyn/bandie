@@ -302,6 +302,23 @@ export function computeOpenMicDashboardMetrics(events: OpenMicEvent[]) {
   };
 }
 
+export function countCancelledOpenMicEvents(
+  events: Pick<OpenMicEvent, 'status'>[],
+): number {
+  return events.filter((event) => event.status === 'cancelled').length;
+}
+
+export function filterOpenMicEventsForDashboard<T extends Pick<OpenMicEvent, 'status'>>(
+  events: T[],
+  options: { includeCancelled: boolean },
+): T[] {
+  if (options.includeCancelled) {
+    return events;
+  }
+
+  return events.filter((event) => event.status !== 'cancelled');
+}
+
 export async function listOrganiserOpenMicEvents(): Promise<OpenMicEventSummary[]> {
   const session = await getCurrentSession();
   if (!session?.user) {

@@ -774,6 +774,8 @@ export {
   openMicStatusPillClass,
   getOpenMicPublicUrl,
   computeOpenMicDashboardMetrics,
+  countCancelledOpenMicEvents,
+  filterOpenMicEventsForDashboard,
   resolveOpenMicVenueLabel,
 } from './openMicEvents';
 export type {

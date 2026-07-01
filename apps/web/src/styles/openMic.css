@@ -38,6 +38,34 @@
   color: #ff5e7e;
 }
 
+.gigs-events-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.gigs-events-section-head h2 {
+  margin: 0;
+}
+
+.open-mic-cancelled-toggle {
+  white-space: nowrap;
+}
+
+.open-mic-cancelled-toggle.is-active {
+  background: rgba(255, 94, 126, 0.2);
+  border-color: rgba(255, 94, 126, 0.45);
+  color: #ff8fa6;
+}
+
+.open-mic-cancelled-toggle-count {
+  font-weight: 700;
+  opacity: 0.9;
+}
+
 .open-mic-queue-item,
 .open-mic-song-card {
   display: flex;
