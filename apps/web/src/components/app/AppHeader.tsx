@@ -3,18 +3,38 @@ import { Link, useLocation } from 'react-router-dom';
 import { getCommunicationSummary, listUserSubscriptions, WORKSPACE_MODE_LABELS } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
 import { usePlayerWorkspaceAccess } from '../../hooks/usePlayerWorkspaceAccess';
-import { getBandNavItems, getGlobalNavItems } from '../../lib/appNavigation';
+import { getAppNavMenuSections } from '../../lib/appNavigation';
 import { BANDIE_BRAND_NAME } from '../../lib/brand';
 import { resolveWorkspacePlanPill } from '../../lib/planPill';
 import { usePlatformAccessMode } from '../../hooks/usePlatformAccessMode';
 import { PlatformAccessModePill } from '../platform/PlatformAccessModePill';
 import { BandieLogo } from '../brand/BandieLogo';
-import { AppAccountMenu } from './AppAccountMenu';
 import { AppNavLinks } from './AppNavLinks';
 
 type AppHeaderProps = {
   bandId?: string;
 };
+
+function MenuIcon({ open }: { open: boolean }) {
+  if (open) {
+    return (
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          d="M6 6l12 12M18 6L6 18"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+      </svg>
+    );
+  }
+
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 export function AppHeader({ bandId }: AppHeaderProps) {
   const location = useLocation();
@@ -35,8 +55,7 @@ export function AppHeader({ bandId }: AppHeaderProps) {
     canBrowsePlayerDirectory: playerAccess.canBrowsePlayerDirectory,
   };
 
-  const globalNavItems = getGlobalNavItems(navOptions);
-  const bandNavItems = getBandNavItems(navOptions);
+  const menuSections = getAppNavMenuSections(navOptions);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -118,83 +137,55 @@ export function AppHeader({ bandId }: AppHeaderProps) {
             <span>{BANDIE_BRAND_NAME}</span>
           </Link>
 
-          <button
-            type="button"
-            className="app-header-toggle"
-            aria-expanded={menuOpen}
-            aria-controls="app-header-mobile-menu"
-            onClick={() => setMenuOpen((open) => !open)}
-          >
-            {menuOpen ? 'Close menu' : 'Menu'}
-          </button>
+          <div className="app-header-status">
+            {adminModeActive ? <span className="app-admin-badge">Admin mode</span> : null}
+            {platformAccessMode ? <PlatformAccessModePill status={platformAccessMode} /> : null}
+            {planPill ? (
+              <Link
+                to="/app/profile"
+                className={`app-plan-pill app-plan-pill-${planPill.tone}`}
+                title={planPillTitle}
+              >
+                {planPill.label}
+              </Link>
+            ) : null}
+          </div>
 
-          <nav className="app-header-nav app-header-nav-desktop" aria-label="Workspace">
-            <AppNavLinks items={globalNavItems} />
-          </nav>
-
-          <div className="app-header-account app-header-account-desktop">
-            <AppAccountMenu
-              displayName={displayName}
-              planPill={planPill}
-              planPillTitle={planPillTitle}
-              adminModeActive={adminModeActive}
-              isAppAdmin={isAppAdmin}
-              canSwitchWorkspaceMode={canSwitchWorkspaceMode}
-              workspaceMode={workspaceMode}
-              platformAccessMode={platformAccessMode}
-              onSignOut={handleLogout}
-              onNavigate={closeMenu}
-            />
+          <div className="app-header-identity">
+            <span className="app-header-display-name">{displayName}</span>
+            <button
+              type="button"
+              className="app-header-menu-toggle"
+              aria-expanded={menuOpen}
+              aria-controls="app-header-menu"
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              onClick={() => setMenuOpen((open) => !open)}
+            >
+              <MenuIcon open={menuOpen} />
+            </button>
           </div>
         </div>
 
-        {bandNavItems.length > 0 ? (
-          <nav className="app-header-band-nav" aria-label="Band">
-            <AppNavLinks
-              items={bandNavItems}
-              linkClassName="app-header-nav-link app-header-band-nav-link"
-            />
-          </nav>
-        ) : null}
-
         {menuOpen ? (
-          <div id="app-header-mobile-menu" className="app-header-mobile-menu">
-            <nav className="app-header-mobile-nav" aria-label="Workspace">
-              <AppNavLinks items={globalNavItems} onNavigate={closeMenu} />
-              {bandNavItems.length > 0 ? (
-                <div className="app-header-mobile-band-nav">
-                  <p className="app-header-mobile-band-label">This band</p>
-                  <AppNavLinks items={bandNavItems} onNavigate={closeMenu} />
-                </div>
-              ) : null}
-            </nav>
+          <div id="app-header-menu" className="app-header-menu-panel">
+            {menuSections.map((section) => (
+              <section key={section.id} className="app-header-menu-section">
+                <h2 className="app-header-menu-section-label">{section.label}</h2>
+                <nav className="app-header-menu-section-nav" aria-label={section.label}>
+                  <AppNavLinks items={section.items} onNavigate={closeMenu} />
+                </nav>
+              </section>
+            ))}
 
-            <div className="app-header-account-mobile">
-              <div className="app-header-account-mobile-badges">
-                {adminModeActive ? <span className="app-admin-badge">Admin mode</span> : null}
-                {platformAccessMode ? <PlatformAccessModePill status={platformAccessMode} /> : null}
-                {planPill ? (
-                  <Link
-                    to="/app/profile"
-                    className={`app-plan-pill app-plan-pill-${planPill.tone}`}
-                    title={planPillTitle}
-                    onClick={closeMenu}
-                  >
-                    {planPill.label}
-                  </Link>
-                ) : null}
-                {!adminModeActive && canSwitchWorkspaceMode ? (
-                  <span className="app-workspace-mode-badge">{WORKSPACE_MODE_LABELS[workspaceMode]}</span>
-                ) : null}
-              </div>
+            <div className="app-header-menu-footer">
+              {!adminModeActive && canSwitchWorkspaceMode ? (
+                <span className="app-workspace-mode-badge">{WORKSPACE_MODE_LABELS[workspaceMode]}</span>
+              ) : null}
               {isAppAdmin ? (
                 <Link to="/admin" className="app-header-nav-link" onClick={closeMenu}>
                   Admin portal
                 </Link>
               ) : null}
-              <Link to="/app/profile" className="app-header-account-name" onClick={closeMenu}>
-                {displayName}
-              </Link>
               <button type="button" className="app-header-sign-out" onClick={handleLogout}>
                 Sign out
               </button>

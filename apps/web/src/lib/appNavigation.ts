@@ -8,6 +8,12 @@ export type AppNavItem = {
   badge?: number;
 };
 
+export type AppNavMenuSection = {
+  id: string;
+  label: string;
+  items: AppNavItem[];
+};
+
 type AppNavOptions = {
   bandId?: string;
   workspaceMode?: WorkspaceMode;
@@ -95,6 +101,28 @@ export function getBandNavItems({
   }
 
   return [];
+}
+
+export function getAppNavMenuSections(options: AppNavOptions): AppNavMenuSection[] {
+  const globalItems = getGlobalNavItems(options);
+  const bandItems = getBandNavItems(options);
+  const sections: AppNavMenuSection[] = [];
+
+  const workspaceLabel = options.adminModeActive
+    ? 'Admin workspace'
+    : options.workspaceMode === 'organiser'
+      ? 'Organiser'
+      : 'Workspace';
+
+  if (globalItems.length > 0) {
+    sections.push({ id: 'workspace', label: workspaceLabel, items: globalItems });
+  }
+
+  if (bandItems.length > 0) {
+    sections.push({ id: 'band', label: 'This band', items: bandItems });
+  }
+
+  return sections;
 }
 
 export function getAppNavItems(options: AppNavOptions): AppNavItem[] {
