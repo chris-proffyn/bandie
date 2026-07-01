@@ -202,9 +202,9 @@
 
 .app-header-inner {
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 1rem;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
   width: 100%;
   max-width: 1400px;
   min-width: 0;
@@ -215,16 +215,23 @@
   padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
 }
 
+.app-header-primary {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+  min-width: 0;
+}
+
 .app-header-brand {
   display: inline-flex;
   align-items: center;
   gap: 0.65rem;
-  min-width: 0;
+  flex-shrink: 0;
   color: #f6f3ea;
   text-decoration: none;
   font-weight: 800;
   letter-spacing: -0.03em;
-  flex: 1 1 auto;
 }
 
 .app-header-brand > span {
@@ -257,8 +264,143 @@
   align-items: center;
   justify-content: flex-start;
   gap: 0.25rem;
-  flex: 0 1 auto;
+  flex: 1 1 auto;
   min-width: 0;
+}
+
+.app-header-nav-global {
+  flex-wrap: wrap;
+}
+
+.app-header-band-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.55rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.app-header-band-nav-link {
+  flex-shrink: 0;
+}
+
+.app-header-mobile-band-nav {
+  display: none;
+}
+
+.app-header-mobile-band-label {
+  margin: 0.35rem 0 0.15rem;
+  padding: 0.35rem 0.75rem 0;
+  color: #8f8a7f;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.app-header-account-desktop {
+  display: flex;
+}
+
+.app-header-account-mobile {
+  display: none;
+}
+
+.app-header-account-menu {
+  position: relative;
+}
+
+.app-header-account-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 40px;
+  padding: 0.4rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  color: #f6f3ea;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.app-header-account-trigger:hover,
+.app-header-account-trigger:focus-visible {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.app-header-account-trigger-name {
+  max-width: 10rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-header-account-trigger-chevron {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.app-header-account-dropdown {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 30;
+  min-width: min(18rem, calc(100vw - 2rem));
+  padding: 0.65rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #18181f;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+}
+
+.app-header-account-dropdown-head {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.35rem 0.55rem 0.65rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 0.35rem;
+}
+
+.app-header-account-dropdown-name {
+  font-weight: 800;
+  color: #f6f3ea;
+}
+
+.app-header-account-dropdown-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.app-header-account-dropdown-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 40px;
+  padding: 0.55rem 0.75rem;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #f6f3ea;
+  text-decoration: none;
+  font: inherit;
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+}
+
+.app-header-account-dropdown-item:hover,
+.app-header-account-dropdown-item:focus-visible {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.app-header-account-dropdown-sign-out {
+  color: #ffb4c4;
 }
 
 .app-header-nav-link {
@@ -1003,8 +1145,29 @@
 
 @media (max-width: 900px) {
   .app-header-inner {
+    padding-bottom: 0.85rem;
+  }
+
+  .app-header-primary {
     flex-wrap: nowrap;
     align-items: center;
+  }
+
+  .app-header-band-nav {
+    display: none;
+  }
+
+  .app-header-account-desktop {
+    display: none;
+  }
+
+  .app-header-account-mobile {
+    display: flex;
+  }
+
+  .app-header-mobile-band-nav {
+    display: block;
+    width: 100%;
   }
 
   .app-header-toggle {
@@ -1058,7 +1221,7 @@
   }
 
   .app-header-nav,
-  .app-header-account {
+  .app-header-account-mobile {
     display: none;
     width: 100%;
   }
@@ -1066,6 +1229,14 @@
   .app-header-nav-open,
   .app-header-account-open {
     display: flex;
+  }
+
+  .app-header-account-mobile-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    width: 100%;
+    padding: 0 0.75rem 0.35rem;
   }
 
   .app-header-nav {
@@ -1094,7 +1265,7 @@
     padding: 14px 16px;
   }
 
-  .app-header-account {
+  .app-header-account-mobile {
     flex-wrap: wrap;
     padding: 0.75rem 0 0.25rem;
     border-top: 1px solid rgba(255, 255, 255, 0.08);

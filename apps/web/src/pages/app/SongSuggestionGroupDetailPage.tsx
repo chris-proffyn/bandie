@@ -6,15 +6,18 @@ import {
   closeSongSuggestionVoting,
   closeSongSuggestions,
   collectSongSuggestionFilterOptions,
+  computeSongSuggestionAutoSelection,
   confirmSongSuggestionGroup,
   createSkeletonSetlistFromSuggestionGroup,
   filterAndSortSongSuggestions,
   getSongSuggestionGroupDetail,
+  isInclusiveSelectionActive,
   isSongSuggestionSubmitOpen,
   isSongSuggestionVotingOpen,
   rankSongSuggestions,
   reopenSongSuggestions,
   resetSongSuggestionVotes,
+  SONG_SUGGESTION_SELECTION_MODE_LABELS,
   songSuggestionGroupStatusClass,
   vetoSongSuggestion,
   withdrawSongSuggestion,
@@ -126,8 +129,12 @@ export function SongSuggestionGroupDetailPage() {
         const ranked = rankSongSuggestions(
           result.suggestions.filter((row) => row.status === 'active'),
         );
-        const top = ranked.slice(0, result.group.target_song_count);
-        setSelectedIds(new Set(top.map((row) => row.id)));
+        const autoSelected = computeSongSuggestionAutoSelection(ranked, {
+          targetSongCount: result.group.target_song_count,
+          selectionMode: result.group.selection_mode,
+          bandMemberCount: result.bandMemberCount,
+        });
+        setSelectedIds(new Set(autoSelected));
       }
     } catch (err) {
       if (!cancelled()) {
@@ -157,6 +164,7 @@ export function SongSuggestionGroupDetailPage() {
   }, [groupId, bandId, loadDetail]);
 
   const group = detail?.group;
+  const bandMemberCount = detail?.bandMemberCount ?? 0;
   const suggestions = detail?.suggestions ?? [];
   const activeSuggestions = useMemo(
     () => suggestions.filter((row) => row.status === 'active'),
@@ -167,6 +175,23 @@ export function SongSuggestionGroupDetailPage() {
     [suggestions],
   );
   const rankedActive = useMemo(() => rankSongSuggestions(activeSuggestions), [activeSuggestions]);
+
+  const autoSelectedIds = useMemo(() => {
+    if (!group) {
+      return [];
+    }
+    return computeSongSuggestionAutoSelection(rankedActive, {
+      targetSongCount: group.target_song_count,
+      selectionMode: group.selection_mode,
+      bandMemberCount,
+    });
+  }, [bandMemberCount, group, rankedActive]);
+
+  const autoSelectedIdSet = useMemo(() => new Set(autoSelectedIds), [autoSelectedIds]);
+
+  const inclusiveSelectionActive = group
+    ? isInclusiveSelectionActive(group.selection_mode, group.target_song_count, bandMemberCount)
+    : false;
 
   const filterOptions = useMemo(
     () => collectSongSuggestionFilterOptions(suggestions),
@@ -364,12 +389,11 @@ export function SongSuggestionGroupDetailPage() {
     }
 
     const selections = [...selectedIds].map((suggestionId) => {
-      const ranked = rankedActive.find((row) => row.id === suggestionId);
-      const inTopN = ranked && ranked.proposed_rank <= group.target_song_count;
+      const inAutoSelection = autoSelectedIdSet.has(suggestionId);
       const overrideReason = overrideReasons[suggestionId]?.trim();
       return {
         suggestionId,
-        overrideReason: !inTopN && overrideReason ? overrideReason : null,
+        overrideReason: !inAutoSelection && overrideReason ? overrideReason : null,
       };
     });
 
@@ -379,10 +403,9 @@ export function SongSuggestionGroupDetailPage() {
     }
 
     for (const selection of selections) {
-      const ranked = rankedActive.find((row) => row.id === selection.suggestionId);
-      const inTopN = ranked && ranked.proposed_rank <= group.target_song_count;
-      if (!inTopN && !selection.overrideReason) {
-        setActionError('Provide an override reason for songs outside the top rank.');
+      const inAutoSelection = autoSelectedIdSet.has(selection.suggestionId);
+      if (!inAutoSelection && !selection.overrideReason) {
+        setActionError('Provide an override reason for songs outside the proposed selection.');
         return;
       }
     }
@@ -463,7 +486,8 @@ export function SongSuggestionGroupDetailPage() {
           </div>
           {group.description ? <p className="my-bands-lead">{group.description}</p> : null}
           <p className="song-suggestion-meta">
-            Target {group.target_song_count} songs · suggestions close{' '}
+            {SONG_SUGGESTION_SELECTION_MODE_LABELS[group.selection_mode]} selection · Target{' '}
+            {group.target_song_count} songs · suggestions close{' '}
             {new Date(group.suggestion_closes_at).toLocaleString('en-GB', {
               day: 'numeric',
               month: 'short',
@@ -572,8 +596,7 @@ export function SongSuggestionGroupDetailPage() {
                 className="directory-btn directory-btn-primary"
                 disabled={actionBusy}
                 onClick={() => {
-                  const top = rankedActive.slice(0, group.target_song_count);
-                  setSelectedIds(new Set(top.map((row) => row.id)));
+                  setSelectedIds(new Set(autoSelectedIds));
                   setShowConfirm(true);
                 }}
               >
@@ -614,8 +637,10 @@ export function SongSuggestionGroupDetailPage() {
         <section className="panel">
           <h2>Confirm top songs</h2>
           <p className="song-suggestion-panel-intro">
-            Select up to {group.target_song_count} songs (or override with a reason). Tied scores are
-            highlighted.
+            Select up to {group.target_song_count} songs (or override with a reason).
+            {inclusiveSelectionActive
+              ? ' Inclusive mode guarantees each member who suggested gets their highest-scoring song when possible.'
+              : ' Tied scores are highlighted.'}
           </p>
           <ul className="song-suggestion-confirm-list">
             {rankedActive.map((row, index) => {
@@ -625,7 +650,7 @@ export function SongSuggestionGroupDetailPage() {
                 next.vote_summary.score === row.vote_summary.score &&
                 next.vote_summary.happy_count === row.vote_summary.happy_count;
               const checked = selectedIds.has(row.id);
-              const outOfTop = row.proposed_rank > group.target_song_count;
+              const inAutoSelection = autoSelectedIdSet.has(row.id);
               return (
                 <li
                   key={row.id}
@@ -645,9 +670,9 @@ export function SongSuggestionGroupDetailPage() {
                       Score {row.vote_summary.score} · 🙂 {row.vote_summary.happy_count} · 😐{' '}
                       {row.vote_summary.meh_count} · 🙁 {row.vote_summary.rather_not_count}
                     </p>
-                    {checked && outOfTop ? (
+                    {checked && !inAutoSelection ? (
                       <input
-                        placeholder="Override reason (required outside top rank)"
+                        placeholder="Override reason (required outside proposed selection)"
                         value={overrideReasons[row.id] ?? ''}
                         onChange={(event) =>
                           setOverrideReasons((current) => ({
@@ -721,6 +746,9 @@ export function SongSuggestionGroupDetailPage() {
       <SongSuggestionRankingTable
         bandId={bandId!}
         targetSongCount={group.target_song_count}
+        selectionMode={group.selection_mode}
+        bandMemberCount={bandMemberCount}
+        autoSelectedIds={autoSelectedIds}
         groupStatus={group.status}
         rankedRows={rankedActive}
         confirmedRows={detail?.confirmed ?? []}

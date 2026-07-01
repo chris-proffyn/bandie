@@ -1,11 +1,14 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   SONG_SUGGESTION_DECADE_OPTIONS,
   SONG_SUGGESTION_GENRE_OPTIONS,
+  SONG_SUGGESTION_SELECTION_MODE_BRIEF,
   createSongSuggestionGroup,
+  listBandMembersWithProfiles,
   updateSongSuggestionGroup,
   type SongSuggestionGroup,
+  type SongSuggestionSelectionMode,
   type VocalSuitability,
   type VoteVisibility,
 } from '@bandie/data';
@@ -34,6 +37,7 @@ export function SongSuggestionGroupFormPanel({
   const isEdit = Boolean(group);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [bandMemberCount, setBandMemberCount] = useState<number | null>(null);
   const [form, setForm] = useState({
     name: group?.name ?? '',
     description: group?.description ?? '',
@@ -44,7 +48,36 @@ export function SongSuggestionGroupFormPanel({
     vocalSuitability: (group?.vocal_suitability ?? 'any') as VocalSuitability,
     preferredGenres: group?.preferred_genres ?? [],
     preferredDecades: group?.preferred_decades ?? [],
+    selectionMode: (group?.selection_mode ?? 'best') as SongSuggestionSelectionMode,
   });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadMemberCount() {
+      try {
+        const members = await listBandMembersWithProfiles(bandId);
+        if (!cancelled) {
+          setBandMemberCount(members.length);
+        }
+      } catch {
+        if (!cancelled) {
+          setBandMemberCount(null);
+        }
+      }
+    }
+
+    void loadMemberCount();
+    return () => {
+      cancelled = true;
+    };
+  }, [bandId]);
+
+  const targetSongCountNumber = Number(form.targetSongCount) || 0;
+  const inclusiveEligible =
+    bandMemberCount != null &&
+    bandMemberCount > 0 &&
+    targetSongCountNumber >= bandMemberCount;
 
   function toggleGenre(genre: string) {
     setForm((current) => ({
@@ -85,6 +118,7 @@ export function SongSuggestionGroupFormPanel({
       vocalSuitability: form.vocalSuitability,
       preferredGenres: form.preferredGenres,
       preferredDecades: form.preferredDecades,
+      selectionMode: form.selectionMode,
     };
 
     try {
@@ -135,6 +169,7 @@ export function SongSuggestionGroupFormPanel({
             value={form.description}
             onChange={(event) => setForm((c) => ({ ...c, description: event.target.value }))}
           />
+          <p className="song-suggestion-mode-brief">{SONG_SUGGESTION_SELECTION_MODE_BRIEF}</p>
         </div>
         <div className="song-suggestion-form-grid">
           <div className="auth-field">
@@ -148,6 +183,34 @@ export function SongSuggestionGroupFormPanel({
               required
             />
           </div>
+          <div className="auth-field">
+            <label htmlFor="ssg-selection-mode">Selection mode</label>
+            <label className="song-suggestion-filter-checkbox" htmlFor="ssg-selection-mode">
+              <input
+                id="ssg-selection-mode"
+                type="checkbox"
+                checked={form.selectionMode === 'inclusive'}
+                onChange={(event) =>
+                  setForm((c) => ({
+                    ...c,
+                    selectionMode: event.target.checked ? 'inclusive' : 'best',
+                  }))
+                }
+              />
+              Inclusive
+            </label>
+            <p className="song-suggestion-mode-note">
+              {form.selectionMode === 'inclusive'
+                ? inclusiveEligible
+                  ? `Active for this band (${bandMemberCount} members): each member who suggests gets their highest-scoring song, then remaining slots fill by score.`
+                  : bandMemberCount != null
+                    ? `Set the target to at least ${bandMemberCount} songs to activate Inclusive for this band. Until then, Best ranking applies.`
+                    : 'Inclusive activates when the target is at least the band size.'
+                : 'Best ranks purely by score — the top songs win.'}
+            </p>
+          </div>
+        </div>
+        <div className="song-suggestion-form-grid">
           <div className="auth-field">
             <label htmlFor="ssg-vote-visibility">Vote visibility</label>
             <select

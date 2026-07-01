@@ -24,6 +24,16 @@ export type SongSuggestionStatus =
 
 export type VoteVisibility = 'member_visible' | 'aggregate_only';
 
+export type SongSuggestionSelectionMode = 'best' | 'inclusive';
+
+export const SONG_SUGGESTION_SELECTION_MODE_LABELS: Record<SongSuggestionSelectionMode, string> = {
+  best: 'Best',
+  inclusive: 'Inclusive',
+};
+
+export const SONG_SUGGESTION_SELECTION_MODE_BRIEF =
+  'Best picks the highest-scoring songs overall. Inclusive guarantees each member who suggested at least one song gets their top-scoring entry when the target count is at least the band size; any remaining slots still go to the next best scores.';
+
 export type VocalSuitability =
   | 'any'
   | 'male_vocal'
@@ -49,6 +59,7 @@ export type SongSuggestionGroup = {
   allow_member_comments: boolean;
   allow_vote_changes: boolean;
   tie_break_mode: string;
+  selection_mode: SongSuggestionSelectionMode;
   status: SongSuggestionGroupStatus;
   suggestions_closed_at: string | null;
   voting_closed_at: string | null;
@@ -223,10 +234,82 @@ export function isSongSuggestionSameRankingTier(
   );
 }
 
+export function isInclusiveSelectionActive(
+  selectionMode: SongSuggestionSelectionMode,
+  targetSongCount: number,
+  bandMemberCount: number,
+): boolean {
+  return (
+    selectionMode === 'inclusive' &&
+    bandMemberCount > 0 &&
+    targetSongCount >= bandMemberCount
+  );
+}
+
+export function computeSongSuggestionAutoSelection(
+  ranked: SongSuggestionWithSummary[],
+  options: {
+    targetSongCount: number;
+    selectionMode: SongSuggestionSelectionMode;
+    bandMemberCount: number;
+  },
+): string[] {
+  const { targetSongCount, selectionMode, bandMemberCount } = options;
+  if (targetSongCount <= 0 || ranked.length === 0) {
+    return [];
+  }
+
+  if (!isInclusiveSelectionActive(selectionMode, targetSongCount, bandMemberCount)) {
+    return ranked.slice(0, targetSongCount).map((row) => row.id);
+  }
+
+  const selectedIds: string[] = [];
+  const selected = new Set<string>();
+
+  const bestByMember = new Map<string, SongSuggestionWithSummary>();
+  for (const row of ranked) {
+    if (!bestByMember.has(row.suggested_by)) {
+      bestByMember.set(row.suggested_by, row);
+    }
+  }
+
+  const memberPicks = [...bestByMember.values()].sort(
+    (a, b) => a.proposed_rank - b.proposed_rank,
+  );
+
+  for (const pick of memberPicks) {
+    if (selectedIds.length >= targetSongCount) {
+      break;
+    }
+    selected.add(pick.id);
+    selectedIds.push(pick.id);
+  }
+
+  for (const row of ranked) {
+    if (selectedIds.length >= targetSongCount) {
+      break;
+    }
+    if (!selected.has(row.id)) {
+      selected.add(row.id);
+      selectedIds.push(row.id);
+    }
+  }
+
+  return selectedIds;
+}
+
 export function isSongSuggestionInAutoSelection(
   proposedRank: number,
   targetSongCount: number,
+  options?: {
+    suggestionId?: string;
+    autoSelectedIds?: string[];
+  },
 ): boolean {
+  if (options?.autoSelectedIds && options.suggestionId) {
+    return options.autoSelectedIds.includes(options.suggestionId);
+  }
+
   return proposedRank > 0 && proposedRank <= targetSongCount;
 }
 
@@ -383,6 +466,7 @@ export type CreateSongSuggestionGroupInput = {
   votingClosesAt?: string | null;
   voteVisibility?: VoteVisibility;
   allowVoteChanges?: boolean;
+  selectionMode?: SongSuggestionSelectionMode;
 };
 
 export async function createSongSuggestionGroup(
@@ -410,6 +494,7 @@ export async function createSongSuggestionGroup(
       voting_closes_at: input.votingClosesAt ?? null,
       vote_visibility: input.voteVisibility ?? 'member_visible',
       allow_vote_changes: input.allowVoteChanges ?? true,
+      selection_mode: input.selectionMode ?? 'best',
       status: 'open_for_suggestions',
     })
     .select('*')
@@ -440,6 +525,7 @@ export type UpdateSongSuggestionGroupInput = {
   votingClosesAt?: string | null;
   voteVisibility?: VoteVisibility;
   allowVoteChanges?: boolean;
+  selectionMode?: SongSuggestionSelectionMode;
 };
 
 const NON_EDITABLE_GROUP_STATUSES: SongSuggestionGroupStatus[] = [
@@ -488,6 +574,7 @@ export async function updateSongSuggestionGroup(
       ...(input.votingClosesAt !== undefined && { voting_closes_at: input.votingClosesAt }),
       ...(input.voteVisibility !== undefined && { vote_visibility: input.voteVisibility }),
       ...(input.allowVoteChanges !== undefined && { allow_vote_changes: input.allowVoteChanges }),
+      ...(input.selectionMode !== undefined && { selection_mode: input.selectionMode }),
     })
     .eq('id', groupId)
     .select('*')
@@ -761,6 +848,7 @@ export async function getSongSuggestionGroupDetail(
   suggestions: SongSuggestionWithSummary[];
   events: SongSuggestionGroupEvent[];
   confirmed: SongSuggestionConfirmedSong[];
+  bandMemberCount: number;
 } | null> {
   const group = await getSongSuggestionGroup(groupId);
   if (!group) {
@@ -772,7 +860,7 @@ export async function getSongSuggestionGroupDetail(
   const viewerId = options.viewerUserId ?? session?.user?.id ?? null;
   const isLeader = options.isLeader ?? false;
 
-  const [{ data: suggestions }, { data: summaries }, { data: votes }, events, confirmed] =
+  const [{ data: suggestions }, { data: summaries }, { data: votes }, { count: bandMemberCount }, events, confirmed] =
     await Promise.all([
       client
         .from('bandie_song_suggestions')
@@ -781,6 +869,11 @@ export async function getSongSuggestionGroupDetail(
         .order('created_at', { ascending: true }),
       client.from('bandie_song_suggestion_vote_summary').select('*').eq('group_id', groupId),
       client.from('bandie_song_suggestion_votes').select('*').eq('group_id', groupId),
+      client
+        .from('bandie_band_members')
+        .select('id', { count: 'exact', head: true })
+        .eq('band_id', group.band_id)
+        .eq('status', 'active'),
       listSongSuggestionGroupEvents(groupId),
       group.status === 'confirmed' ? listConfirmedSongSuggestions(groupId) : Promise.resolve([]),
     ]);
@@ -869,6 +962,7 @@ export async function getSongSuggestionGroupDetail(
     suggestions: [...ranked, ...others],
     events,
     confirmed,
+    bandMemberCount: bandMemberCount ?? 0,
   };
 }
 

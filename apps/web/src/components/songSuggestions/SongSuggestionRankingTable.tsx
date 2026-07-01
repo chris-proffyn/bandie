@@ -3,8 +3,11 @@ import { Link } from 'react-router-dom';
 import {
   isSongSuggestionCutoffTieCandidate,
   isSongSuggestionInAutoSelection,
+  isInclusiveSelectionActive,
+  SONG_SUGGESTION_SELECTION_MODE_LABELS,
   type SongSuggestionConfirmedSong,
   type SongSuggestionGroupStatus,
+  type SongSuggestionSelectionMode,
   type SongSuggestionWithSummary,
 } from '@bandie/data';
 import { bandInitials } from '../../lib/profileHelpers';
@@ -12,6 +15,9 @@ import { bandInitials } from '../../lib/profileHelpers';
 type SongSuggestionRankingTableProps = {
   bandId: string;
   targetSongCount: number;
+  selectionMode: SongSuggestionSelectionMode;
+  bandMemberCount: number;
+  autoSelectedIds: string[];
   groupStatus: SongSuggestionGroupStatus;
   rankedRows: SongSuggestionWithSummary[];
   confirmedRows?: SongSuggestionConfirmedSong[];
@@ -42,12 +48,21 @@ function SongSuggestionRankingSuggesterCell({ row }: { row: SongSuggestionWithSu
 export function SongSuggestionRankingTable({
   bandId,
   targetSongCount,
+  selectionMode,
+  bandMemberCount,
+  autoSelectedIds,
   groupStatus,
   rankedRows,
   confirmedRows = [],
   vetoedCount = 0,
 }: SongSuggestionRankingTableProps) {
   const isConfirmed = groupStatus === 'confirmed';
+  const inclusiveActive = isInclusiveSelectionActive(
+    selectionMode,
+    targetSongCount,
+    bandMemberCount,
+  );
+  const selectionModeLabel = SONG_SUGGESTION_SELECTION_MODE_LABELS[selectionMode];
 
   if (isConfirmed) {
     if (confirmedRows.length === 0) {
@@ -121,7 +136,7 @@ export function SongSuggestionRankingTable({
     );
   }
 
-  const showCutoff = rankedRows.length > targetSongCount;
+  const showCutoff = !inclusiveActive && rankedRows.length > targetSongCount;
 
   return (
     <section className="panel surface-light song-suggestion-ranking-panel">
@@ -129,12 +144,13 @@ export function SongSuggestionRankingTable({
         <div>
           <h2>Live ranking</h2>
           <p className="song-suggestion-ranking-intro">
-            Songs ranked by score (highest first). The top {targetSongCount} will be proposed when
-            voting closes unless the leader adjusts the final selection.
+            {inclusiveActive
+              ? `${selectionModeLabel} mode: each member who suggested gets their highest-scoring song, then remaining slots fill by score up to ${targetSongCount}.`
+              : `${selectionModeLabel} mode: songs ranked by score (highest first). The top ${targetSongCount} are proposed when voting closes unless the leader adjusts the final selection.`}
           </p>
         </div>
         <span className="song-suggestion-ranking-target-badge">
-          Target {targetSongCount}
+          {selectionModeLabel} · Target {targetSongCount}
         </span>
       </div>
 
@@ -155,6 +171,7 @@ export function SongSuggestionRankingTable({
               const inSelection = isSongSuggestionInAutoSelection(
                 row.proposed_rank,
                 targetSongCount,
+                { suggestionId: row.id, autoSelectedIds },
               );
               const isTie = isSongSuggestionCutoffTieCandidate(
                 row,
@@ -192,7 +209,7 @@ export function SongSuggestionRankingTable({
                     <td>
                       {inSelection ? (
                         <span className="song-suggestion-ranking-status song-suggestion-ranking-status-in">
-                          In top {targetSongCount}
+                          {inclusiveActive ? 'In selection' : `In top ${targetSongCount}`}
                         </span>
                       ) : (
                         <span className="song-suggestion-ranking-status song-suggestion-ranking-status-out">
@@ -212,7 +229,9 @@ export function SongSuggestionRankingTable({
                         <div className="song-suggestion-ranking-cutoff-line">
                           <span>Selection cutoff</span>
                           <span className="song-suggestion-ranking-cutoff-detail">
-                            Top {targetSongCount} proceed when voting closes
+                            {inclusiveActive
+                              ? `${selectionModeLabel} selection (${autoSelectedIds.length} songs)`
+                              : `Top ${targetSongCount} proceed when voting closes`}
                           </span>
                         </div>
                       </td>

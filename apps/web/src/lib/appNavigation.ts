@@ -17,7 +17,7 @@ type AppNavOptions = {
   canBrowsePlayerDirectory?: boolean;
 };
 
-export function getAppNavItems({
+export function getGlobalNavItems({
   bandId,
   workspaceMode = 'player',
   adminModeActive = false,
@@ -26,9 +26,8 @@ export function getAppNavItems({
   canBrowsePlayerDirectory = true,
 }: AppNavOptions): AppNavItem[] {
   const resolvedBandId = bandRouteIdFromParam(bandId);
-  const inBandContext = Boolean(resolvedBandId);
 
-  const directoryItems: AppNavItem[] = inBandContext
+  const directoryItems: AppNavItem[] = resolvedBandId
     ? []
     : [
         ...(canBrowseBandDirectory ? [{ label: 'Band directory', to: '/app/bands' }] : []),
@@ -36,7 +35,7 @@ export function getAppNavItems({
       ];
 
   if (adminModeActive) {
-    const items: AppNavItem[] = [
+    return [
       { label: 'My bands', to: '/app', end: true },
       {
         label: 'Communications',
@@ -46,16 +45,6 @@ export function getAppNavItems({
       { label: 'My profile', to: '/app/profile' },
       ...directoryItems,
     ];
-
-    if (resolvedBandId) {
-      items.push({ label: 'Band overview', to: `/app/${resolvedBandId}`, end: true });
-      items.push({ label: 'Songs', to: `/app/${resolvedBandId}/songs` });
-      items.push({ label: 'Setlists', to: `/app/${resolvedBandId}/setlists` });
-      items.push({ label: 'Calendar', to: `/app/${resolvedBandId}/calendar` });
-      items.push({ label: 'Gig invites', to: `/app/${resolvedBandId}/gigs` });
-    }
-
-    return items;
   }
 
   if (workspaceMode === 'organiser') {
@@ -73,7 +62,7 @@ export function getAppNavItems({
     ];
   }
 
-  const items: AppNavItem[] = [
+  return [
     { label: 'My bands', to: '/app', end: true },
     {
       label: 'Communications',
@@ -83,14 +72,31 @@ export function getAppNavItems({
     { label: 'My profile', to: '/app/profile' },
     ...directoryItems,
   ];
+}
 
-  if (resolvedBandId) {
-    items.push({ label: 'Band overview', to: `/app/${resolvedBandId}`, end: true });
-    items.push({ label: 'Songs', to: `/app/${resolvedBandId}/songs` });
-    items.push({ label: 'Setlists', to: `/app/${resolvedBandId}/setlists` });
-    items.push({ label: 'Calendar', to: `/app/${resolvedBandId}/calendar` });
-    items.push({ label: 'Gig invites', to: `/app/${resolvedBandId}/gigs` });
+export function getBandNavItems({
+  bandId,
+  workspaceMode = 'player',
+  adminModeActive = false,
+}: AppNavOptions): AppNavItem[] {
+  const resolvedBandId = bandRouteIdFromParam(bandId);
+  if (!resolvedBandId) {
+    return [];
   }
 
-  return items;
+  if (adminModeActive || workspaceMode === 'player') {
+    return [
+      { label: 'Band overview', to: `/app/${resolvedBandId}`, end: true },
+      { label: 'Songs', to: `/app/${resolvedBandId}/songs` },
+      { label: 'Setlists', to: `/app/${resolvedBandId}/setlists` },
+      { label: 'Calendar', to: `/app/${resolvedBandId}/calendar` },
+      { label: 'Gig invites', to: `/app/${resolvedBandId}/gigs` },
+    ];
+  }
+
+  return [];
+}
+
+export function getAppNavItems(options: AppNavOptions): AppNavItem[] {
+  return [...getGlobalNavItems(options), ...getBandNavItems(options)];
 }
