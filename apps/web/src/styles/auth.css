@@ -223,6 +223,19 @@
   min-width: 0;
 }
 
+.app-header-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+  min-width: 0;
+  width: 100%;
+}
+
+.app-header-nav-desktop {
+  display: flex;
+}
+
 .app-header-brand {
   display: inline-flex;
   align-items: center;
@@ -288,7 +301,22 @@
 }
 
 .app-header-mobile-band-nav {
+  display: block;
+  width: 100%;
+  margin-top: 0.35rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.app-header-mobile-menu {
   display: none;
+}
+
+.app-header-mobile-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.15rem;
 }
 
 .app-header-mobile-band-label {
@@ -1148,31 +1176,43 @@
     padding-bottom: 0.85rem;
   }
 
-  .app-header-primary {
+  .app-header-toolbar {
     flex-wrap: nowrap;
     align-items: center;
+  }
+
+  .app-header-brand {
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
   .app-header-band-nav {
     display: none;
   }
 
+  .app-header-nav-desktop,
   .app-header-account-desktop {
-    display: none;
+    display: none !important;
   }
 
-  .app-header-account-mobile {
+  .app-header-mobile-menu {
     display: flex;
-  }
-
-  .app-header-mobile-band-nav {
-    display: block;
+    flex-direction: column;
+    gap: 0;
     width: 100%;
+    margin-top: 0.65rem;
+    padding-top: 0.65rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    max-height: calc(100dvh - 5rem - env(safe-area-inset-top, 0px));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .app-header-toggle {
     display: inline-flex;
     align-items: center;
+    flex-shrink: 0;
+    margin-left: auto;
   }
 
   :is(.songs-header, .setlists-header, .gigs-header, .calendar-header) {
@@ -1220,15 +1260,15 @@
     min-width: min(100%, 10rem);
   }
 
-  .app-header-nav,
   .app-header-account-mobile {
-    display: none;
-    width: 100%;
-  }
-
-  .app-header-nav-open,
-  .app-header-account-open {
     display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.15rem;
+    flex-wrap: nowrap;
+    padding: 0.75rem 0 0.25rem;
+    margin-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .app-header-account-mobile-badges {
@@ -1236,39 +1276,36 @@
     flex-wrap: wrap;
     gap: 0.45rem;
     width: 100%;
-    padding: 0 0.75rem 0.35rem;
-  }
-
-  .app-header-nav {
-    flex-direction: column;
-    align-items: stretch;
-    padding-top: 0.5rem;
+    padding: 0 0.75rem 0.5rem;
   }
 
   .app-header-nav-link {
+    width: 100%;
+    box-sizing: border-box;
     white-space: normal;
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     min-height: var(--touch-target-min);
     padding: 14px 16px;
   }
 
   .app-header-account-name {
-    display: inline-flex;
+    display: flex;
     align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    box-sizing: border-box;
     min-height: var(--touch-target-min);
     padding: 14px 16px;
   }
 
   .app-header-sign-out {
+    width: 100%;
+    box-sizing: border-box;
     min-height: var(--touch-target-min);
     padding: 14px 16px;
-  }
-
-  .app-header-account-mobile {
-    flex-wrap: wrap;
-    padding: 0.75rem 0 0.25rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: left;
   }
 
   .app-body-with-sidebar {
