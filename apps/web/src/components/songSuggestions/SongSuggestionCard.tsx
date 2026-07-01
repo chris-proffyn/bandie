@@ -17,10 +17,12 @@ type SongSuggestionCardProps = {
   sortBy: SongSuggestionSortKey;
   votingOpen: boolean;
   voteVisibility: VoteVisibility;
+  allowVoteChanges: boolean;
   isLeader: boolean;
   currentUserId: string | null;
   actionBusy: boolean;
   onVote: (suggestionId: string, voteState: SongSuggestionVoteState) => void;
+  onClearVote: (suggestionId: string) => void;
   onVeto: (row: SongSuggestionWithSummary) => void;
 };
 
@@ -36,14 +38,17 @@ export function SongSuggestionCard({
   sortBy,
   votingOpen,
   voteVisibility,
+  allowVoteChanges,
   isLeader,
   currentUserId,
   actionBusy,
   onVote,
+  onClearVote,
   onVeto,
 }: SongSuggestionCardProps) {
   const isVetoed = row.status === 'leader_vetoed';
   const canVote = votingOpen && row.status === 'active';
+  const canClearVote = canVote && Boolean(row.my_vote) && allowVoteChanges;
   const hideMemberVotes = voteVisibility === 'aggregate_only' && !isLeader;
 
   return (
@@ -154,21 +159,33 @@ export function SongSuggestionCard({
       ) : null}
 
       {canVote ? (
-        <div className="song-suggestion-vote-buttons" role="group" aria-label="Cast your vote">
-          {(['happy_to_play', 'meh', 'rather_not'] as const).map((voteState) => (
+        <div className="song-suggestion-vote-actions">
+          <div className="song-suggestion-vote-buttons" role="group" aria-label="Cast your vote">
+            {(['happy_to_play', 'meh', 'rather_not'] as const).map((voteState) => (
+              <button
+                key={voteState}
+                type="button"
+                className={`song-suggestion-vote-btn song-suggestion-vote-btn-${voteState}${
+                  row.my_vote === voteState ? ' active' : ''
+                }`}
+                disabled={actionBusy}
+                aria-pressed={row.my_vote === voteState}
+                onClick={() => onVote(row.id, voteState)}
+              >
+                {VOTE_EMOJI[voteState]} {SONG_SUGGESTION_VOTE_LABELS[voteState]}
+              </button>
+            ))}
+          </div>
+          {canClearVote ? (
             <button
-              key={voteState}
               type="button"
-              className={`song-suggestion-vote-btn song-suggestion-vote-btn-${voteState}${
-                row.my_vote === voteState ? ' active' : ''
-              }`}
+              className="song-suggestion-clear-vote-btn"
               disabled={actionBusy}
-              aria-pressed={row.my_vote === voteState}
-              onClick={() => onVote(row.id, voteState)}
+              onClick={() => onClearVote(row.id)}
             >
-              {VOTE_EMOJI[voteState]} {SONG_SUGGESTION_VOTE_LABELS[voteState]}
+              Clear vote
             </button>
-          ))}
+          ) : null}
         </div>
       ) : null}
     </article>

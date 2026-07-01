@@ -358,6 +358,34 @@
   gap: 0.5rem;
 }
 
+.song-suggestion-vote-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.song-suggestion-clear-vote-btn {
+  border: none;
+  background: transparent;
+  color: var(--auth-muted, #6b7280);
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.25rem 0;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  cursor: pointer;
+}
+
+.song-suggestion-clear-vote-btn:hover:not(:disabled) {
+  color: var(--auth-text, #111827);
+}
+
+.song-suggestion-clear-vote-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .song-suggestion-vote-btn {
   min-height: 42px;
   padding: 0.45rem 0.9rem;
@@ -443,4 +471,244 @@
   margin: 0 0 0.75rem;
   color: var(--text-muted);
   line-height: 1.45;
+}
+
+/**
+ * Light cards inside the dark app shell — must set an explicit white background
+ * when using .surface-light (see auth.css / RSD_UX §6.4).
+ */
+.app-main .surface-light.song-suggestion-filters,
+.app-shell .surface-light.song-suggestion-filters,
+.app-main .surface-light.song-suggestion-item-card,
+.app-shell .surface-light.song-suggestion-item-card {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #1f2937;
+  color-scheme: light;
+}
+
+.app-main .surface-light.song-suggestion-filters h3,
+.app-shell .surface-light.song-suggestion-filters h3,
+.app-main .surface-light.song-suggestion-item-card h3,
+.app-shell .surface-light.song-suggestion-item-card h3 {
+  color: #111827;
+}
+
+.app-main .surface-light .song-suggestion-meta,
+.app-shell .surface-light .song-suggestion-meta {
+  color: #4b5563;
+}
+
+.app-main .surface-light .song-suggestion-filter-checkbox,
+.app-shell .surface-light .song-suggestion-filter-checkbox {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.app-main .surface-light .song-suggestion-item-rationale,
+.app-shell .surface-light .song-suggestion-item-rationale {
+  color: #374151;
+}
+
+.app-main .surface-light .song-suggestion-needs-vote-note,
+.app-shell .surface-light .song-suggestion-needs-vote-note {
+  color: #6b7280;
+}
+
+.app-main .surface-light.song-suggestion-filters .auth-field input,
+.app-main .surface-light.song-suggestion-filters .auth-field select,
+.app-shell .surface-light.song-suggestion-filters .auth-field input,
+.app-shell .surface-light.song-suggestion-filters .auth-field select {
+  border: 1px solid #dfe4f1;
+  background: #ffffff;
+  color: #121826;
+}
+
+.app-main .surface-light.song-suggestion-filters .auth-field input::placeholder,
+.app-shell .surface-light.song-suggestion-filters .auth-field input::placeholder {
+  color: #6b7280;
+}
+
+.app-main .surface-light.song-suggestion-filters .auth-field input:focus-visible,
+.app-main .surface-light.song-suggestion-filters .auth-field select:focus-visible,
+.app-shell .surface-light.song-suggestion-filters .auth-field input:focus-visible,
+.app-shell .surface-light.song-suggestion-filters .auth-field select:focus-visible {
+  outline: 2px solid #ffcc33;
+  outline-offset: 2px;
+}
+
+.app-main .surface-light .song-suggestion-links a,
+.app-shell .surface-light .song-suggestion-links a {
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.app-main .surface-light .song-suggestion-score-pill,
+.app-shell .surface-light .song-suggestion-score-pill {
+  background: rgba(15, 23, 42, 0.06);
+  color: #334155;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.app-main .surface-light .song-suggestion-rank-badge,
+.app-shell .surface-light .song-suggestion-rank-badge {
+  background: rgba(15, 23, 42, 0.08);
+  color: #0f172a;
+}
+
+.app-main .surface-light .song-suggestion-item-card-needs-vote,
+.app-shell .surface-light .song-suggestion-item-card-needs-vote {
+  border-color: rgba(15, 23, 42, 0.22);
+}
+
+.song-suggestion-ranking-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.song-suggestion-ranking-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.song-suggestion-ranking-head h2 {
+  margin: 0 0 0.35rem;
+}
+
+.song-suggestion-ranking-intro {
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.45;
+}
+
+.song-suggestion-ranking-target-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(255, 204, 51, 0.18);
+  border: 1px solid rgba(180, 130, 0, 0.35);
+  color: #713f12;
+  font-size: 0.82rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.song-suggestion-ranking-table th {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+}
+
+.song-suggestion-ranking-table td {
+  vertical-align: top;
+}
+
+.song-suggestion-ranking-rank {
+  display: inline-flex;
+  min-width: 2rem;
+  font-weight: 800;
+  color: #111827;
+}
+
+.song-suggestion-ranking-artist,
+.song-suggestion-ranking-suggester,
+.song-suggestion-ranking-votes {
+  margin-top: 0.2rem;
+  font-size: 0.84rem;
+  color: #6b7280;
+}
+
+.song-suggestion-ranking-row-selected td {
+  background: rgba(22, 163, 74, 0.08);
+}
+
+.song-suggestion-ranking-row-below td {
+  background: rgba(15, 23, 42, 0.03);
+}
+
+.song-suggestion-ranking-row-tie td {
+  box-shadow: inset 0 0 0 1px rgba(217, 119, 6, 0.35);
+}
+
+.song-suggestion-ranking-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  margin-right: 0.35rem;
+}
+
+.song-suggestion-ranking-status-in {
+  background: rgba(22, 163, 74, 0.14);
+  color: #166534;
+}
+
+.song-suggestion-ranking-status-out {
+  background: rgba(100, 116, 139, 0.14);
+  color: #475569;
+}
+
+.song-suggestion-ranking-status-tie {
+  background: rgba(217, 119, 6, 0.16);
+  color: #92400e;
+}
+
+.song-suggestion-ranking-cutoff-row td {
+  padding: 0;
+  background: transparent;
+  border-bottom: none;
+}
+
+.song-suggestion-ranking-cutoff-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin: 0.35rem 0;
+  padding: 0.65rem 0.85rem;
+  border-top: 2px dashed rgba(217, 119, 6, 0.55);
+  border-bottom: 2px dashed rgba(217, 119, 6, 0.55);
+  background: rgba(255, 247, 237, 0.9);
+  color: #92400e;
+  font-weight: 800;
+}
+
+.song-suggestion-ranking-cutoff-detail {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #b45309;
+}
+
+.song-suggestion-ranking-footnote {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.88rem;
+}
+
+.song-suggestion-ranking-catalogue-link {
+  margin-top: 0.35rem;
+}
+
+.song-suggestion-ranking-catalogue-link a {
+  color: #1d4ed8;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.song-suggestion-ranking-catalogue-link a:hover {
+  text-decoration: underline;
+}
+
+.app-main .surface-light.song-suggestion-ranking-panel,
+.app-shell .surface-light.song-suggestion-ranking-panel {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
 }

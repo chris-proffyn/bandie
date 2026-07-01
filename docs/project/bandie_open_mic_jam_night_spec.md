@@ -4,7 +4,7 @@
 **Product:** Bandie  
 **Feature area:** Organiser tools / Open Mic & Jam Night Management  
 **Intended use:** Source material for Cursor implementation of web and mobile views  
-**Last updated:** 30 June 2026 (§19 product decisions locked)
+**Last updated:** 27 June 2026 (Jam night vs open mic differentiation)
 
 ---
 
@@ -1503,4 +1503,50 @@ Avoid over-building:
 - Excessive automation.
 
 The most important product test is whether a pub open mic host can run a busy evening from a tablet without falling back to a clipboard.
+
+---
+
+## 22. Event type differentiation — Open Mic vs Jam Night
+
+**Added 27 June 2026** — distinguishes two primary event types within the organiser events workspace.
+
+### 22.1 Jam Night (`jam_night`)
+
+Operates like organiser **gigs**: the organiser defines date/time, duration, **number of performance slots**, and default minutes per slot. Slots may be filled in advance or managed live on the night.
+
+| Aspect | Behaviour |
+|---|---|
+| Sign-up unit | **Band / act** (not song parts) |
+| Bandie membership | **Not required** by default — guest bands sign up with name + contact |
+| Registration toggle | Organiser may enable `requires_bandie_registration` to require signed-in Bandie users |
+| Public page | Tabular slot list; request a specific slot or any available slot |
+| Organiser view | Tabular slots table — slot #, time, duration, status, band, on-night assign/clear |
+| Live mode | Reuses live control patterns where applicable; slot status: open → requested → filled → playing → completed |
+
+### 22.2 Open Mic (`open_mic`)
+
+Song-centric evenings with a **standard parts template** and optional **house band roster**.
+
+| Aspect | Behaviour |
+|---|---|
+| House band | Organiser maintains roster (name + instrument); parts may default to house band members |
+| Standard parts | Event-level part templates (e.g. Vocals, Lead guitar, Rhythm guitar, Bass, Keys, Drums) seeded on create |
+| Song add | Adding a song auto-creates parts from template; house band auto-assigned where configured |
+| Per-song override | Organiser can disable a part for a song (e.g. no keys); free a part for a guest player |
+| Public sign-up | Name + contact; choose open part on existing song **or** suggest new song + preferred part **or** request part on existing song |
+| Organiser views | **Tabular** song matrix (songs × parts) for fast scanning; tabular pending sign-ups and suggestions |
+| Duplicate event | Copies house band roster, part templates, songs and slot structure (not player assignments) |
+
+### 22.3 Shared
+
+- Event creation chooses type up front (open mic or jam night).
+- Public mini-site at `/events/:slug` with QR.
+- Sign-up modes: open, moderated, invite-only, organiser-only.
+- Organiser Plus required to create events.
+- Tabular lists preferred for multi-record management (songs/parts matrix; jam slots table).
+
+### 22.4 Deferred
+
+- Enforcing Bandie registration for jam nights beyond the boolean flag (e.g. band profile linking).
+- Walk-up player RPCs and Dropbox file linking UI (unchanged from Phase 17 MVP deferrals).
 

@@ -212,6 +212,48 @@ export function rankSongSuggestions(
     .map((row, index) => ({ ...row, proposed_rank: index + 1 }));
 }
 
+export function isSongSuggestionSameRankingTier(
+  a: SongSuggestionWithSummary,
+  b: SongSuggestionWithSummary,
+): boolean {
+  return (
+    a.vote_summary.score === b.vote_summary.score &&
+    a.vote_summary.happy_count === b.vote_summary.happy_count
+  );
+}
+
+export function isSongSuggestionInAutoSelection(
+  proposedRank: number,
+  targetSongCount: number,
+): boolean {
+  return proposedRank > 0 && proposedRank <= targetSongCount;
+}
+
+export function isSongSuggestionCutoffTieCandidate(
+  row: SongSuggestionWithSummary,
+  ranked: SongSuggestionWithSummary[],
+  targetSongCount: number,
+): boolean {
+  if (
+    row.proposed_rank !== targetSongCount &&
+    row.proposed_rank !== targetSongCount + 1
+  ) {
+    return false;
+  }
+
+  const index = ranked.findIndex((entry) => entry.id === row.id);
+  if (index < 0) {
+    return false;
+  }
+
+  const previous = ranked[index - 1];
+  const next = ranked[index + 1];
+  return (
+    (previous != null && isSongSuggestionSameRankingTier(row, previous)) ||
+    (next != null && isSongSuggestionSameRankingTier(row, next))
+  );
+}
+
 function mapGroup(row: Record<string, unknown>): SongSuggestionGroup {
   return row as unknown as SongSuggestionGroup;
 }
@@ -536,6 +578,17 @@ export async function voteOnSongSuggestion(
     p_suggestion_id: suggestionId,
     p_vote_state: voteState,
     p_comment: comment ?? null,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function clearSongSuggestionVote(suggestionId: string): Promise<void> {
+  const client = getBandieClient();
+  const { error } = await client.rpc('bandie_clear_song_suggestion_vote', {
+    p_suggestion_id: suggestionId,
   });
 
   if (error) {

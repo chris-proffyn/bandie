@@ -115,6 +115,18 @@ export function trackSongSuggestionVoteChanged(
   });
 }
 
+export function trackSongSuggestionVoteCleared(
+  context: SongSuggestionAnalyticsContext & {
+    suggestionId: string;
+    previousVoteState: string;
+  },
+): void {
+  track('song_suggestion_vote_cleared', {
+    feature: 'song_suggestions',
+    ...context,
+  });
+}
+
 export function trackSongSuggestionsClosed(context: SongSuggestionAnalyticsContext): void {
   track('song_suggestions_closed', {
     feature: 'song_suggestions',

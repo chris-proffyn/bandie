@@ -7,11 +7,14 @@ import {
   createOrganiserVenue,
   EntitlementGateError,
   formatOpenMicEventStatus,
+  formatOpenMicEventType,
   formatOrganiserVenueAddress,
   listMyOrganiserVenues,
   listOrganiserOpenMicEvents,
+  OPEN_MIC_EVENT_TYPE_OPTIONS,
   openMicStatusPillClass,
   type OpenMicEventSummary,
+  type OpenMicEventType,
   type OrganiserVenue,
 } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
@@ -37,6 +40,9 @@ export function OpenMicEventsDashboardPage() {
   const [form, setForm] = useState({
     title: '',
     startsAt: '',
+    eventType: 'open_mic' as OpenMicEventType,
+    slotCount: '8',
+    slotDuration: '20',
     venueChoice: '' as VenueChoice,
     newVenueName: '',
     newVenueAddress: '',
@@ -129,6 +135,10 @@ export function OpenMicEventsDashboardPage() {
       const created = await createOpenMicEvent({
         title: form.title,
         startsAt: new Date(form.startsAt).toISOString(),
+        eventType: form.eventType,
+        slotCount: form.eventType === 'jam_night' ? Number(form.slotCount) || 8 : null,
+        defaultSlotDurationMinutes:
+          form.eventType === 'jam_night' ? Number(form.slotDuration) || 20 : null,
         venueId,
         venueName,
         venueAddress,
@@ -138,6 +148,9 @@ export function OpenMicEventsDashboardPage() {
       setForm({
         title: '',
         startsAt: '',
+        eventType: 'open_mic',
+        slotCount: '8',
+        slotDuration: '20',
         venueChoice: '',
         newVenueName: '',
         newVenueAddress: '',
@@ -213,12 +226,30 @@ export function OpenMicEventsDashboardPage() {
 
       {showCreate && canCreate ? (
         <section className="panel gigs-create-panel">
-          <h2>New open mic event</h2>
+          <h2>New event</h2>
           <p className="workspace-empty-note">
-            Start with a title and date. You&apos;ll add venue details, songs, and sign-up settings on
-            the next screen.
+            Choose open mic (songs & parts) or jam night (band performance slots). You&apos;ll refine
+            settings on the next screen.
           </p>
           <form className="auth-form" onSubmit={handleCreate}>
+            <div className="auth-field">
+              <label htmlFor="open-mic-type">Event type</label>
+              <select
+                id="open-mic-type"
+                value={form.eventType}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, eventType: e.target.value as OpenMicEventType }))
+                }
+              >
+                {OPEN_MIC_EVENT_TYPE_OPTIONS.filter((type) =>
+                  ['open_mic', 'jam_night'].includes(type),
+                ).map((type) => (
+                  <option key={type} value={type}>
+                    {formatOpenMicEventType(type)}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div className="auth-field">
               <label htmlFor="open-mic-title">Title</label>
               <input
@@ -239,6 +270,30 @@ export function OpenMicEventsDashboardPage() {
                 required
               />
             </div>
+            {form.eventType === 'jam_night' ? (
+              <div className="gig-detail-grid">
+                <div className="auth-field">
+                  <label htmlFor="open-mic-slot-count">Performance slots</label>
+                  <input
+                    id="open-mic-slot-count"
+                    type="number"
+                    min={1}
+                    value={form.slotCount}
+                    onChange={(e) => setForm((prev) => ({ ...prev, slotCount: e.target.value }))}
+                  />
+                </div>
+                <div className="auth-field">
+                  <label htmlFor="open-mic-slot-duration">Minutes per slot</label>
+                  <input
+                    id="open-mic-slot-duration"
+                    type="number"
+                    min={5}
+                    value={form.slotDuration}
+                    onChange={(e) => setForm((prev) => ({ ...prev, slotDuration: e.target.value }))}
+                  />
+                </div>
+              </div>
+            ) : null}
             <div className="auth-field">
               <label htmlFor="open-mic-venue">Venue (optional)</label>
               <select

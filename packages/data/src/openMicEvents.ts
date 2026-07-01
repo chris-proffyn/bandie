@@ -84,6 +84,9 @@ export type OpenMicEvent = {
   running_order_locked: boolean;
   poster_template_id: string | null;
   event_image_url: string | null;
+  slot_count: number | null;
+  default_slot_duration_minutes: number | null;
+  requires_bandie_registration: boolean;
   created_by: string;
   updated_by: string | null;
   created_at: string;
@@ -121,6 +124,9 @@ export type PublicOpenMicEvent = {
   venue_address: string | null;
   poster_template_id: string | null;
   event_image_url: string | null;
+  requires_bandie_registration: boolean;
+  slot_count: number | null;
+  default_slot_duration_minutes: number | null;
 };
 
 export type CreateOpenMicEventInput = {
@@ -135,6 +141,8 @@ export type CreateOpenMicEventInput = {
   timezone?: string;
   signupMode?: OpenMicSignupMode;
   requiredContactField?: OpenMicContactField;
+  slotCount?: number | null;
+  defaultSlotDurationMinutes?: number | null;
 };
 
 export type UpdateOpenMicEventInput = Partial<{
@@ -163,6 +171,9 @@ export type UpdateOpenMicEventInput = Partial<{
   posterTemplateId: string | null;
   eventImageUrl: string | null;
   visibility: OpenMicVisibility;
+  slotCount: number | null;
+  defaultSlotDurationMinutes: number | null;
+  requiresBandieRegistration: boolean;
 }>;
 
 function normalizeEventRow(row: Record<string, unknown>): OpenMicEvent {
@@ -199,6 +210,10 @@ function normalizeEventRow(row: Record<string, unknown>): OpenMicEvent {
     running_order_locked: Boolean(row.running_order_locked),
     poster_template_id: row.poster_template_id ? String(row.poster_template_id) : null,
     event_image_url: row.event_image_url ? String(row.event_image_url) : null,
+    slot_count: row.slot_count == null ? null : Number(row.slot_count),
+    default_slot_duration_minutes:
+      row.default_slot_duration_minutes == null ? null : Number(row.default_slot_duration_minutes),
+    requires_bandie_registration: Boolean(row.requires_bandie_registration),
     created_by: String(row.created_by),
     updated_by: row.updated_by ? String(row.updated_by) : null,
     created_at: String(row.created_at),
@@ -432,6 +447,8 @@ export async function createOpenMicEvent(input: CreateOpenMicEventInput): Promis
     p_timezone: input.timezone ?? 'Europe/London',
     p_signup_mode: input.signupMode ?? 'open',
     p_required_contact_field: input.requiredContactField ?? 'email_or_phone',
+    p_slot_count: input.slotCount ?? null,
+    p_default_slot_duration_minutes: input.defaultSlotDurationMinutes ?? null,
   });
 
   if (error) {
@@ -472,6 +489,13 @@ function buildUpdatePatch(input: UpdateOpenMicEventInput): Record<string, unknow
   if (input.posterTemplateId !== undefined) patch.poster_template_id = input.posterTemplateId;
   if (input.eventImageUrl !== undefined) patch.event_image_url = input.eventImageUrl;
   if (input.visibility !== undefined) patch.visibility = input.visibility;
+  if (input.slotCount !== undefined) patch.slot_count = input.slotCount;
+  if (input.defaultSlotDurationMinutes !== undefined) {
+    patch.default_slot_duration_minutes = input.defaultSlotDurationMinutes;
+  }
+  if (input.requiresBandieRegistration !== undefined) {
+    patch.requires_bandie_registration = input.requiresBandieRegistration;
+  }
   return patch;
 }
 
@@ -569,5 +593,9 @@ export async function getPublicOpenMicEvent(slug: string): Promise<PublicOpenMic
     venue_address: row.venue_address ? String(row.venue_address) : null,
     poster_template_id: row.poster_template_id ? String(row.poster_template_id) : null,
     event_image_url: row.event_image_url ? String(row.event_image_url) : null,
+    requires_bandie_registration: Boolean(row.requires_bandie_registration),
+    slot_count: row.slot_count == null ? null : Number(row.slot_count),
+    default_slot_duration_minutes:
+      row.default_slot_duration_minutes == null ? null : Number(row.default_slot_duration_minutes),
   };
 }

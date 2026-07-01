@@ -80,6 +80,8 @@ export function OpenMicEventOverviewPage() {
   });
   const publicUrl = getOpenMicPublicUrl(event.slug);
   const signupOpen = ['published', 'signup_open', 'in_progress'].includes(event.status);
+  const isJamNight = event.event_type === 'jam_night';
+  const isOpenMic = event.event_type === 'open_mic';
 
   return (
     <div className="gigs-page">
@@ -106,8 +108,8 @@ export function OpenMicEventOverviewPage() {
 
       <div className="gigs-metrics">
         <article className="gigs-metric-card">
-          <span>Songs planned</span>
-          <strong>{event.songCount}</strong>
+          <span>{isJamNight ? 'Slots' : 'Songs planned'}</span>
+          <strong>{isJamNight ? (event.slot_count ?? 0) : event.songCount}</strong>
         </article>
         <article className="gigs-metric-card">
           <span>Sign-ups</span>
@@ -128,7 +130,9 @@ export function OpenMicEventOverviewPage() {
           <div>
             <h2>Next steps</h2>
             <p className="workspace-section-intro">
-              Publish when ready, then build your song list and share the sign-up page.
+              {isJamNight
+                ? 'Publish when ready, then manage performance slots and share the sign-up page.'
+                : 'Publish when ready, then set up house band parts, build your song list, and share sign-up.'}
             </p>
           </div>
         </header>
@@ -143,9 +147,21 @@ export function OpenMicEventOverviewPage() {
               Publish event
             </button>
           ) : null}
-          <Link className="directory-btn directory-btn-secondary" to={`/app/open-mic/${event.id}/songs`}>
-            Manage songs
-          </Link>
+          {isOpenMic ? (
+            <>
+              <Link className="directory-btn directory-btn-secondary" to={`/app/open-mic/${event.id}/house-band`}>
+                House band & parts
+              </Link>
+              <Link className="directory-btn directory-btn-secondary" to={`/app/open-mic/${event.id}/songs`}>
+                Manage songs
+              </Link>
+            </>
+          ) : null}
+          {isJamNight ? (
+            <Link className="directory-btn directory-btn-secondary" to={`/app/open-mic/${event.id}/jam-slots`}>
+              Manage slots
+            </Link>
+          ) : null}
           <Link className="directory-btn directory-btn-secondary" to={`/app/open-mic/${event.id}/poster`}>
             Create poster
           </Link>

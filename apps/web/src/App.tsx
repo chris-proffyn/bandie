@@ -48,6 +48,8 @@ import { OpenMicEventOverviewPage } from './pages/app/OpenMicEventOverviewPage';
 import { OpenMicPosterPage } from './pages/app/OpenMicPosterPage';
 import { OpenMicSongListPage } from './pages/app/OpenMicSongListPage';
 import { OpenMicLiveControlPage } from './pages/app/OpenMicLiveControlPage';
+import { OpenMicHouseBandPage } from './pages/app/OpenMicHouseBandPage';
+import { OpenMicJamSlotsPage } from './pages/app/OpenMicJamSlotsPage';
 
 function RedirectToBandOverview() {
   const { bandId } = useParams();
@@ -165,6 +167,22 @@ export default function App() {
               element={
                 <WorkspaceModeRoute mode="organiser">
                   <OrganiserGigsDashboardPage />
+                </WorkspaceModeRoute>
+              }
+            />
+            <Route
+              path="open-mic/:eventId/house-band"
+              element={
+                <WorkspaceModeRoute mode="organiser">
+                  <OpenMicHouseBandPage />
+                </WorkspaceModeRoute>
+              }
+            />
+            <Route
+              path="open-mic/:eventId/jam-slots"
+              element={
+                <WorkspaceModeRoute mode="organiser">
+                  <OpenMicJamSlotsPage />
                 </WorkspaceModeRoute>
               }
             />

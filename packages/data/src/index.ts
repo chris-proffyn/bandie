@@ -473,6 +473,7 @@ export {
   findSimilarSongSuggestions,
   submitSongSuggestion,
   voteOnSongSuggestion,
+  clearSongSuggestionVote,
   closeSongSuggestions,
   reopenSongSuggestions,
   closeSongSuggestionVoting,
@@ -483,6 +484,9 @@ export {
   listConfirmedSongSuggestions,
   createSkeletonSetlistFromSuggestionGroup,
   rankSongSuggestions,
+  isSongSuggestionSameRankingTier,
+  isSongSuggestionInAutoSelection,
+  isSongSuggestionCutoffTieCandidate,
   songSuggestionGroupStatusClass,
   isSongSuggestionVotingOpen,
   isSongSuggestionSubmitOpen,
@@ -815,6 +819,8 @@ export type {
   OpenMicSlotStatus,
   OpenMicAssignmentStatus,
   OpenMicSuggestionStatus,
+  OpenMicSuggestionType,
+  OpenMicSongSlotWithPlayer,
 } from './openMicSongs';
 
 export {
@@ -826,6 +832,38 @@ export {
   getOpenMicEventSummary,
 } from './openMicLive';
 export type { OpenMicLiveDashboard, OpenMicEventSummaryStats } from './openMicLive';
+
+export {
+  listOpenMicHouseBandMembers,
+  addOpenMicHouseBandMember,
+  deleteOpenMicHouseBandMember,
+  listOpenMicPartTemplates,
+  addOpenMicPartTemplate,
+  updateOpenMicPartTemplate,
+  deleteOpenMicPartTemplate,
+  seedOpenMicDefaultParts,
+  setOpenMicSongSlotEnabled,
+  clearOpenMicSlotAssignment,
+} from './openMicParts';
+export type { OpenMicHouseBandMember, OpenMicPartTemplate } from './openMicParts';
+
+export {
+  listOpenMicJamSlots,
+  listOpenMicJamSignups,
+  generateOpenMicJamSlots,
+  assignOpenMicJamSlot,
+  clearOpenMicJamSlot,
+  requestJamSlot,
+  approveJamSignup,
+  getPublicJamSlots,
+  formatJamSlotStatus,
+} from './openMicJam';
+export type {
+  OpenMicJamSlot,
+  OpenMicJamSignup,
+  OpenMicJamSlotStatus,
+  PublicJamSlot,
+} from './openMicJam';
 
 export {
   listMyBookingEnquiries,

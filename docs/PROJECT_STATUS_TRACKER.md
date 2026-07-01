@@ -3,7 +3,7 @@
 **Document status:** Live project tracker  
 **Product:** Bandie  
 **Phase:** Phase 15 (billing) implemented — configure Stripe env vars and sync plans  
-**Last updated:** 27 June 2026 (Phase 17 Open mic MVP implemented)
+**Last updated:** 27 June 2026 (Jam night vs open mic differentiation)
 
 ---
 
@@ -37,7 +37,7 @@
 | Entitlement framework (Phase 8) | Complete — schema, seeds, service, gate hooks; enforcement off by default |
 | Calendar & gigs (Phases 9–10) | Complete — `/app/:bandId/calendar`; organiser gigs `/app/gigs`; band invites `/app/:bandId/gigs` |
 | Admin portal & metrics (Phases 12–14) | Complete — `/admin` (overview, accounts, metrics, editable plan catalogue, audit); enforcement toggle |
-| Open mic / jam nights (Phase 17) | **MVP shipped** — organiser workspace, public `/events/:slug`, songs/sign-up/live; Dropbox file UI deferred |
+| Open mic / jam nights (Phase 17) | **MVP shipped** — open mic vs jam night split; house band/parts; tabular UI; jam slots; Dropbox file UI deferred |
 
 ## Active constraints
 
@@ -408,6 +408,9 @@ Monetisation: **Organiser Plus required** (`open_mic.create`); Organiser Free de
 - [x] 17.2.2 RPCs — song/slot CRUD, sign-up, **song suggestion submit**, moderation approve/reject
 - [x] 17.2.3 Data layer — readiness helpers, Bandie member flag on public sign-up
 - [x] 17.2.4 UI — song list builder, public sign-up, suggestion form, moderation queue
+- [x] 17.2.5 **Jam vs open mic** — `bandie_open_mic_house_band_members`, `bandie_open_mic_part_templates`, `bandie_open_mic_jam_slots`, jam sign-ups; auto-parts on song add
+- [x] 17.2.6 Tabular organiser UI — song matrix, jam slots table, house band & parts page
+- [x] 17.2.7 Public flows — jam band sign-up; open mic part request on existing song
 
 #### 17.3 Release 3 — Live running order
 
@@ -429,7 +432,7 @@ Monetisation: **Organiser Plus required** (`open_mic.create`); Organiser Free de
 
 #### 17.6 Documentation and acceptance
 
-- [ ] 17.6.1 `product-functional-requirements.md` — open mic section
+- [x] 17.6.1 `product-functional-requirements.md` — open mic section (§12b)
 - [ ] 17.6.2 `product-technical-requirements.md` — tables, routes, module
 - [ ] 17.6.3 Manual QA — create → publish → sign-up → suggest song → live night → PDF export
 
@@ -535,6 +538,12 @@ Task checklist: `docs/project/bandie_song_suggestions_voting_implementation_plan
 - Admin UI: `AdminOrganiserInvitesPanel` on `/admin/accounts`
 - Accept flow: `AcceptInvitePage` resolves band vs organiser token; organiser accept sets `is_organiser` and routes to organiser home
 - Communications: `IncomingOrganiserInvitationsPanel` on `/app/communications` (All tab)
+
+**27 June 2026 — Jam night vs open mic differentiation**
+- Migration `20260703100000_bandie_open_mic_jam_and_parts.sql` — house band roster, event part templates, jam performance slots/sign-ups, auto-parts on song add
+- Data: `openMicParts.ts`, `openMicJam.ts`; extended `openMicEvents.ts`, `openMicSongs.ts`
+- UI: event type on create; `/app/open-mic/:eventId/house-band`, `/app/open-mic/:eventId/jam-slots`; tabular song matrix and jam slots; public jam vs open mic sign-up flows
+- Docs: spec §22, `product-functional-requirements.md` §12b
 
 **27 June 2026 — Phase 17 Open mic / jam nights MVP implemented**
 - Migrations `20260702100000_bandie_open_mic_events.sql`, `20260702110000_bandie_open_mic_songs_signup.sql` applied via `supabase db push`

@@ -18,6 +18,7 @@ import {
   songSuggestionGroupStatusClass,
   vetoSongSuggestion,
   voteOnSongSuggestion,
+  clearSongSuggestionVote,
   type SongSuggestionGroupEvent,
   type SongSuggestionListFilters,
   type SongSuggestionVoteState,
@@ -29,6 +30,7 @@ import { UpgradePromptModal } from '../../components/entitlements/UpgradePromptM
 import { SongsBandContextBar } from '../../components/songs/SongsBandContextBar';
 import { SongSuggestionListControls } from '../../components/songSuggestions/SongSuggestionListControls';
 import { SongSuggestionCard } from '../../components/songSuggestions/SongSuggestionCard';
+import { SongSuggestionRankingTable } from '../../components/songSuggestions/SongSuggestionRankingTable';
 import { SubmitSongSuggestionPanel } from '../../components/songSuggestions/SubmitSongSuggestionPanel';
 import { SongSuggestionGroupFormPanel } from '../../components/songSuggestions/SongSuggestionGroupFormPanel';
 import { useUpgradePrompt } from '../../hooks/useUpgradePrompt';
@@ -37,6 +39,7 @@ import {
   trackSongSuggestionSetlistCreated,
   trackSongSuggestionVoteCast,
   trackSongSuggestionVoteChanged,
+  trackSongSuggestionVoteCleared,
   trackSongSuggestionsClosed,
   trackSongSuggestionVotingClosed,
 } from '../../lib/analytics';
@@ -130,6 +133,10 @@ export function SongSuggestionGroupDetailPage() {
     () => suggestions.filter((row) => row.status === 'active'),
     [suggestions],
   );
+  const vetoedCount = useMemo(
+    () => suggestions.filter((row) => row.status === 'leader_vetoed').length,
+    [suggestions],
+  );
   const rankedActive = useMemo(() => rankSongSuggestions(activeSuggestions), [activeSuggestions]);
 
   const filterOptions = useMemo(
@@ -208,6 +215,29 @@ export function SongSuggestionGroupDetailPage() {
           voteState,
         });
       }
+    });
+  }
+
+  async function handleClearVote(suggestionId: string) {
+    const previousVote =
+      suggestions.find((row) => row.id === suggestionId)?.my_vote ?? null;
+
+    if (!previousVote) {
+      return;
+    }
+
+    await runAction(async () => {
+      await clearSongSuggestionVote(suggestionId);
+      if (!bandId || !groupId) {
+        return;
+      }
+
+      trackSongSuggestionVoteCleared({
+        bandId,
+        groupId,
+        suggestionId,
+        previousVoteState: previousVote,
+      });
     });
   }
 
@@ -498,31 +528,7 @@ export function SongSuggestionGroupDetailPage() {
 
       {group.status === 'confirmed' ? (
         <section className="panel">
-          <h2>Confirmed songs</h2>
-          {detail?.confirmed.length === 0 ? (
-            <p className="workspace-empty-note">No confirmed songs recorded.</p>
-          ) : (
-            <ol className="song-suggestion-confirm-list">
-              {detail?.confirmed.map((row) => (
-                <li key={row.id} className="song-suggestion-confirm-item">
-                  <strong>#{row.final_rank}</strong>
-                  <div>
-                    <div>
-                      {row.song_title} — {row.artist}
-                    </div>
-                    {row.selection_override && row.selection_override_reason ? (
-                      <p className="song-suggestion-meta">Override: {row.selection_override_reason}</p>
-                    ) : null}
-                    {row.created_catalogue_song_id ? (
-                      <Link to={`/app/${bandId}/songs/${row.created_catalogue_song_id}`}>
-                        View in songbook
-                      </Link>
-                    ) : null}
-                  </div>
-                </li>
-              ))}
-            </ol>
-          )}
+          <h2>Confirmed outcome</h2>
           {isLeader && !group.skeleton_setlist_id ? (
             <div className="song-suggestion-leader-actions">
               <button
@@ -648,6 +654,15 @@ export function SongSuggestionGroupDetailPage() {
         />
       ) : null}
 
+      <SongSuggestionRankingTable
+        bandId={bandId!}
+        targetSongCount={group.target_song_count}
+        groupStatus={group.status}
+        rankedRows={rankedActive}
+        confirmedRows={detail?.confirmed ?? []}
+        vetoedCount={vetoedCount}
+      />
+
       <section className="panel">
         <h2>Suggestions ({suggestions.length})</h2>
         {suggestions.length > 0 ? (
@@ -677,10 +692,12 @@ export function SongSuggestionGroupDetailPage() {
                 sortBy={listFilters.sortBy}
                 votingOpen={votingOpen}
                 voteVisibility={group.vote_visibility}
+                allowVoteChanges={group.allow_vote_changes}
                 isLeader={isLeader}
                 currentUserId={user?.id ?? null}
                 actionBusy={actionBusy}
                 onVote={(suggestionId, voteState) => void handleVote(suggestionId, voteState)}
+                onClearVote={(suggestionId) => void handleClearVote(suggestionId)}
                 onVeto={(suggestion) => void handleVeto(suggestion)}
               />
             ))}

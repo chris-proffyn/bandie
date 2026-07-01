@@ -2,7 +2,7 @@
 
 **Document status:** Authoritative functional requirements  
 **Product:** Bandie  
-**Last updated:** 30 June 2026
+**Last updated:** 27 June 2026
 
 **Source documents:** `bandie_product_description.md`, `bandie_build_elements.md`, feature specs in `docs/project/`
 
@@ -571,7 +571,11 @@ Leader creates a named group with brief, target number of songs, suggestion clos
 
 ### Member participation
 
-Members submit song title, artist, optional YouTube/Spotify links and rationale. Submitter receives an automatic `happy_to_play` vote. Members vote 🙂 / 😐 / 🙁 while voting is open. Duplicate title+artist shows a non-blocking warning.
+Members submit song title, artist, optional YouTube/Spotify links and rationale. Submitter receives an automatic `happy_to_play` vote. Members vote 🙂 / 😐 / 🙁 while voting is open; they may change or **clear** their vote while voting is open when the group allows vote changes. Duplicate title+artist shows a non-blocking warning.
+
+### Live ranking
+
+Group detail shows a **live ranking table** (score order) for all active suggestions, with a dashed **selection cutoff** after the target rank showing which songs would proceed when voting closes. Rows in the top N are highlighted; ties at the cutoff are flagged. After confirmation, the table shows the frozen final ranking.
 
 ### Leader controls
 
@@ -681,6 +685,59 @@ Organiser submits structured enquiry from band profile **Book** modal: optional 
 ### Private (implemented)
 
 Primary contact and sender see enquiries in `/app/communications` → **Booking enquiries** filter. Status: new, read, replied, archived. Reply via message thread.
+
+---
+
+## 12b. Open mic and jam nights
+
+**Spec:** `bandie_open_mic_jam_night_spec.md` (§22 event type differentiation)
+
+Organiser Plus users create and manage live music evenings from `/app/open-mic`. Public sign-up pages live at `/events/:slug`.
+
+### Event types
+
+| Type | Purpose |
+|---|---|
+| **Open mic** | Song list with standard instrument parts; house band roster; guests sign up for parts or suggest songs |
+| **Jam night** | Gig-style performance slots; guest bands sign up without Bandie membership (optional registration toggle) |
+
+### Open mic — organiser
+
+- Create/duplicate event; venue, date/time, sign-up policy.
+- Define **house band roster** (name + instrument) and **standard parts** (e.g. Vocals, Lead guitar, Bass, Drums).
+- Assign house band members to default parts; override per song.
+- Add songs — parts auto-created from template; house band auto-assigned where configured.
+- Disable parts per song (e.g. no keys); free parts for guest players.
+- **Tabular song matrix** (songs × parts) for running order management.
+- Approve moderated sign-ups and song/part requests.
+- Publish public page, poster, live control room.
+
+### Open mic — public
+
+- View event details and (when enabled) tabular song list.
+- Sign up with name + contact for an open part on an existing song.
+- Suggest a new song with preferred part, or request a part on an existing song.
+- Bandie members flagged when signed in.
+
+### Jam night — organiser
+
+- Set slot count and minutes per slot (like gigs).
+- Generate performance slots; fill in advance or on the night.
+- **Tabular slots list** — slot number, time, band, status.
+- Toggle whether Bandie sign-in is required for public requests.
+- Approve moderated band requests.
+
+### Jam night — public
+
+- View tabular slot list.
+- Request a slot (specific or any available) with band name + contact.
+- No Bandie account required unless organiser enables registration requirement.
+
+### Shared
+
+- Sign-up modes: open, moderated, invite-only, organiser-only.
+- Duplicate event copies structure (parts, house band, songs/slots) not player assignments.
+- Dropbox file linking and walk-up player RPCs deferred from MVP.
 
 ---
 

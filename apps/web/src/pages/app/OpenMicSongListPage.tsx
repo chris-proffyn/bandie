@@ -1,16 +1,17 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   addOpenMicSong,
-  applyInstrumentTemplate,
+  approveOpenMicAssignment,
+  clearOpenMicSlotAssignment,
   deleteOpenMicSong,
   formatSongReadiness,
   getOpenMicEvent,
   listOpenMicSignups,
   listOpenMicSongSuggestions,
-  approveOpenMicAssignment,
-  rejectOpenMicAssignment,
   listOpenMicSongs,
+  rejectOpenMicAssignment,
+  setOpenMicSongSlotEnabled,
   type OpenMicAssignmentWithDetails,
   type OpenMicSongSuggestion,
   type OpenMicSongWithSlots,
@@ -56,6 +57,16 @@ export function OpenMicSongListPage() {
     void load();
   }, [load]);
 
+  const partNames = useMemo(() => {
+    const names = new Set<string>();
+    for (const song of songs) {
+      for (const slot of song.slots) {
+        names.add(slot.slot_name);
+      }
+    }
+    return [...names];
+  }, [songs]);
+
   async function handleAddSong(formEvent: FormEvent) {
     formEvent.preventDefault();
     if (!eventId || !title.trim()) return;
@@ -69,13 +80,8 @@ export function OpenMicSongListPage() {
     }
   }
 
-  async function handleApplyTemplate(songId: string, templateCode: string) {
-    try {
-      await applyInstrumentTemplate(songId, templateCode);
-      await load();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to apply template.');
-    }
+  function slotForSong(song: OpenMicSongWithSlots, partName: string) {
+    return song.slots.find((slot) => slot.slot_name === partName);
   }
 
   return (
@@ -84,11 +90,19 @@ export function OpenMicSongListPage() {
         <div>
           <p className="my-bands-eyebrow">Song list</p>
           <h1>{eventTitle}</h1>
-          <p className="my-bands-lead">Add songs, apply instrument templates, and review sign-ups.</p>
+          <p className="my-bands-lead">
+            Songs with auto-assigned parts from your house band template. Toggle parts off per song when
+            not needed.
+          </p>
         </div>
-        <Link to={`/app/open-mic/${eventId}`} className="directory-btn directory-btn-secondary">
-          Back to event
-        </Link>
+        <div className="gig-detail-actions">
+          <Link to={`/app/open-mic/${eventId}/house-band`} className="directory-btn directory-btn-secondary">
+            House band & parts
+          </Link>
+          <Link to={`/app/open-mic/${eventId}`} className="directory-btn directory-btn-secondary">
+            Back to event
+          </Link>
+        </div>
       </header>
 
       {error ? <div className="auth-message auth-message-error">{error}</div> : null}
@@ -98,7 +112,7 @@ export function OpenMicSongListPage() {
         <header className="workspace-section-header">
           <div>
             <h2>Add song</h2>
-            <p className="workspace-section-intro">Songs appear in running order on the live control room.</p>
+            <p className="workspace-section-intro">Standard parts are applied automatically from your event template.</p>
           </div>
         </header>
         <form className="auth-form" onSubmit={handleAddSong}>
@@ -134,37 +148,47 @@ export function OpenMicSongListPage() {
           <header className="workspace-section-header">
             <div>
               <h2>Pending sign-ups ({signups.length})</h2>
-              <p className="workspace-section-intro">Approve or reject player requests.</p>
             </div>
           </header>
-          <ul className="gigs-list">
-            {signups.map((signup) => (
-              <li key={signup.id} className="open-mic-queue-item">
-                <div>
-                  <strong>{signup.player.display_name}</strong>
-                  <p>
-                    {signup.song.title} · {signup.slot.slot_name}
-                  </p>
-                </div>
-                <div className="gig-detail-actions">
-                  <button
-                    type="button"
-                    className="auth-button"
-                    onClick={() => void approveOpenMicAssignment(signup.id).then(load)}
-                  >
-                    Approve
-                  </button>
-                  <button
-                    type="button"
-                    className="directory-btn directory-btn-secondary"
-                    onClick={() => void rejectOpenMicAssignment(signup.id).then(load)}
-                  >
-                    Reject
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <div className="open-mic-table-wrap">
+            <table className="open-mic-table">
+              <thead>
+                <tr>
+                  <th>Player</th>
+                  <th>Song</th>
+                  <th>Part</th>
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {signups.map((signup) => (
+                  <tr key={signup.id}>
+                    <td>{signup.player.display_name}</td>
+                    <td>{signup.song.title}</td>
+                    <td>{signup.slot.slot_name}</td>
+                    <td>
+                      <div className="gig-detail-actions">
+                        <button
+                          type="button"
+                          className="auth-button"
+                          onClick={() => void approveOpenMicAssignment(signup.id).then(load)}
+                        >
+                          Approve
+                        </button>
+                        <button
+                          type="button"
+                          className="directory-btn directory-btn-secondary"
+                          onClick={() => void rejectOpenMicAssignment(signup.id).then(load)}
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
       ) : null}
 
@@ -172,37 +196,51 @@ export function OpenMicSongListPage() {
         <section className="panel workspace-section">
           <header className="workspace-section-header">
             <div>
-              <h2>Song suggestions ({suggestions.length})</h2>
+              <h2>Requests & suggestions ({suggestions.length})</h2>
             </div>
           </header>
-          <ul className="gigs-list">
-            {suggestions.map((suggestion) => (
-              <li key={suggestion.id} className="open-mic-queue-item">
-                <div>
-                  <strong>
-                    {suggestion.title}
-                    {suggestion.artist ? ` — ${suggestion.artist}` : ''}
-                  </strong>
-                  {suggestion.notes ? <p>{suggestion.notes}</p> : null}
-                </div>
-                <div className="gig-detail-actions">
-                  <button
-                    type="button"
-                    className="auth-button"
-                    onClick={() =>
-                      void addOpenMicSong(eventId!, {
-                        title: suggestion.title,
-                        artist: suggestion.artist,
-                        notes: suggestion.notes,
-                      }).then(load)
-                    }
-                  >
-                    Add to list
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <div className="open-mic-table-wrap">
+            <table className="open-mic-table">
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Detail</th>
+                  <th>Notes</th>
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {suggestions.map((suggestion) => (
+                  <tr key={suggestion.id}>
+                    <td>{suggestion.suggestion_type === 'existing_slot' ? 'Part request' : 'New song'}</td>
+                    <td>
+                      {suggestion.suggestion_type === 'existing_slot'
+                        ? suggestion.preferred_slot_name ?? 'Existing song part'
+                        : `${suggestion.title}${suggestion.artist ? ` — ${suggestion.artist}` : ''}`}
+                    </td>
+                    <td>{suggestion.notes ?? '—'}</td>
+                    <td>
+                      {suggestion.suggestion_type === 'new_song' ? (
+                        <button
+                          type="button"
+                          className="auth-button"
+                          onClick={() =>
+                            void addOpenMicSong(eventId!, {
+                              title: suggestion.title,
+                              artist: suggestion.artist,
+                              notes: suggestion.notes,
+                            }).then(load)
+                          }
+                        >
+                          Add to list
+                        </button>
+                      ) : null}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
       ) : null}
 
@@ -215,67 +253,88 @@ export function OpenMicSongListPage() {
             ) : null}
           </div>
         </header>
-        <ul className="gigs-list">
-          {songs.map((song) => (
-            <li key={song.id}>
-              <article className="open-mic-song-card">
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <strong>
-                    {song.title}
-                    {song.artist ? ` — ${song.artist}` : ''}
-                  </strong>
-                  <p>{formatSongReadiness(song.readiness_status)}</p>
-                  <div className="open-mic-slot-chips" style={{ marginTop: '0.5rem' }}>
-                    {song.slots.map((slot) => (
-                      <span
-                        key={slot.id}
-                        className={`open-mic-slot-chip ${
-                          slot.status === 'open' ? 'open-mic-slot-chip--open' : 'open-mic-slot-chip--filled'
-                        }`}
-                      >
-                        {slot.slot_name} ({slot.status})
-                      </span>
-                    ))}
-                  </div>
-                  {song.slots.length === 0 ? (
-                    <div className="gig-detail-actions" style={{ marginTop: '0.75rem' }}>
+        {songs.length > 0 ? (
+          <div className="open-mic-table-wrap open-mic-table-wrap--scroll">
+            <table className="open-mic-table open-mic-table--matrix">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Song</th>
+                  <th>Ready</th>
+                  {partNames.map((name) => (
+                    <th key={name}>{name}</th>
+                  ))}
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {songs.map((song, index) => (
+                  <tr key={song.id}>
+                    <td>{index + 1}</td>
+                    <td>
+                      <strong>{song.title}</strong>
+                      {song.artist ? <div className="open-mic-table-sub">{song.artist}</div> : null}
+                    </td>
+                    <td>{formatSongReadiness(song.readiness_status)}</td>
+                    {partNames.map((partName) => {
+                      const slot = slotForSong(song, partName);
+                      if (!slot) {
+                        return <td key={partName}>—</td>;
+                      }
+                      return (
+                        <td key={partName} className={!slot.enabled ? 'open-mic-cell--disabled' : undefined}>
+                          {slot.enabled ? (
+                            <>
+                              <div>{slot.playerName ?? 'Open'}</div>
+                              <div className="open-mic-table-sub">{slot.status}</div>
+                              <div className="open-mic-table-actions">
+                                {slot.playerName ? (
+                                  <button
+                                    type="button"
+                                    className="directory-btn directory-btn-secondary"
+                                    onClick={() => void clearOpenMicSlotAssignment(slot.id).then(load)}
+                                  >
+                                    Free
+                                  </button>
+                                ) : null}
+                                <button
+                                  type="button"
+                                  className="directory-btn directory-btn-secondary"
+                                  onClick={() =>
+                                    void setOpenMicSongSlotEnabled(slot.id, !slot.enabled).then(load)
+                                  }
+                                >
+                                  {slot.enabled ? 'Off' : 'On'}
+                                </button>
+                              </div>
+                            </>
+                          ) : (
+                            <button
+                              type="button"
+                              className="directory-btn directory-btn-secondary"
+                              onClick={() => void setOpenMicSongSlotEnabled(slot.id, true).then(load)}
+                            >
+                              Enable
+                            </button>
+                          )}
+                        </td>
+                      );
+                    })}
+                    <td>
                       <button
                         type="button"
                         className="directory-btn directory-btn-secondary"
-                        onClick={() => void handleApplyTemplate(song.id, 'rock')}
+                        onClick={() => void deleteOpenMicSong(song.id).then(load)}
                       >
-                        Rock template
+                        Delete
                       </button>
-                      <button
-                        type="button"
-                        className="directory-btn directory-btn-secondary"
-                        onClick={() => void handleApplyTemplate(song.id, 'acoustic')}
-                      >
-                        Acoustic template
-                      </button>
-                      <button
-                        type="button"
-                        className="directory-btn directory-btn-secondary"
-                        onClick={() => void handleApplyTemplate(song.id, 'blues')}
-                      >
-                        Blues template
-                      </button>
-                    </div>
-                  ) : null}
-                </div>
-                <div className="gig-detail-actions">
-                  <button
-                    type="button"
-                    className="directory-btn directory-btn-secondary"
-                    onClick={() => void deleteOpenMicSong(song.id).then(load)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </article>
-            </li>
-          ))}
-        </ul>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : null}
       </section>
     </div>
   );

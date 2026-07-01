@@ -52,6 +52,9 @@ export type OpenMicSongSlot = {
   public_signup_enabled: boolean;
   notes: string | null;
   sort_order: number;
+  enabled: boolean;
+  part_template_id: string | null;
+  house_band_member_id: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -85,6 +88,8 @@ export type OpenMicAssignment = {
   updated_at: string;
 };
 
+export type OpenMicSuggestionType = 'new_song' | 'existing_slot';
+
 export type OpenMicSongSuggestion = {
   id: string;
   event_id: string;
@@ -97,12 +102,21 @@ export type OpenMicSongSuggestion = {
   status: OpenMicSuggestionStatus;
   organiser_note: string | null;
   created_song_id: string | null;
+  suggestion_type: OpenMicSuggestionType;
+  event_song_id: string | null;
+  song_slot_id: string | null;
+  preferred_slot_name: string | null;
   created_at: string;
   updated_at: string;
 };
 
 export type OpenMicSongWithSlots = OpenMicSong & {
-  slots: OpenMicSongSlot[];
+  slots: OpenMicSongSlotWithPlayer[];
+};
+
+export type OpenMicSongSlotWithPlayer = OpenMicSongSlot & {
+  playerName: string | null;
+  assignmentStatus: OpenMicAssignmentStatus | null;
 };
 
 export type OpenMicAssignmentWithDetails = OpenMicAssignment & {
@@ -166,6 +180,9 @@ function normalizeSlot(row: Record<string, unknown>): OpenMicSongSlot {
     public_signup_enabled: Boolean(row.public_signup_enabled),
     notes: row.notes ? String(row.notes) : null,
     sort_order: Number(row.sort_order ?? 0),
+    enabled: row.enabled !== false,
+    part_template_id: row.part_template_id ? String(row.part_template_id) : null,
+    house_band_member_id: row.house_band_member_id ? String(row.house_band_member_id) : null,
     created_at: String(row.created_at),
     updated_at: String(row.updated_at),
   };
@@ -211,7 +228,7 @@ export function computeOpenMicSongReadiness(
   if (song.readiness_override === 'ready') return 'ready';
   if (song.readiness_override === 'not_ready') return 'not_ready';
 
-  const required = slots.filter((slot) => slot.required);
+  const required = slots.filter((slot) => slot.required && slot.enabled !== false);
   if (required.length === 0) return 'ready';
   const filled = required.filter((slot) => slot.status === 'filled' || slot.status === 'locked');
   if (filled.length === 0) return 'not_ready';
@@ -262,11 +279,49 @@ export async function listOpenMicSongs(eventId: string): Promise<OpenMicSongWith
     throw new Error(slotError.message);
   }
 
-  const slotsBySong = new Map<string, OpenMicSongSlot[]>();
+  const slotIds = (slots ?? []).map((row) => String((row as { id: string }).id));
+  const assignmentBySlot = new Map<string, { playerName: string; status: OpenMicAssignmentStatus }>();
+
+  if (slotIds.length > 0) {
+    const { data: assignments } = await client
+      .from('bandie_open_mic_assignments')
+      .select('song_slot_id, status, player_id')
+      .in('song_slot_id', slotIds)
+      .in('status', ['approved', 'requested']);
+
+    const playerIds = [...new Set((assignments ?? []).map((row) => String((row as { player_id: string }).player_id)))];
+    const playerMap = new Map<string, string>();
+
+    if (playerIds.length > 0) {
+      const { data: players } = await client
+        .from('bandie_open_mic_players')
+        .select('id, display_name')
+        .in('id', playerIds);
+      for (const row of players ?? []) {
+        playerMap.set(String((row as { id: string }).id), String((row as { display_name: string }).display_name));
+      }
+    }
+
+    for (const row of assignments ?? []) {
+      const slotId = String((row as { song_slot_id: string }).song_slot_id);
+      assignmentBySlot.set(slotId, {
+        playerName: playerMap.get(String((row as { player_id: string }).player_id)) ?? 'Unknown',
+        status: (row as { status: OpenMicAssignmentStatus }).status,
+      });
+    }
+  }
+
+  const slotsBySong = new Map<string, OpenMicSongSlotWithPlayer[]>();
   for (const row of slots ?? []) {
     const slot = normalizeSlot(row as Record<string, unknown>);
+    const assignment = assignmentBySlot.get(slot.id);
+    const enriched: OpenMicSongSlotWithPlayer = {
+      ...slot,
+      playerName: assignment?.playerName ?? null,
+      assignmentStatus: assignment?.status ?? null,
+    };
     const list = slotsBySong.get(slot.event_song_id) ?? [];
-    list.push(slot);
+    list.push(enriched);
     slotsBySong.set(slot.event_song_id, list);
   }
 
@@ -437,22 +492,30 @@ export async function rejectOpenMicAssignment(
 
 export async function submitOpenMicSongSuggestion(input: {
   eventId: string;
-  title: string;
+  title?: string | null;
   artist?: string | null;
   displayName?: string | null;
   email?: string | null;
   phone?: string | null;
   notes?: string | null;
+  suggestionType?: OpenMicSuggestionType;
+  eventSongId?: string | null;
+  songSlotId?: string | null;
+  preferredSlotName?: string | null;
 }): Promise<OpenMicSongSuggestion> {
   const client = getBandieClient();
   const { data, error } = await client.rpc('bandie_submit_open_mic_song_suggestion', {
     p_event_id: input.eventId,
-    p_title: input.title,
+    p_title: input.title ?? null,
     p_artist: input.artist ?? null,
     p_display_name: input.displayName ?? null,
     p_email: input.email ?? null,
     p_phone: input.phone ?? null,
     p_notes: input.notes ?? null,
+    p_suggestion_type: input.suggestionType ?? 'new_song',
+    p_event_song_id: input.eventSongId ?? null,
+    p_song_slot_id: input.songSlotId ?? null,
+    p_preferred_slot_name: input.preferredSlotName ?? null,
   });
   if (error) {
     throw new Error(error.message);
@@ -471,6 +534,10 @@ export async function submitOpenMicSongSuggestion(input: {
     status: row.status as OpenMicSuggestionStatus,
     organiser_note: row.organiser_note ? String(row.organiser_note) : null,
     created_song_id: row.created_song_id ? String(row.created_song_id) : null,
+    suggestion_type: (row.suggestion_type as OpenMicSuggestionType) ?? 'new_song',
+    event_song_id: row.event_song_id ? String(row.event_song_id) : null,
+    song_slot_id: row.song_slot_id ? String(row.song_slot_id) : null,
+    preferred_slot_name: row.preferred_slot_name ? String(row.preferred_slot_name) : null,
     created_at: String(row.created_at),
     updated_at: String(row.updated_at),
   };
@@ -502,6 +569,10 @@ export async function listOpenMicSongSuggestions(eventId: string): Promise<OpenM
       status: r.status as OpenMicSuggestionStatus,
       organiser_note: r.organiser_note ? String(r.organiser_note) : null,
       created_song_id: r.created_song_id ? String(r.created_song_id) : null,
+      suggestion_type: (r.suggestion_type as OpenMicSuggestionType) ?? 'new_song',
+      event_song_id: r.event_song_id ? String(r.event_song_id) : null,
+      song_slot_id: r.song_slot_id ? String(r.song_slot_id) : null,
+      preferred_slot_name: r.preferred_slot_name ? String(r.preferred_slot_name) : null,
       created_at: String(r.created_at),
       updated_at: String(r.updated_at),
     };
