@@ -173,14 +173,42 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.55rem 0.75rem;
+  min-height: 1.35rem;
 }
 
 .song-suggestion-selection-field-label {
   font-size: 0.875rem;
   font-weight: 700;
-  line-height: 1.35;
+  line-height: 1;
   white-space: nowrap;
+}
+
+.auth-field.song-suggestion-selection-field .song-suggestion-selection-value-label {
+  display: inline;
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.auth-field.song-suggestion-selection-field .song-suggestion-selection-checkbox,
+.song-suggestion-selection-checkbox {
+  box-sizing: border-box;
+  width: 1.05rem;
+  height: 1.05rem;
+  min-width: 1.05rem;
+  min-height: 1.05rem;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.2);
+  accent-color: #ffcc33;
+  cursor: pointer;
 }
 
 .song-suggestion-selection-toggle {
@@ -190,7 +218,7 @@
   margin: 0;
   font-size: 0.92rem;
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1;
   cursor: pointer;
 }
 
@@ -255,6 +283,11 @@
 
 .song-suggestion-selection-field .song-suggestion-mode-note {
   margin-top: 0.65rem;
+}
+
+.app-main .surface-light .song-suggestion-selection-checkbox,
+.app-shell .surface-light .song-suggestion-selection-checkbox {
+  accent-color: #1d4ed8;
 }
 
 .app-main .surface-light .song-suggestion-selection-toggle input[type='checkbox'],

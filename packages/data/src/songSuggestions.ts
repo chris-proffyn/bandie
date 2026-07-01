@@ -716,6 +716,17 @@ export async function withdrawSongSuggestion(suggestionId: string): Promise<void
   }
 }
 
+export async function clearAllSongSuggestions(groupId: string): Promise<void> {
+  const client = getBandieClient();
+  const { error } = await client.rpc('bandie_clear_all_song_suggestions', {
+    p_group_id: groupId,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
 export async function closeSongSuggestions(groupId: string): Promise<void> {
   const client = getBandieClient();
   const { error } = await client.rpc('bandie_close_song_suggestions', { p_group_id: groupId });

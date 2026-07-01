@@ -479,6 +479,7 @@ export {
   voteOnSongSuggestion,
   clearSongSuggestionVote,
   withdrawSongSuggestion,
+  clearAllSongSuggestions,
   closeSongSuggestions,
   reopenSongSuggestions,
   closeSongSuggestionVoting,

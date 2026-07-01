@@ -5,6 +5,7 @@ import {
   DEFAULT_SONG_SUGGESTION_LIST_FILTERS,
   closeSongSuggestionVoting,
   closeSongSuggestions,
+  clearAllSongSuggestions,
   collectSongSuggestionFilterOptions,
   computeSongSuggestionAutoSelection,
   confirmSongSuggestionGroup,
@@ -65,6 +66,10 @@ function formatEvent(event: SongSuggestionGroupEvent): string {
       return 'Suggestions closed';
     case 'suggestions_reopened':
       return 'Suggestions reopened';
+    case 'suggestions_cleared':
+      return payload.cleared_count
+        ? `Leader cleared ${String(payload.cleared_count)} suggestion${Number(payload.cleared_count) === 1 ? '' : 's'}`
+        : 'Leader cleared all suggestions';
     case 'voting_closed':
       return 'Voting closed';
     case 'votes_reset':
@@ -323,6 +328,23 @@ export function SongSuggestionGroupDetailPage() {
     });
   }
 
+  async function handleClearAllSuggestions() {
+    if (!groupId || activeSuggestions.length === 0) {
+      return;
+    }
+
+    const message =
+      activeSuggestions.length === 1
+        ? 'Remove the only suggestion from this group? Members can suggest again while suggestions are still open.'
+        : `Remove all ${activeSuggestions.length} suggestions from this group? Members can suggest again while suggestions are still open.`;
+
+    if (!window.confirm(message)) {
+      return;
+    }
+
+    await runAction(() => clearAllSongSuggestions(groupId));
+  }
+
   async function handleCloseSuggestions() {
     if (!groupId || !window.confirm('Close suggestions? Members will no longer be able to add songs.')) {
       return;
@@ -557,6 +579,16 @@ export function SongSuggestionGroupDetailPage() {
                 onClick={() => setShowEdit(true)}
               >
                 Edit group
+              </button>
+            ) : null}
+            {group.status === 'open_for_suggestions' && activeSuggestions.length > 0 ? (
+              <button
+                type="button"
+                className="directory-btn directory-btn-secondary"
+                disabled={actionBusy}
+                onClick={() => void handleClearAllSuggestions()}
+              >
+                Clear all
               </button>
             ) : null}
             {group.status === 'open_for_suggestions' ? (

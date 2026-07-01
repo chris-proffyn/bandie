@@ -110,6 +110,7 @@ stripe listen --forward-to localhost:8888/api/billing/stripe-webhook
 - `20260701170000_bandie_song_suggestions.sql` — suggestion groups, votes, confirmed snapshot, vote summary view, RLS + RPCs (submit, vote, close/reopen, veto, reset, confirm)
 - `20260704110000_bandie_withdraw_song_suggestion.sql` — member withdraw own suggestion while window open
 - `20260706100000_bandie_leader_withdraw_song_suggestion.sql` — band leaders may remove any member suggestion while suggestions are open
+- `20260706110000_bandie_clear_all_song_suggestions.sql` — band leaders may clear all active suggestions while suggestions are open
 - `20260704120000_bandie_admin_organiser_subscription.sql` — admin can create organiser/leader subscriptions when assigning a plan from `/admin/accounts`
 - `20260705120000_bandie_admin_account_deletion.sql` — admin soft-delete user accounts; leadership transfer; Dropbox disconnect; communications show Deleted user
 
