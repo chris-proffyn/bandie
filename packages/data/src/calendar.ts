@@ -59,6 +59,23 @@ export type CreateCalendarEventInput = {
   repeat?: CalendarRepeatInput;
 };
 
+export type UpdateCalendarEventInput = {
+  eventId: string;
+  bandId: string;
+  title: string;
+  startsAt: string;
+  endsAt?: string | null;
+  location?: string | null;
+  notes?: string | null;
+};
+
+export type CalendarMemberAvailabilityRow = {
+  userId: string;
+  displayName: string;
+  vote: AvailabilityVote;
+  isCurrentUser: boolean;
+};
+
 export const CALENDAR_LEADER_ONLY_MESSAGE =
   'Only band leaders can create or edit calendar events. Members can vote on rehearsal and gig availability.';
 
@@ -81,6 +98,27 @@ export function formatCalendarEventType(eventType: CalendarEventType): string {
 
 export function availabilityStatusClass(status: AvailabilityStatus): string {
   return `calendar-status calendar-status-${status}`;
+}
+
+export function availabilityVoteClass(vote: AvailabilityVote): string {
+  return `calendar-vote-chip calendar-vote-chip-${vote}`;
+}
+
+export function mergeCalendarMemberVotes(
+  members: { userId: string; displayName: string }[],
+  votes: CalendarEventVote[],
+  currentUserId?: string | null,
+): CalendarMemberAvailabilityRow[] {
+  const voteByUser = new Map(votes.map((row) => [row.user_id, row.vote]));
+
+  return members
+    .map((member) => ({
+      userId: member.userId,
+      displayName: member.displayName,
+      vote: voteByUser.get(member.userId) ?? 'pending',
+      isCurrentUser: member.userId === currentUserId,
+    }))
+    .sort((left, right) => left.displayName.localeCompare(right.displayName));
 }
 
 export async function getBandCalendarTier(
@@ -266,18 +304,47 @@ export async function createCalendarEvent(
 
   const created = (data ?? []) as CalendarEvent[];
 
-  if (input.eventType === 'gig_availability') {
-    for (const event of created) {
-      const { error: seedError } = await client.rpc('bandie_seed_calendar_event_votes', {
-        p_event_id: event.id,
-      });
-      if (seedError) {
-        throw new Error(seedError.message);
-      }
+  for (const event of created) {
+    const { error: seedError } = await client.rpc('bandie_seed_calendar_event_votes', {
+      p_event_id: event.id,
+    });
+    if (seedError) {
+      throw new Error(seedError.message);
     }
   }
 
   return created;
+}
+
+export async function updateCalendarEvent(input: UpdateCalendarEventInput): Promise<CalendarEvent> {
+  await assertCanPerform({
+    capability: 'calendar.use',
+    subjectType: 'band',
+    subjectId: input.bandId,
+    bandId: input.bandId,
+    planScope: 'leader',
+  });
+
+  const client = getBandieClient();
+  const { data, error } = await client
+    .from('bandie_calendar_events')
+    .update({
+      title: input.title.trim(),
+      starts_at: input.startsAt,
+      ends_at: input.endsAt ?? null,
+      location: input.location?.trim() || null,
+      notes: input.notes?.trim() || null,
+    })
+    .eq('id', input.eventId)
+    .eq('band_id', input.bandId)
+    .select('*')
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data as CalendarEvent;
 }
 
 export async function deleteCalendarEvent(eventId: string): Promise<void> {

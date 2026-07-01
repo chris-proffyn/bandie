@@ -91,7 +91,7 @@ export function SongSuggestionGroupsPage() {
       ) : null}
 
       <section className="panel">
-        <h2>Groups</h2>
+        <h2>Song Groups</h2>
         {loading ? <p className="workspace-empty-note">Loading…</p> : null}
         {!loading && groups.length === 0 ? (
           <p className="workspace-empty-note">

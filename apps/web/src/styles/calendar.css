@@ -69,8 +69,7 @@
 }
 
 .calendar-event-meta,
-.calendar-event-notes,
-.calendar-vote-summary {
+.calendar-event-notes {
   color: var(--text-muted);
   margin: 0;
 }
@@ -90,14 +89,132 @@
   background: rgba(255, 204, 51, 0.08);
 }
 
+.calendar-votes {
+  display: grid;
+  gap: 1rem;
+}
+
+.calendar-vote-summary {
+  color: var(--text-muted);
+  margin: 0;
+}
+
 .calendar-vote-actions {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.calendar-vote-actions-label,
+.calendar-member-votes-label {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.calendar-vote-actions-row {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
 }
 
-.calendar-vote-actions .active {
+.calendar-vote-actions-row .active {
   border-color: var(--brand-primary);
+}
+
+.calendar-member-votes {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.calendar-member-votes-empty {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+.calendar-member-vote-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.calendar-member-vote-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.calendar-member-vote-row.is-current-user {
+  border-color: rgba(255, 141, 168, 0.35);
+  background: rgba(255, 141, 168, 0.08);
+}
+
+.calendar-member-vote-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 600;
+}
+
+.calendar-member-vote-you {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #ff8da8;
+}
+
+.calendar-vote-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.calendar-vote-chip-available {
+  background: rgba(76, 175, 80, 0.18);
+  color: #9ae6b4;
+}
+
+.calendar-vote-chip-maybe {
+  background: rgba(255, 193, 7, 0.15);
+  color: #fde68a;
+}
+
+.calendar-vote-chip-no {
+  background: rgba(239, 68, 68, 0.16);
+  color: #fca5a5;
+}
+
+.calendar-vote-chip-pending {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+}
+
+.calendar-event-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.calendar-edit-note {
+  margin: -0.25rem 0 1rem;
+  color: var(--text-muted);
+  font-size: 0.92rem;
 }
 
 .calendar-status {

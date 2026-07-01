@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react
 import { Link, useParams } from 'react-router-dom';
 import {
   AVAILABILITY_STATUS_LABELS,
-  AVAILABILITY_VOTE_LABELS,
   CALENDAR_DEFAULT_OCCURRENCE_COUNT,
   CALENDAR_LEADER_ONLY_MESSAGE,
   CALENDAR_MAX_OCCURRENCE_COUNT,
@@ -16,18 +15,23 @@ import {
   formatCalendarEventType,
   formatCalendarRepeatPattern,
   getBandCalendarTier,
+  listBandMembersWithProfiles,
+  memberDisplayName,
+  mergeCalendarMemberVotes,
   parseCalendarRepeatPattern,
   isBandLeaderRole,
   listBandCalendarEventsWithVotes,
   PLAN_CODES,
   PLAN_DISPLAY_NAMES,
-  summarizeAvailabilityVotes,
+  updateCalendarEvent,
   type AvailabilityVote,
+  type BandMemberWithProfile,
   type CalendarEventType,
   type CalendarEventWithVotes,
   type CalendarRepeatInput,
 } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
+import { CalendarEventVotesPanel } from '../../components/calendar/CalendarEventVotesPanel';
 import { SongsBandContextBar } from '../../components/songs/SongsBandContextBar';
 import '../../styles/calendar.css';
 
@@ -104,6 +108,34 @@ function repeatPreview(form: CalendarFormState): string | null {
   );
 }
 
+function toDatetimeLocalValue(iso: string | null | undefined): string {
+  if (!iso) {
+    return '';
+  }
+
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function eventToForm(event: CalendarEventWithVotes): CalendarFormState {
+  return {
+    eventType: event.event_type,
+    title: event.title,
+    startsAt: toDatetimeLocalValue(event.starts_at),
+    endsAt: toDatetimeLocalValue(event.ends_at),
+    location: event.location ?? '',
+    notes: event.notes ?? '',
+    repeatKind: 'none',
+    repeatOrdinal: 1,
+    occurrenceCount: String(CALENDAR_DEFAULT_OCCURRENCE_COUNT),
+  };
+}
+
 export function CalendarPage() {
   const { bandId } = useParams();
   const { bands, adminModeActive, user } = useAuth();
@@ -112,13 +144,25 @@ export function CalendarPage() {
   const canManage = adminModeActive || isBandLeaderRole(membership?.member_role);
 
   const [events, setEvents] = useState<CalendarEventWithVotes[]>([]);
+  const [members, setMembers] = useState<BandMemberWithProfile[]>([]);
   const [calendarTier, setCalendarTier] = useState<'basic' | 'full'>('full');
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<CalendarEventWithVotes | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [votingEventId, setVotingEventId] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [form, setForm] = useState<CalendarFormState>(INITIAL_FORM);
+
+  const memberVoteInputs = useMemo(
+    () =>
+      members.map((member) => ({
+        userId: member.user_id,
+        displayName: memberDisplayName(member),
+      })),
+    [members],
+  );
 
   const loadEvents = useCallback(async () => {
     if (!bandId) {
@@ -129,14 +173,17 @@ export function CalendarPage() {
     setLoadError(null);
 
     try {
-      const [rows, tier] = await Promise.all([
+      const [rows, tier, memberRows] = await Promise.all([
         listBandCalendarEventsWithVotes(bandId),
         getBandCalendarTier(bandId),
+        listBandMembersWithProfiles(bandId),
       ]);
       setEvents(rows);
       setCalendarTier(tier);
+      setMembers(memberRows);
     } catch (err) {
       setEvents([]);
+      setMembers([]);
       setLoadError(err instanceof Error ? err.message : 'Unable to load calendar.');
     } finally {
       setLoading(false);
@@ -176,6 +223,7 @@ export function CalendarPage() {
       });
       setShowCreate(false);
       setForm(INITIAL_FORM);
+      setFormError(null);
       if (created.length > 1) {
         setLoadError(null);
       }
@@ -188,11 +236,65 @@ export function CalendarPage() {
   }
 
   async function handleVote(eventId: string, vote: Exclude<AvailabilityVote, 'pending'>) {
+    setVotingEventId(eventId);
+    setLoadError(null);
+
     try {
       await castAvailabilityVote(eventId, vote);
       await loadEvents();
     } catch (err) {
       setLoadError(err instanceof Error ? err.message : 'Unable to save vote.');
+    } finally {
+      setVotingEventId(null);
+    }
+  }
+
+  function openCreateForm() {
+    setEditingEvent(null);
+    setForm(INITIAL_FORM);
+    setFormError(null);
+    setShowCreate(true);
+  }
+
+  function openEditForm(event: CalendarEventWithVotes) {
+    setShowCreate(false);
+    setEditingEvent(event);
+    setForm(eventToForm(event));
+    setFormError(null);
+  }
+
+  function closeEventForm() {
+    setShowCreate(false);
+    setEditingEvent(null);
+    setForm(INITIAL_FORM);
+    setFormError(null);
+  }
+
+  async function handleUpdate(event: FormEvent) {
+    event.preventDefault();
+    if (!bandId || !editingEvent || !form.title.trim() || !form.startsAt) {
+      return;
+    }
+
+    setSubmitting(true);
+    setFormError(null);
+
+    try {
+      await updateCalendarEvent({
+        eventId: editingEvent.id,
+        bandId,
+        title: form.title,
+        startsAt: new Date(form.startsAt).toISOString(),
+        endsAt: form.endsAt ? new Date(form.endsAt).toISOString() : null,
+        location: form.location,
+        notes: form.notes,
+      });
+      closeEventForm();
+      await loadEvents();
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Unable to update event.');
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -268,7 +370,7 @@ export function CalendarPage() {
             <button
               type="button"
               className="directory-btn directory-btn-primary"
-              onClick={() => setShowCreate(true)}
+              onClick={openCreateForm}
             >
               Add event
             </button>
@@ -430,7 +532,7 @@ export function CalendarPage() {
               <button
                 type="button"
                 className="auth-button auth-button-secondary"
-                onClick={() => setShowCreate(false)}
+                onClick={closeEventForm}
                 disabled={submitting}
               >
                 Cancel
@@ -447,6 +549,88 @@ export function CalendarPage() {
         </section>
       ) : null}
 
+      {editingEvent ? (
+        <section className="panel calendar-create-panel">
+          <h2>Edit calendar event</h2>
+          <p className="calendar-edit-note">
+            {formatCalendarEventType(editingEvent.event_type)}
+            {editingEvent.series_key ? ' · This occurrence only — repeat settings are not changed here.' : ''}
+          </p>
+          <form className="auth-form" onSubmit={handleUpdate}>
+            <div className="auth-field">
+              <label htmlFor="calendar-edit-title">Title</label>
+              <input
+                id="calendar-edit-title"
+                value={form.title}
+                onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
+                required
+              />
+            </div>
+            <div className="calendar-form-grid">
+              <div className="auth-field">
+                <label htmlFor="calendar-edit-starts">Starts</label>
+                <input
+                  id="calendar-edit-starts"
+                  type="datetime-local"
+                  value={form.startsAt}
+                  onChange={(event) =>
+                    setForm((current) => ({ ...current, startsAt: event.target.value }))
+                  }
+                  required
+                />
+              </div>
+              <div className="auth-field">
+                <label htmlFor="calendar-edit-ends">Ends (optional)</label>
+                <input
+                  id="calendar-edit-ends"
+                  type="datetime-local"
+                  value={form.endsAt}
+                  onChange={(event) =>
+                    setForm((current) => ({ ...current, endsAt: event.target.value }))
+                  }
+                />
+              </div>
+            </div>
+            <div className="auth-field">
+              <label htmlFor="calendar-edit-location">Location</label>
+              <input
+                id="calendar-edit-location"
+                value={form.location}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, location: event.target.value }))
+                }
+                placeholder="e.g. Powerhouse Studios"
+              />
+            </div>
+            <div className="auth-field">
+              <label htmlFor="calendar-edit-notes">Notes</label>
+              <textarea
+                id="calendar-edit-notes"
+                rows={3}
+                value={form.notes}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, notes: event.target.value }))
+                }
+              />
+            </div>
+            {formError ? <div className="auth-message auth-message-error">{formError}</div> : null}
+            <div className="calendar-form-actions">
+              <button
+                type="button"
+                className="auth-button auth-button-secondary"
+                onClick={closeEventForm}
+                disabled={submitting}
+              >
+                Cancel
+              </button>
+              <button type="submit" className="auth-button" disabled={submitting}>
+                {submitting ? 'Saving…' : 'Save changes'}
+              </button>
+            </div>
+          </form>
+        </section>
+      ) : null}
+
       <section className="panel calendar-events-panel">
         <h2>Upcoming events</h2>
         {loading ? <p className="workspace-empty-note">Loading calendar…</p> : null}
@@ -455,8 +639,8 @@ export function CalendarPage() {
         ) : null}
         <ul className="calendar-event-list">
           {upcoming.map((event) => {
-            const voteSummary = summarizeAvailabilityVotes(event.votes);
-            const myVote = event.votes.find((vote) => vote.user_id === user?.id);
+            const myVote = event.votes.find((vote) => vote.user_id === user?.id)?.vote;
+            const memberRows = mergeCalendarMemberVotes(memberVoteInputs, event.votes, user?.id);
             const repeatPattern = parseCalendarRepeatPattern(event.repeat_pattern);
             const repeatLabel = formatCalendarRepeatPattern(repeatPattern, event.starts_at);
 
@@ -493,33 +677,31 @@ export function CalendarPage() {
 
                 {event.notes ? <p className="calendar-event-notes">{event.notes}</p> : null}
 
-                <div className="calendar-votes">
-                  <p className="calendar-vote-summary">
-                    {voteSummary.available} available · {voteSummary.maybe} maybe · {voteSummary.no} no ·{' '}
-                    {voteSummary.pending} pending
-                  </p>
-                  <div className="calendar-vote-actions">
-                    {(['available', 'maybe', 'no'] as const).map((vote) => (
-                      <button
-                        key={vote}
-                        type="button"
-                        className={`directory-btn directory-btn-secondary ${myVote?.vote === vote ? 'active' : ''}`}
-                        onClick={() => void handleVote(event.id, vote)}
-                      >
-                        {AVAILABILITY_VOTE_LABELS[vote]}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                <CalendarEventVotesPanel
+                  votes={event.votes}
+                  memberRows={memberRows}
+                  currentUserVote={myVote}
+                  votingBusy={votingEventId === event.id}
+                  onVote={(vote) => void handleVote(event.id, vote)}
+                />
 
                 {canManage ? (
-                  <button
-                    type="button"
-                    className="calendar-delete-btn"
-                    onClick={() => void handleDelete(event)}
-                  >
-                    Delete
-                  </button>
+                  <div className="calendar-event-actions">
+                    <button
+                      type="button"
+                      className="directory-btn directory-btn-secondary"
+                      onClick={() => openEditForm(event)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      className="calendar-delete-btn"
+                      onClick={() => void handleDelete(event)}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 ) : null}
               </li>
             );
