@@ -121,13 +121,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [session]);
 
   const refreshBands = useCallback(async () => {
-    if (!session) {
+    const currentSession = await getCurrentSession();
+    if (!currentSession) {
       setBands([]);
       return;
     }
     const userBands = await listUserBands();
     setBands(userBands);
-  }, [session]);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -168,8 +169,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     setMembershipResolved(false);
+    let mounted = true;
+
     ensureAppMembership()
       .then(async (membership) => {
+        if (!mounted) {
+          return;
+        }
+
         const appAdmin = isPlatformAppAdminRole(membership.role);
         setIsAppAdmin(appAdmin);
 
@@ -177,9 +184,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setAdminModeEnabled(storedAdminMode);
         setBandieAdminModeActive(appAdmin && storedAdminMode);
 
-        await Promise.all([
-          refreshBands(),
-          refreshProfile(),
+        try {
+          await refreshBands();
+        } catch {
+          if (mounted) {
+            setBands([]);
+          }
+        }
+
+        try {
+          await refreshProfile();
+        } catch {
+          if (mounted) {
+            setProfile(null);
+          }
+        }
+
+        void Promise.allSettled([
           loadPlatformEntitlementEnforcement(),
           loadPlatformAccessMode(),
           ensureLaunchTrialsExpired(),
@@ -187,6 +208,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ]);
       })
       .catch(() => {
+        if (!mounted) {
+          return;
+        }
         setBands([]);
         setProfile(null);
         setIsAppAdmin(false);
@@ -195,8 +219,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setBandieAdminModeActive(false);
       })
       .finally(() => {
-        setMembershipResolved(true);
+        if (mounted) {
+          setMembershipResolved(true);
+        }
       });
+
+    return () => {
+      mounted = false;
+    };
   }, [session, refreshBands, refreshProfile]);
 
   useEffect(() => {

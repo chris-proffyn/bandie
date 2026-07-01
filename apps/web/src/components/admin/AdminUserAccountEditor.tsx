@@ -1,6 +1,7 @@
 import { useEffect, useId, useState, type FormEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
+import { AdminUserAccountDeletionSection } from './AdminUserAccountDeletionSection';
 import {
   adminSetUserSubscriptionPlan,
   adminSetUserSubscriptionTrialEnd,
@@ -31,9 +32,10 @@ type AdminUserAccountEditorProps = {
   account: AdminUserAccount;
   onSaved: () => void;
   onCancel: () => void;
+  onDeleted?: () => void;
 };
 
-export function AdminUserAccountEditor({ account, onSaved, onCancel }: AdminUserAccountEditorProps) {
+export function AdminUserAccountEditor({ account, onSaved, onCancel, onDeleted }: AdminUserAccountEditorProps) {
   const titleId = useId();
   const [isPlayer, setIsPlayer] = useState(account.is_player);
   const [isOrganiser, setIsOrganiser] = useState(account.is_organiser);
@@ -81,6 +83,7 @@ export function AdminUserAccountEditor({ account, onSaved, onCancel }: AdminUser
 
   const leaderStripe = isStripeBilledSubscription(account.leader_stripe_subscription_id);
   const organiserStripe = isStripeBilledSubscription(account.organiser_stripe_subscription_id);
+  const isDeleted = Boolean(account.account_deleted_at);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -184,6 +187,11 @@ export function AdminUserAccountEditor({ account, onSaved, onCancel }: AdminUser
 
       {error ? <div className="auth-message auth-message-error">{error}</div> : null}
       {message ? <div className="auth-message auth-message-success">{message}</div> : null}
+      {isDeleted ? (
+        <div className="auth-message auth-message-error">
+          This account is deleted. Subscription and role fields are read-only.
+        </div>
+      ) : null}
 
       <div className="admin-account-editor-grid">
         <fieldset className="admin-account-fieldset">
@@ -192,6 +200,7 @@ export function AdminUserAccountEditor({ account, onSaved, onCancel }: AdminUser
             <input
               type="checkbox"
               checked={isPlayer}
+              disabled={isDeleted}
               onChange={(event) => setIsPlayer(event.target.checked)}
             />
             Player
@@ -200,6 +209,7 @@ export function AdminUserAccountEditor({ account, onSaved, onCancel }: AdminUser
             <input
               type="checkbox"
               checked={isOrganiser}
+              disabled={isDeleted}
               onChange={(event) => setIsOrganiser(event.target.checked)}
             />
             Organiser
@@ -365,11 +375,19 @@ export function AdminUserAccountEditor({ account, onSaved, onCancel }: AdminUser
         </p>
       ) : null}
 
+      <AdminUserAccountDeletionSection
+        account={account}
+        onDeleted={() => {
+          onDeleted?.();
+          onCancel();
+        }}
+      />
+
       <div className="admin-account-editor-actions">
         <button type="button" className="auth-button auth-button-secondary" onClick={onCancel}>
           Cancel
         </button>
-        <button type="submit" className="auth-button" disabled={saving}>
+        <button type="submit" className="auth-button" disabled={saving || isDeleted}>
           {saving ? 'Saving…' : 'Save changes'}
         </button>
       </div>

@@ -579,6 +579,19 @@
   padding-top: 1rem;
 }
 
+.directory-band-card .band-card-actions .directory-btn-secondary {
+  background: #fff;
+  border-color: #9a8b7a;
+  color: #151515;
+}
+
+.directory-band-card .band-card-actions .directory-btn-secondary:hover,
+.directory-band-card .band-card-actions .directory-btn-secondary:focus-visible {
+  background: #efe9e0;
+  border-color: #5c5349;
+  color: #111;
+}
+
 .directory-price {
   font-size: 0.82rem;
   color: #5d5650;

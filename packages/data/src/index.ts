@@ -932,6 +932,17 @@ export {
 export type { AdminUserAccount, AdminBandAccount, AdminAccountsPage, AdminTestDataCounts } from './adminAccounts';
 
 export {
+  getAdminAccountDeletionPreview,
+  adminDeleteUserAccount,
+} from './adminAccountDeletion';
+export type {
+  AdminAccountDeletionPreview,
+  AdminAccountDeletionBandTransfer,
+  AdminAccountDeletionMemberOption,
+  AdminAccountDeletionLeadershipTransfer,
+} from './adminAccountDeletion';
+
+export {
   listPlansWithEntitlements,
   listCapabilities,
   formatEntitlementValueForInput,

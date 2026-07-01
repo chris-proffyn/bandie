@@ -115,6 +115,9 @@ export function AdminAccountsUsersPanel({
                       <div className="admin-account-name-cell">
                         <span>{user.display_name ?? '—'}</span>
                         <TestDataBadge testUser={user.test_user} />
+                        {user.account_deleted_at ? (
+                          <span className="admin-deleted-badge">Deleted</span>
+                        ) : null}
                       </div>
                     </td>
                     <td>{user.username ?? '—'}</td>
@@ -167,6 +170,7 @@ export function AdminAccountsUsersPanel({
           account={selectedAccount}
           onCancel={() => setSelectedUserId(null)}
           onSaved={() => void loadUsers(page.offset)}
+          onDeleted={() => void loadUsers(page.offset)}
         />
       ) : null}
     </section>

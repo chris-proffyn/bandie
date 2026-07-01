@@ -16,7 +16,7 @@ import '../../styles/directory.css';
 
 export function AppEntryPage() {
   const navigate = useNavigate();
-  const { bands, loading } = useAuth();
+  const { bands, loading, membershipResolved } = useAuth();
   const { access: playerAccess } = usePlayerWorkspaceAccess();
   const [checkingInvites, setCheckingInvites] = useState(true);
   const [hideTestData, setHideTestData] = useState(readDirectoryHideTestData);
@@ -34,7 +34,7 @@ export function AppEntryPage() {
   }
 
   useEffect(() => {
-    if (loading) {
+    if (loading || !membershipResolved) {
       return;
     }
 
@@ -45,9 +45,9 @@ export function AppEntryPage() {
         }
       })
       .finally(() => setCheckingInvites(false));
-  }, [loading, navigate]);
+  }, [loading, membershipResolved, navigate]);
 
-  if (loading || checkingInvites) {
+  if (loading || !membershipResolved || checkingInvites) {
     return (
       <div className="my-bands-page">
         <div className="panel">

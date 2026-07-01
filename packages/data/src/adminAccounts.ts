@@ -13,6 +13,7 @@ export type AdminUserAccount = {
   is_player: boolean;
   is_organiser: boolean;
   test_user: boolean;
+  account_deleted_at: string | null;
   entitlement_test_leader_plan_code: string | null;
   leader_subscription_id: string | null;
   leader_plan_code: string | null;

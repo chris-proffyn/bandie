@@ -539,6 +539,11 @@ Task checklist: `docs/project/bandie_song_suggestions_voting_implementation_plan
 - UI: Beta/Promo pill in `AppHeader` and `MarketingNav`
 - Docs: `product-functional-requirements.md` §12c
 
+**1 July 2026 — Admin account deletion**
+- Migration `20260705120000_bandie_admin_account_deletion.sql` — `account_deleted_at` on profiles; deletion preview/execute RPCs; leadership transfer; Dropbox disconnect; communications resolve deleted users as **Deleted user**; login blocked
+- Data: `adminAccountDeletion.ts`; UI: deletion section in admin **Manage user** panel on `/admin/accounts`
+- Docs: `product-functional-requirements.md` §6 Accounts management — account deletion
+
 **30 June 2026 — Admin accounts hide test data**
 - Migration `20260703160000_bandie_admin_accounts_hide_test_data.sql` — `p_hide_test_data` on admin list/count RPCs; `test_user` on list rows; `bandie_admin_test_data_counts`
 - UI: **Hide test data** toggle on `/admin/accounts` and `/admin` overview; session preference `bandie:admin:hide-test-data`; **Test data** badges on account rows

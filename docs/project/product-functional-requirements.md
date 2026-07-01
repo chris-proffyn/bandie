@@ -2,7 +2,7 @@
 
 **Document status:** Authoritative functional requirements  
 **Product:** Bandie  
-**Last updated:** 27 June 2026
+**Last updated:** 1 July 2026
 
 **Source documents:** `bandie_product_description.md`, `bandie_build_elements.md`, feature specs in `docs/project/`
 
@@ -373,9 +373,27 @@ Platform admins use the Accounts screen to browse and manage live users and band
 
 **Users table (paginated, 20 per page):**
 - Loads on page open (most recent profiles first); optional search filters by display name, username, or email
-- Columns: name, username, email, workspace roles (player / organiser), leader plan, organiser plan, test plan override, promo/trial end dates, active entitlement override count
-- **Manage user** panel (per row): view full subscription detail; change workspace roles (`is_player`, `is_organiser`); set **Test player plan limits** override (`entitlement_test_leader_plan_code` — same values as profile billing: Player Free, Plus, Pro, or cleared); change assigned plan for **non-Stripe** subscriptions (`source` = `system`, `manual`, `migration`, or `launch_promo`); extend or set **trial / promo end** (`trial_end`) on non-Stripe subscriptions
+- Columns: name, username, email, workspace roles (player / organiser), leader plan, organiser plan, test plan override, promo/trial end dates, active entitlement override count; deleted accounts show a **Deleted** badge
+- **Manage user** panel (per row): view full subscription detail; change workspace roles (`is_player`, `is_organiser`); set **Test player plan limits** override (`entitlement_test_leader_plan_code` — same values as profile billing: Player Free, Plus, Pro, or cleared); change assigned plan for **non-Stripe** subscriptions (`source` = `system`, `manual`, `migration`, or `launch_promo`); extend or set **trial / promo end** (`trial_end`) on non-Stripe subscriptions; **delete account** (see below)
 - Stripe-billed subscriptions are read-only here (plan changes via Stripe / billing admin); admin changes are audit-logged
+
+**Account deletion (admin):**
+
+Platform admins may permanently delete a user account from the **Manage user** panel on `/admin/accounts`. Deletion is a soft delete: the profile row and historical records remain, but the user can no longer sign in or use Bandie.
+
+| Area | Behaviour |
+|---|---|
+| Access | Revoke Bandie app membership; block sign-in (username and email lookup) |
+| Profile | Clear PII (bio, avatar, contact fields, directory visibility); display name becomes **Deleted user**; username released |
+| Communications | Direct messages, booking enquiries, gig invites, and invite/outreach history are **retained**; any party name resolves to **Deleted user** when the account is deleted |
+| Band leadership | For each band where the user is the **sole** active leader, admin must assign another **active member** as the new leader before deletion proceeds. Primary public contact (`owner_user_id`) transfers to the new leader. Bands with other leaders already in place transfer primary contact automatically when the deleted user was primary |
+| Band membership | User is removed from all bands (`status = removed`) |
+| Songs & repertoire | Song, setlist, and folder metadata in Supabase are **kept** for the band |
+| Dropbox | If the user connected Dropbox for song-part storage, the integration is disconnected (tokens removed, band storage mapping set to `disconnected`). Song-part file and folder rows remain but Dropbox paths/links are cleared and files marked `unavailable` |
+| Subscriptions | Non-Stripe subscriptions are cancelled; Stripe-billed subscriptions are left for billing admin / Stripe reconciliation |
+| Safeguards | Cannot delete platform admin accounts or your own account from the admin portal; requires typed confirmation (user email); audit-logged |
+
+Deletion preview lists bands that need a successor leader and any Dropbox bands affected before the admin confirms.
 
 **Bands table (paginated, 20 per page):**
 - Loads on page open; optional search by band name or slug

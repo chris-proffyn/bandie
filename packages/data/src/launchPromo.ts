@@ -65,7 +65,7 @@ export async function ensureLaunchTrialsExpired(): Promise<void> {
       try {
         const { error } = await getBandieClient().rpc('bandie_expire_launch_trials');
         if (error) {
-          throw new Error(error.message);
+          console.warn('Failed to expire launch trials', error.message);
         }
       } finally {
         expireLaunchTrialsPromise = null;

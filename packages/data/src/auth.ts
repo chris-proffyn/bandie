@@ -61,6 +61,22 @@ export async function signInWithEmail(email: string, password: string): Promise<
     throw new Error(mapAuthError(error.message));
   }
 
+  if (data.user) {
+    const { data: deleted, error: deletedError } = await client.rpc('bandie_profile_account_is_deleted', {
+      p_user_id: data.user.id,
+    });
+
+    if (deletedError) {
+      await client.auth.signOut();
+      throw new Error(mapAuthError(deletedError.message));
+    }
+
+    if (deleted === true) {
+      await client.auth.signOut();
+      throw new Error('This account has been deleted.');
+    }
+  }
+
   return { user: data.user, session: data.session };
 }
 

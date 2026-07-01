@@ -32,6 +32,9 @@ const SORT_OPTIONS: Array<{ value: SongSuggestionSortKey; label: string }> = [
   { value: 'title', label: 'Title A–Z' },
 ];
 
+/** Hidden until suggestions routinely capture genre and decade metadata. */
+const SHOW_SONG_SUGGESTION_METADATA_FILTERS = false;
+
 export function SongSuggestionListControls({
   filters,
   options,
@@ -51,8 +54,8 @@ export function SongSuggestionListControls({
     filters.searchQuery.trim() !== '' ||
     filters.voteFilter !== 'all' ||
     filters.suggestedByUserId !== '' ||
-    filters.genre !== '' ||
-    filters.decade !== '' ||
+    (SHOW_SONG_SUGGESTION_METADATA_FILTERS && filters.genre !== '') ||
+    (SHOW_SONG_SUGGESTION_METADATA_FILTERS && filters.decade !== '') ||
     filters.sortBy !== 'score' ||
     filters.topNOnly;
 
@@ -123,37 +126,41 @@ export function SongSuggestionListControls({
           </select>
         </div>
 
-        <div className="auth-field">
-          <label htmlFor="ss-filter-genre">Genre</label>
-          <select
-            id="ss-filter-genre"
-            value={filters.genre}
-            onChange={(event) => update('genre', event.target.value)}
-          >
-            <option value="">Any genre</option>
-            {options.genres.map((genre) => (
-              <option key={genre} value={genre}>
-                {genre}
-              </option>
-            ))}
-          </select>
-        </div>
+        {SHOW_SONG_SUGGESTION_METADATA_FILTERS ? (
+          <>
+            <div className="auth-field">
+              <label htmlFor="ss-filter-genre">Genre</label>
+              <select
+                id="ss-filter-genre"
+                value={filters.genre}
+                onChange={(event) => update('genre', event.target.value)}
+              >
+                <option value="">Any genre</option>
+                {options.genres.map((genre) => (
+                  <option key={genre} value={genre}>
+                    {genre}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        <div className="auth-field">
-          <label htmlFor="ss-filter-decade">Decade</label>
-          <select
-            id="ss-filter-decade"
-            value={filters.decade}
-            onChange={(event) => update('decade', event.target.value)}
-          >
-            <option value="">Any decade</option>
-            {options.decades.map((decade) => (
-              <option key={decade} value={decade}>
-                {decade}
-              </option>
-            ))}
-          </select>
-        </div>
+            <div className="auth-field">
+              <label htmlFor="ss-filter-decade">Decade</label>
+              <select
+                id="ss-filter-decade"
+                value={filters.decade}
+                onChange={(event) => update('decade', event.target.value)}
+              >
+                <option value="">Any decade</option>
+                {options.decades.map((decade) => (
+                  <option key={decade} value={decade}>
+                    {decade}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </>
+        ) : null}
 
         <div className="auth-field">
           <label htmlFor="ss-filter-sort">Sort by</label>
