@@ -345,7 +345,9 @@ export async function listBandSongSuggestionGroups(
     voteCounts.set(groupId, (voteCounts.get(groupId) ?? 0) + 1);
   }
 
-  return groupRows.map((group) => ({
+  return groupRows
+    .filter((group) => group.band_id === bandId)
+    .map((group) => ({
     ...group,
     suggestion_count: suggestionCounts.get(group.id) ?? 0,
     vote_count: voteCounts.get(group.id) ?? 0,

@@ -70,35 +70,51 @@ export function SongsDashboardPage() {
   });
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  const loadDashboard = useCallback(async () => {
-    if (!bandId) {
-      return;
-    }
-
+  const loadDashboard = useCallback(async (activeBandId: string, cancelled: () => boolean) => {
     setLoading(true);
     setLoadError(null);
 
     try {
       const [songRows, activityRows, groupRows] = await Promise.all([
-        listBandSongs(bandId, { ...filters, includeDeleted: showDeleted }),
-        listRecentSongPartActivity(bandId),
-        listBandSongSuggestionGroups(bandId),
+        listBandSongs(activeBandId, { ...filters, includeDeleted: showDeleted }),
+        listRecentSongPartActivity(activeBandId),
+        listBandSongSuggestionGroups(activeBandId),
       ]);
-      setSongs(songRows);
-      setActivity(activityRows);
-      setSuggestionGroups(groupRows);
+      if (!cancelled()) {
+        setSongs(songRows);
+        setActivity(activityRows);
+        setSuggestionGroups(groupRows);
+      }
     } catch (err) {
-      setSongs([]);
-      setActivity([]);
-      setLoadError(err instanceof Error ? err.message : 'Unable to load songs dashboard.');
+      if (!cancelled()) {
+        setSongs([]);
+        setActivity([]);
+        setSuggestionGroups([]);
+        setLoadError(err instanceof Error ? err.message : 'Unable to load songs dashboard.');
+      }
     } finally {
-      setLoading(false);
+      if (!cancelled()) {
+        setLoading(false);
+      }
     }
-  }, [bandId, filters, showDeleted]);
+  }, [filters, showDeleted]);
 
   useEffect(() => {
-    void loadDashboard();
-  }, [loadDashboard]);
+    if (!bandId) {
+      return;
+    }
+
+    setSongs([]);
+    setActivity([]);
+    setSuggestionGroups([]);
+    let cancelled = false;
+
+    void loadDashboard(bandId, () => cancelled);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [bandId, loadDashboard]);
 
   async function handleRestoreSong(songId: string) {
     if (!bandId) {
@@ -110,7 +126,7 @@ export function SongsDashboardPage() {
 
     try {
       await restoreBandSong(bandId, songId);
-      await loadDashboard();
+      await loadDashboard(bandId, () => false);
     } catch (err) {
       setLoadError(err instanceof Error ? err.message : 'Unable to restore song.');
     } finally {
@@ -523,7 +539,7 @@ export function SongsDashboardPage() {
           bandId={bandId}
           canManage={canManageParts}
           onClose={() => setShowAddSong(false)}
-          onCreated={() => void loadDashboard()}
+          onCreated={() => bandId && void loadDashboard(bandId, () => false)}
         />
       ) : null}
     </div>

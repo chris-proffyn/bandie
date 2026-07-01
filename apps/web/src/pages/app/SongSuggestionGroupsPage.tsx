@@ -24,26 +24,40 @@ export function SongSuggestionGroupsPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
 
-  const loadGroups = useCallback(async () => {
+  const loadGroups = useCallback(async (activeBandId: string, cancelled: () => boolean) => {
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const rows = await listBandSongSuggestionGroups(activeBandId);
+      if (!cancelled()) {
+        setGroups(rows);
+      }
+    } catch (err) {
+      if (!cancelled()) {
+        setGroups([]);
+        setLoadError(err instanceof Error ? err.message : 'Unable to load song suggestion groups.');
+      }
+    } finally {
+      if (!cancelled()) {
+        setLoading(false);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
     if (!bandId) {
       return;
     }
 
-    setLoading(true);
-    setLoadError(null);
-    try {
-      setGroups(await listBandSongSuggestionGroups(bandId));
-    } catch (err) {
-      setGroups([]);
-      setLoadError(err instanceof Error ? err.message : 'Unable to load song suggestion groups.');
-    } finally {
-      setLoading(false);
-    }
-  }, [bandId]);
+    setGroups([]);
+    let cancelled = false;
 
-  useEffect(() => {
-    void loadGroups();
-  }, [loadGroups]);
+    void loadGroups(bandId, () => cancelled);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [bandId, loadGroups]);
 
   if (!bandId) {
     return null;
@@ -51,7 +65,12 @@ export function SongSuggestionGroupsPage() {
 
   return (
     <div className="song-suggestions-page">
-      <SongsBandContextBar bandId={bandId} bandName={membership?.name} sectionNote="Song suggestions" />
+      <SongsBandContextBar
+        bandId={bandId}
+        bandName={membership?.name}
+        sectionNote="Song suggestions"
+        switchPath={(nextBandId) => `/app/${nextBandId}/songs/suggestions`}
+      />
 
       <header className="song-suggestions-header">
         <div>
@@ -67,7 +86,7 @@ export function SongSuggestionGroupsPage() {
             Songbook
           </Link>
           {canManage ? (
-            <button type="button" className="auth-button" onClick={() => setShowCreate(true)}>
+            <button type="button" className="directory-btn directory-btn-primary" onClick={() => setShowCreate(true)}>
               New suggestion group
             </button>
           ) : null}
@@ -85,7 +104,9 @@ export function SongSuggestionGroupsPage() {
           onClose={() => setShowCreate(false)}
           onCreated={() => {
             setShowCreate(false);
-            void loadGroups();
+            if (bandId) {
+              void loadGroups(bandId, () => false);
+            }
           }}
         />
       ) : null}

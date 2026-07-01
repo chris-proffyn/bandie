@@ -10,6 +10,17 @@
   align-items: flex-start;
 }
 
+.song-suggestions-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.song-suggestions-title-row h1 {
+  margin: 0;
+}
+
 .song-suggestions-header-actions {
   display: flex;
   flex-wrap: wrap;
@@ -494,6 +505,16 @@
   flex-wrap: wrap;
   gap: 0.65rem;
   margin-top: 0.5rem;
+}
+
+.song-suggestion-leader-actions .directory-btn:disabled,
+.song-suggestion-form-actions .directory-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.song-suggestion-form-actions .directory-btn {
+  min-width: min(100%, 10rem);
 }
 
 .song-suggestion-events {

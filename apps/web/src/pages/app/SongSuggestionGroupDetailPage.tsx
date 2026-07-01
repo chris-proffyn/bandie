@@ -99,7 +99,7 @@ export function SongSuggestionGroupDetailPage() {
   const [detail, setDetail] = useState<Awaited<ReturnType<typeof getSongSuggestionGroupDetail>>>(null);
   const { upgradeDecision, clearUpgradePrompt, handleEntitlementError } = useUpgradePrompt();
 
-  const loadDetail = useCallback(async () => {
+  const loadDetail = useCallback(async (cancelled: () => boolean) => {
     if (!groupId) {
       return;
     }
@@ -111,6 +111,16 @@ export function SongSuggestionGroupDetailPage() {
         viewerUserId: user?.id ?? null,
         isLeader,
       });
+
+      if (cancelled()) {
+        return;
+      }
+
+      if (result && bandId && result.group.band_id !== bandId) {
+        navigate(`/app/${result.group.band_id}/songs/suggestions/${groupId}`, { replace: true });
+        return;
+      }
+
       setDetail(result);
       if (result && showConfirm) {
         const ranked = rankSongSuggestions(
@@ -120,16 +130,31 @@ export function SongSuggestionGroupDetailPage() {
         setSelectedIds(new Set(top.map((row) => row.id)));
       }
     } catch (err) {
-      setDetail(null);
-      setLoadError(err instanceof Error ? err.message : 'Unable to load suggestion group.');
+      if (!cancelled()) {
+        setDetail(null);
+        setLoadError(err instanceof Error ? err.message : 'Unable to load suggestion group.');
+      }
     } finally {
-      setLoading(false);
+      if (!cancelled()) {
+        setLoading(false);
+      }
     }
-  }, [groupId, isLeader, showConfirm, user?.id]);
+  }, [bandId, groupId, isLeader, navigate, showConfirm, user?.id]);
 
   useEffect(() => {
-    void loadDetail();
-  }, [loadDetail]);
+    if (!groupId) {
+      return;
+    }
+
+    setDetail(null);
+    let cancelled = false;
+
+    void loadDetail(() => cancelled);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [groupId, bandId, loadDetail]);
 
   const group = detail?.group;
   const suggestions = detail?.suggestions ?? [];
@@ -183,7 +208,7 @@ export function SongSuggestionGroupDetailPage() {
     setActionError(null);
     try {
       await action();
-      await loadDetail();
+      await loadDetail(() => false);
     } catch (err) {
       if (handleEntitlementError(err)) {
         return;
@@ -420,12 +445,22 @@ export function SongSuggestionGroupDetailPage() {
 
   return (
     <div className="song-suggestions-page">
-      <SongsBandContextBar bandId={bandId} bandName={membership?.name} sectionNote="Song suggestions" />
+      <SongsBandContextBar
+        bandId={bandId}
+        bandName={membership?.name}
+        sectionNote="Song suggestions"
+        switchPath={(nextBandId) => `/app/${nextBandId}/songs/suggestions`}
+      />
 
       <header className="song-suggestions-header">
         <div>
           <p className="my-bands-eyebrow">Song suggestions</p>
-          <h1>{group.name}</h1>
+          <div className="song-suggestions-title-row">
+            <h1>{group.name}</h1>
+            <span className={songSuggestionGroupStatusClass(group.status)}>
+              {SONG_SUGGESTION_GROUP_STATUS_LABELS[group.status]}
+            </span>
+          </div>
           {group.description ? <p className="my-bands-lead">{group.description}</p> : null}
           <p className="song-suggestion-meta">
             Target {group.target_song_count} songs · suggestions close{' '}
@@ -452,9 +487,6 @@ export function SongSuggestionGroupDetailPage() {
           >
             All groups
           </Link>
-          <span className={songSuggestionGroupStatusClass(group.status)}>
-            {SONG_SUGGESTION_GROUP_STATUS_LABELS[group.status]}
-          </span>
         </div>
       </header>
 
@@ -537,7 +569,7 @@ export function SongSuggestionGroupDetailPage() {
             ) ? (
               <button
                 type="button"
-                className="auth-button"
+                className="directory-btn directory-btn-primary"
                 disabled={actionBusy}
                 onClick={() => {
                   const top = rankedActive.slice(0, group.target_song_count);
@@ -559,7 +591,7 @@ export function SongSuggestionGroupDetailPage() {
             <div className="song-suggestion-leader-actions">
               <button
                 type="button"
-                className="auth-button"
+                className="directory-btn directory-btn-primary"
                 disabled={actionBusy}
                 onClick={() => void handleCreateSetlist()}
               >
@@ -633,7 +665,7 @@ export function SongSuggestionGroupDetailPage() {
           <div className="song-suggestion-form-actions">
             <button
               type="button"
-              className="auth-button auth-button-secondary"
+              className="directory-btn directory-btn-secondary"
               onClick={() => setShowConfirm(false)}
               disabled={actionBusy}
             >
@@ -641,7 +673,7 @@ export function SongSuggestionGroupDetailPage() {
             </button>
             <button
               type="button"
-              className="auth-button"
+              className="directory-btn directory-btn-primary"
               disabled={actionBusy}
               onClick={() => void handleConfirm()}
             >
@@ -653,7 +685,11 @@ export function SongSuggestionGroupDetailPage() {
 
       {submitOpen && !showSuggest ? (
         <div className="song-suggestion-leader-actions">
-          <button type="button" className="auth-button" onClick={() => setShowSuggest(true)}>
+          <button
+            type="button"
+            className="directory-btn directory-btn-primary"
+            onClick={() => setShowSuggest(true)}
+          >
             Suggest a song
           </button>
         </div>
@@ -666,7 +702,7 @@ export function SongSuggestionGroupDetailPage() {
           onClose={() => setShowEdit(false)}
           onSaved={() => {
             setShowEdit(false);
-            void loadDetail();
+            void loadDetail(() => false);
           }}
         />
       ) : null}
@@ -678,7 +714,7 @@ export function SongSuggestionGroupDetailPage() {
           isLeader={isLeader}
           currentUserId={user?.id ?? null}
           onClose={() => setShowSuggest(false)}
-          onSubmitted={() => void loadDetail()}
+          onSubmitted={() => void loadDetail(() => false)}
         />
       ) : null}
 

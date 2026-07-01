@@ -224,13 +224,13 @@ export function SongSuggestionGroupFormPanel({
         <div className="song-suggestion-form-actions">
           <button
             type="button"
-            className="auth-button auth-button-secondary"
+            className="directory-btn directory-btn-secondary"
             onClick={onClose}
             disabled={submitting}
           >
             Cancel
           </button>
-          <button type="submit" className="auth-button" disabled={submitting}>
+          <button type="submit" className="directory-btn directory-btn-primary" disabled={submitting}>
             {submitting ? 'Saving…' : isEdit ? 'Save changes' : 'Create group'}
           </button>
         </div>
