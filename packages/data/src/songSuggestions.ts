@@ -113,6 +113,7 @@ export type SongSuggestionWithSummary = SongSuggestion & {
   my_vote: SongSuggestionVoteState | null;
   proposed_rank: number;
   suggester_display_name: string | null;
+  suggester_profile_image_url: string | null;
 };
 
 export type SongSuggestionGroupListItem = SongSuggestionGroup & {
@@ -263,9 +264,15 @@ function mapSuggestion(row: Record<string, unknown>): SongSuggestion {
 }
 
 async function loadMemberProfiles(userIds: string[]): Promise<
-  Map<string, { display_name: string | null; username: string | null }>
+  Map<
+    string,
+    { display_name: string | null; username: string | null; profile_image_url: string | null }
+  >
 > {
-  const profileMap = new Map<string, { display_name: string | null; username: string | null }>();
+  const profileMap = new Map<
+    string,
+    { display_name: string | null; username: string | null; profile_image_url: string | null }
+  >();
   if (userIds.length === 0) {
     return profileMap;
   }
@@ -273,7 +280,7 @@ async function loadMemberProfiles(userIds: string[]): Promise<
   const client = getBandieClient();
   const { data, error } = await client
     .from('bandie_profiles')
-    .select('user_id, display_name, username')
+    .select('user_id, display_name, username, profile_image_url')
     .in('user_id', userIds);
 
   if (error) {
@@ -284,6 +291,7 @@ async function loadMemberProfiles(userIds: string[]): Promise<
     profileMap.set(profile.user_id as string, {
       display_name: (profile.display_name as string | null) ?? null,
       username: (profile.username as string | null) ?? null,
+      profile_image_url: (profile.profile_image_url as string | null) ?? null,
     });
   }
 
@@ -843,6 +851,7 @@ export async function getSongSuggestionGroupDetail(
       proposed_rank: 0,
       suggester_display_name:
         suggesterProfile?.display_name ?? suggesterProfile?.username ?? null,
+      suggester_profile_image_url: suggesterProfile?.profile_image_url ?? null,
     };
   });
 

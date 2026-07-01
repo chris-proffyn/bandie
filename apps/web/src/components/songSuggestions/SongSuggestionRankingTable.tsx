@@ -7,6 +7,7 @@ import {
   type SongSuggestionGroupStatus,
   type SongSuggestionWithSummary,
 } from '@bandie/data';
+import { bandInitials } from '../../lib/profileHelpers';
 
 type SongSuggestionRankingTableProps = {
   bandId: string;
@@ -16,6 +17,27 @@ type SongSuggestionRankingTableProps = {
   confirmedRows?: SongSuggestionConfirmedSong[];
   vetoedCount?: number;
 };
+
+function suggesterLabel(row: SongSuggestionWithSummary): string {
+  return row.suggester_display_name?.trim() || 'Member';
+}
+
+function SongSuggestionRankingSuggesterCell({ row }: { row: SongSuggestionWithSummary }) {
+  const label = suggesterLabel(row);
+
+  return (
+    <div className="song-suggestion-ranking-suggester">
+      <span className="song-suggestion-ranking-suggester-avatar" aria-hidden="true">
+        {row.suggester_profile_image_url ? (
+          <img src={row.suggester_profile_image_url} alt="" />
+        ) : (
+          <span>{bandInitials(label)}</span>
+        )}
+      </span>
+      <span className="song-suggestion-ranking-suggester-name">{label}</span>
+    </div>
+  );
+}
 
 export function SongSuggestionRankingTable({
   bandId,
@@ -122,6 +144,7 @@ export function SongSuggestionRankingTable({
             <tr>
               <th scope="col">Rank</th>
               <th scope="col">Song</th>
+              <th scope="col">Suggested by</th>
               <th scope="col">Score</th>
               <th scope="col">Votes</th>
               <th scope="col">Selection</th>
@@ -155,11 +178,9 @@ export function SongSuggestionRankingTable({
                     <td>
                       <strong>{row.song_title}</strong>
                       <div className="song-suggestion-ranking-artist">{row.artist}</div>
-                      {row.suggester_display_name ? (
-                        <div className="song-suggestion-ranking-suggester">
-                          Suggested by {row.suggester_display_name}
-                        </div>
-                      ) : null}
+                    </td>
+                    <td>
+                      <SongSuggestionRankingSuggesterCell row={row} />
                     </td>
                     <td>{row.vote_summary.score}</td>
                     <td>
@@ -187,7 +208,7 @@ export function SongSuggestionRankingTable({
                   </tr>
                   {showCutoff && row.proposed_rank === targetSongCount ? (
                     <tr className="song-suggestion-ranking-cutoff-row" aria-hidden="true">
-                      <td colSpan={5}>
+                      <td colSpan={6}>
                         <div className="song-suggestion-ranking-cutoff-line">
                           <span>Selection cutoff</span>
                           <span className="song-suggestion-ranking-cutoff-detail">
