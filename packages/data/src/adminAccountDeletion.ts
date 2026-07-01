@@ -25,27 +25,44 @@ export type AdminAccountDeletionLeadershipTransfer = {
   newLeaderUserId: string;
 };
 
-function parsePreviewRow(row: Record<string, unknown>): AdminAccountDeletionPreview {
-  const rawBands = row.bands_requiring_transfer;
-  const bands = Array.isArray(rawBands)
-    ? rawBands
-    : typeof rawBands === 'string'
-      ? (JSON.parse(rawBands) as AdminAccountDeletionBandTransfer[])
+function parseMemberOptions(raw: unknown): AdminAccountDeletionMemberOption[] {
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+
+  return raw.map((member) => {
+    const row = member as Record<string, unknown>;
+    return {
+      user_id: String(row.user_id),
+      display_name: String(row.display_name),
+    };
+  });
+}
+
+function parseBandTransfers(raw: unknown): AdminAccountDeletionBandTransfer[] {
+  const bands = Array.isArray(raw)
+    ? raw
+    : typeof raw === 'string'
+      ? (JSON.parse(raw) as unknown[])
       : [];
 
+  return bands.map((band) => {
+    const row = band as Record<string, unknown>;
+    return {
+      band_id: String(row.band_id),
+      band_name: String(row.band_name),
+      member_options: parseMemberOptions(row.member_options),
+    };
+  });
+}
+
+function parsePreviewRow(row: Record<string, unknown>): AdminAccountDeletionPreview {
   return {
     account_deleted_at: (row.account_deleted_at as string | null) ?? null,
     is_platform_admin: Boolean(row.is_platform_admin),
     dropbox_connected: Boolean(row.dropbox_connected),
     dropbox_band_count: Number(row.dropbox_band_count ?? 0),
-    bands_requiring_transfer: bands.map((band) => ({
-      band_id: String(band.band_id),
-      band_name: String(band.band_name),
-      member_options: (band.member_options ?? []).map((member) => ({
-        user_id: String(member.user_id),
-        display_name: String(member.display_name),
-      })),
-    })),
+    bands_requiring_transfer: parseBandTransfers(row.bands_requiring_transfer),
   };
 }
 
