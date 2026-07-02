@@ -192,9 +192,9 @@ export const SONG_SUGGESTION_DECADE_OPTIONS = [
 ] as const;
 
 export const SONG_SUGGESTION_VOTE_LABELS: Record<SongSuggestionVoteState, string> = {
-  happy_to_play: 'Happy to play',
+  happy_to_play: 'Happy',
   meh: 'Meh',
-  rather_not: 'Rather not',
+  rather_not: 'Nope',
 };
 
 export const SONG_SUGGESTION_GROUP_STATUS_LABELS: Record<SongSuggestionGroupStatus, string> = {
@@ -620,11 +620,21 @@ export type SubmitSongSuggestionInput = {
   suggestedByUserId?: string | null;
 };
 
-export type UpdateSongSuggestionMediaInput = {
+export type UpdateSongSuggestionDetailsInput = {
+  artist: string;
+  suggestedGenre?: string | null;
+  decade?: string | null;
   youtubeUrl?: string | null;
   spotifyUrl?: string | null;
   otherMediaUrl?: string | null;
+  rationale?: string | null;
 };
+
+/** @deprecated Use UpdateSongSuggestionDetailsInput */
+export type UpdateSongSuggestionMediaInput = Pick<
+  UpdateSongSuggestionDetailsInput,
+  'youtubeUrl' | 'spotifyUrl' | 'otherMediaUrl'
+>;
 
 export async function findSimilarSongSuggestions(
   groupId: string,
@@ -683,16 +693,20 @@ export async function submitSongSuggestion(
   return data as string;
 }
 
-export async function updateSongSuggestionMedia(
+export async function updateSongSuggestionDetails(
   suggestionId: string,
-  input: UpdateSongSuggestionMediaInput,
+  input: UpdateSongSuggestionDetailsInput,
 ): Promise<void> {
   const client = getBandieClient();
-  const { error } = await client.rpc('bandie_update_song_suggestion_media', {
+  const { error } = await client.rpc('bandie_update_song_suggestion_details', {
     p_suggestion_id: suggestionId,
+    p_artist: input.artist,
+    p_suggested_genre: input.suggestedGenre ?? null,
+    p_decade: input.decade ?? null,
     p_youtube_url: input.youtubeUrl ?? null,
     p_spotify_url: input.spotifyUrl ?? null,
     p_other_media_url: input.otherMediaUrl ?? null,
+    p_rationale: input.rationale ?? null,
   });
 
   if (error) {
@@ -700,16 +714,13 @@ export async function updateSongSuggestionMedia(
   }
 }
 
-export function canEditSongSuggestionMedia(
+export function canEditSongSuggestionDetails(
   row: Pick<SongSuggestion, 'status' | 'suggested_by'>,
   group: SongSuggestionGroup,
   currentUserId: string | null,
+  isLeader: boolean,
 ): boolean {
-  if (!currentUserId || row.suggested_by !== currentUserId) {
-    return false;
-  }
-
-  if (row.status !== 'active') {
+  if (!currentUserId || row.status !== 'active') {
     return false;
   }
 
@@ -717,7 +728,20 @@ export function canEditSongSuggestionMedia(
     return false;
   }
 
-  return isSongSuggestionSubmitOpen(group) || isSongSuggestionVotingOpen(group);
+  if (!isSongSuggestionSubmitOpen(group) && !isSongSuggestionVotingOpen(group)) {
+    return false;
+  }
+
+  return row.suggested_by === currentUserId || isLeader;
+}
+
+/** @deprecated Use canEditSongSuggestionDetails */
+export function canEditSongSuggestionMedia(
+  row: Pick<SongSuggestion, 'status' | 'suggested_by'>,
+  group: SongSuggestionGroup,
+  currentUserId: string | null,
+): boolean {
+  return canEditSongSuggestionDetails(row, group, currentUserId, false);
 }
 
 export async function voteOnSongSuggestion(

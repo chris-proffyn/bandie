@@ -24,21 +24,25 @@ import {
   songSuggestionGroupStatusClass,
   vetoSongSuggestion,
   withdrawSongSuggestion,
-  updateSongSuggestionMedia,
-  canEditSongSuggestionMedia,
+  updateSongSuggestionDetails,
+  canEditSongSuggestionDetails,
   voteOnSongSuggestion,
   clearSongSuggestionVote,
   type SongSuggestionGroupEvent,
   type SongSuggestionListFilters,
   type SongSuggestionVoteState,
   type SongSuggestionWithSummary,
-  type UpdateSongSuggestionMediaInput,
+  type UpdateSongSuggestionDetailsInput,
   isBandLeaderRole,
 } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
 import { UpgradePromptModal } from '../../components/entitlements/UpgradePromptModal';
 import { SongsBandContextBar } from '../../components/songs/SongsBandContextBar';
 import { SongSuggestionListControls } from '../../components/songSuggestions/SongSuggestionListControls';
+import {
+  SongSuggestionLeaderActionsModal,
+  CogIcon,
+} from '../../components/songSuggestions/SongSuggestionLeaderActionsModal';
 import { SongSuggestionCard } from '../../components/songSuggestions/SongSuggestionCard';
 import { SongSuggestionRankingTable } from '../../components/songSuggestions/SongSuggestionRankingTable';
 import { SubmitSongSuggestionPanel } from '../../components/songSuggestions/SubmitSongSuggestionPanel';
@@ -108,13 +112,13 @@ export function SongSuggestionGroupDetailPage() {
   const [actionBusy, setActionBusy] = useState(false);
   const [showSuggest, setShowSuggest] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
+  const [showLeaderActions, setShowLeaderActions] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [listFilters, setListFilters] = useState<SongSuggestionListFilters>(
     DEFAULT_SONG_SUGGESTION_LIST_FILTERS,
   );
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [overrideReasons, setOverrideReasons] = useState<Record<string, string>>({});
-  const [editingMediaSuggestionId, setEditingMediaSuggestionId] = useState<string | null>(null);
   const [detail, setDetail] = useState<Awaited<ReturnType<typeof getSongSuggestionGroupDetail>>>(null);
   const { upgradeDecision, clearUpgradePrompt, handleEntitlementError } = useUpgradePrompt();
 
@@ -229,10 +233,30 @@ export function SongSuggestionGroupDetailPage() {
     });
   }, [group, listFilters, suggestions, user?.id, votingOpen]);
 
-  const canEditGroup =
+  const { yourSuggestions, otherSuggestions } = useMemo(() => {
+    const userId = user?.id ?? null;
+    const yours: SongSuggestionWithSummary[] = [];
+    const others: SongSuggestionWithSummary[] = [];
+
+    for (const row of displayedSuggestions) {
+      if (userId && row.suggested_by === userId) {
+        yours.push(row);
+      } else {
+        others.push(row);
+      }
+    }
+
+    return { yourSuggestions: yours, otherSuggestions: others };
+  }, [displayedSuggestions, user?.id]);
+
+  const canEditGroup = Boolean(
     isLeader &&
-    group &&
-    !['confirmed', 'archived', 'cancelled'].includes(group.status);
+      group &&
+      !['confirmed', 'archived', 'cancelled'].includes(group.status),
+  );
+
+  const showLeaderActionsEntry =
+    isLeader && group && !['confirmed', 'cancelled'].includes(group.status);
 
   const membersVotedCount = useMemo(() => {
     const voters = new Set<string>();
@@ -244,17 +268,19 @@ export function SongSuggestionGroupDetailPage() {
     return voters.size;
   }, [activeSuggestions]);
 
-  async function runAction(action: () => Promise<void>) {
+  async function runAction(action: () => Promise<void>): Promise<boolean> {
     setActionBusy(true);
     setActionError(null);
     try {
       await action();
       await loadDetail(() => false);
+      return true;
     } catch (err) {
       if (handleEntitlementError(err)) {
-        return;
+        return false;
       }
       setActionError(err instanceof Error ? err.message : 'Action failed.');
+      return false;
     } finally {
       setActionBusy(false);
     }
@@ -312,7 +338,7 @@ export function SongSuggestionGroupDetailPage() {
     });
   }
 
-  async function handleWithdraw(suggestion: SongSuggestionWithSummary) {
+  async function handleWithdraw(suggestion: SongSuggestionWithSummary): Promise<boolean> {
     const isOwn = user?.id != null && suggestion.suggested_by === user.id;
     const message =
       isLeader && !isOwn
@@ -320,10 +346,10 @@ export function SongSuggestionGroupDetailPage() {
         : `Remove "${suggestion.song_title}" from this group? You can suggest another song while suggestions are still open.`;
 
     if (!window.confirm(message)) {
-      return;
+      return false;
     }
 
-    await runAction(async () => {
+    return runAction(async () => {
       await withdrawSongSuggestion(suggestion.id);
       if (bandId && groupId) {
         trackSongSuggestionWithdrawn({
@@ -335,13 +361,12 @@ export function SongSuggestionGroupDetailPage() {
     });
   }
 
-  async function handleUpdateMedia(
+  async function handleUpdateDetails(
     suggestionId: string,
-    input: UpdateSongSuggestionMediaInput,
-  ) {
-    await runAction(async () => {
-      await updateSongSuggestionMedia(suggestionId, input);
-      setEditingMediaSuggestionId(null);
+    input: UpdateSongSuggestionDetailsInput,
+  ): Promise<boolean> {
+    return runAction(async () => {
+      await updateSongSuggestionDetails(suggestionId, input);
     });
   }
 
@@ -557,6 +582,16 @@ export function SongSuggestionGroupDetailPage() {
           ) : null}
         </div>
         <div className="song-suggestions-header-actions">
+          {showLeaderActionsEntry ? (
+            <button
+              type="button"
+              className="song-suggestion-leader-settings-btn"
+              aria-label="Leader actions"
+              onClick={() => setShowLeaderActions(true)}
+            >
+              <CogIcon />
+            </button>
+          ) : null}
           <Link
             to={`/app/${bandId}/songs/suggestions`}
             className="directory-btn directory-btn-secondary"
@@ -584,89 +619,30 @@ export function SongSuggestionGroupDetailPage() {
       {loadError ? <div className="auth-message auth-message-error">{loadError}</div> : null}
       {actionError ? <div className="auth-message auth-message-error">{actionError}</div> : null}
 
-      {isLeader && group.status !== 'confirmed' && group.status !== 'cancelled' ? (
-        <section className="panel">
-          <h2>Leader actions</h2>
-          <div className="song-suggestion-leader-actions">
-            {canEditGroup ? (
-              <button
-                type="button"
-                className="directory-btn directory-btn-secondary"
-                disabled={actionBusy}
-                onClick={() => setShowEdit(true)}
-              >
-                Edit group
-              </button>
-            ) : null}
-            {group.status === 'open_for_suggestions' && activeSuggestions.length > 0 ? (
-              <button
-                type="button"
-                className="directory-btn directory-btn-secondary"
-                disabled={actionBusy}
-                onClick={() => void handleClearAllSuggestions()}
-              >
-                Clear all
-              </button>
-            ) : null}
-            {group.status === 'open_for_suggestions' ? (
-              <button
-                type="button"
-                className="directory-btn directory-btn-secondary"
-                disabled={actionBusy}
-                onClick={() => void handleCloseSuggestions()}
-              >
-                Close suggestions
-              </button>
-            ) : null}
-            {group.status === 'suggestions_closed' ? (
-              <button
-                type="button"
-                className="directory-btn directory-btn-secondary"
-                disabled={actionBusy}
-                onClick={() => void handleReopenSuggestions()}
-              >
-                Reopen suggestions
-              </button>
-            ) : null}
-            {votingOpen ? (
-              <button
-                type="button"
-                className="directory-btn directory-btn-secondary"
-                disabled={actionBusy}
-                onClick={() => void handleCloseVoting()}
-              >
-                Close voting
-              </button>
-            ) : null}
-            {['open_for_suggestions', 'suggestions_closed', 'voting_closed'].includes(
-              group.status,
-            ) ? (
-              <button
-                type="button"
-                className="directory-btn directory-btn-secondary"
-                disabled={actionBusy}
-                onClick={() => void handleResetVotes()}
-              >
-                Reset votes
-              </button>
-            ) : null}
-            {['suggestions_closed', 'voting_closed', 'open_for_suggestions'].includes(
-              group.status,
-            ) ? (
-              <button
-                type="button"
-                className="directory-btn directory-btn-primary"
-                disabled={actionBusy}
-                onClick={() => {
-                  setSelectedIds(new Set(autoSelectedIds));
-                  setShowConfirm(true);
-                }}
-              >
-                Confirm selections
-              </button>
-            ) : null}
-          </div>
-        </section>
+      {showLeaderActionsEntry && group ? (
+        <SongSuggestionLeaderActionsModal
+          open={showLeaderActions}
+          group={group}
+          canEditGroup={canEditGroup}
+          votingOpen={votingOpen}
+          actionBusy={actionBusy}
+          activeSuggestionCount={activeSuggestions.length}
+          onClose={() => setShowLeaderActions(false)}
+          onEditGroup={() => {
+            setShowLeaderActions(false);
+            setShowEdit(true);
+          }}
+          onClearAll={() => void handleClearAllSuggestions()}
+          onCloseSuggestions={() => void handleCloseSuggestions()}
+          onReopenSuggestions={() => void handleReopenSuggestions()}
+          onCloseVoting={() => void handleCloseVoting()}
+          onResetVotes={() => void handleResetVotes()}
+          onConfirmSelections={() => {
+            setShowLeaderActions(false);
+            setSelectedIds(new Set(autoSelectedIds));
+            setShowConfirm(true);
+          }}
+        />
       ) : null}
 
       {group.status === 'confirmed' ? (
@@ -846,35 +822,70 @@ export function SongSuggestionGroupDetailPage() {
             No suggestions match these filters. Try clearing filters or broadening your search.
           </p>
         ) : (
-          <div className="song-suggestion-cards-grid">
-            {displayedSuggestions.map((row) => (
-              <SongSuggestionCard
-                key={row.id}
-                row={row}
-                sortBy={listFilters.sortBy}
-                suggestionsOpen={submitOpen}
-                votingOpen={votingOpen}
-                voteVisibility={group.vote_visibility}
-                allowVoteChanges={group.allow_vote_changes}
-                isLeader={isLeader}
-                currentUserId={user?.id ?? null}
-                actionBusy={actionBusy}
-                onVote={(suggestionId, voteState) => void handleVote(suggestionId, voteState)}
-                onClearVote={(suggestionId) => void handleClearVote(suggestionId)}
-                onWithdraw={(suggestion) => void handleWithdraw(suggestion)}
-                onVeto={(suggestion) => void handleVeto(suggestion)}
-                canEditMedia={
-                  group
-                    ? canEditSongSuggestionMedia(row, group, user?.id ?? null)
-                    : false
-                }
-                editingMedia={editingMediaSuggestionId === row.id}
-                onEditMedia={(suggestion) => setEditingMediaSuggestionId(suggestion.id)}
-                onCancelEditMedia={() => setEditingMediaSuggestionId(null)}
-                onSaveMedia={(suggestionId, input) => void handleUpdateMedia(suggestionId, input)}
-              />
-            ))}
-          </div>
+          <>
+            {yourSuggestions.length > 0 ? (
+              <section className="song-suggestion-list-section" aria-label="Your suggestions">
+                <h3>Your suggestions ({yourSuggestions.length})</h3>
+                <div className="song-suggestion-cards-grid">
+                  {yourSuggestions.map((row) => (
+                    <SongSuggestionCard
+                      key={row.id}
+                      row={row}
+                      sortBy={listFilters.sortBy}
+                      suggestionsOpen={submitOpen}
+                      votingOpen={votingOpen}
+                      voteVisibility={group.vote_visibility}
+                      allowVoteChanges={group.allow_vote_changes}
+                      isLeader={isLeader}
+                      currentUserId={user?.id ?? null}
+                      actionBusy={actionBusy}
+                      onVote={(suggestionId, voteState) => void handleVote(suggestionId, voteState)}
+                      onClearVote={(suggestionId) => void handleClearVote(suggestionId)}
+                      onWithdraw={(suggestion) => handleWithdraw(suggestion)}
+                      onVeto={(suggestion) => void handleVeto(suggestion)}
+                      canEdit={
+                        group
+                          ? canEditSongSuggestionDetails(row, group, user?.id ?? null, isLeader)
+                          : false
+                      }
+                      onSaveDetails={(suggestionId, input) => handleUpdateDetails(suggestionId, input)}
+                    />
+                  ))}
+                </div>
+              </section>
+            ) : null}
+            {otherSuggestions.length > 0 ? (
+              <section className="song-suggestion-list-section" aria-label="Other suggestions">
+                <h3>Others ({otherSuggestions.length})</h3>
+                <div className="song-suggestion-cards-grid">
+                  {otherSuggestions.map((row) => (
+                    <SongSuggestionCard
+                      key={row.id}
+                      row={row}
+                      sortBy={listFilters.sortBy}
+                      suggestionsOpen={submitOpen}
+                      votingOpen={votingOpen}
+                      voteVisibility={group.vote_visibility}
+                      allowVoteChanges={group.allow_vote_changes}
+                      isLeader={isLeader}
+                      currentUserId={user?.id ?? null}
+                      actionBusy={actionBusy}
+                      onVote={(suggestionId, voteState) => void handleVote(suggestionId, voteState)}
+                      onClearVote={(suggestionId) => void handleClearVote(suggestionId)}
+                      onWithdraw={(suggestion) => handleWithdraw(suggestion)}
+                      onVeto={(suggestion) => void handleVeto(suggestion)}
+                      canEdit={
+                        group
+                          ? canEditSongSuggestionDetails(row, group, user?.id ?? null, isLeader)
+                          : false
+                      }
+                      onSaveDetails={(suggestionId, input) => handleUpdateDetails(suggestionId, input)}
+                    />
+                  ))}
+                </div>
+              </section>
+            ) : null}
+          </>
         )}
       </section>
 

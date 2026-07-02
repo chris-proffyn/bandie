@@ -476,8 +476,8 @@ export {
   updateSongSuggestionGroup,
   findSimilarSongSuggestions,
   submitSongSuggestion,
-  updateSongSuggestionMedia,
-  canEditSongSuggestionMedia,
+  updateSongSuggestionDetails,
+  canEditSongSuggestionDetails,
   voteOnSongSuggestion,
   clearSongSuggestionVote,
   withdrawSongSuggestion,
@@ -527,6 +527,7 @@ export type {
   SongSuggestionFilterOptions,
   UpdateSongSuggestionGroupInput,
   SubmitSongSuggestionInput,
+  UpdateSongSuggestionDetailsInput,
   UpdateSongSuggestionMediaInput,
   ConfirmSelectionItem,
 } from './songSuggestions';

@@ -152,10 +152,11 @@ export function SongSuggestionRankingTable({
         <div className="song-suggestion-ranking-meta">
           <span
             className={`song-suggestion-ranking-mode-badge song-suggestion-ranking-mode-badge-${selectionMode}`}
+            aria-label={`${selectionModeLabel} selection, ${targetSongCount} songs`}
+            title={`${selectionModeLabel}: ${targetSongCount} songs`}
           >
-            {selectionModeLabel}
+            {targetSongCount}
           </span>
-          <span className="song-suggestion-ranking-target-badge">Target: {targetSongCount}</span>
         </div>
       </div>
 
@@ -199,21 +200,15 @@ export function SongSuggestionRankingTable({
                       <span className="song-suggestion-ranking-rank">#{row.proposed_rank}</span>
                     </td>
                     <td data-label="Song" className="song-suggestion-ranking-song-cell">
-                      <div className="song-suggestion-ranking-song-main">
-                        <span
-                          className="song-suggestion-ranking-rank song-suggestion-ranking-rank-inline"
-                          aria-hidden="true"
-                        >
-                          #{row.proposed_rank}
-                        </span>
-                        <div className="song-suggestion-ranking-song-copy">
-                          <strong>{row.song_title}</strong>
-                          <div className="song-suggestion-ranking-artist">{row.artist}</div>
-                        </div>
-                      </div>
+                      <strong>{row.song_title}</strong>
+                      <div className="song-suggestion-ranking-artist">{row.artist}</div>
                     </td>
-                    <td data-label="Raised">
-                      <SongSuggestionSuggester row={row} />
+                    <td data-label="Raised" className="song-suggestion-ranking-raised-cell">
+                      <SongSuggestionSuggester
+                        row={row}
+                        className="song-suggestion-ranking-suggester"
+                        avatarOnly
+                      />
                     </td>
                     <td data-label="Score">{row.vote_summary.score}</td>
                     <td data-label="Votes">

@@ -1,13 +1,14 @@
+import { useState } from 'react';
 import {
   SONG_SUGGESTION_VOTE_LABELS,
   type SongSuggestionSortKey,
   type SongSuggestionVoteState,
   type SongSuggestionWithSummary,
+  type UpdateSongSuggestionDetailsInput,
   type VoteVisibility,
 } from '@bandie/data';
 import { SongSuggestionSuggester } from './SongSuggestionSuggester';
-import { SongSuggestionMediaEditor } from './SongSuggestionMediaEditor';
-import type { UpdateSongSuggestionMediaInput } from '@bandie/data';
+import { SongSuggestionEditModal } from './SongSuggestionEditModal';
 
 const VOTE_EMOJI: Record<SongSuggestionVoteState, string> = {
   happy_to_play: '🙂',
@@ -27,13 +28,10 @@ type SongSuggestionCardProps = {
   actionBusy: boolean;
   onVote: (suggestionId: string, voteState: SongSuggestionVoteState) => void;
   onClearVote: (suggestionId: string) => void;
-  onWithdraw: (row: SongSuggestionWithSummary) => void;
+  onWithdraw: (row: SongSuggestionWithSummary) => void | Promise<boolean>;
   onVeto: (row: SongSuggestionWithSummary) => void;
-  canEditMedia: boolean;
-  editingMedia: boolean;
-  onEditMedia: (row: SongSuggestionWithSummary) => void;
-  onCancelEditMedia: () => void;
-  onSaveMedia: (suggestionId: string, input: UpdateSongSuggestionMediaInput) => void;
+  canEdit: boolean;
+  onSaveDetails: (suggestionId: string, input: UpdateSongSuggestionDetailsInput) => void | Promise<boolean>;
 };
 
 function showRank(
@@ -43,11 +41,17 @@ function showRank(
   return sortBy === 'score' && row.proposed_rank > 0 && row.status === 'active';
 }
 
-function TrashIcon() {
+function CogIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
       <path
-        d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-8 0h8m-9 4v7a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-7M10 11v6M14 11v6"
+        d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+      />
+      <path
+        d="M19.4 13a7.9 7.9 0 0 0 .1-2l2-1.2-2-3.5-2.3 1a8 8 0 0 0-1.7-1L15 3h-6l-.5 2.8a8 8 0 0 0-1.7 1l-2.3-1-2 3.5 2 1.2a7.9 7.9 0 0 0 .1 2l-2 1.2 2 3.5 2.3-1a8 8 0 0 0 1.7 1L9 21h6l.5-2.8a8 8 0 0 0 1.7-1l2.3 1 2-3.5-2-1.2Z"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.75"
@@ -72,12 +76,10 @@ export function SongSuggestionCard({
   onClearVote,
   onWithdraw,
   onVeto,
-  canEditMedia,
-  editingMedia,
-  onEditMedia,
-  onCancelEditMedia,
-  onSaveMedia,
+  canEdit,
+  onSaveDetails,
 }: SongSuggestionCardProps) {
+  const [manageOpen, setManageOpen] = useState(false);
   const isVetoed = row.status === 'leader_vetoed';
   const canVote = votingOpen && row.status === 'active';
   const canClearVote = canVote && Boolean(row.my_vote) && allowVoteChanges;
@@ -88,9 +90,15 @@ export function SongSuggestionCard({
     row.suggested_by === currentUserId;
   const canLeaderRemove =
     suggestionsOpen && row.status === 'active' && isLeader;
-  const canRemove = canMemberWithdraw || canLeaderRemove;
+  const canDelete = canMemberWithdraw || canLeaderRemove;
+  const canManage = canEdit || canDelete;
   const canVeto = isLeader && row.status === 'active' && !suggestionsOpen;
+  const isLeaderEditingOther =
+    isLeader && currentUserId != null && row.suggested_by !== currentUserId;
   const hideMemberVotes = voteVisibility === 'aggregate_only' && !isLeader;
+  const otherMemberVotes = row.votes.filter(
+    (vote) => currentUserId == null || vote.member_user_id !== currentUserId,
+  );
 
   return (
     <article
@@ -116,15 +124,15 @@ export function SongSuggestionCard({
           </div>
         </div>
         <div className="song-suggestion-item-card-actions">
-          {canRemove ? (
+          {canManage ? (
             <button
               type="button"
-              className="song-suggestion-withdraw-btn"
+              className="song-suggestion-manage-btn"
               disabled={actionBusy}
-              aria-label={`Remove ${row.song_title}`}
-              onClick={() => onWithdraw(row)}
+              aria-label={`Manage ${row.song_title}`}
+              onClick={() => setManageOpen(true)}
             >
-              <TrashIcon />
+              <CogIcon />
             </button>
           ) : null}
           {canVeto ? (
@@ -139,20 +147,6 @@ export function SongSuggestionCard({
           ) : null}
         </div>
       </header>
-
-      {row.my_vote ? (
-        <div
-          className={`song-suggestion-my-vote-badge song-suggestion-my-vote-badge-${row.my_vote}`}
-          aria-label={`Your vote: ${SONG_SUGGESTION_VOTE_LABELS[row.my_vote]}`}
-        >
-          <span className="song-suggestion-my-vote-label">Your vote</span>
-          <span className="song-suggestion-my-vote-value">
-            {VOTE_EMOJI[row.my_vote]} {SONG_SUGGESTION_VOTE_LABELS[row.my_vote]}
-          </span>
-        </div>
-      ) : canVote ? (
-        <p className="song-suggestion-needs-vote-note">Tap a reaction below to vote.</p>
-      ) : null}
 
       {row.rationale ? <p className="song-suggestion-item-rationale">{row.rationale}</p> : null}
 
@@ -169,45 +163,24 @@ export function SongSuggestionCard({
         </div>
       )}
 
-      {editingMedia ? (
-        <SongSuggestionMediaEditor
-          row={row}
-          actionBusy={actionBusy}
-          onSave={onSaveMedia}
-          onCancel={onCancelEditMedia}
-        />
-      ) : (
-        <>
-          {(row.youtube_url || row.spotify_url || row.other_media_url) && (
-            <div className="song-suggestion-links">
-              {row.youtube_url ? (
-                <a href={row.youtube_url} target="_blank" rel="noopener noreferrer">
-                  YouTube
-                </a>
-              ) : null}
-              {row.spotify_url ? (
-                <a href={row.spotify_url} target="_blank" rel="noopener noreferrer">
-                  Spotify
-                </a>
-              ) : null}
-              {row.other_media_url ? (
-                <a href={row.other_media_url} target="_blank" rel="noopener noreferrer">
-                  Media
-                </a>
-              ) : null}
-            </div>
-          )}
-          {canEditMedia ? (
-            <button
-              type="button"
-              className="song-suggestion-edit-links-btn"
-              disabled={actionBusy}
-              onClick={() => onEditMedia(row)}
-            >
-              {row.youtube_url || row.spotify_url || row.other_media_url ? 'Edit links' : 'Add links'}
-            </button>
+      {(row.youtube_url || row.spotify_url || row.other_media_url) && (
+        <div className="song-suggestion-links">
+          {row.youtube_url ? (
+            <a href={row.youtube_url} target="_blank" rel="noopener noreferrer">
+              YouTube
+            </a>
           ) : null}
-        </>
+          {row.spotify_url ? (
+            <a href={row.spotify_url} target="_blank" rel="noopener noreferrer">
+              Spotify
+            </a>
+          ) : null}
+          {row.other_media_url ? (
+            <a href={row.other_media_url} target="_blank" rel="noopener noreferrer">
+              Media
+            </a>
+          ) : null}
+        </div>
       )}
 
       <div className="song-suggestion-score-row" aria-label="Vote totals">
@@ -219,25 +192,20 @@ export function SongSuggestionCard({
 
       {hideMemberVotes ? (
         <p className="song-suggestion-meta">Individual votes are hidden — totals only.</p>
-      ) : row.votes.length > 0 ? (
+      ) : otherMemberVotes.length > 0 ? (
         <div className="song-suggestion-tags">
-          {row.votes.map((vote) => {
-            const isMine = currentUserId != null && vote.member_user_id === currentUserId;
-            return (
-              <span
-                key={vote.id}
-                className={`song-suggestion-tag${isMine ? ' song-suggestion-tag-mine' : ''}`}
-              >
-                {isMine ? 'You' : (vote.display_name ?? vote.username ?? 'Member')}:{' '}
-                {VOTE_EMOJI[vote.vote_state]} {SONG_SUGGESTION_VOTE_LABELS[vote.vote_state]}
-              </span>
-            );
-          })}
+          {otherMemberVotes.map((vote) => (
+            <span key={vote.id} className="song-suggestion-tag">
+              {vote.display_name ?? vote.username ?? 'Member'}: {VOTE_EMOJI[vote.vote_state]}{' '}
+              {SONG_SUGGESTION_VOTE_LABELS[vote.vote_state]}
+            </span>
+          ))}
         </div>
       ) : null}
 
       {canVote ? (
         <div className="song-suggestion-vote-actions">
+          <p className="song-suggestion-vote-now-label">Vote now</p>
           <div className="song-suggestion-vote-buttons" role="group" aria-label="Cast your vote">
             {(['happy_to_play', 'meh', 'rather_not'] as const).map((voteState) => (
               <button
@@ -266,6 +234,18 @@ export function SongSuggestionCard({
           ) : null}
         </div>
       ) : null}
+
+      <SongSuggestionEditModal
+        row={row}
+        open={manageOpen}
+        actionBusy={actionBusy}
+        canDelete={canDelete}
+        canEdit={canEdit}
+        isLeaderEditingOther={isLeaderEditingOther}
+        onClose={() => setManageOpen(false)}
+        onSave={onSaveDetails}
+        onDelete={onWithdraw}
+      />
     </article>
   );
 }
