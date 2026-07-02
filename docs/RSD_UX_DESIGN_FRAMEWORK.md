@@ -244,6 +244,37 @@ Pale status pills (e.g. `#eef2ff` fill, `#dbeafe` fill) **without borders** disa
 - Page Header
 - Section Container
 
+#### 7.1.1 Workspace page headers (Bandie `/app` routes)
+
+**For new pages**, use the existing shared header structure so titles and action buttons stay consistent across Songs, Gigs, Setlists, Calendar, Communications, and similar workspace screens.
+
+**Required markup:**
+
+```jsx
+<header className="songs-header"> {/* or gigs-header, setlists-header, calendar-header, song-suggestions-header, etc. */}
+  <div>
+    <p className="my-bands-eyebrow">Section label</p>
+    <HeadingWithHelp as="h1" helpLabel="About this page" help={<p>…</p>}>
+      Page title
+    </HeadingWithHelp>
+  </div>
+  <div className="songs-header-actions">
+    <Link className="directory-btn directory-btn-secondary" to="…">Secondary</Link>
+    <button type="button" className="directory-btn directory-btn-primary">Primary</button>
+  </div>
+</header>
+```
+
+**Rules:**
+
+1. **Header class** — use the feature-scoped header class (`songs-header`, `gigs-header`, `setlists-header`, `calendar-header`, `song-suggestions-header`, `communications-header`, `my-bands-header`, …). Match the paired actions class (`songs-header-actions`, `gigs-header-actions`, …) or the shared `app-page-header-actions` alias where appropriate.
+2. **Title block** — left column: optional `my-bands-eyebrow` context line, then `HeadingWithHelp` for the page `h1` and inline help.
+3. **Actions block** — right column (wraps below title on mobile): navigation links and primary CTAs only. Use `directory-btn directory-btn-secondary` for navigation and secondary actions; `directory-btn directory-btn-primary` for the main page action.
+4. **No per-page mobile CSS** for header layout when you use these shared classes. Responsive stacking, full-width buttons, and overflow protection are defined centrally in `apps/web/src/styles/auth.css` (≤900px) and mirrored in feature stylesheets (`songs.css`, `gigs.css`, `calendar.css`, `setlists.css`, …).
+5. **Do not** invent one-off flex layouts or custom button classes for page headers — reuse the pattern above.
+
+**Reference implementation:** `apps/web/src/pages/app/SongsDashboardPage.tsx` (`songs-header` + `songs-header-actions`).
+
 ---
 
 ### 7.2 Content Components

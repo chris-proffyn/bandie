@@ -14,6 +14,20 @@ import {
 import { SongSuggestionSuggester } from './SongSuggestionSuggester';
 import { HeadingWithHelp } from '../ui/InfoHelp';
 
+type RankingStatus = 'In' | 'Out' | 'Tie';
+
+function resolveRankingStatus(inSelection: boolean, isTie: boolean): RankingStatus {
+  if (isTie) return 'Tie';
+  if (inSelection) return 'In';
+  return 'Out';
+}
+
+const RANKING_STATUS_CLASS: Record<RankingStatus, string> = {
+  In: 'song-suggestion-ranking-status-in',
+  Out: 'song-suggestion-ranking-status-out',
+  Tie: 'song-suggestion-ranking-status-tie',
+};
+
 type SongSuggestionRankingTableProps = {
   bandId: string;
   targetSongCount: number;
@@ -122,36 +136,39 @@ export function SongSuggestionRankingTable({
   return (
     <section className="panel surface-light song-suggestion-ranking-panel">
       <div className="song-suggestion-ranking-head">
-        <div>
-          <HeadingWithHelp
-            as="h2"
-            helpLabel="About live ranking"
-            help={
-              <p>
-                {inclusiveActive
-                  ? `${selectionModeLabel} mode: ${SONG_SUGGESTION_INCLUSIVE_SELECTION_EXPLANATION} Up to ${targetSongCount} songs can be selected in total.`
-                  : `${selectionModeLabel} mode: songs ranked by score (highest first). The top ${targetSongCount} are proposed when voting closes unless the leader adjusts the final selection.`}
-              </p>
-            }
+        <HeadingWithHelp
+          as="h2"
+          helpLabel="About live ranking"
+          help={
+            <p>
+              {inclusiveActive
+                ? `${selectionModeLabel} mode: ${SONG_SUGGESTION_INCLUSIVE_SELECTION_EXPLANATION} Up to ${targetSongCount} songs can be selected in total.`
+                : `${selectionModeLabel} mode: songs ranked by score (highest first). The top ${targetSongCount} are proposed when voting closes unless the leader adjusts the final selection.`}
+            </p>
+          }
+        >
+          Live ranking
+        </HeadingWithHelp>
+        <div className="song-suggestion-ranking-meta">
+          <span
+            className={`song-suggestion-ranking-mode-badge song-suggestion-ranking-mode-badge-${selectionMode}`}
           >
-            Live ranking
-          </HeadingWithHelp>
+            {selectionModeLabel}
+          </span>
+          <span className="song-suggestion-ranking-target-badge">Target: {targetSongCount}</span>
         </div>
-        <span className="song-suggestion-ranking-target-badge">
-          {selectionModeLabel} · Target {targetSongCount}
-        </span>
       </div>
 
-      <div className="admin-table-wrap">
+      <div className="admin-table-wrap song-suggestion-ranking-table-wrap">
         <table className="admin-table admin-table-compact song-suggestion-ranking-table">
           <thead>
             <tr>
               <th scope="col">Rank</th>
               <th scope="col">Song</th>
-              <th scope="col">Suggested by</th>
+              <th scope="col">Raised</th>
               <th scope="col">Score</th>
               <th scope="col">Votes</th>
-              <th scope="col">Selection</th>
+              <th scope="col">Status</th>
             </tr>
           </thead>
           <tbody>
@@ -166,6 +183,7 @@ export function SongSuggestionRankingTable({
                 rankedRows,
                 targetSongCount,
               );
+              const status = resolveRankingStatus(inSelection, isTie);
 
               return (
                 <Fragment key={row.id}>
@@ -177,38 +195,46 @@ export function SongSuggestionRankingTable({
                       .filter(Boolean)
                       .join(' ')}
                   >
-                    <td>
+                    <td data-label="Rank" className="song-suggestion-ranking-rank-cell">
                       <span className="song-suggestion-ranking-rank">#{row.proposed_rank}</span>
                     </td>
-                    <td>
-                      <strong>{row.song_title}</strong>
-                      <div className="song-suggestion-ranking-artist">{row.artist}</div>
+                    <td data-label="Song" className="song-suggestion-ranking-song-cell">
+                      <div className="song-suggestion-ranking-song-main">
+                        <span
+                          className="song-suggestion-ranking-rank song-suggestion-ranking-rank-inline"
+                          aria-hidden="true"
+                        >
+                          #{row.proposed_rank}
+                        </span>
+                        <div className="song-suggestion-ranking-song-copy">
+                          <strong>{row.song_title}</strong>
+                          <div className="song-suggestion-ranking-artist">{row.artist}</div>
+                        </div>
+                      </div>
                     </td>
-                    <td>
+                    <td data-label="Raised">
                       <SongSuggestionSuggester row={row} />
                     </td>
-                    <td>{row.vote_summary.score}</td>
-                    <td>
+                    <td data-label="Score">{row.vote_summary.score}</td>
+                    <td data-label="Votes">
                       <span className="song-suggestion-ranking-votes">
-                        🙂 {row.vote_summary.happy_count} · 😐 {row.vote_summary.meh_count} · 🙁{' '}
-                        {row.vote_summary.rather_not_count}
+                        <span className="song-suggestion-ranking-vote-chip">
+                          🙂 {row.vote_summary.happy_count}
+                        </span>
+                        <span className="song-suggestion-ranking-vote-chip">
+                          😐 {row.vote_summary.meh_count}
+                        </span>
+                        <span className="song-suggestion-ranking-vote-chip">
+                          🙁 {row.vote_summary.rather_not_count}
+                        </span>
                       </span>
                     </td>
-                    <td>
-                      {inSelection ? (
-                        <span className="song-suggestion-ranking-status song-suggestion-ranking-status-in">
-                          {inclusiveActive ? 'In selection' : `In top ${targetSongCount}`}
-                        </span>
-                      ) : (
-                        <span className="song-suggestion-ranking-status song-suggestion-ranking-status-out">
-                          Below cutoff
-                        </span>
-                      )}
-                      {isTie ? (
-                        <span className="song-suggestion-ranking-status song-suggestion-ranking-status-tie">
-                          Tie at cutoff
-                        </span>
-                      ) : null}
+                    <td data-label="Status">
+                      <span
+                        className={`song-suggestion-ranking-status ${RANKING_STATUS_CLASS[status]}`}
+                      >
+                        {status}
+                      </span>
                     </td>
                   </tr>
                   {showCutoff && row.proposed_rank === targetSongCount ? (

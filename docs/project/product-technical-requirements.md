@@ -351,6 +351,15 @@ apps/web/src/
 
 Homepage component breakdown per `bandie_homepage_functional_technical_spec.md` §13.3.
 
+### 9.1 Workspace page header pattern
+
+New `/app` pages must follow the shared page header structure documented in `docs/RSD_UX_DESIGN_FRAMEWORK.md` §7.1.1. Summary:
+
+- **Header:** `{feature}-header` (e.g. `songs-header`, `gigs-header`, `setlists-header`)
+- **Actions:** `{feature}-header-actions` with `directory-btn` variants
+- **Title:** `my-bands-eyebrow` + `HeadingWithHelp` (`apps/web/src/components/ui/InfoHelp.tsx`)
+- **Mobile:** no page-specific header breakpoints — shared rules in `auth.css` and feature CSS files
+
 ---
 
 ## 10. Design tokens (Bandie brand)

@@ -359,8 +359,10 @@
   }
 
   .calendar-header-actions .directory-btn {
-    flex: 1 1 auto;
+    width: 100%;
+    flex: none;
     min-height: var(--touch-target-min);
+    justify-content: center;
   }
 
   .calendar-event-head {

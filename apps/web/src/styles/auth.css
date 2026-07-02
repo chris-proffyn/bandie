@@ -1290,6 +1290,10 @@
   margin-top: 0;
 }
 
+/**
+ * Mobile page headers: title block on top, full-width action buttons below.
+ * Avoid flex-basis percentages here — they turn pill buttons into circles when items wrap.
+ */
 @media (max-width: 900px) {
   .app-header-toolbar {
     flex-wrap: wrap;
@@ -1316,9 +1320,36 @@
     max-width: 10rem;
   }
 
-  :is(.songs-header, .setlists-header, .gigs-header, .calendar-header) {
+  :is(
+    .songs-header,
+    .setlists-header,
+    .gigs-header,
+    .calendar-header,
+    .song-suggestions-header,
+    .communications-header,
+    .my-bands-header
+  ) {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  :is(
+    .songs-header,
+    .setlists-header,
+    .gigs-header,
+    .calendar-header,
+    .song-suggestions-header,
+    .communications-header,
+    .my-bands-header
+  ) > :first-child {
+    flex: none;
+    min-width: 0;
+  }
+
+  :is(.songs-header, .setlists-header, .gigs-header, .calendar-header) h1,
+  :is(.communications-header, .song-suggestions-header) h1 {
+    margin-bottom: 0.35rem;
   }
 
   .app-page-header-actions,
@@ -1331,8 +1362,11 @@
   .my-bands-header-actions,
   .user-profile-page-header-actions,
   .profile-collapsible-summary {
-    flex-direction: column;
-    align-items: stretch;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.55rem;
+    width: 100%;
+    min-width: 0;
   }
 
   .profile-collapsible-summary-end {
@@ -1375,8 +1409,26 @@
   .user-profile-page-header-actions > :is(a, button).auth-button,
   .songs-side-card-header-actions > :is(a, button).auth-button,
   .band-parts-header-actions > :is(a, button).auth-button {
-    flex: 1 1 calc(50% - 0.3rem);
-    min-width: min(100%, 10rem);
+    width: 100%;
+    max-width: none;
+    flex: none;
+    min-height: var(--touch-target-min);
+    justify-content: center;
+    white-space: normal;
+    text-align: center;
+  }
+
+  :is(
+    .app-page-header-actions,
+    .songs-header-actions,
+    .setlists-header-actions,
+    .calendar-header-actions,
+    .gigs-header-actions,
+    .song-suggestions-header-actions,
+    .directory-header-actions,
+    .my-bands-header-actions
+  ) > :is(a, button).directory-btn-primary {
+    order: -1;
   }
 
   .app-body-with-sidebar {
