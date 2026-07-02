@@ -939,6 +939,42 @@ export async function resetSongSuggestionVotes(
   }
 }
 
+export type CarryOverNotSelectedSuggestionsInput = {
+  sourceGroupId: string;
+  name: string;
+  suggestionClosesAt: string;
+  votingClosesAt?: string | null;
+};
+
+export function countNotSelectedSongSuggestions(
+  suggestions: Pick<SongSuggestion, 'status'>[],
+): number {
+  return suggestions.filter((row) => row.status === 'not_selected').length;
+}
+
+export async function carryOverNotSelectedSongSuggestions(
+  input: CarryOverNotSelectedSuggestionsInput,
+): Promise<string> {
+  const session = await getCurrentSession();
+  if (!session?.user) {
+    throw new Error('Must be signed in to carry over songs.');
+  }
+
+  const client = getBandieClient();
+  const { data, error } = await client.rpc('bandie_carry_over_not_selected_suggestions', {
+    p_source_group_id: input.sourceGroupId,
+    p_name: input.name.trim(),
+    p_suggestion_closes_at: input.suggestionClosesAt,
+    p_voting_closes_at: input.votingClosesAt ?? null,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data as string;
+}
+
 export type ConfirmSelectionItem = {
   suggestionId: string;
   overrideReason?: string | null;

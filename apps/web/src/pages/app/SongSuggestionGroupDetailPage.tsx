@@ -9,6 +9,8 @@ import {
   collectSongSuggestionFilterOptions,
   computeSongSuggestionAutoSelection,
   confirmSongSuggestionGroup,
+  carryOverNotSelectedSongSuggestions,
+  countNotSelectedSongSuggestions,
   createSkeletonSetlistFromSuggestionGroup,
   filterAndSortSongSuggestions,
   getSongSuggestionGroupDetail,
@@ -46,11 +48,13 @@ import {
 } from '../../components/songSuggestions/SongSuggestionLeaderActionsModal';
 import { SongSuggestionCard } from '../../components/songSuggestions/SongSuggestionCard';
 import { SongSuggestionRankingTable } from '../../components/songSuggestions/SongSuggestionRankingTable';
+import { SongSuggestionCarryOverModal } from '../../components/songSuggestions/SongSuggestionCarryOverModal';
 import { SubmitSongSuggestionPanel } from '../../components/songSuggestions/SubmitSongSuggestionPanel';
 import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 import { useUpgradePrompt } from '../../hooks/useUpgradePrompt';
 import {
   trackSongSuggestionGroupConfirmed,
+  trackSongSuggestionCarryOver,
   trackSongSuggestionSetlistCreated,
   trackSongSuggestionVoteCast,
   trackSongSuggestionVoteChanged,
@@ -96,6 +100,10 @@ function formatEvent(event: SongSuggestionGroupEvent): string {
       return 'Group confirmed';
     case 'setlist_created':
       return 'Skeleton setlist created';
+    case 'not_selected_carried_over':
+      return payload.new_group_name
+        ? `Unselected songs carried to ${String(payload.new_group_name)}`
+        : 'Unselected songs carried to a new group';
     default:
       return event.event_type.replace(/_/g, ' ');
   }
@@ -115,6 +123,7 @@ export function SongSuggestionGroupDetailPage() {
   const [showSuggest, setShowSuggest] = useState(false);
   const [showLeaderActions, setShowLeaderActions] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showCarryOver, setShowCarryOver] = useState(false);
   const [listFilters, setListFilters] = useState<SongSuggestionListFilters>(
     DEFAULT_SONG_SUGGESTION_LIST_FILTERS,
   );
@@ -193,6 +202,10 @@ export function SongSuggestionGroupDetailPage() {
   );
   const vetoedCount = useMemo(
     () => suggestions.filter((row) => row.status === 'leader_vetoed').length,
+    [suggestions],
+  );
+  const notSelectedCount = useMemo(
+    () => countNotSelectedSongSuggestions(suggestions),
     [suggestions],
   );
   const rankedActive = useMemo(() => rankSongSuggestions(activeSuggestions), [activeSuggestions]);
@@ -514,6 +527,42 @@ export function SongSuggestionGroupDetailPage() {
     });
   }
 
+  async function handleCarryOver(input: {
+    name: string;
+    suggestionClosesAt: string;
+    votingClosesAt: string | null;
+  }) {
+    if (!groupId || !bandId) {
+      return;
+    }
+
+    setActionBusy(true);
+    setActionError(null);
+    try {
+      const newGroupId = await carryOverNotSelectedSongSuggestions({
+        sourceGroupId: groupId,
+        name: input.name,
+        suggestionClosesAt: input.suggestionClosesAt,
+        votingClosesAt: input.votingClosesAt,
+      });
+      trackSongSuggestionCarryOver({
+        bandId,
+        groupId,
+        newGroupId,
+        carriedCount: notSelectedCount,
+      });
+      setShowCarryOver(false);
+      navigate(`/app/${bandId}/songs/suggestions/${newGroupId}`);
+    } catch (err) {
+      if (handleEntitlementError(err)) {
+        return;
+      }
+      setActionError(err instanceof Error ? err.message : 'Unable to create carry-over group.');
+    } finally {
+      setActionBusy(false);
+    }
+  }
+
   if (!bandId || !groupId) {
     return null;
   }
@@ -647,19 +696,38 @@ export function SongSuggestionGroupDetailPage() {
       {group.status === 'confirmed' ? (
         <section className="panel">
           <h2>Confirmed outcome</h2>
-          {isLeader && !group.skeleton_setlist_id ? (
-            <div className="song-suggestion-leader-actions">
-              <button
-                type="button"
-                className="directory-btn directory-btn-primary"
-                disabled={actionBusy}
-                onClick={() => void handleCreateSetlist()}
-              >
-                Create skeleton setlist
-              </button>
+          {isLeader ? (
+            <div className="song-suggestion-leader-actions song-suggestion-leader-actions--stacked">
+              {notSelectedCount > 0 ? (
+                <button
+                  type="button"
+                  className="directory-btn directory-btn-secondary"
+                  disabled={actionBusy}
+                  onClick={() => setShowCarryOver(true)}
+                >
+                  New group with {notSelectedCount} unselected song
+                  {notSelectedCount === 1 ? '' : 's'}
+                </button>
+              ) : null}
+              {!group.skeleton_setlist_id ? (
+                <button
+                  type="button"
+                  className="directory-btn directory-btn-primary"
+                  disabled={actionBusy}
+                  onClick={() => void handleCreateSetlist()}
+                >
+                  Create skeleton setlist
+                </button>
+              ) : (
+                <Link
+                  to={`/app/${bandId}/setlists/${group.skeleton_setlist_id}`}
+                  className="directory-btn directory-btn-primary"
+                >
+                  Open setlist
+                </Link>
+              )}
             </div>
-          ) : null}
-          {group.skeleton_setlist_id ? (
+          ) : group.skeleton_setlist_id ? (
             <Link
               to={`/app/${bandId}/setlists/${group.skeleton_setlist_id}`}
               className="directory-btn directory-btn-primary"
@@ -668,6 +736,17 @@ export function SongSuggestionGroupDetailPage() {
             </Link>
           ) : null}
         </section>
+      ) : null}
+
+      {group && showCarryOver ? (
+        <SongSuggestionCarryOverModal
+          open={showCarryOver}
+          sourceGroup={group}
+          notSelectedCount={notSelectedCount}
+          actionBusy={actionBusy}
+          onClose={() => setShowCarryOver(false)}
+          onSubmit={handleCarryOver}
+        />
       ) : null}
 
       {showConfirm ? (

@@ -475,6 +475,8 @@ export {
   getSongSuggestionGroup,
   getSongSuggestionGroupDetail,
   createSongSuggestionGroup,
+  carryOverNotSelectedSongSuggestions,
+  countNotSelectedSongSuggestions,
   updateSongSuggestionGroup,
   findSimilarSongSuggestions,
   submitSongSuggestion,
@@ -535,6 +537,7 @@ export type {
   SubmitSongSuggestionInput,
   UpdateSongSuggestionDetailsInput,
   UpdateSongSuggestionMediaInput,
+  CarryOverNotSelectedSuggestionsInput,
   ConfirmSelectionItem,
 } from './songSuggestions';
 

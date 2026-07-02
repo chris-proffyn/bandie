@@ -1351,6 +1351,13 @@
   border: 0;
 }
 
+.song-suggestion-carry-over-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 0.25rem;
+}
+
 .song-suggestion-leader-actions {
   display: flex;
   flex-wrap: wrap;

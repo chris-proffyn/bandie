@@ -174,3 +174,12 @@ export function trackSongSuggestionGroupArchived(context: SongSuggestionAnalytic
     ...context,
   });
 }
+
+export function trackSongSuggestionCarryOver(
+  context: SongSuggestionAnalyticsContext & { newGroupId: string; carriedCount: number },
+): void {
+  track('song_suggestion_carry_over', {
+    feature: 'song_suggestions',
+    ...context,
+  });
+}
