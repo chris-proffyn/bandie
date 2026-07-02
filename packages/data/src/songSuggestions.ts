@@ -116,6 +116,7 @@ export type SongSuggestionVote = {
   comment: string | null;
   display_name: string | null;
   username: string | null;
+  profile_image_url: string | null;
 };
 
 export type SongSuggestionComment = {
@@ -216,6 +217,12 @@ export const SONG_SUGGESTION_VOTE_EMOJI: Record<SongSuggestionVoteState, string>
   meh: '🙂',
   rather_not: '😐',
 };
+
+export const SONG_SUGGESTION_VOTE_STATES: SongSuggestionVoteState[] = [
+  'happy_to_play',
+  'meh',
+  'rather_not',
+];
 
 export const SONG_SUGGESTION_GROUP_STATUS_LABELS: Record<SongSuggestionGroupStatus, string> = {
   draft: 'Draft',
@@ -1091,6 +1098,7 @@ export async function getSongSuggestionGroupDetail(
       comment: (row.comment as string | null) ?? null,
       display_name: profile?.display_name ?? null,
       username: profile?.username ?? null,
+      profile_image_url: profile?.profile_image_url ?? null,
     };
     const existing = votesBySuggestion.get(suggestionId) ?? [];
     existing.push(vote);

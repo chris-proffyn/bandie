@@ -67,7 +67,19 @@
 }
 
 .song-suggestion-leader-actions-dialog {
-  width: min(100%, 420px);
+  width: min(100%, 640px);
+}
+
+.song-suggestion-group-form-embedded {
+  margin-bottom: 0.25rem;
+}
+
+.song-suggestion-leader-actions-section-title {
+  margin: 0.5rem 0 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: -0.02em;
 }
 
 .song-suggestion-group-form-dialog {
@@ -454,9 +466,10 @@
 }
 
 .song-suggestion-item-card {
+  position: relative;
   display: grid;
   gap: 0.85rem;
-  padding: 1rem 1.1rem;
+  padding: 1rem 1.1rem 3.35rem;
   border: 1px solid rgba(15, 23, 42, 0.1);
   border-radius: 16px;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
@@ -513,27 +526,76 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
   gap: 0.5rem;
 }
 
-.song-suggestion-comment-count-pill {
+.song-suggestion-discuss-btn {
+  position: absolute;
+  right: 1.1rem;
+  bottom: 1rem;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  font-size: 0.75rem;
-  font-weight: 800;
-  padding: 0.25rem 0.55rem;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid #c7d2fe;
   border-radius: 999px;
   background: #e0e7ff;
-  border: 1px solid #c7d2fe;
   color: #3730a3;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
-.song-suggestion-comment-count-pill-empty {
+.song-suggestion-discuss-btn-empty {
   background: #f3f4f6;
   border-color: #d1d5db;
   color: #4b5563;
+}
+
+.song-suggestion-discuss-btn:hover {
+  background: #c7d2fe;
+  border-color: #a5b4fc;
+  color: #312e81;
+  box-shadow: 0 4px 12px rgba(55, 48, 163, 0.16);
+}
+
+.song-suggestion-discuss-btn-empty:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+  color: #111827;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+.song-suggestion-discuss-btn:focus-visible {
+  outline: 2px solid #ffcc33;
+  outline-offset: 2px;
+}
+
+.song-suggestion-discuss-badge {
+  position: absolute;
+  top: -0.2rem;
+  right: -0.2rem;
+  min-width: 1.05rem;
+  height: 1.05rem;
+  padding: 0 0.2rem;
+  border-radius: 999px;
+  background: #3730a3;
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 800;
+  line-height: 1.05rem;
+  text-align: center;
+  border: 1.5px solid #fff;
+}
+
+.song-suggestion-discuss-btn-empty .song-suggestion-discuss-badge {
+  background: #4b5563;
 }
 
 .song-suggestion-comments-section {
@@ -1202,6 +1264,91 @@
 
 .song-suggestion-vote-icon.active:disabled {
   opacity: 0.85;
+}
+
+.song-suggestion-vote-matrix-wrap {
+  margin-top: 0.35rem;
+}
+
+.song-suggestion-vote-matrix {
+  width: auto;
+  max-width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.song-suggestion-vote-matrix th,
+.song-suggestion-vote-matrix td {
+  padding: 0.2rem 0.3rem;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.song-suggestion-vote-matrix-member-col {
+  width: 2rem;
+  padding: 0;
+}
+
+.song-suggestion-vote-matrix-heading {
+  font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.35rem;
+}
+
+.song-suggestion-vote-matrix-member-cell {
+  padding-right: 0.15rem;
+}
+
+.song-suggestion-vote-matrix-vote-cell {
+  width: 1.85rem;
+}
+
+.song-suggestion-vote-matrix-avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #e7ded1;
+  color: #151515;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.song-suggestion-vote-matrix-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.song-suggestion-vote-matrix-tick {
+  display: inline-block;
+  color: #166534;
+  font-weight: 800;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.song-suggestion-vote-matrix-empty {
+  display: inline-block;
+  width: 0.55rem;
+  height: 0.55rem;
+}
+
+.song-suggestion-vote-matrix-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .song-suggestion-leader-actions {

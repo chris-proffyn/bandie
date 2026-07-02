@@ -13,6 +13,7 @@ import {
 import { SongSuggestionSuggester } from './SongSuggestionSuggester';
 import { SongSuggestionEditModal } from './SongSuggestionEditModal';
 import { SongSuggestionDetailModal } from './SongSuggestionDetailModal';
+import { SongSuggestionVoteMatrix } from './SongSuggestionVoteMatrix';
 
 type SongSuggestionCardProps = {
   row: SongSuggestionWithSummary;
@@ -62,6 +63,21 @@ function CogIcon() {
   );
 }
 
+function DiscussIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function SongSuggestionCard({
   row,
   group,
@@ -99,9 +115,6 @@ export function SongSuggestionCard({
   const isLeaderEditingOther =
     isLeader && currentUserId != null && row.suggested_by !== currentUserId;
   const hideMemberVotes = voteVisibility === 'aggregate_only' && !isLeader;
-  const otherMemberVotes = row.votes.filter(
-    (vote) => currentUserId == null || vote.member_user_id !== currentUserId,
-  );
   const canComment = canCommentOnSongSuggestion(row, group, currentUserId);
 
   function stopCardOpen(event: MouseEvent | KeyboardEvent) {
@@ -225,31 +238,13 @@ export function SongSuggestionCard({
             {SONG_SUGGESTION_VOTE_EMOJI.rather_not} {row.vote_summary.rather_not_count}
           </span>
         </div>
-        <span
-          className={[
-            'song-suggestion-comment-count-pill',
-            row.comment_count === 0 ? 'song-suggestion-comment-count-pill-empty' : '',
-          ]
-            .filter(Boolean)
-            .join(' ')}
-        >
-          {row.comment_count > 0 ? `💬 ${row.comment_count}` : '💬 Discuss'}
-        </span>
       </div>
 
       {hideMemberVotes ? (
         <p className="song-suggestion-meta">Individual votes are hidden — totals only.</p>
-      ) : otherMemberVotes.length > 0 ? (
-        <div className="song-suggestion-tags">
-          {otherMemberVotes.map((vote) => (
-            <span key={vote.id} className="song-suggestion-tag">
-              {vote.display_name ?? vote.username ?? 'Member'}:{' '}
-              {SONG_SUGGESTION_VOTE_EMOJI[vote.vote_state]}{' '}
-              {SONG_SUGGESTION_VOTE_LABELS[vote.vote_state]}
-            </span>
-          ))}
-        </div>
-      ) : null}
+      ) : (
+        <SongSuggestionVoteMatrix votes={row.votes} currentUserId={currentUserId} />
+      )}
 
       {canVote ? (
         <div className="song-suggestion-vote-actions" onClick={stopCardOpen}>
@@ -285,6 +280,32 @@ export function SongSuggestionCard({
           ) : null}
         </div>
       ) : null}
+
+      <button
+        type="button"
+        className={[
+          'song-suggestion-discuss-btn',
+          row.comment_count === 0 ? 'song-suggestion-discuss-btn-empty' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        aria-label={
+          row.comment_count > 0
+            ? `Discuss — ${row.comment_count} comment${row.comment_count === 1 ? '' : 's'}`
+            : 'Discuss'
+        }
+        onClick={(event) => {
+          stopCardOpen(event);
+          openDetail();
+        }}
+      >
+        <DiscussIcon />
+        {row.comment_count > 0 ? (
+          <span className="song-suggestion-discuss-badge" aria-hidden="true">
+            {row.comment_count}
+          </span>
+        ) : null}
+      </button>
 
       <SongSuggestionDetailModal
         row={row}

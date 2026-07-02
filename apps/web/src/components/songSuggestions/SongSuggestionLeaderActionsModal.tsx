@@ -1,16 +1,18 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import type { SongSuggestionGroup } from '@bandie/data';
+import { SongSuggestionGroupFormPanel } from './SongSuggestionGroupFormPanel';
 
 type SongSuggestionLeaderActionsModalProps = {
   open: boolean;
+  bandId: string;
   group: SongSuggestionGroup;
   canEditGroup: boolean;
   votingOpen: boolean;
   actionBusy: boolean;
   activeSuggestionCount: number;
   onClose: () => void;
-  onEditGroup: () => void;
+  onGroupSaved: () => void;
   onClearAll: () => void;
   onCloseSuggestions: () => void;
   onReopenSuggestions: () => void;
@@ -42,13 +44,14 @@ function CogIcon() {
 
 export function SongSuggestionLeaderActionsModal({
   open,
+  bandId,
   group,
   canEditGroup,
   votingOpen,
   actionBusy,
   activeSuggestionCount,
   onClose,
-  onEditGroup,
+  onGroupSaved,
   onClearAll,
   onCloseSuggestions,
   onReopenSuggestions,
@@ -109,21 +112,28 @@ export function SongSuggestionLeaderActionsModal({
         </header>
 
         <div className="gigs-dialog-body">
-          <p className="gigs-dialog-note">
-            Manage this suggestion group, control voting phases, and confirm the final song list.
-          </p>
+          {canEditGroup ? (
+            <SongSuggestionGroupFormPanel
+              bandId={bandId}
+              group={group}
+              presentation="embedded"
+              onClose={onClose}
+              onSaved={() => {
+                onGroupSaved();
+                onClose();
+              }}
+            />
+          ) : (
+            <p className="gigs-dialog-note">
+              Manage this suggestion group, control voting phases, and confirm the final song list.
+            </p>
+          )}
+
+          {canEditGroup ? (
+            <h3 className="song-suggestion-leader-actions-section-title">Voting & confirmation</h3>
+          ) : null}
 
           <div className="song-suggestion-leader-actions song-suggestion-leader-actions--stacked">
-            {canEditGroup ? (
-              <button
-                type="button"
-                className="directory-btn directory-btn-secondary"
-                disabled={actionBusy}
-                onClick={onEditGroup}
-              >
-                Edit group
-              </button>
-            ) : null}
             {showClearAll ? (
               <button
                 type="button"

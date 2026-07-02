@@ -28,7 +28,7 @@ type SongSuggestionGroupFormPanelProps = {
   group?: SongSuggestionGroup;
   onClose: () => void;
   onSaved: () => void;
-  presentation?: 'panel' | 'modal';
+  presentation?: 'panel' | 'modal' | 'embedded';
 };
 
 export function SongSuggestionGroupFormPanel({
@@ -336,6 +336,10 @@ export function SongSuggestionGroupFormPanel({
       </div>
     </form>
   );
+
+  if (presentation === 'embedded') {
+    return <div className="song-suggestion-group-form-embedded">{formContent}</div>;
+  }
 
   if (presentation === 'modal') {
     return createPortal(

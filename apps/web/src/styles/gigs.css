@@ -820,28 +820,33 @@
   background: #fff;
 }
 
-.gigs-dialog-actions .directory-btn {
+.gigs-dialog-actions .directory-btn,
+.gigs-dialog .directory-btn {
   min-height: 42px;
   padding: 0.55rem 1.15rem;
 }
 
+.gigs-dialog .directory-btn-secondary,
 .gigs-dialog-actions .directory-btn-secondary {
   background: #fff;
   border-color: #d1d5db;
   color: #111827;
 }
 
-.gigs-dialog-actions .directory-btn-secondary:hover {
+.gigs-dialog-actions .directory-btn-secondary:hover,
+.gigs-dialog .directory-btn-secondary:hover:not(:disabled) {
   background: #f9fafb;
   border-color: #9ca3af;
 }
 
+.gigs-dialog .directory-btn-primary,
 .gigs-dialog-actions .directory-btn-primary {
   background: #ff5e7e;
   color: #fff;
 }
 
-.gigs-dialog-actions .directory-btn-primary:disabled {
+.gigs-dialog-actions .directory-btn-primary:disabled,
+.gigs-dialog .directory-btn-primary:disabled {
   opacity: 0.65;
   cursor: not-allowed;
 }

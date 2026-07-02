@@ -47,7 +47,6 @@ import {
 import { SongSuggestionCard } from '../../components/songSuggestions/SongSuggestionCard';
 import { SongSuggestionRankingTable } from '../../components/songSuggestions/SongSuggestionRankingTable';
 import { SubmitSongSuggestionPanel } from '../../components/songSuggestions/SubmitSongSuggestionPanel';
-import { SongSuggestionGroupFormPanel } from '../../components/songSuggestions/SongSuggestionGroupFormPanel';
 import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 import { useUpgradePrompt } from '../../hooks/useUpgradePrompt';
 import {
@@ -114,7 +113,6 @@ export function SongSuggestionGroupDetailPage() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionBusy, setActionBusy] = useState(false);
   const [showSuggest, setShowSuggest] = useState(false);
-  const [showEdit, setShowEdit] = useState(false);
   const [showLeaderActions, setShowLeaderActions] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [listFilters, setListFilters] = useState<SongSuggestionListFilters>(
@@ -625,16 +623,14 @@ export function SongSuggestionGroupDetailPage() {
       {showLeaderActionsEntry && group ? (
         <SongSuggestionLeaderActionsModal
           open={showLeaderActions}
+          bandId={bandId}
           group={group}
           canEditGroup={canEditGroup}
           votingOpen={votingOpen}
           actionBusy={actionBusy}
           activeSuggestionCount={activeSuggestions.length}
           onClose={() => setShowLeaderActions(false)}
-          onEditGroup={() => {
-            setShowLeaderActions(false);
-            setShowEdit(true);
-          }}
+          onGroupSaved={() => void loadDetail(() => false)}
           onClearAll={() => void handleClearAllSuggestions()}
           onCloseSuggestions={() => void handleCloseSuggestions()}
           onReopenSuggestions={() => void handleReopenSuggestions()}
@@ -768,19 +764,6 @@ export function SongSuggestionGroupDetailPage() {
             Suggest a song
           </button>
         </div>
-      ) : null}
-
-      {showEdit && group && bandId ? (
-        <SongSuggestionGroupFormPanel
-          bandId={bandId}
-          group={group}
-          presentation="modal"
-          onClose={() => setShowEdit(false)}
-          onSaved={() => {
-            setShowEdit(false);
-            void loadDetail(() => false);
-          }}
-        />
       ) : null}
 
       {showSuggest && groupId ? (

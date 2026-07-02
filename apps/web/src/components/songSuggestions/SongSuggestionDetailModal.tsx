@@ -13,6 +13,7 @@ import {
 } from '@bandie/data';
 import { bandInitials } from '../../lib/profileHelpers';
 import { SongSuggestionSuggester } from './SongSuggestionSuggester';
+import { SongSuggestionVoteMatrix } from './SongSuggestionVoteMatrix';
 
 type SongSuggestionDetailModalProps = {
   row: SongSuggestionWithSummary;
@@ -70,9 +71,6 @@ export function SongSuggestionDetailModal({
   const canVote = votingOpen && row.status === 'active';
   const canClearVote = canVote && Boolean(row.my_vote) && allowVoteChanges;
   const hideMemberVotes = voteVisibility === 'aggregate_only' && !isLeader;
-  const otherMemberVotes = row.votes.filter(
-    (vote) => currentUserId == null || vote.member_user_id !== currentUserId,
-  );
 
   const loadComments = useCallback(async () => {
     setCommentsLoading(true);
@@ -211,17 +209,9 @@ export function SongSuggestionDetailModal({
 
         {hideMemberVotes ? (
           <p className="song-suggestion-meta">Individual votes are hidden — totals only.</p>
-        ) : otherMemberVotes.length > 0 ? (
-          <div className="song-suggestion-tags">
-            {otherMemberVotes.map((vote) => (
-              <span key={vote.id} className="song-suggestion-tag">
-                {vote.display_name ?? vote.username ?? 'Member'}:{' '}
-                {SONG_SUGGESTION_VOTE_EMOJI[vote.vote_state]}{' '}
-                {SONG_SUGGESTION_VOTE_LABELS[vote.vote_state]}
-              </span>
-            ))}
-          </div>
-        ) : null}
+        ) : (
+          <SongSuggestionVoteMatrix votes={row.votes} currentUserId={currentUserId} />
+        )}
 
         {canVote ? (
           <div className="song-suggestion-vote-actions">
