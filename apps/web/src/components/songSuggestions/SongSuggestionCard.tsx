@@ -211,14 +211,17 @@ export function SongSuggestionCard({
               <button
                 key={voteState}
                 type="button"
-                className={`song-suggestion-vote-btn song-suggestion-vote-btn-${voteState}${
+                className={`song-suggestion-vote-icon song-suggestion-vote-icon-${voteState}${
                   row.my_vote === voteState ? ' active' : ''
                 }`}
                 disabled={actionBusy}
+                aria-label={SONG_SUGGESTION_VOTE_LABELS[voteState]}
                 aria-pressed={row.my_vote === voteState}
                 onClick={() => onVote(row.id, voteState)}
               >
-                {VOTE_EMOJI[voteState]} {SONG_SUGGESTION_VOTE_LABELS[voteState]}
+                <span className="song-suggestion-vote-icon-glyph" aria-hidden="true">
+                  {VOTE_EMOJI[voteState]}
+                </span>
               </button>
             ))}
           </div>

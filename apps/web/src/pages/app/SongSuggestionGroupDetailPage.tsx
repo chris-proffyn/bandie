@@ -769,6 +769,7 @@ export function SongSuggestionGroupDetailPage() {
         <SongSuggestionGroupFormPanel
           bandId={bandId}
           group={group}
+          presentation="modal"
           onClose={() => setShowEdit(false)}
           onSaved={() => {
             setShowEdit(false);

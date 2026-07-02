@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import {
   SONG_SUGGESTION_DECADE_OPTIONS,
@@ -27,6 +28,7 @@ type SongSuggestionGroupFormPanelProps = {
   group?: SongSuggestionGroup;
   onClose: () => void;
   onSaved: () => void;
+  presentation?: 'panel' | 'modal';
 };
 
 export function SongSuggestionGroupFormPanel({
@@ -34,6 +36,7 @@ export function SongSuggestionGroupFormPanel({
   group,
   onClose,
   onSaved,
+  presentation = 'panel',
 }: SongSuggestionGroupFormPanelProps) {
   const navigate = useNavigate();
   const isEdit = Boolean(group);
@@ -74,6 +77,28 @@ export function SongSuggestionGroupFormPanel({
       cancelled = true;
     };
   }, [bandId]);
+
+  useEffect(() => {
+    if (presentation !== 'modal') {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape' && !submitting) {
+        onClose();
+      }
+    }
+
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose, presentation, submitting]);
 
   const targetSongCountNumber = Number(form.targetSongCount) || 0;
   const inclusiveEligible =
@@ -149,167 +174,196 @@ export function SongSuggestionGroupFormPanel({
     }
   }
 
-  return (
-    <section className="panel">
-      <h2>{isEdit ? 'Edit song suggestion group' : 'New song suggestion group'}</h2>
-      <form className="auth-form" onSubmit={handleSubmit}>
+  const title = isEdit ? 'Edit song suggestion group' : 'New song suggestion group';
+
+  const formContent = (
+    <form className="auth-form song-suggestion-group-form" onSubmit={handleSubmit}>
+      <div className="auth-field">
+        <label htmlFor="ssg-name">Group name</label>
+        <input
+          id="ssg-name"
+          value={form.name}
+          onChange={(event) => setForm((c) => ({ ...c, name: event.target.value }))}
+          placeholder="e.g. Summer swing songs"
+          required
+        />
+      </div>
+      <div className="auth-field">
+        <label htmlFor="ssg-description">Brief</label>
+        <textarea
+          id="ssg-description"
+          rows={3}
+          value={form.description}
+          onChange={(event) => setForm((c) => ({ ...c, description: event.target.value }))}
+        />
+        <p className="song-suggestion-mode-brief">{SONG_SUGGESTION_SELECTION_MODE_BRIEF}</p>
+      </div>
+      <div className="song-suggestion-form-grid">
         <div className="auth-field">
-          <label htmlFor="ssg-name">Group name</label>
+          <label htmlFor="ssg-target">Target number of songs</label>
           <input
-            id="ssg-name"
-            value={form.name}
-            onChange={(event) => setForm((c) => ({ ...c, name: event.target.value }))}
-            placeholder="e.g. Summer swing songs"
+            id="ssg-target"
+            type="number"
+            min={1}
+            value={form.targetSongCount}
+            onChange={(event) => setForm((c) => ({ ...c, targetSongCount: event.target.value }))}
+            required
+          />
+        </div>
+        <div className="auth-field song-suggestion-selection-field">
+          <div className="song-suggestion-selection-row">
+            <span className="song-suggestion-selection-field-label" id="ssg-selection-mode-label">
+              Selection mode
+            </span>
+            <input
+              id="ssg-selection-mode"
+              type="checkbox"
+              className="song-suggestion-selection-checkbox"
+              checked={form.selectionMode === 'inclusive'}
+              aria-labelledby="ssg-selection-mode-label ssg-selection-mode-text"
+              onChange={(event) =>
+                setForm((c) => ({
+                  ...c,
+                  selectionMode: event.target.checked ? 'inclusive' : 'best',
+                }))
+              }
+            />
+            <label
+              htmlFor="ssg-selection-mode"
+              className="song-suggestion-selection-value-label"
+              id="ssg-selection-mode-text"
+            >
+              Inclusive
+            </label>
+          </div>
+          <p className="song-suggestion-mode-note">
+            {form.selectionMode === 'inclusive'
+              ? inclusiveEligible
+                ? `Active for this band (${bandMemberCount} members): ${SONG_SUGGESTION_INCLUSIVE_SELECTION_EXPLANATION}`
+                : bandMemberCount != null
+                  ? songSuggestionInclusiveSelectionPendingExplanation(bandMemberCount)
+                  : 'Inclusive selection activates when the target is at least the band size.'
+              : 'Best ranks purely by score — the top songs win.'}
+          </p>
+        </div>
+      </div>
+      <div className="song-suggestion-form-grid">
+        <div className="auth-field">
+          <label htmlFor="ssg-vote-visibility">Vote visibility</label>
+          <select
+            id="ssg-vote-visibility"
+            value={form.voteVisibility}
+            onChange={(event) =>
+              setForm((c) => ({
+                ...c,
+                voteVisibility: event.target.value as VoteVisibility,
+              }))
+            }
+          >
+            <option value="member_visible">Show who voted how</option>
+            <option value="aggregate_only">Aggregate counts only</option>
+          </select>
+        </div>
+      </div>
+      <div className="song-suggestion-form-grid">
+        <div className="auth-field">
+          <label htmlFor="ssg-suggestion-close">Suggestions close</label>
+          <input
+            id="ssg-suggestion-close"
+            type="datetime-local"
+            value={form.suggestionClosesAt}
+            onChange={(event) =>
+              setForm((c) => ({ ...c, suggestionClosesAt: event.target.value }))
+            }
             required
           />
         </div>
         <div className="auth-field">
-          <label htmlFor="ssg-description">Brief</label>
-          <textarea
-            id="ssg-description"
-            rows={3}
-            value={form.description}
-            onChange={(event) => setForm((c) => ({ ...c, description: event.target.value }))}
+          <label htmlFor="ssg-voting-close">Voting close (optional)</label>
+          <input
+            id="ssg-voting-close"
+            type="datetime-local"
+            value={form.votingClosesAt}
+            onChange={(event) =>
+              setForm((c) => ({ ...c, votingClosesAt: event.target.value }))
+            }
           />
-          <p className="song-suggestion-mode-brief">{SONG_SUGGESTION_SELECTION_MODE_BRIEF}</p>
         </div>
-        <div className="song-suggestion-form-grid">
-          <div className="auth-field">
-            <label htmlFor="ssg-target">Target number of songs</label>
-            <input
-              id="ssg-target"
-              type="number"
-              min={1}
-              value={form.targetSongCount}
-              onChange={(event) => setForm((c) => ({ ...c, targetSongCount: event.target.value }))}
-              required
-            />
-          </div>
-          <div className="auth-field song-suggestion-selection-field">
-            <div className="song-suggestion-selection-row">
-              <span className="song-suggestion-selection-field-label" id="ssg-selection-mode-label">
-                Selection mode
-              </span>
+      </div>
+      <fieldset className="auth-field">
+        <legend>Preferred genres (optional)</legend>
+        <div className="song-suggestion-tags">
+          {SONG_SUGGESTION_GENRE_OPTIONS.map((genre) => (
+            <label key={genre} className="song-suggestion-tag">
               <input
-                id="ssg-selection-mode"
                 type="checkbox"
-                className="song-suggestion-selection-checkbox"
-                checked={form.selectionMode === 'inclusive'}
-                aria-labelledby="ssg-selection-mode-label ssg-selection-mode-text"
-                onChange={(event) =>
-                  setForm((c) => ({
-                    ...c,
-                    selectionMode: event.target.checked ? 'inclusive' : 'best',
-                  }))
-                }
-              />
-              <label
-                htmlFor="ssg-selection-mode"
-                className="song-suggestion-selection-value-label"
-                id="ssg-selection-mode-text"
-              >
-                Inclusive
-              </label>
-            </div>
-            <p className="song-suggestion-mode-note">
-              {form.selectionMode === 'inclusive'
-                ? inclusiveEligible
-                  ? `Active for this band (${bandMemberCount} members): ${SONG_SUGGESTION_INCLUSIVE_SELECTION_EXPLANATION}`
-                  : bandMemberCount != null
-                    ? songSuggestionInclusiveSelectionPendingExplanation(bandMemberCount)
-                    : 'Inclusive selection activates when the target is at least the band size.'
-                : 'Best ranks purely by score — the top songs win.'}
-            </p>
-          </div>
+                checked={form.preferredGenres.includes(genre)}
+                onChange={() => toggleGenre(genre)}
+              />{' '}
+              {genre}
+            </label>
+          ))}
         </div>
-        <div className="song-suggestion-form-grid">
-          <div className="auth-field">
-            <label htmlFor="ssg-vote-visibility">Vote visibility</label>
-            <select
-              id="ssg-vote-visibility"
-              value={form.voteVisibility}
-              onChange={(event) =>
-                setForm((c) => ({
-                  ...c,
-                  voteVisibility: event.target.value as VoteVisibility,
-                }))
-              }
-            >
-              <option value="member_visible">Show who voted how</option>
-              <option value="aggregate_only">Aggregate counts only</option>
-            </select>
-          </div>
+      </fieldset>
+      <fieldset className="auth-field">
+        <legend>Preferred decades (optional)</legend>
+        <div className="song-suggestion-tags">
+          {SONG_SUGGESTION_DECADE_OPTIONS.map((decade) => (
+            <label key={decade} className="song-suggestion-tag">
+              <input
+                type="checkbox"
+                checked={form.preferredDecades.includes(decade)}
+                onChange={() => toggleDecade(decade)}
+              />{' '}
+              {decade}
+            </label>
+          ))}
         </div>
-        <div className="song-suggestion-form-grid">
-          <div className="auth-field">
-            <label htmlFor="ssg-suggestion-close">Suggestions close</label>
-            <input
-              id="ssg-suggestion-close"
-              type="datetime-local"
-              value={form.suggestionClosesAt}
-              onChange={(event) =>
-                setForm((c) => ({ ...c, suggestionClosesAt: event.target.value }))
-              }
-              required
-            />
-          </div>
-          <div className="auth-field">
-            <label htmlFor="ssg-voting-close">Voting close (optional)</label>
-            <input
-              id="ssg-voting-close"
-              type="datetime-local"
-              value={form.votingClosesAt}
-              onChange={(event) =>
-                setForm((c) => ({ ...c, votingClosesAt: event.target.value }))
-              }
-            />
-          </div>
+      </fieldset>
+      {error ? <div className="auth-message auth-message-error">{error}</div> : null}
+      <div className="song-suggestion-form-actions">
+        <button
+          type="button"
+          className="directory-btn directory-btn-secondary"
+          onClick={onClose}
+          disabled={submitting}
+        >
+          Cancel
+        </button>
+        <button type="submit" className="directory-btn directory-btn-primary" disabled={submitting}>
+          {submitting ? 'Saving…' : isEdit ? 'Save changes' : 'Create group'}
+        </button>
+      </div>
+    </form>
+  );
+
+  if (presentation === 'modal') {
+    return createPortal(
+      <div className="gigs-dialog-backdrop" role="presentation" onClick={onClose}>
+        <div
+          className="gigs-dialog surface-light song-suggestion-group-form-dialog"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="song-suggestion-group-form-title"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <header className="gigs-dialog-header">
+            <h2 id="song-suggestion-group-form-title">{title}</h2>
+            <button type="button" className="gigs-dialog-close" onClick={onClose} aria-label="Close">
+              ×
+            </button>
+          </header>
+          <div className="gigs-dialog-body">{formContent}</div>
         </div>
-        <fieldset className="auth-field">
-          <legend>Preferred genres (optional)</legend>
-          <div className="song-suggestion-tags">
-            {SONG_SUGGESTION_GENRE_OPTIONS.map((genre) => (
-              <label key={genre} className="song-suggestion-tag">
-                <input
-                  type="checkbox"
-                  checked={form.preferredGenres.includes(genre)}
-                  onChange={() => toggleGenre(genre)}
-                />{' '}
-                {genre}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-        <fieldset className="auth-field">
-          <legend>Preferred decades (optional)</legend>
-          <div className="song-suggestion-tags">
-            {SONG_SUGGESTION_DECADE_OPTIONS.map((decade) => (
-              <label key={decade} className="song-suggestion-tag">
-                <input
-                  type="checkbox"
-                  checked={form.preferredDecades.includes(decade)}
-                  onChange={() => toggleDecade(decade)}
-                />{' '}
-                {decade}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-        {error ? <div className="auth-message auth-message-error">{error}</div> : null}
-        <div className="song-suggestion-form-actions">
-          <button
-            type="button"
-            className="directory-btn directory-btn-secondary"
-            onClick={onClose}
-            disabled={submitting}
-          >
-            Cancel
-          </button>
-          <button type="submit" className="directory-btn directory-btn-primary" disabled={submitting}>
-            {submitting ? 'Saving…' : isEdit ? 'Save changes' : 'Create group'}
-          </button>
-        </div>
-      </form>
+      </div>,
+      document.body,
+    );
+  }
+
+  return (
+    <section className="panel">
+      <h2>{title}</h2>
+      {formContent}
     </section>
   );
 }
