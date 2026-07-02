@@ -81,7 +81,7 @@ export function SongSuggestionGroupsPage() {
             helpLabel="About song suggestions"
             help={
               <p>
-                Ask the band for ideas, vote with 🙂 / 😐 / 🙁, and confirm the songs you want to learn
+                Ask the band for ideas, vote with Happy / Meh / Nope, and confirm the songs you want to learn
                 next.
               </p>
             }

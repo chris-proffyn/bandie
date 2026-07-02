@@ -20,6 +20,7 @@ import {
   resetSongSuggestionVotes,
   SONG_SUGGESTION_SELECTION_MODE_LABELS,
   SONG_SUGGESTION_INCLUSIVE_SELECTION_EXPLANATION,
+  SONG_SUGGESTION_VOTE_EMOJI,
   songSuggestionInclusiveSelectionPendingExplanation,
   songSuggestionGroupStatusClass,
   vetoSongSuggestion,
@@ -90,6 +91,8 @@ function formatEvent(event: SongSuggestionGroupEvent): string {
       return payload.removed_by_leader
         ? `Leader removed suggestion: ${String(payload.song_title ?? 'song')}`
         : `Suggestion removed: ${String(payload.song_title ?? 'song')}`;
+    case 'comment_added':
+      return 'New comment on a suggestion';
     case 'group_confirmed':
       return 'Group confirmed';
     case 'setlist_created':
@@ -712,8 +715,10 @@ export function SongSuggestionGroupDetailPage() {
                       #{row.proposed_rank} {row.song_title} — {row.artist}
                     </strong>
                     <p className="song-suggestion-meta">
-                      Score {row.vote_summary.score} · 🙂 {row.vote_summary.happy_count} · 😐{' '}
-                      {row.vote_summary.meh_count} · 🙁 {row.vote_summary.rather_not_count}
+                      Score {row.vote_summary.score} ·{' '}
+                      {SONG_SUGGESTION_VOTE_EMOJI.happy_to_play} {row.vote_summary.happy_count} ·{' '}
+                      {SONG_SUGGESTION_VOTE_EMOJI.meh} {row.vote_summary.meh_count} ·{' '}
+                      {SONG_SUGGESTION_VOTE_EMOJI.rather_not} {row.vote_summary.rather_not_count}
                     </p>
                     {checked && !inAutoSelection ? (
                       <input
@@ -832,6 +837,7 @@ export function SongSuggestionGroupDetailPage() {
                     <SongSuggestionCard
                       key={row.id}
                       row={row}
+                      group={group}
                       sortBy={listFilters.sortBy}
                       suggestionsOpen={submitOpen}
                       votingOpen={votingOpen}
@@ -850,6 +856,7 @@ export function SongSuggestionGroupDetailPage() {
                           : false
                       }
                       onSaveDetails={(suggestionId, input) => handleUpdateDetails(suggestionId, input)}
+                      onCommentsChanged={() => void loadDetail(() => false)}
                     />
                   ))}
                 </div>
@@ -863,6 +870,7 @@ export function SongSuggestionGroupDetailPage() {
                     <SongSuggestionCard
                       key={row.id}
                       row={row}
+                      group={group}
                       sortBy={listFilters.sortBy}
                       suggestionsOpen={submitOpen}
                       votingOpen={votingOpen}
@@ -881,6 +889,7 @@ export function SongSuggestionGroupDetailPage() {
                           : false
                       }
                       onSaveDetails={(suggestionId, input) => handleUpdateDetails(suggestionId, input)}
+                      onCommentsChanged={() => void loadDetail(() => false)}
                     />
                   ))}
                 </div>

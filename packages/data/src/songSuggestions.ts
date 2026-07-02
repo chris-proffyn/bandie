@@ -118,6 +118,19 @@ export type SongSuggestionVote = {
   username: string | null;
 };
 
+export type SongSuggestionComment = {
+  id: string;
+  suggestion_id: string;
+  group_id: string;
+  band_id: string;
+  author_user_id: string;
+  body: string;
+  created_at: string;
+  author_display_name: string | null;
+  author_username: string | null;
+  author_profile_image_url: string | null;
+};
+
 export type SongSuggestionVoteSummary = {
   suggestion_id: string;
   total_votes: number;
@@ -134,6 +147,7 @@ export type SongSuggestionWithSummary = SongSuggestion & {
   proposed_rank: number;
   suggester_display_name: string | null;
   suggester_profile_image_url: string | null;
+  comment_count: number;
 };
 
 export type SongSuggestionGroupListItem = SongSuggestionGroup & {
@@ -195,6 +209,12 @@ export const SONG_SUGGESTION_VOTE_LABELS: Record<SongSuggestionVoteState, string
   happy_to_play: 'Happy',
   meh: 'Meh',
   rather_not: 'Nope',
+};
+
+export const SONG_SUGGESTION_VOTE_EMOJI: Record<SongSuggestionVoteState, string> = {
+  happy_to_play: '🤩',
+  meh: '🙂',
+  rather_not: '😐',
 };
 
 export const SONG_SUGGESTION_GROUP_STATUS_LABELS: Record<SongSuggestionGroupStatus, string> = {
@@ -735,6 +755,67 @@ export function canEditSongSuggestionDetails(
   return row.suggested_by === currentUserId || isLeader;
 }
 
+export function canCommentOnSongSuggestion(
+  row: Pick<SongSuggestion, 'status'>,
+  group: SongSuggestionGroup,
+  currentUserId: string | null,
+): boolean {
+  if (!currentUserId || row.status !== 'active') {
+    return false;
+  }
+
+  return !['confirmed', 'archived', 'cancelled'].includes(group.status);
+}
+
+export async function listSongSuggestionComments(
+  suggestionId: string,
+): Promise<SongSuggestionComment[]> {
+  const client = getBandieClient();
+  const { data, error } = await client
+    .from('bandie_song_suggestion_comments')
+    .select('*')
+    .eq('suggestion_id', suggestionId)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const authorIds = [...new Set((data ?? []).map((row) => row.author_user_id as string))];
+  const profiles = await loadMemberProfiles(authorIds);
+
+  return (data ?? []).map((row) => {
+    const profile = profiles.get(row.author_user_id as string);
+    return {
+      id: row.id as string,
+      suggestion_id: row.suggestion_id as string,
+      group_id: row.group_id as string,
+      band_id: row.band_id as string,
+      author_user_id: row.author_user_id as string,
+      body: row.body as string,
+      created_at: row.created_at as string,
+      author_display_name: profile?.display_name ?? null,
+      author_username: profile?.username ?? null,
+      author_profile_image_url: profile?.profile_image_url ?? null,
+    };
+  });
+}
+
+export async function addSongSuggestionComment(
+  suggestionId: string,
+  body: string,
+): Promise<void> {
+  const client = getBandieClient();
+  const { error } = await client.rpc('bandie_add_song_suggestion_comment', {
+    p_suggestion_id: suggestionId,
+    p_body: body,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
 /** @deprecated Use canEditSongSuggestionDetails */
 export function canEditSongSuggestionMedia(
   row: Pick<SongSuggestion, 'status' | 'suggested_by'>,
@@ -947,7 +1028,7 @@ export async function getSongSuggestionGroupDetail(
   const viewerId = options.viewerUserId ?? session?.user?.id ?? null;
   const isLeader = options.isLeader ?? false;
 
-  const [{ data: suggestions }, { data: summaries }, { data: votes }, { count: bandMemberCount }, events, confirmed] =
+  const [{ data: suggestions }, { data: summaries }, { data: votes }, { data: commentRows }, { count: bandMemberCount }, events, confirmed] =
     await Promise.all([
       client
         .from('bandie_song_suggestions')
@@ -957,6 +1038,10 @@ export async function getSongSuggestionGroupDetail(
       client.from('bandie_song_suggestion_vote_summary').select('*').eq('group_id', groupId),
       client.from('bandie_song_suggestion_votes').select('*').eq('group_id', groupId),
       client
+        .from('bandie_song_suggestion_comments')
+        .select('suggestion_id')
+        .eq('group_id', groupId),
+      client
         .from('bandie_band_members')
         .select('id', { count: 'exact', head: true })
         .eq('band_id', group.band_id)
@@ -964,6 +1049,12 @@ export async function getSongSuggestionGroupDetail(
       listSongSuggestionGroupEvents(groupId),
       group.status === 'confirmed' ? listConfirmedSongSuggestions(groupId) : Promise.resolve([]),
     ]);
+
+  const commentCountBySuggestion = new Map<string, number>();
+  for (const row of commentRows ?? []) {
+    const suggestionId = row.suggestion_id as string;
+    commentCountBySuggestion.set(suggestionId, (commentCountBySuggestion.get(suggestionId) ?? 0) + 1);
+  }
 
   const summaryMap = new Map<string, SongSuggestionVoteSummary>();
   for (const row of summaries ?? []) {
@@ -1034,6 +1125,7 @@ export async function getSongSuggestionGroupDetail(
       suggester_display_name:
         suggesterProfile?.display_name ?? suggesterProfile?.username ?? null,
       suggester_profile_image_url: suggesterProfile?.profile_image_url ?? null,
+      comment_count: commentCountBySuggestion.get(suggestion.id) ?? 0,
     };
   });
 

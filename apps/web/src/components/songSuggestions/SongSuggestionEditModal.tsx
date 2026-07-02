@@ -107,7 +107,7 @@ export function SongSuggestionEditModal({
   return createPortal(
     <div className="song-suggestion-edit-backdrop" role="presentation" onClick={onClose}>
       <div
-        className="song-suggestion-edit-dialog surface-light"
+        className="song-suggestion-edit-dialog"
         role="dialog"
         aria-modal="true"
         aria-labelledby={`song-suggestion-edit-title-${row.id}`}

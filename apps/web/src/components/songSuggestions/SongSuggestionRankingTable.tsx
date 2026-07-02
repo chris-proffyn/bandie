@@ -6,6 +6,7 @@ import {
   isInclusiveSelectionActive,
   SONG_SUGGESTION_SELECTION_MODE_LABELS,
   SONG_SUGGESTION_INCLUSIVE_SELECTION_EXPLANATION,
+  SONG_SUGGESTION_VOTE_EMOJI,
   type SongSuggestionConfirmedSong,
   type SongSuggestionGroupStatus,
   type SongSuggestionSelectionMode,
@@ -214,13 +215,14 @@ export function SongSuggestionRankingTable({
                     <td data-label="Votes">
                       <span className="song-suggestion-ranking-votes">
                         <span className="song-suggestion-ranking-vote-chip">
-                          🙂 {row.vote_summary.happy_count}
+                          {SONG_SUGGESTION_VOTE_EMOJI.happy_to_play} {row.vote_summary.happy_count}
                         </span>
                         <span className="song-suggestion-ranking-vote-chip">
-                          😐 {row.vote_summary.meh_count}
+                          {SONG_SUGGESTION_VOTE_EMOJI.meh} {row.vote_summary.meh_count}
                         </span>
                         <span className="song-suggestion-ranking-vote-chip">
-                          🙁 {row.vote_summary.rather_not_count}
+                          {SONG_SUGGESTION_VOTE_EMOJI.rather_not}{' '}
+                          {row.vote_summary.rather_not_count}
                         </span>
                       </span>
                     </td>

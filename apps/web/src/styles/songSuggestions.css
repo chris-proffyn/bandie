@@ -491,6 +491,138 @@
   border-color: rgba(15, 23, 42, 0.18);
 }
 
+.song-suggestion-item-card-interactive {
+  cursor: pointer;
+  transition:
+    box-shadow 0.15s ease,
+    transform 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.song-suggestion-item-card-interactive:hover {
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.1);
+  transform: translateY(-1px);
+}
+
+.song-suggestion-item-card-interactive:focus-visible {
+  outline: 2px solid #ffcc33;
+  outline-offset: 3px;
+}
+
+.song-suggestion-card-footer-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.song-suggestion-comment-count-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: #e0e7ff;
+  border: 1px solid #c7d2fe;
+  color: #3730a3;
+}
+
+.song-suggestion-comment-count-pill-empty {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #4b5563;
+}
+
+.song-suggestion-comments-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.song-suggestion-comments-heading {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: -0.02em;
+}
+
+.song-suggestion-comments-list {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.song-suggestion-comment-item {
+  padding: 0.75rem 0.85rem;
+  border-radius: 12px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+}
+
+.song-suggestion-comment-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.45rem;
+}
+
+.song-suggestion-comment-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #e5e7eb;
+  color: #111827;
+  font-size: 0.72rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.song-suggestion-comment-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.song-suggestion-comment-author {
+  display: block;
+  font-size: 0.86rem;
+  color: #111827;
+}
+
+.song-suggestion-comment-time {
+  display: block;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.song-suggestion-comment-body {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: #1f2937;
+  white-space: pre-wrap;
+}
+
+.song-suggestion-comment-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.song-suggestion-comment-form .directory-btn {
+  justify-self: start;
+  min-height: var(--touch-target-min);
+}
+
 .song-suggestion-item-card-head {
   display: flex;
   justify-content: space-between;
@@ -536,20 +668,31 @@
 .song-suggestion-edit-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 50;
+  z-index: 1000;
   display: grid;
   place-items: center;
-  padding: 1rem;
-  background: rgba(8, 10, 20, 0.55);
+  padding: max(1rem, env(safe-area-inset-top, 0px)) max(1rem, env(safe-area-inset-right, 0px))
+    max(1rem, env(safe-area-inset-bottom, 0px)) max(1rem, env(safe-area-inset-left, 0px));
+  background: rgba(8, 10, 20, 0.72);
+  backdrop-filter: blur(4px);
 }
 
-.song-suggestion-edit-dialog {
+.song-suggestion-edit-dialog,
+.song-suggestion-detail-dialog {
+  box-sizing: border-box;
   width: min(100%, 560px);
   max-height: min(92vh, 860px);
   overflow: auto;
   border-radius: 18px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #1f2937;
+  color-scheme: light;
   padding: 1.1rem 1.15rem 1.15rem;
   box-shadow: 0 24px 60px rgba(12, 16, 38, 0.28);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
 }
 
 .song-suggestion-edit-dialog-head {
@@ -563,23 +706,26 @@
 .song-suggestion-edit-dialog-head h2 {
   margin: 0;
   font-size: 1.2rem;
+  color: #111827;
+  letter-spacing: -0.03em;
 }
 
 .song-suggestion-edit-close {
   flex-shrink: 0;
   width: 2rem;
   height: 2rem;
-  border: none;
+  border: 1px solid #d1d5db;
   border-radius: 999px;
-  background: rgba(15, 23, 42, 0.08);
-  color: #334155;
+  background: #f9fafb;
+  color: #374151;
   font-size: 1.35rem;
   line-height: 1;
   cursor: pointer;
 }
 
 .song-suggestion-edit-close:hover {
-  background: rgba(15, 23, 42, 0.14);
+  background: #f3f4f6;
+  border-color: #9ca3af;
 }
 
 .song-suggestion-edit-note {
@@ -594,11 +740,99 @@
   gap: 0.75rem;
 }
 
+/* Portaled outside .app-shell — light form tokens (see gigs-dialog / info-help-dialog). */
+.song-suggestion-edit-dialog .auth-field label,
+.song-suggestion-detail-dialog .auth-field label {
+  color: #111827;
+}
+
+.song-suggestion-edit-dialog .auth-field input,
+.song-suggestion-edit-dialog .auth-field select,
+.song-suggestion-edit-dialog .auth-field textarea,
+.song-suggestion-detail-dialog .auth-field input,
+.song-suggestion-detail-dialog .auth-field select,
+.song-suggestion-detail-dialog .auth-field textarea {
+  border: 1px solid #dfe4f1;
+  background: #fff;
+  color: #121826;
+}
+
+.song-suggestion-edit-dialog .auth-field input:disabled,
+.song-suggestion-edit-dialog .auth-field textarea:disabled,
+.song-suggestion-edit-dialog .auth-field select:disabled,
+.song-suggestion-detail-dialog .auth-field input:disabled,
+.song-suggestion-detail-dialog .auth-field textarea:disabled,
+.song-suggestion-detail-dialog .auth-field select:disabled {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.song-suggestion-edit-dialog .auth-field input::placeholder,
+.song-suggestion-edit-dialog .auth-field textarea::placeholder,
+.song-suggestion-detail-dialog .auth-field input::placeholder,
+.song-suggestion-detail-dialog .auth-field textarea::placeholder {
+  color: #6b7280;
+}
+
+.song-suggestion-edit-dialog .auth-field input:focus-visible,
+.song-suggestion-edit-dialog .auth-field textarea:focus-visible,
+.song-suggestion-edit-dialog .auth-field select:focus-visible,
+.song-suggestion-detail-dialog .auth-field input:focus-visible,
+.song-suggestion-detail-dialog .auth-field textarea:focus-visible,
+.song-suggestion-detail-dialog .auth-field select:focus-visible {
+  outline: 2px solid #ffcc33;
+  outline-offset: 2px;
+}
+
+.song-suggestion-edit-dialog .directory-btn-secondary,
+.song-suggestion-detail-dialog .directory-btn-secondary {
+  background: #fff;
+  border-color: #d1d5db;
+  color: #111827;
+}
+
+.song-suggestion-edit-dialog .directory-btn-secondary:hover:not(:disabled),
+.song-suggestion-detail-dialog .directory-btn-secondary:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.song-suggestion-edit-dialog .directory-btn-primary,
+.song-suggestion-detail-dialog .directory-btn-primary {
+  color: #fff;
+}
+
+.song-suggestion-detail-dialog .song-suggestion-meta {
+  color: #6b7280;
+}
+
+.song-suggestion-detail-dialog .song-suggestion-item-rationale {
+  color: #374151;
+}
+
+.song-suggestion-detail-dialog .song-suggestion-tag {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #111827;
+}
+
+.song-suggestion-detail-dialog .auth-message-error {
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  border-radius: 12px;
+  padding: 0.75rem 0.9rem;
+}
+
 .song-suggestion-edit-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.65rem;
   margin-top: 0.15rem;
+}
+
+.song-suggestion-edit-actions .directory-btn {
+  min-height: var(--touch-target-min);
 }
 
 .song-suggestion-edit-danger-zone {

@@ -1,23 +1,22 @@
-import { useState } from 'react';
+import { useState, type KeyboardEvent, type MouseEvent } from 'react';
 import {
+  SONG_SUGGESTION_VOTE_EMOJI,
   SONG_SUGGESTION_VOTE_LABELS,
+  type SongSuggestionGroup,
   type SongSuggestionSortKey,
   type SongSuggestionVoteState,
   type SongSuggestionWithSummary,
   type UpdateSongSuggestionDetailsInput,
   type VoteVisibility,
+  canCommentOnSongSuggestion,
 } from '@bandie/data';
 import { SongSuggestionSuggester } from './SongSuggestionSuggester';
 import { SongSuggestionEditModal } from './SongSuggestionEditModal';
-
-const VOTE_EMOJI: Record<SongSuggestionVoteState, string> = {
-  happy_to_play: '🙂',
-  meh: '😐',
-  rather_not: '🙁',
-};
+import { SongSuggestionDetailModal } from './SongSuggestionDetailModal';
 
 type SongSuggestionCardProps = {
   row: SongSuggestionWithSummary;
+  group: SongSuggestionGroup;
   sortBy: SongSuggestionSortKey;
   suggestionsOpen: boolean;
   votingOpen: boolean;
@@ -32,6 +31,7 @@ type SongSuggestionCardProps = {
   onVeto: (row: SongSuggestionWithSummary) => void;
   canEdit: boolean;
   onSaveDetails: (suggestionId: string, input: UpdateSongSuggestionDetailsInput) => void | Promise<boolean>;
+  onCommentsChanged: () => void;
 };
 
 function showRank(
@@ -64,6 +64,7 @@ function CogIcon() {
 
 export function SongSuggestionCard({
   row,
+  group,
   sortBy,
   suggestionsOpen,
   votingOpen,
@@ -78,8 +79,10 @@ export function SongSuggestionCard({
   onVeto,
   canEdit,
   onSaveDetails,
+  onCommentsChanged,
 }: SongSuggestionCardProps) {
   const [manageOpen, setManageOpen] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
   const isVetoed = row.status === 'leader_vetoed';
   const canVote = votingOpen && row.status === 'active';
   const canClearVote = canVote && Boolean(row.my_vote) && allowVoteChanges;
@@ -99,18 +102,38 @@ export function SongSuggestionCard({
   const otherMemberVotes = row.votes.filter(
     (vote) => currentUserId == null || vote.member_user_id !== currentUserId,
   );
+  const canComment = canCommentOnSongSuggestion(row, group, currentUserId);
+
+  function stopCardOpen(event: MouseEvent | KeyboardEvent) {
+    event.stopPropagation();
+  }
+
+  function openDetail() {
+    setDetailOpen(true);
+  }
 
   return (
     <article
       className={[
         'song-suggestion-item-card',
         'surface-light',
+        'song-suggestion-item-card-interactive',
         isVetoed ? 'song-suggestion-item-card-vetoed' : '',
         row.my_vote ? `song-suggestion-item-card-voted song-suggestion-item-card-voted-${row.my_vote}` : '',
         canVote && !row.my_vote ? 'song-suggestion-item-card-needs-vote' : '',
       ]
         .filter(Boolean)
         .join(' ')}
+      role="button"
+      tabIndex={0}
+      aria-label={`Open ${row.song_title} discussion${row.comment_count > 0 ? ` — ${row.comment_count} comments` : ''}`}
+      onClick={openDetail}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          openDetail();
+        }
+      }}
     >
       <header className="song-suggestion-item-card-head">
         <div className="song-suggestion-item-card-title-block">
@@ -130,7 +153,10 @@ export function SongSuggestionCard({
               className="song-suggestion-manage-btn"
               disabled={actionBusy}
               aria-label={`Manage ${row.song_title}`}
-              onClick={() => setManageOpen(true)}
+              onClick={(event) => {
+                stopCardOpen(event);
+                setManageOpen(true);
+              }}
             >
               <CogIcon />
             </button>
@@ -140,7 +166,10 @@ export function SongSuggestionCard({
               type="button"
               className="directory-btn directory-btn-secondary"
               disabled={actionBusy}
-              onClick={() => onVeto(row)}
+              onClick={(event) => {
+                stopCardOpen(event);
+                onVeto(row);
+              }}
             >
               Veto
             </button>
@@ -164,7 +193,7 @@ export function SongSuggestionCard({
       )}
 
       {(row.youtube_url || row.spotify_url || row.other_media_url) && (
-        <div className="song-suggestion-links">
+        <div className="song-suggestion-links" onClick={stopCardOpen}>
           {row.youtube_url ? (
             <a href={row.youtube_url} target="_blank" rel="noopener noreferrer">
               YouTube
@@ -183,11 +212,29 @@ export function SongSuggestionCard({
         </div>
       )}
 
-      <div className="song-suggestion-score-row" aria-label="Vote totals">
-        <span className="song-suggestion-score-pill">Score {row.vote_summary.score}</span>
-        <span className="song-suggestion-score-pill">🙂 {row.vote_summary.happy_count}</span>
-        <span className="song-suggestion-score-pill">😐 {row.vote_summary.meh_count}</span>
-        <span className="song-suggestion-score-pill">🙁 {row.vote_summary.rather_not_count}</span>
+      <div className="song-suggestion-card-footer-meta">
+        <div className="song-suggestion-score-row" aria-label="Vote totals">
+          <span className="song-suggestion-score-pill">Score {row.vote_summary.score}</span>
+          <span className="song-suggestion-score-pill">
+            {SONG_SUGGESTION_VOTE_EMOJI.happy_to_play} {row.vote_summary.happy_count}
+          </span>
+          <span className="song-suggestion-score-pill">
+            {SONG_SUGGESTION_VOTE_EMOJI.meh} {row.vote_summary.meh_count}
+          </span>
+          <span className="song-suggestion-score-pill">
+            {SONG_SUGGESTION_VOTE_EMOJI.rather_not} {row.vote_summary.rather_not_count}
+          </span>
+        </div>
+        <span
+          className={[
+            'song-suggestion-comment-count-pill',
+            row.comment_count === 0 ? 'song-suggestion-comment-count-pill-empty' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
+          {row.comment_count > 0 ? `💬 ${row.comment_count}` : '💬 Discuss'}
+        </span>
       </div>
 
       {hideMemberVotes ? (
@@ -196,7 +243,8 @@ export function SongSuggestionCard({
         <div className="song-suggestion-tags">
           {otherMemberVotes.map((vote) => (
             <span key={vote.id} className="song-suggestion-tag">
-              {vote.display_name ?? vote.username ?? 'Member'}: {VOTE_EMOJI[vote.vote_state]}{' '}
+              {vote.display_name ?? vote.username ?? 'Member'}:{' '}
+              {SONG_SUGGESTION_VOTE_EMOJI[vote.vote_state]}{' '}
               {SONG_SUGGESTION_VOTE_LABELS[vote.vote_state]}
             </span>
           ))}
@@ -204,7 +252,7 @@ export function SongSuggestionCard({
       ) : null}
 
       {canVote ? (
-        <div className="song-suggestion-vote-actions">
+        <div className="song-suggestion-vote-actions" onClick={stopCardOpen}>
           <p className="song-suggestion-vote-now-label">Vote now</p>
           <div className="song-suggestion-vote-buttons" role="group" aria-label="Cast your vote">
             {(['happy_to_play', 'meh', 'rather_not'] as const).map((voteState) => (
@@ -220,7 +268,7 @@ export function SongSuggestionCard({
                 onClick={() => onVote(row.id, voteState)}
               >
                 <span className="song-suggestion-vote-icon-glyph" aria-hidden="true">
-                  {VOTE_EMOJI[voteState]}
+                  {SONG_SUGGESTION_VOTE_EMOJI[voteState]}
                 </span>
               </button>
             ))}
@@ -237,6 +285,23 @@ export function SongSuggestionCard({
           ) : null}
         </div>
       ) : null}
+
+      <SongSuggestionDetailModal
+        row={row}
+        group={group}
+        open={detailOpen}
+        currentUserId={currentUserId}
+        canComment={canComment}
+        votingOpen={votingOpen}
+        voteVisibility={voteVisibility}
+        allowVoteChanges={allowVoteChanges}
+        isLeader={isLeader}
+        actionBusy={actionBusy}
+        onClose={() => setDetailOpen(false)}
+        onCommentAdded={onCommentsChanged}
+        onVote={onVote}
+        onClearVote={onClearVote}
+      />
 
       <SongSuggestionEditModal
         row={row}
