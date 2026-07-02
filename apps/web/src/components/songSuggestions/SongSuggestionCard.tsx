@@ -6,6 +6,8 @@ import {
   type VoteVisibility,
 } from '@bandie/data';
 import { SongSuggestionSuggester } from './SongSuggestionSuggester';
+import { SongSuggestionMediaEditor } from './SongSuggestionMediaEditor';
+import type { UpdateSongSuggestionMediaInput } from '@bandie/data';
 
 const VOTE_EMOJI: Record<SongSuggestionVoteState, string> = {
   happy_to_play: '🙂',
@@ -27,6 +29,11 @@ type SongSuggestionCardProps = {
   onClearVote: (suggestionId: string) => void;
   onWithdraw: (row: SongSuggestionWithSummary) => void;
   onVeto: (row: SongSuggestionWithSummary) => void;
+  canEditMedia: boolean;
+  editingMedia: boolean;
+  onEditMedia: (row: SongSuggestionWithSummary) => void;
+  onCancelEditMedia: () => void;
+  onSaveMedia: (suggestionId: string, input: UpdateSongSuggestionMediaInput) => void;
 };
 
 function showRank(
@@ -65,6 +72,11 @@ export function SongSuggestionCard({
   onClearVote,
   onWithdraw,
   onVeto,
+  canEditMedia,
+  editingMedia,
+  onEditMedia,
+  onCancelEditMedia,
+  onSaveMedia,
 }: SongSuggestionCardProps) {
   const isVetoed = row.status === 'leader_vetoed';
   const canVote = votingOpen && row.status === 'active';
@@ -157,19 +169,45 @@ export function SongSuggestionCard({
         </div>
       )}
 
-      {(row.youtube_url || row.spotify_url) && (
-        <div className="song-suggestion-links">
-          {row.youtube_url ? (
-            <a href={row.youtube_url} target="_blank" rel="noopener noreferrer">
-              YouTube
-            </a>
+      {editingMedia ? (
+        <SongSuggestionMediaEditor
+          row={row}
+          actionBusy={actionBusy}
+          onSave={onSaveMedia}
+          onCancel={onCancelEditMedia}
+        />
+      ) : (
+        <>
+          {(row.youtube_url || row.spotify_url || row.other_media_url) && (
+            <div className="song-suggestion-links">
+              {row.youtube_url ? (
+                <a href={row.youtube_url} target="_blank" rel="noopener noreferrer">
+                  YouTube
+                </a>
+              ) : null}
+              {row.spotify_url ? (
+                <a href={row.spotify_url} target="_blank" rel="noopener noreferrer">
+                  Spotify
+                </a>
+              ) : null}
+              {row.other_media_url ? (
+                <a href={row.other_media_url} target="_blank" rel="noopener noreferrer">
+                  Media
+                </a>
+              ) : null}
+            </div>
+          )}
+          {canEditMedia ? (
+            <button
+              type="button"
+              className="song-suggestion-edit-links-btn"
+              disabled={actionBusy}
+              onClick={() => onEditMedia(row)}
+            >
+              {row.youtube_url || row.spotify_url || row.other_media_url ? 'Edit links' : 'Add links'}
+            </button>
           ) : null}
-          {row.spotify_url ? (
-            <a href={row.spotify_url} target="_blank" rel="noopener noreferrer">
-              Spotify
-            </a>
-          ) : null}
-        </div>
+        </>
       )}
 
       <div className="song-suggestion-score-row" aria-label="Vote totals">

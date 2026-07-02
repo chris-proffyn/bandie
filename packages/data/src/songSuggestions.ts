@@ -620,6 +620,12 @@ export type SubmitSongSuggestionInput = {
   suggestedByUserId?: string | null;
 };
 
+export type UpdateSongSuggestionMediaInput = {
+  youtubeUrl?: string | null;
+  spotifyUrl?: string | null;
+  otherMediaUrl?: string | null;
+};
+
 export async function findSimilarSongSuggestions(
   groupId: string,
   songTitle: string,
@@ -675,6 +681,43 @@ export async function submitSongSuggestion(
   }
 
   return data as string;
+}
+
+export async function updateSongSuggestionMedia(
+  suggestionId: string,
+  input: UpdateSongSuggestionMediaInput,
+): Promise<void> {
+  const client = getBandieClient();
+  const { error } = await client.rpc('bandie_update_song_suggestion_media', {
+    p_suggestion_id: suggestionId,
+    p_youtube_url: input.youtubeUrl ?? null,
+    p_spotify_url: input.spotifyUrl ?? null,
+    p_other_media_url: input.otherMediaUrl ?? null,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+export function canEditSongSuggestionMedia(
+  row: Pick<SongSuggestion, 'status' | 'suggested_by'>,
+  group: SongSuggestionGroup,
+  currentUserId: string | null,
+): boolean {
+  if (!currentUserId || row.suggested_by !== currentUserId) {
+    return false;
+  }
+
+  if (row.status !== 'active') {
+    return false;
+  }
+
+  if (['confirmed', 'archived', 'cancelled'].includes(group.status)) {
+    return false;
+  }
+
+  return isSongSuggestionSubmitOpen(group) || isSongSuggestionVotingOpen(group);
 }
 
 export async function voteOnSongSuggestion(

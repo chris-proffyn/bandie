@@ -24,12 +24,15 @@ import {
   songSuggestionGroupStatusClass,
   vetoSongSuggestion,
   withdrawSongSuggestion,
+  updateSongSuggestionMedia,
+  canEditSongSuggestionMedia,
   voteOnSongSuggestion,
   clearSongSuggestionVote,
   type SongSuggestionGroupEvent,
   type SongSuggestionListFilters,
   type SongSuggestionVoteState,
   type SongSuggestionWithSummary,
+  type UpdateSongSuggestionMediaInput,
   isBandLeaderRole,
 } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
@@ -63,6 +66,8 @@ function formatEvent(event: SongSuggestionGroupEvent): string {
       return 'Group details updated';
     case 'suggestion_submitted':
       return `Suggestion added: ${String(payload.song_title ?? 'song')}`;
+    case 'suggestion_media_updated':
+      return `Media links updated: ${String(payload.song_title ?? 'song')}`;
     case 'suggestions_closed':
       return 'Suggestions closed';
     case 'suggestions_reopened':
@@ -109,6 +114,7 @@ export function SongSuggestionGroupDetailPage() {
   );
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [overrideReasons, setOverrideReasons] = useState<Record<string, string>>({});
+  const [editingMediaSuggestionId, setEditingMediaSuggestionId] = useState<string | null>(null);
   const [detail, setDetail] = useState<Awaited<ReturnType<typeof getSongSuggestionGroupDetail>>>(null);
   const { upgradeDecision, clearUpgradePrompt, handleEntitlementError } = useUpgradePrompt();
 
@@ -326,6 +332,16 @@ export function SongSuggestionGroupDetailPage() {
           suggestionId: suggestion.id,
         });
       }
+    });
+  }
+
+  async function handleUpdateMedia(
+    suggestionId: string,
+    input: UpdateSongSuggestionMediaInput,
+  ) {
+    await runAction(async () => {
+      await updateSongSuggestionMedia(suggestionId, input);
+      setEditingMediaSuggestionId(null);
     });
   }
 
@@ -847,6 +863,15 @@ export function SongSuggestionGroupDetailPage() {
                 onClearVote={(suggestionId) => void handleClearVote(suggestionId)}
                 onWithdraw={(suggestion) => void handleWithdraw(suggestion)}
                 onVeto={(suggestion) => void handleVeto(suggestion)}
+                canEditMedia={
+                  group
+                    ? canEditSongSuggestionMedia(row, group, user?.id ?? null)
+                    : false
+                }
+                editingMedia={editingMediaSuggestionId === row.id}
+                onEditMedia={(suggestion) => setEditingMediaSuggestionId(suggestion.id)}
+                onCancelEditMedia={() => setEditingMediaSuggestionId(null)}
+                onSaveMedia={(suggestionId, input) => void handleUpdateMedia(suggestionId, input)}
               />
             ))}
           </div>

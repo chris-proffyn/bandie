@@ -549,6 +549,44 @@
   color: #93c5fd;
 }
 
+.song-suggestion-edit-links-btn {
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #93c5fd;
+  font-size: 0.86rem;
+  font-weight: 650;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.song-suggestion-edit-links-btn:hover,
+.song-suggestion-edit-links-btn:focus-visible {
+  color: #bfdbfe;
+  outline: 2px solid #ffcc33;
+  outline-offset: 2px;
+}
+
+.song-suggestion-media-editor {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.song-suggestion-media-editor-note {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.song-suggestion-media-editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
 .song-suggestion-vote-summary {
   display: flex;
   flex-wrap: wrap;
