@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { getOpenMicEvent, getOpenMicPublicUrl } from '@bandie/data';
 import { usePageMeta } from '../../lib/usePageMeta';
+import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 import '../../styles/gigs.css';
 import '../../styles/workspace.css';
 import '../../styles/openMic.css';
@@ -74,8 +75,13 @@ export function OpenMicPosterPage() {
       <header className="gigs-header open-mic-no-print">
         <div>
           <p className="my-bands-eyebrow">Event poster</p>
-          <h1>{title}</h1>
-          <p className="my-bands-lead">Print an A4 poster with QR code for sign-ups.</p>
+          <HeadingWithHelp
+            as="h1"
+            helpLabel="About event poster"
+            help={<p>Print an A4 poster with QR code for sign-ups.</p>}
+          >
+            {title}
+          </HeadingWithHelp>
         </div>
         <Link to={`/app/open-mic/${eventId}`} className="directory-btn directory-btn-secondary">
           Back to event

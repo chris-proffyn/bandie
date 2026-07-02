@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getAdminOverviewCounts, getAdminTestDataCounts, type AdminOverviewCounts } from '@bandie/data';
 import { AdminTestDataToggle } from '../../components/admin/AdminTestDataToggle';
+import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 import {
   readAdminHideTestData,
   saveAdminHideTestData,
@@ -35,8 +36,13 @@ export function AdminOverviewPage() {
   return (
     <section className="panel">
       <p className="my-bands-eyebrow">Phase 12</p>
-      <h2>Platform overview</h2>
-      <p className="my-bands-lead">Read-only counts across users, bands, and content.</p>
+      <HeadingWithHelp
+        as="h2"
+        helpLabel="About platform overview"
+        help={<p>Read-only counts across users, bands, and content.</p>}
+      >
+        Platform overview
+      </HeadingWithHelp>
       <AdminTestDataToggle
         hideTestData={hideTestData}
         testUserCount={testDataCounts.test_user_count}

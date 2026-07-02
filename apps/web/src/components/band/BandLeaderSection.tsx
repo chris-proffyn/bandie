@@ -6,6 +6,7 @@ import {
   type BandLeaderSummary,
 } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
+import { HeadingWithHelp } from '../ui/InfoHelp';
 
 type BandLeaderSectionProps = {
   bandId: string;
@@ -79,12 +80,19 @@ export function BandLeaderSection({ bandId, canEditContact }: BandLeaderSectionP
     <section className="workspace-section panel workspace-leader-section">
       <div className="workspace-section-header">
         <div>
-          <h2>Band leaders</h2>
-          <p className="workspace-section-intro">
-            {leaders.length > 1
-              ? 'Leaders who manage this band. The primary contact appears on the public profile.'
-              : `Primary contact for organisers, players and other bands working with ${primaryLeader?.displayName ?? 'this band'}.`}
-          </p>
+          <HeadingWithHelp
+            as="h2"
+            helpLabel="About band leaders"
+            help={
+              <p>
+                {leaders.length > 1
+                  ? 'Leaders who manage this band. The primary contact appears on the public profile.'
+                  : `Primary contact for organisers, players and other bands working with ${primaryLeader?.displayName ?? 'this band'}.`}
+              </p>
+            }
+          >
+            Band leaders
+          </HeadingWithHelp>
         </div>
         {isCurrentUserLeader && canEditContact && !editing ? (
           <button type="button" className="workspace-edit-button" onClick={() => setEditing(true)}>

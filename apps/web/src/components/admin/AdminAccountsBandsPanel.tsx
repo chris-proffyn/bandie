@@ -7,6 +7,7 @@ import {
   type AdminBandAccount,
 } from '@bandie/data';
 import { AdminPagination } from './AdminPagination';
+import { HeadingWithHelp } from '../ui/InfoHelp';
 import { TestDataBadge } from '../common/TestDataBadge';
 
 type AdminAccountsBandsPanelProps = {
@@ -60,10 +61,17 @@ export function AdminAccountsBandsPanel({
     <section className="panel admin-accounts-section">
       <div className="admin-accounts-section-head">
         <div>
-          <h3>Bands</h3>
-          <p className="workspace-section-intro">
-            Band workspaces with primary leader plan, member count, and repertoire size.
-          </p>
+          <HeadingWithHelp
+            as="h3"
+            helpLabel="About bands"
+            help={
+              <p>
+                Band workspaces with primary leader plan, member count, and repertoire size.
+              </p>
+            }
+          >
+            Bands
+          </HeadingWithHelp>
         </div>
         {!loading ? (
           <span className="communications-count-badge">{page.total}</span>

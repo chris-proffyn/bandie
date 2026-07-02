@@ -12,6 +12,7 @@ import {
 } from '@bandie/data';
 import { buildFindPlayersUrl } from '../../lib/findPlayersNavigation';
 import { bandInitials } from '../../lib/profileHelpers';
+import { HeadingWithHelp } from '../ui/InfoHelp';
 
 type BandPartsPanelProps = {
   bandId: string;
@@ -141,11 +142,18 @@ export function BandPartsPanel({
     <section className="workspace-section panel workspace-parts-section">
       <div className="workspace-section-header">
         <div>
-          <h2>Lineup & band parts</h2>
-          <p className="workspace-section-intro">
-            Define the roles in your band. Band size is calculated from {parts.length}{' '}
-            {parts.length === 1 ? 'part' : 'parts'}.
-          </p>
+          <HeadingWithHelp
+            as="h2"
+            helpLabel="About lineup and band parts"
+            help={
+              <p>
+                Define the roles in your band. Band size is calculated from {parts.length}{' '}
+                {parts.length === 1 ? 'part' : 'parts'}.
+              </p>
+            }
+          >
+            Lineup & band parts
+          </HeadingWithHelp>
         </div>
         {canManage ? (
           <div className="band-parts-header-actions">

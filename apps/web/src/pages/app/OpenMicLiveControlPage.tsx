@@ -12,6 +12,7 @@ import {
   type OpenMicLiveDashboard,
   type OpenMicEventSummaryStats,
 } from '@bandie/data';
+import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 import '../../styles/gigs.css';
 import '../../styles/workspace.css';
 import '../../styles/openMic.css';
@@ -92,8 +93,13 @@ export function OpenMicLiveControlPage() {
       <header className="gigs-header open-mic-no-print">
         <div>
           <p className="my-bands-eyebrow">Live control room</p>
-          <h1>{event.title}</h1>
-          <p className="my-bands-lead">Run the evening — mark songs playing, complete, or skip.</p>
+          <HeadingWithHelp
+            as="h1"
+            helpLabel="About live control room"
+            help={<p>Run the evening — mark songs playing, complete, or skip.</p>}
+          >
+            {event.title}
+          </HeadingWithHelp>
         </div>
         <Link to={`/app/open-mic/${eventId}`} className="directory-btn directory-btn-secondary">
           Back to event

@@ -18,6 +18,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { CreateSetlistDialog } from '../../components/setlists/CreateSetlistDialog';
 import { SongsBandContextBar } from '../../components/songs/SongsBandContextBar';
+import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 import '../../styles/setlists.css';
 
 export function SetlistsDashboardPage() {
@@ -89,11 +90,18 @@ export function SetlistsDashboardPage() {
       <header className="setlists-header">
         <div>
           <p className="my-bands-eyebrow">Setlist management</p>
-          <h1>Create, compare and reuse setlists</h1>
-          <p className="my-bands-lead">
-            Build gig-specific running orders, check total duration, balance the overall vibe,
-            and track how often each setlist has been used.
-          </p>
+          <HeadingWithHelp
+            as="h1"
+            helpLabel="About setlists"
+            help={
+              <p>
+                Build gig-specific running orders, check total duration, balance the overall vibe,
+                and track how often each setlist has been used.
+              </p>
+            }
+          >
+            Create, compare and reuse setlists
+          </HeadingWithHelp>
         </div>
         <div className="setlists-header-actions">
           <Link to={`/app/${bandId}/songs`} className="directory-btn directory-btn-secondary">

@@ -10,6 +10,7 @@ import {
   type BandSongPartTemplate,
 } from '@bandie/data';
 import { AddBandSongPartTemplateDialog } from './AddBandSongPartTemplateDialog';
+import { HeadingWithHelp } from '../ui/InfoHelp';
 
 type BandSongPartTemplatesPanelProps = {
   bandId: string;
@@ -82,11 +83,18 @@ export function BandSongPartTemplatesPanel({ bandId, canManage }: BandSongPartTe
     <section className="panel songs-templates-panel">
       <div className="songs-side-card-header">
         <div>
-          <h2>Band song part folders</h2>
-          <p className="my-bands-lead" style={{ margin: 0 }}>
-            Default part folders for new songs. Use one Guitar folder for all guitar parts, or customise
-            for your band — not every lineup slot needs its own folder.
-          </p>
+          <HeadingWithHelp
+            as="h2"
+            helpLabel="About song part folders"
+            help={
+              <p>
+                Default part folders for new songs. Use one Guitar folder for all guitar parts, or customise
+                for your band — not every lineup slot needs its own folder.
+              </p>
+            }
+          >
+            Band song part folders
+          </HeadingWithHelp>
         </div>
         {canManage ? (
           <div className="songs-side-card-header-actions">

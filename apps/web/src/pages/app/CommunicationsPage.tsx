@@ -7,6 +7,7 @@ import { IncomingOrganiserInvitationsPanel } from '../../components/communicatio
 import { IncomingPlayerOutreachPanel } from '../../components/communications/IncomingPlayerOutreachPanel';
 import { OutgoingInvitesPanel } from '../../components/communications/OutgoingInvitesPanel';
 import { UserMessagesPanel } from '../../components/communications/UserMessagesPanel';
+import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 import '../../styles/communications.css';
 
 type FilterOption = {
@@ -78,19 +79,24 @@ export function CommunicationsPage() {
       <header className="communications-header">
         <div>
           <p className="my-bands-eyebrow">Workspace</p>
-          <h1>Communications</h1>
-          <p className="my-bands-lead">
-            {isOrganiserView
-              ? 'Gig invites, booking enquiries, and direct messages with bands and organisers. Gig invites and player invites are actionable; general messages can be hidden once read.'
-              : 'Player invites from band leaders, gig invites from organisers, and general messages. Accept or decline invites here; hide read messages when you are caught up.'}
-            {loadingSummary ? null : summary.total > 0 ? (
-              <>
-                {' '}
-                You have {summary.total} unread{' '}
-                {summary.total === 1 ? 'item' : 'items'} waiting.
-              </>
-            ) : null}
-          </p>
+          <HeadingWithHelp
+            as="h1"
+            helpLabel="About communications"
+            help={
+              <p>
+                {isOrganiserView
+                  ? 'Gig invites, booking enquiries, and direct messages with bands and organisers. Gig invites and player invites are actionable; general messages can be hidden once read.'
+                  : 'Player invites from band leaders, gig invites from organisers, and general messages. Accept or decline invites here; hide read messages when you are caught up.'}
+              </p>
+            }
+          >
+            Communications
+          </HeadingWithHelp>
+          {!loadingSummary && summary.total > 0 ? (
+            <p className="my-bands-lead">
+              You have {summary.total} unread {summary.total === 1 ? 'item' : 'items'} waiting.
+            </p>
+          ) : null}
         </div>
       </header>
 
@@ -160,12 +166,19 @@ export function CommunicationsPage() {
         <section className="panel communications-section">
           <div className="communications-section-head">
             <div>
-              <h2>Gig invites</h2>
-              <p className="profile-section-intro">
-                {isOrganiserView
-                  ? 'Formal gig invitations you have sent to bands, with band responses.'
-                  : 'Gig invitations from organisers linked to a specific gig. Accept or decline here, or open the gig for setlist and slot details.'}
-              </p>
+              <HeadingWithHelp
+                as="h2"
+                helpLabel="About gig invites"
+                help={
+                  <p>
+                    {isOrganiserView
+                      ? 'Formal gig invitations you have sent to bands, with band responses.'
+                      : 'Gig invitations from organisers linked to a specific gig. Accept or decline here, or open the gig for setlist and slot details.'}
+                  </p>
+                }
+              >
+                Gig invites
+              </HeadingWithHelp>
             </div>
             {summary.unreadGigInvites > 0 ? (
               <span className="communications-count-badge">{summary.unreadGigInvites}</span>
@@ -184,11 +197,18 @@ export function CommunicationsPage() {
           <section className="panel communications-section">
             <div className="communications-section-head">
               <div>
-                <h2>Sent player invites</h2>
-                <p className="profile-section-intro">
-                  Join and audition invites you have sent to players, plus email membership
-                  invitations.
-                </p>
+                <HeadingWithHelp
+                  as="h2"
+                  helpLabel="About sent player invites"
+                  help={
+                    <p>
+                      Join and audition invites you have sent to players, plus email membership
+                      invitations.
+                    </p>
+                  }
+                >
+                  Sent player invites
+                </HeadingWithHelp>
               </div>
             </div>
             <OutgoingInvitesPanel
@@ -200,11 +220,18 @@ export function CommunicationsPage() {
           <section className="panel communications-section">
             <div className="communications-section-head">
               <div>
-                <h2>Received player invites</h2>
-                <p className="profile-section-intro">
-                  Join or audition invites from band leaders, and email invitations to join a band
-                  workspace.
-                </p>
+                <HeadingWithHelp
+                  as="h2"
+                  helpLabel="About received player invites"
+                  help={
+                    <p>
+                      Join or audition invites from band leaders, and email invitations to join a band
+                      workspace.
+                    </p>
+                  }
+                >
+                  Received player invites
+                </HeadingWithHelp>
               </div>
               {pendingPlayerInvites > 0 ? (
                 <span className="communications-count-badge">{pendingPlayerInvites}</span>
@@ -226,11 +253,18 @@ export function CommunicationsPage() {
         <section className="panel communications-section">
           <div className="communications-section-head">
             <div>
-              <h2>General messages</h2>
-              <p className="profile-section-intro">
-                Direct messages and booking enquiries that are not formal invites. Reply inline or
-                hide read items when you are up to date.
-              </p>
+              <HeadingWithHelp
+                as="h2"
+                helpLabel="About general messages"
+                help={
+                  <p>
+                    Direct messages and booking enquiries that are not formal invites. Reply inline or
+                    hide read items when you are up to date.
+                  </p>
+                }
+              >
+                General messages
+              </HeadingWithHelp>
             </div>
             {pendingGeneralMessages > 0 ? (
               <span className="communications-count-badge">{pendingGeneralMessages}</span>

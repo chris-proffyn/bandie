@@ -1,5 +1,6 @@
 import type { UserBand } from '@bandie/data';
 import type { FindPlayersContext } from '../../lib/findPlayersNavigation';
+import { InfoHelpButton } from '../ui/InfoHelp';
 
 type AdminRecruitingBandSelectorProps = {
   bands: UserBand[];
@@ -24,10 +25,14 @@ export function AdminRecruitingBandSelector({
 
   return (
     <div className="admin-recruit-band-selector panel">
-      <label htmlFor="adminRecruitBandSelect" className="directory-filter-label">
-        Recruiting for band
-      </label>
-      <p className="workspace-section-intro">{intro}</p>
+      <div className="heading-with-help">
+        <label htmlFor="adminRecruitBandSelect" className="directory-filter-label">
+          Recruiting for band
+        </label>
+        <InfoHelpButton label="About recruiting for band" title="Recruiting for band">
+          <p>{intro}</p>
+        </InfoHelpButton>
+      </div>
       <select
         id="adminRecruitBandSelect"
         className="admin-recruit-band-select"

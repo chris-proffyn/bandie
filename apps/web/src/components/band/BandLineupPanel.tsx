@@ -20,6 +20,7 @@ import {
 } from '@bandie/data';
 import { buildFindDeputyUrl, buildFindPlayersUrl } from '../../lib/findPlayersNavigation';
 import { bandInitials } from '../../lib/profileHelpers';
+import { HeadingWithHelp } from '../ui/InfoHelp';
 
 type BandLineupPanelProps = {
   bandId: string;
@@ -320,11 +321,18 @@ export function BandLineupPanel({
     <section className="workspace-section panel workspace-lineup-section">
       <div className="workspace-section-header">
         <div>
-          <h2>Lineup</h2>
-          <p className="workspace-section-intro">
-            Assign members to each band part. Unassigned members appear below. Band size is calculated
-            from {parts.length} {parts.length === 1 ? 'part' : 'parts'}.
-          </p>
+          <HeadingWithHelp
+            as="h2"
+            helpLabel="About lineup"
+            help={
+              <p>
+                Assign members to each band part. Unassigned members appear below. Band size is calculated
+                from {parts.length} {parts.length === 1 ? 'part' : 'parts'}.
+              </p>
+            }
+          >
+            Lineup
+          </HeadingWithHelp>
         </div>
         {canManage && parts.length === 0 ? (
           <button
@@ -490,10 +498,13 @@ export function BandLineupPanel({
 
       {!loading && unassignedMembers.length ? (
         <div className="band-lineup-unassigned">
-          <h3>Unassigned members</h3>
-          <p className="workspace-section-intro">
-            These active members are not linked to a lineup part yet.
-          </p>
+          <HeadingWithHelp
+            as="h3"
+            helpLabel="About unassigned members"
+            help={<p>These active members are not linked to a lineup part yet.</p>}
+          >
+            Unassigned members
+          </HeadingWithHelp>
           <ul className="band-lineup-unassigned-list">
             {unassignedMembers.map((member) => (
               <li key={member.id} className="band-lineup-unassigned-row">

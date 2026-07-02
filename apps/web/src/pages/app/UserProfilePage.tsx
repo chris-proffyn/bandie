@@ -7,6 +7,7 @@ import { AdminModePanel } from '../../components/profile/AdminModePanel';
 import { BillingPanel } from '../../components/profile/BillingPanel';
 import { WorkspaceModePanel } from '../../components/profile/WorkspaceModePanel';
 import { UserProfileEditor } from '../../components/profile/UserProfileEditor';
+import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 import '../../styles/bandProfile.css';
 
 const PROFILE_FORM_ID = 'player-profile-form';
@@ -78,9 +79,14 @@ export function UserProfilePage() {
       <div className="panel" style={{ maxWidth: 820 }}>
         <div className="user-profile-page-header">
           <div>
-            <h2>{profilePageTitle(formProfile)}</h2>
+            <HeadingWithHelp
+              as="h2"
+              helpLabel="About your profile"
+              help={<p>{profilePageIntro(formProfile)}</p>}
+            >
+              {profilePageTitle(formProfile)}
+            </HeadingWithHelp>
             <p className="user-profile-page-intro">
-              {profilePageIntro(formProfile)}{' '}
               {workspaceMode === 'organiser' || (formProfile.is_organiser && !formProfile.is_player) ? (
                 playerAccess.canBrowseBandDirectory ? (
                   <Link to="/app/bands" className="profile-preview-link">

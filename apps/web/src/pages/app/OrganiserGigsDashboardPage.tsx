@@ -12,6 +12,7 @@ import {
   type OrganiserGig,
   type OrganiserVenue,
 } from '@bandie/data';
+import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 import '../../styles/gigs.css';
 
 type VenueChoice = '' | 'new' | string;
@@ -137,11 +138,18 @@ export function OrganiserGigsDashboardPage() {
       <header className="gigs-header">
         <div>
           <p className="my-bands-eyebrow">Gig management</p>
-          <h1>Plan events and invite bands</h1>
-          <p className="my-bands-lead">
-            Create gigs, choose venues, invite bands and set the running order. Band leaders accept
-            invites and assign setlists.
-          </p>
+          <HeadingWithHelp
+            as="h1"
+            helpLabel="About gig planning"
+            help={
+              <p>
+                Create gigs, choose venues, invite bands and set the running order. Band leaders accept
+                invites and assign setlists.
+              </p>
+            }
+          >
+            Plan events and invite bands
+          </HeadingWithHelp>
         </div>
         <div className="gigs-header-actions">
           <Link to="/app/venues" className="directory-btn directory-btn-secondary">

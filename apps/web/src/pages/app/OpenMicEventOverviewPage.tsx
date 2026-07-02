@@ -13,6 +13,7 @@ import {
   resolveOpenMicVenueLabel,
   type OpenMicEventSummary,
 } from '@bandie/data';
+import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 import '../../styles/gigs.css';
 import '../../styles/workspace.css';
 import '../../styles/openMic.css';
@@ -128,12 +129,19 @@ export function OpenMicEventOverviewPage() {
       <section className="panel workspace-section">
         <header className="workspace-section-header">
           <div>
-            <h2>Next steps</h2>
-            <p className="workspace-section-intro">
-              {isJamNight
-                ? 'Publish when ready, then manage performance slots and share the sign-up page.'
-                : 'Publish when ready, then set up house band parts, build your song list, and share sign-up.'}
-            </p>
+            <HeadingWithHelp
+              as="h2"
+              helpLabel="About next steps"
+              help={
+                <p>
+                  {isJamNight
+                    ? 'Publish when ready, then manage performance slots and share the sign-up page.'
+                    : 'Publish when ready, then set up house band parts, build your song list, and share sign-up.'}
+                </p>
+              }
+            >
+              Next steps
+            </HeadingWithHelp>
           </div>
         </header>
         <div className="gig-detail-actions">

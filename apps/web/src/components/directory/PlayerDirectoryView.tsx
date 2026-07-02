@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { BandieLogo } from '../brand/BandieLogo';
+import { HeadingWithHelp } from '../ui/InfoHelp';
 import {
   collectPlayerDirectoryGenres,
   collectPlayerDirectoryPrimaryInstruments,
@@ -191,7 +192,19 @@ export function PlayerDirectoryView({
         <div className={isWorkspace ? 'my-bands-eyebrow' : 'directory-eyebrow'}>
           {isWorkspace ? 'Find band members' : 'Bandie player directory for band leaders'}
         </div>
-        <h1>{isWorkspace ? 'Player directory' : 'Find the right player for your band.'}</h1>
+        <HeadingWithHelp
+          as="h1"
+          helpLabel="About player directory"
+          help={
+            <p>
+              {isWorkspace
+                ? 'Search musicians who are open to joining a band permanently or covering a one-off gig. Filter by instrument, genre, location and experience.'
+                : 'Need a dep for one gig or a new permanent member? Search musicians by instrument, genre, location and the details that matter for temporary or long-term roles.'}
+            </p>
+          }
+        >
+          {isWorkspace ? 'Player directory' : 'Find the right player for your band.'}
+        </HeadingWithHelp>
         {effectiveFindPlayersContext ? (
           <p className="workspace-recruiting-banner">
             Recruiting for <strong>{effectiveFindPlayersContext.bandName ?? 'your band'}</strong>
@@ -213,11 +226,6 @@ export function PlayerDirectoryView({
             onChange={setAdminRecruitBandId}
           />
         ) : null}
-        <p className={isWorkspace ? 'my-bands-lead' : 'directory-lead'}>
-          {isWorkspace
-            ? 'Search musicians who are open to joining a band permanently or covering a one-off gig. Filter by instrument, genre, location and experience.'
-            : 'Need a dep for one gig or a new permanent member? Search musicians by instrument, genre, location and the details that matter for temporary or long-term roles.'}
-        </p>
       </div>
       <aside className="directory-stats" aria-label="Directory summary">
         <div className="directory-stat">

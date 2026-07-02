@@ -22,6 +22,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { UpgradePromptModal } from '../../components/entitlements/UpgradePromptModal';
 import { useUpgradePrompt } from '../../hooks/useUpgradePrompt';
+import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 import '../../styles/gigs.css';
 import '../../styles/openMic.css';
 import '../../styles/workspace.css';
@@ -179,11 +180,18 @@ export function OpenMicEventsDashboardPage() {
       <header className="gigs-header">
         <div>
           <p className="my-bands-eyebrow">Open mic / jam nights</p>
-          <h1>Plan evenings and run sign-ups</h1>
-          <p className="my-bands-lead">
-            Create events, build song lists with instrument slots, and run the evening from a live
-            control room.
-          </p>
+          <HeadingWithHelp
+            as="h1"
+            helpLabel="About open mic events"
+            help={
+              <p>
+                Create events, build song lists with instrument slots, and run the evening from a live
+                control room.
+              </p>
+            }
+          >
+            Plan evenings and run sign-ups
+          </HeadingWithHelp>
         </div>
         <div className="gigs-header-actions">
           <Link to="/app/venues" className="directory-btn directory-btn-secondary">

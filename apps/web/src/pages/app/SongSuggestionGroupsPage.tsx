@@ -11,6 +11,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { SongsBandContextBar } from '../../components/songs/SongsBandContextBar';
 import { CreateSongSuggestionGroupPanel } from '../../components/songSuggestions/CreateSongSuggestionGroupPanel';
+import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 import '../../styles/songSuggestions.css';
 
 export function SongSuggestionGroupsPage() {
@@ -75,11 +76,18 @@ export function SongSuggestionGroupsPage() {
       <header className="song-suggestions-header">
         <div>
           <p className="my-bands-eyebrow">Songs</p>
-          <h1>Song suggestions</h1>
-          <p className="my-bands-lead">
-            Ask the band for ideas, vote with 🙂 / 😐 / 🙁, and confirm the songs you want to learn
-            next.
-          </p>
+          <HeadingWithHelp
+            as="h1"
+            helpLabel="About song suggestions"
+            help={
+              <p>
+                Ask the band for ideas, vote with 🙂 / 😐 / 🙁, and confirm the songs you want to learn
+                next.
+              </p>
+            }
+          >
+            Song suggestions
+          </HeadingWithHelp>
         </div>
         <div className="song-suggestions-header-actions">
           <Link to={`/app/${bandId}/songs`} className="directory-btn directory-btn-secondary">

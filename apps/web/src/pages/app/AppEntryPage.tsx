@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { usePlayerWorkspaceAccess } from '../../hooks/usePlayerWorkspaceAccess';
 import { WorkspaceBandCard } from '../../components/bands/WorkspaceBandCard';
 import { DirectoryTestDataToggle } from '../../components/directory/DirectoryTestDataToggle';
+import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 import {
   applyDirectoryTestDataFilter,
   countDirectoryTestRows,
@@ -61,14 +62,21 @@ export function AppEntryPage() {
     <div className="my-bands-page">
       <header className="my-bands-header">
         <div>
-          <h1>Your bands</h1>
-          <p className="my-bands-lead">
-            {bands.length
-              ? 'Open a band workspace to view members, songs, setlists, and calendar.'
-              : playerAccess.canCreateBand
-                ? 'Create a band or accept an invitation to get started.'
-                : 'Accept a band invitation to get started. Player Free accounts collaborate inside invited bands.'}
-          </p>
+          <HeadingWithHelp
+            as="h1"
+            helpLabel="About your bands"
+            help={
+              <p>
+                {bands.length
+                  ? 'Open a band workspace to view members, songs, setlists, and calendar.'
+                  : playerAccess.canCreateBand
+                    ? 'Create a band or accept an invitation to get started.'
+                    : 'Accept a band invitation to get started. Player Free accounts collaborate inside invited bands.'}
+              </p>
+            }
+          >
+            Your bands
+          </HeadingWithHelp>
         </div>
         {bands.length > 0 && playerAccess.canCreateBand ? (
           <div className="my-bands-header-actions">

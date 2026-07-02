@@ -12,6 +12,7 @@ import {
   type SongPartStorageHealth,
   type UserIntegration,
 } from '@bandie/data';
+import { HeadingWithHelp } from '../ui/InfoHelp';
 
 type BandSongPartStoragePanelProps = {
   bandId: string;
@@ -178,11 +179,18 @@ export function BandSongPartStoragePanel({ bandId, canManage }: BandSongPartStor
     <section className="workspace-section panel workspace-song-part-storage-section">
       <div className="workspace-section-header">
         <div>
-          <h2>Song part storage</h2>
-          <p className="workspace-section-intro">
-            Song-part files (tabs, charts, lyrics) are stored in the band leader&apos;s Dropbox.
-            Setlists, gigs, and public profile media stay in Bandie.
-          </p>
+          <HeadingWithHelp
+            as="h2"
+            helpLabel="About song part storage"
+            help={
+              <p>
+                Song-part files (tabs, charts, lyrics) are stored in the band leader&apos;s Dropbox.
+                Setlists, gigs, and public profile media stay in Bandie.
+              </p>
+            }
+          >
+            Song part storage
+          </HeadingWithHelp>
         </div>
       </div>
 

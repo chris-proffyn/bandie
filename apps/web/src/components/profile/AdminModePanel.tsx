@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { HeadingWithHelp } from '../ui/InfoHelp';
 
 export function AdminModePanel() {
   const { adminModeActive, setAdminModeActive } = useAuth();
@@ -24,16 +25,23 @@ export function AdminModePanel() {
     <section className="profile-editor-section admin-mode-panel">
       <div className="admin-mode-panel-header">
         <div>
-          <h3>Admin mode</h3>
-          <p className="profile-section-intro">
-            When off, you use Bandie like any other member — only your bands and your own profile.
-            Turn on to view all bands, edit any player profile, and use platform admin tools. For
-            metrics, entitlements, and audit, open the{' '}
-            <Link to="/admin" className="profile-preview-link">
-              platform admin portal
-            </Link>{' '}
-            at <code>/admin</code> (not <code>/app/admin</code>).
-          </p>
+          <HeadingWithHelp
+            as="h3"
+            helpLabel="About admin mode"
+            help={
+              <p>
+                When off, you use Bandie like any other member — only your bands and your own profile.
+                Turn on to view all bands, edit any player profile, and use platform admin tools. For
+                metrics, entitlements, and audit, open the{' '}
+                <Link to="/admin" className="profile-preview-link">
+                  platform admin portal
+                </Link>{' '}
+                at <code>/admin</code> (not <code>/app/admin</code>).
+              </p>
+            }
+          >
+            Admin mode
+          </HeadingWithHelp>
         </div>
         {adminModeActive ? <span className="app-admin-badge">Active</span> : null}
       </div>

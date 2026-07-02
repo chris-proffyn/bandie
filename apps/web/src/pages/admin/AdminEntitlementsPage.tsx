@@ -26,6 +26,7 @@ import {
   type PlatformAccessModeStatus,
   type PlanWithEntitlements,
 } from '@bandie/data';
+import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 
 export function AdminEntitlementsPage() {
   const [plans, setPlans] = useState<PlanWithEntitlements[]>([]);
@@ -222,11 +223,18 @@ export function AdminEntitlementsPage() {
     <div className="admin-main">
       <section className="panel">
         <p className="my-bands-eyebrow">Entitlements</p>
-        <h2>Plan catalogue and enforcement</h2>
-        <p className="my-bands-lead">
-          Review published entitlements, stage draft changes, inspect gate denials, and toggle
-          platform enforcement (Phase 14.6).
-        </p>
+        <HeadingWithHelp
+          as="h2"
+          helpLabel="About entitlements"
+          help={
+            <p>
+              Review published entitlements, stage draft changes, inspect gate denials, and toggle
+              platform enforcement (Phase 14.6).
+            </p>
+          }
+        >
+          Plan catalogue and enforcement
+        </HeadingWithHelp>
         <label className="communications-hide-resolved-toggle">
           <input type="checkbox" checked={enforced} onChange={() => void handleToggleEnforcement()} />
           Enforce entitlements on platform
@@ -235,11 +243,18 @@ export function AdminEntitlementsPage() {
       </section>
 
       <section className="panel">
-        <h3>Platform access mode</h3>
-        <p className="my-bands-lead">
-          Beta or Promo mode grants full platform access to all users until the end date. Roles and
-          membership are unchanged. Launch promo trials (Billing) are separate.
-        </p>
+        <HeadingWithHelp
+          as="h3"
+          helpLabel="About platform access mode"
+          help={
+            <p>
+              Beta or Promo mode grants full platform access to all users until the end date. Roles and
+              membership are unchanged. Launch promo trials (Billing) are separate.
+            </p>
+          }
+        >
+          Platform access mode
+        </HeadingWithHelp>
         {accessModeStatus?.active ? (
           <p className="my-bands-lead">
             <strong>
@@ -305,11 +320,18 @@ export function AdminEntitlementsPage() {
       </section>
 
       <section className="panel">
-        <h3>Plan catalogue</h3>
-        <p className="my-bands-lead">
-          Choose a plan, then edit its details and capability values. Changes save immediately and are
-          audit logged.
-        </p>
+        <HeadingWithHelp
+          as="h3"
+          helpLabel="About plan catalogue"
+          help={
+            <p>
+              Choose a plan, then edit its details and capability values. Changes save immediately and are
+              audit logged.
+            </p>
+          }
+        >
+          Plan catalogue
+        </HeadingWithHelp>
         <div className="auth-field">
           <label htmlFor="catalogue-change-reason">Change reason (optional, for audit)</label>
           <input

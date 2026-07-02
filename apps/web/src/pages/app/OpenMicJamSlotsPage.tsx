@@ -13,6 +13,7 @@ import {
   type OpenMicJamSignup,
   type OpenMicJamSlot,
 } from '@bandie/data';
+import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 import '../../styles/gigs.css';
 import '../../styles/workspace.css';
 import '../../styles/openMic.css';
@@ -105,10 +106,17 @@ export function OpenMicJamSlotsPage() {
       <header className="gigs-header">
         <div>
           <p className="my-bands-eyebrow">Jam night slots</p>
-          <h1>{eventTitle}</h1>
-          <p className="my-bands-lead">
-            Set how many performance slots you need, then fill them in advance or on the night.
-          </p>
+          <HeadingWithHelp
+            as="h1"
+            helpLabel="About jam night slots"
+            help={
+              <p>
+                Set how many performance slots you need, then fill them in advance or on the night.
+              </p>
+            }
+          >
+            {eventTitle}
+          </HeadingWithHelp>
         </div>
         <Link to={`/app/open-mic/${eventId}`} className="directory-btn directory-btn-secondary">
           Back to event

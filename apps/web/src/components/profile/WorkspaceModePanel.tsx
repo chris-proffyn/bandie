@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { HeadingWithHelp } from '../ui/InfoHelp';
 import { WORKSPACE_MODE_LABELS, type WorkspaceMode } from '@bandie/data';
 
 export function WorkspaceModePanel() {
@@ -38,13 +39,20 @@ export function WorkspaceModePanel() {
     <section className="profile-editor-section workspace-mode-panel">
       <div className="admin-mode-panel-header">
         <div>
-          <h3>Workspace mode</h3>
-          <p className="profile-section-intro">
-            You use Bandie as both a {isPlayer ? 'player' : ''}
-            {isPlayer && isOrganiser ? ' and ' : ''}
-            {isOrganiser ? 'organiser' : ''}. Choose which experience to show in the app
-            menu and screens.
-          </p>
+          <HeadingWithHelp
+            as="h3"
+            helpLabel="About workspace mode"
+            help={
+              <p>
+                You use Bandie as both a {isPlayer ? 'player' : ''}
+                {isPlayer && isOrganiser ? ' and ' : ''}
+                {isOrganiser ? 'organiser' : ''}. Choose which experience to show in the app
+                menu and screens.
+              </p>
+            }
+          >
+            Workspace mode
+          </HeadingWithHelp>
         </div>
         <span className="app-workspace-mode-badge">{WORKSPACE_MODE_LABELS[workspaceMode]}</span>
       </div>

@@ -17,6 +17,7 @@ import {
   type OpenMicSongWithSlots,
 } from '@bandie/data';
 import { ImportFromBandSongDialog } from '../../components/openMic/ImportFromBandSongDialog';
+import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 import '../../styles/gigs.css';
 import '../../styles/workspace.css';
 import '../../styles/openMic.css';
@@ -100,11 +101,18 @@ export function OpenMicSongListPage() {
       <header className="gigs-header">
         <div>
           <p className="my-bands-eyebrow">Song list</p>
-          <h1>{eventTitle}</h1>
-          <p className="my-bands-lead">
-            Songs with auto-assigned parts from your house band template. Toggle parts off per song when
-            not needed.
-          </p>
+          <HeadingWithHelp
+            as="h1"
+            helpLabel="About song list"
+            help={
+              <p>
+                Songs with auto-assigned parts from your house band template. Toggle parts off per song when
+                not needed.
+              </p>
+            }
+          >
+            {eventTitle}
+          </HeadingWithHelp>
         </div>
         <div className="gig-detail-actions">
           <Link to={`/app/open-mic/${eventId}/house-band`} className="directory-btn directory-btn-secondary">
@@ -122,8 +130,15 @@ export function OpenMicSongListPage() {
       <section className="panel workspace-section">
         <header className="workspace-section-header">
           <div>
-            <h2>Add song</h2>
-            <p className="workspace-section-intro">Standard parts are applied automatically from your event template.</p>
+            <HeadingWithHelp
+              as="h2"
+              helpLabel="About adding songs"
+              help={
+                <p>Standard parts are applied automatically from your event template.</p>
+              }
+            >
+              Add song
+            </HeadingWithHelp>
           </div>
           <button
             type="button"

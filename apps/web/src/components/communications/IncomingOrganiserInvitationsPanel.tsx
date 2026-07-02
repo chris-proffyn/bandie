@@ -6,6 +6,7 @@ import {
   type PendingOrganiserInvitation,
 } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
+import { HeadingWithHelp } from '../ui/InfoHelp';
 
 type IncomingOrganiserInvitationsPanelProps = {
   onChanged?: () => void;
@@ -80,10 +81,13 @@ export function IncomingOrganiserInvitationsPanel({
     <section className="panel communications-section">
       <div className="communications-section-head">
         <div>
-          <h2>Organiser invitations</h2>
-          <p className="profile-section-intro">
-            Platform invitations to join Bandie as an event organiser.
-          </p>
+          <HeadingWithHelp
+            as="h2"
+            helpLabel="About organiser invitations"
+            help={<p>Platform invitations to join Bandie as an event organiser.</p>}
+          >
+            Organiser invitations
+          </HeadingWithHelp>
         </div>
         <span className="communications-count-badge">{invitations.length}</span>
       </div>

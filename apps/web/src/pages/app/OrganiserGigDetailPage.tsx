@@ -19,6 +19,7 @@ import {
   type OrganiserVenue,
 } from '@bandie/data';
 import { GigLineupSection } from '../../components/gigs/GigLineupSection';
+import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 import '../../styles/gigs.css';
 
 function toDatetimeLocalValue(iso: string | null | undefined): string {
@@ -246,10 +247,15 @@ export function OrganiserGigDetailPage() {
       <section className="panel workspace-section gig-workflow-panel">
         <header className="workspace-section-header">
           <div>
-            <h2>Planning progress</h2>
-            <p className="workspace-section-intro">
-              Work through each step — you can revisit earlier steps until the gig is confirmed.
-            </p>
+            <HeadingWithHelp
+              as="h2"
+              helpLabel="About planning progress"
+              help={
+                <p>Work through each step — you can revisit earlier steps until the gig is confirmed.</p>
+              }
+            >
+              Planning progress
+            </HeadingWithHelp>
           </div>
         </header>
         <ol className="gig-workflow-track">
@@ -271,10 +277,15 @@ export function OrganiserGigDetailPage() {
         <header className="workspace-section-header">
           <div>
             <p className="gig-step-eyebrow">Step 1</p>
-            <h2>Gig placeholder</h2>
-            <p className="workspace-section-intro">
-              Start with a title and event date. Refine show times in the structure step.
-            </p>
+            <HeadingWithHelp
+              as="h2"
+              helpLabel="About gig placeholder"
+              help={
+                <p>Start with a title and event date. Refine show times in the structure step.</p>
+              }
+            >
+              Gig placeholder
+            </HeadingWithHelp>
           </div>
         </header>
         <form className="auth-form" onSubmit={handleSaveBasics}>
@@ -308,8 +319,13 @@ export function OrganiserGigDetailPage() {
         <header className="workspace-section-header">
           <div>
             <p className="gig-step-eyebrow">Step 2</p>
-            <h2>Venue</h2>
-            <p className="workspace-section-intro">Choose a saved venue or enter details for this gig.</p>
+            <HeadingWithHelp
+              as="h2"
+              helpLabel="About venue"
+              help={<p>Choose a saved venue or enter details for this gig.</p>}
+            >
+              Venue
+            </HeadingWithHelp>
           </div>
         </header>
         <form className="auth-form" onSubmit={handleSaveBasics}>
@@ -351,10 +367,15 @@ export function OrganiserGigDetailPage() {
         <header className="workspace-section-header">
           <div>
             <p className="gig-step-eyebrow">Step 3</p>
-            <h2>Gig structure</h2>
-            <p className="workspace-section-intro">
-              Set show start and end, number of slots, and default slot duration.
-            </p>
+            <HeadingWithHelp
+              as="h2"
+              helpLabel="About gig structure"
+              help={
+                <p>Set show start and end, number of slots, and default slot duration.</p>
+              }
+            >
+              Gig structure
+            </HeadingWithHelp>
           </div>
         </header>
         <form className="auth-form" onSubmit={handleSaveStructure}>
@@ -468,10 +489,13 @@ export function OrganiserGigDetailPage() {
           <header className="workspace-section-header">
             <div>
               <p className="gig-step-eyebrow">Step 8</p>
-              <h2>Band branding</h2>
-              <p className="workspace-section-intro">
-                Branding is pulled from each accepted band&apos;s public profile.
-              </p>
+              <HeadingWithHelp
+                as="h2"
+                helpLabel="About band branding"
+                help={<p>Branding is pulled from each accepted band&apos;s public profile.</p>}
+              >
+                Band branding
+              </HeadingWithHelp>
             </div>
           </header>
           <ul className="gig-branding-grid">

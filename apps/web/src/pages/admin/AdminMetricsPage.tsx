@@ -6,6 +6,7 @@ import {
   snapshotsToCsv,
   type MetricSnapshot,
 } from '@bandie/data';
+import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 
 export function AdminMetricsPage() {
   const [snapshots, setSnapshots] = useState<MetricSnapshot[]>([]);
@@ -70,11 +71,16 @@ export function AdminMetricsPage() {
     <div className="admin-main">
       <section className="panel">
         <p className="my-bands-eyebrow">Metrics</p>
-        <h2>Platform metrics</h2>
-        <p className="my-bands-lead">
-          DAU/WAU/MAU and content totals from daily snapshots.
-          {lastUpdated ? ` Last updated ${new Date(lastUpdated).toLocaleString('en-GB')}.` : null}
-        </p>
+        <HeadingWithHelp
+          as="h2"
+          helpLabel="About platform metrics"
+          help={<p>DAU/WAU/MAU and content totals from daily snapshots.</p>}
+        >
+          Platform metrics
+        </HeadingWithHelp>
+        {lastUpdated ? (
+          <p className="my-bands-lead">Last updated {new Date(lastUpdated).toLocaleString('en-GB')}.</p>
+        ) : null}
         <div className="gig-detail-actions">
           <button type="button" className="auth-button" onClick={() => void handleAggregate()} disabled={aggregating}>
             {aggregating ? 'Aggregating…' : 'Run daily aggregation'}

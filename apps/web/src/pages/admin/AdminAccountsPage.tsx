@@ -4,6 +4,7 @@ import { AdminOrganiserInvitesPanel } from '../../components/admin/AdminOrganise
 import { AdminAccountsBandsPanel } from '../../components/admin/AdminAccountsBandsPanel';
 import { AdminAccountsUsersPanel } from '../../components/admin/AdminAccountsUsersPanel';
 import { AdminTestDataToggle } from '../../components/admin/AdminTestDataToggle';
+import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 import {
   readAdminHideTestData,
   saveAdminHideTestData,
@@ -49,11 +50,18 @@ export function AdminAccountsPage() {
     <div className="admin-main admin-accounts-page">
       <section className="panel">
         <p className="my-bands-eyebrow">Accounts</p>
-        <h2>Users and bands</h2>
-        <p className="workspace-section-intro">
-          Browse paginated users and bands, manage workspace roles, subscription plans, promo expiry,
-          and entitlement test-plan overrides. Stripe-billed subscriptions remain read-only here.
-        </p>
+        <HeadingWithHelp
+          as="h2"
+          helpLabel="About users and bands"
+          help={
+            <p>
+              Browse paginated users and bands, manage workspace roles, subscription plans, promo expiry,
+              and entitlement test-plan overrides. Stripe-billed subscriptions remain read-only here.
+            </p>
+          }
+        >
+          Users and bands
+        </HeadingWithHelp>
 
         <form className="admin-search-bar" onSubmit={handleSearch}>
           <div className="auth-field">

@@ -1,0 +1,121 @@
+.heading-with-help {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.heading-with-help > :is(h1, h2, h3, h4) {
+  margin: 0;
+}
+
+.info-help-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  color: #bbb6aa;
+  cursor: pointer;
+}
+
+.info-help-trigger:hover,
+.info-help-trigger:focus-visible {
+  color: #f6f3ea;
+  border-color: rgba(255, 204, 51, 0.45);
+  background: rgba(255, 255, 255, 0.1);
+  outline: 2px solid #ffcc33;
+  outline-offset: 2px;
+}
+
+.surface-light .info-help-trigger,
+.info-help-dialog .info-help-trigger {
+  border-color: rgba(15, 23, 42, 0.12);
+  background: rgba(15, 23, 42, 0.04);
+  color: #6b7280;
+}
+
+.surface-light .info-help-trigger:hover,
+.surface-light .info-help-trigger:focus-visible,
+.info-help-dialog .info-help-trigger:hover,
+.info-help-dialog .info-help-trigger:focus-visible {
+  color: #111827;
+  border-color: rgba(180, 130, 0, 0.35);
+  background: rgba(255, 204, 51, 0.12);
+}
+
+.info-help-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: max(1rem, env(safe-area-inset-top, 0px)) max(1rem, env(safe-area-inset-right, 0px))
+    max(1rem, env(safe-area-inset-bottom, 0px)) max(1rem, env(safe-area-inset-left, 0px));
+  background: rgba(8, 8, 12, 0.72);
+  backdrop-filter: blur(4px);
+}
+
+.info-help-dialog {
+  width: min(100%, 28rem);
+  max-height: min(80dvh, 32rem);
+  overflow: auto;
+  border-radius: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+}
+
+.info-help-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1rem 0.5rem;
+}
+
+.info-help-dialog-header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  letter-spacing: -0.03em;
+  color: #111827;
+}
+
+.info-help-dialog-close {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.06);
+  color: #374151;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.info-help-dialog-close:hover,
+.info-help-dialog-close:focus-visible {
+  background: rgba(15, 23, 42, 0.1);
+  outline: 2px solid #ffcc33;
+  outline-offset: 2px;
+}
+
+.info-help-dialog-body {
+  padding: 0.35rem 1rem 1.15rem;
+  color: #4b5563;
+  font-size: 0.94rem;
+  line-height: 1.55;
+}
+
+.info-help-dialog-body p {
+  margin: 0 0 0.75rem;
+}
+
+.info-help-dialog-body p:last-child {
+  margin-bottom: 0;
+}

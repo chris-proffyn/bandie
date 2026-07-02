@@ -29,6 +29,7 @@ import {
 } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
 import { SongsBandContextBar } from '../../components/songs/SongsBandContextBar';
+import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 import '../../styles/setlists.css';
 
 type SongPickerFilter = 'all' | 'gig_ready' | 'needs_rehearsal';
@@ -356,10 +357,17 @@ export function SetlistBuilderPage() {
       <header className="setlists-header">
         <div>
           <p className="my-bands-eyebrow">Setlist builder</p>
-          <h1>{setlist?.title ?? 'Setlist'}</h1>
-          <p className="my-bands-lead">
-            Drag songs into a running order, add per-song notes, and track live duration and readiness.
-          </p>
+          <HeadingWithHelp
+            as="h1"
+            helpLabel="About setlist builder"
+            help={
+              <p>
+                Drag songs into a running order, add per-song notes, and track live duration and readiness.
+              </p>
+            }
+          >
+            {setlist?.title ?? 'Setlist'}
+          </HeadingWithHelp>
         </div>
         <div className="setlists-header-actions">
           <Link to={`/app/${bandId}/setlists`} className="directory-btn directory-btn-secondary">

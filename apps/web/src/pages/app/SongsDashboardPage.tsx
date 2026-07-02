@@ -26,6 +26,7 @@ import { useAuth } from '../../context/AuthContext';
 import { AddSongDialog } from '../../components/songs/AddSongDialog';
 import { BandSongPartTemplatesPanel } from '../../components/songs/BandSongPartTemplatesPanel';
 import { SongsBandContextBar } from '../../components/songs/SongsBandContextBar';
+import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 import '../../styles/songs.css';
 
 function partsPillClass(song: SongWithReadiness): string {
@@ -171,11 +172,18 @@ export function SongsDashboardPage() {
       <header className="songs-header">
         <div>
           <p className="my-bands-eyebrow">Songs management</p>
-          <h1>Band songbook dashboard</h1>
-          <p className="my-bands-lead">
-            Upload, organise and prepare the working repertoire for this band.
-            Track readiness, keys, parts and file activity in one secure member-only area.
-          </p>
+          <HeadingWithHelp
+            as="h1"
+            helpLabel="About songbook dashboard"
+            help={
+              <p>
+                Upload, organise and prepare the working repertoire for this band. Track readiness,
+                keys, parts and file activity in one secure member-only area.
+              </p>
+            }
+          >
+            Band songbook dashboard
+          </HeadingWithHelp>
         </div>
         <div className="songs-header-actions">
           <Link to={`/app/${bandId}/songs/suggestions`} className="directory-btn directory-btn-secondary">

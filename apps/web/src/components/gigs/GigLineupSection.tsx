@@ -8,6 +8,7 @@ import {
   type OrganiserGigDetail,
 } from '@bandie/data';
 import { buildFindGigUrl } from '../../lib/findGigNavigation';
+import { HeadingWithHelp } from '../ui/InfoHelp';
 
 type GigLineupSectionProps = {
   gig: OrganiserGigDetail;
@@ -48,11 +49,18 @@ export function GigLineupSection({
       <header className="workspace-section-header">
         <div>
           <p className="gig-step-eyebrow">Steps 4–6</p>
-          <h2>Bands & running order</h2>
-          <p className="workspace-section-intro">
-            Invite bands from the directory, track responses, and fine-tune slot positions and
-            durations.
-          </p>
+          <HeadingWithHelp
+            as="h2"
+            helpLabel="About bands and running order"
+            help={
+              <p>
+                Invite bands from the directory, track responses, and fine-tune slot positions and
+                durations.
+              </p>
+            }
+          >
+            Bands & running order
+          </HeadingWithHelp>
         </div>
         {!isConfirmed ? (
           <Link

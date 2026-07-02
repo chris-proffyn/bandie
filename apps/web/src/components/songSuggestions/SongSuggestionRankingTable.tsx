@@ -12,6 +12,7 @@ import {
   type SongSuggestionWithSummary,
 } from '@bandie/data';
 import { SongSuggestionSuggester } from './SongSuggestionSuggester';
+import { HeadingWithHelp } from '../ui/InfoHelp';
 
 type SongSuggestionRankingTableProps = {
   bandId: string;
@@ -122,12 +123,19 @@ export function SongSuggestionRankingTable({
     <section className="panel surface-light song-suggestion-ranking-panel">
       <div className="song-suggestion-ranking-head">
         <div>
-          <h2>Live ranking</h2>
-          <p className="song-suggestion-ranking-intro">
-            {inclusiveActive
-              ? `${selectionModeLabel} mode: ${SONG_SUGGESTION_INCLUSIVE_SELECTION_EXPLANATION} Up to ${targetSongCount} songs can be selected in total.`
-              : `${selectionModeLabel} mode: songs ranked by score (highest first). The top ${targetSongCount} are proposed when voting closes unless the leader adjusts the final selection.`}
-          </p>
+          <HeadingWithHelp
+            as="h2"
+            helpLabel="About live ranking"
+            help={
+              <p>
+                {inclusiveActive
+                  ? `${selectionModeLabel} mode: ${SONG_SUGGESTION_INCLUSIVE_SELECTION_EXPLANATION} Up to ${targetSongCount} songs can be selected in total.`
+                  : `${selectionModeLabel} mode: songs ranked by score (highest first). The top ${targetSongCount} are proposed when voting closes unless the leader adjusts the final selection.`}
+              </p>
+            }
+          >
+            Live ranking
+          </HeadingWithHelp>
         </div>
         <span className="song-suggestion-ranking-target-badge">
           {selectionModeLabel} · Target {targetSongCount}

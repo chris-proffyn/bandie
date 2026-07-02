@@ -31,6 +31,7 @@ import {
   type CalendarRepeatInput,
 } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
+import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 import { CalendarEventVotesPanel } from '../../components/calendar/CalendarEventVotesPanel';
 import { SongsBandContextBar } from '../../components/songs/SongsBandContextBar';
 import '../../styles/calendar.css';
@@ -352,15 +353,22 @@ export function CalendarPage() {
       <header className="calendar-header">
         <div>
           <p className="my-bands-eyebrow">Calendar</p>
-          <h1>Rehearsals and gig availability</h1>
-          <p className="my-bands-lead">
-            Propose rehearsals internally or gig date windows for the band to vote on. Repeating
-            sessions (for example every Tuesday rehearsal or first Monday of the month gig slot) can
-            be created in one step.
-            {calendarTier === 'basic'
-              ? ` Public calendar publishing unlocks on ${PLAN_DISPLAY_NAMES[PLAN_CODES.PLAYER_PLUS]} when entitlements are enforced.`
-              : ' Confirmed and provisional gig availability can publish to your public profile.'}
-          </p>
+          <HeadingWithHelp
+            as="h1"
+            helpLabel="About calendar"
+            help={
+              <p>
+                Propose rehearsals internally or gig date windows for the band to vote on. Repeating
+                sessions (for example every Tuesday rehearsal or first Monday of the month gig slot) can
+                be created in one step.
+                {calendarTier === 'basic'
+                  ? ` Public calendar publishing unlocks on ${PLAN_DISPLAY_NAMES[PLAN_CODES.PLAYER_PLUS]} when entitlements are enforced.`
+                  : ' Confirmed and provisional gig availability can publish to your public profile.'}
+              </p>
+            }
+          >
+            Rehearsals and gig availability
+          </HeadingWithHelp>
         </div>
         <div className="calendar-header-actions">
           <Link to={`/app/${bandId}/gigs`} className="directory-btn directory-btn-secondary">

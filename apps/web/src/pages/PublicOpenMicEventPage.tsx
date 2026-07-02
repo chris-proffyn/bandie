@@ -16,6 +16,7 @@ import {
 } from '@bandie/data';
 import { useAuth } from '../context/AuthContext';
 import { BackLink } from '../components/navigation/BackLink';
+import { HeadingWithHelp } from '../components/ui/InfoHelp';
 import { usePageMeta } from '../lib/usePageMeta';
 import '../styles/bandProfile.css';
 import '../styles/gigs.css';
@@ -305,8 +306,15 @@ export function PublicOpenMicEventPage() {
           <section className="panel workspace-section">
             <header className="workspace-section-header">
               <div>
-                <h2>Request a performance slot</h2>
-                <p className="workspace-section-intro">Guest bands welcome — no Bandie account needed unless required.</p>
+                <HeadingWithHelp
+                  as="h2"
+                  helpLabel="About performance slot requests"
+                  help={
+                    <p>Guest bands welcome — no Bandie account needed unless required.</p>
+                  }
+                >
+                  Request a performance slot
+                </HeadingWithHelp>
               </div>
             </header>
             <form className="auth-form" onSubmit={handleJamSignup}>

@@ -10,6 +10,7 @@ import {
 } from '@bandie/data';
 import { AdminPagination } from './AdminPagination';
 import { AdminUserAccountEditor } from './AdminUserAccountEditor';
+import { HeadingWithHelp } from '../ui/InfoHelp';
 import { TestDataBadge } from '../common/TestDataBadge';
 
 type AdminAccountsUsersPanelProps = {
@@ -70,10 +71,17 @@ export function AdminAccountsUsersPanel({
     <section className="panel admin-accounts-section">
       <div className="admin-accounts-section-head">
         <div>
-          <h3>Users</h3>
-          <p className="workspace-section-intro">
-            Browse accounts with leader and organiser plans, test-plan overrides, and promo expiry.
-          </p>
+          <HeadingWithHelp
+            as="h3"
+            helpLabel="About users"
+            help={
+              <p>
+                Browse accounts with leader and organiser plans, test-plan overrides, and promo expiry.
+              </p>
+            }
+          >
+            Users
+          </HeadingWithHelp>
         </div>
         {!loading ? (
           <span className="communications-count-badge">{page.total}</span>

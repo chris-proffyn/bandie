@@ -17,6 +17,7 @@ import { EditSongDialog } from '../../components/songs/EditSongDialog';
 import { SongMetadataPanel } from '../../components/songs/SongMetadataPanel';
 import { SongPartFolderCards } from '../../components/songs/SongPartFolderCards';
 import { SongsBandContextBar } from '../../components/songs/SongsBandContextBar';
+import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 import '../../styles/songs.css';
 
 export function SongFolderPage() {
@@ -108,13 +109,18 @@ export function SongFolderPage() {
       <header className="songs-header">
         <div>
           <p className="my-bands-eyebrow">Song folder</p>
-          <h1>
+          <HeadingWithHelp
+            as="h1"
+            helpLabel="About song folder"
+            help={
+              <p>
+                One place for the band to store music sheets, lyrics, tabs, notes and part-specific files for this song.
+              </p>
+            }
+          >
             {song.title}
             {song.artist ? ` — ${song.artist}` : ''}
-          </h1>
-          <p className="my-bands-lead">
-            One place for the band to store music sheets, lyrics, tabs, notes and part-specific files for this song.
-          </p>
+          </HeadingWithHelp>
         </div>
         <div className="songs-header-actions">
           {canManageSongParts ? (

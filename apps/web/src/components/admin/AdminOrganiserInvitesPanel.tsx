@@ -6,6 +6,7 @@ import {
   type OrganiserInvitation,
 } from '@bandie/data';
 import { getAppOrigin } from '../../lib/bandieClient';
+import { HeadingWithHelp } from '../ui/InfoHelp';
 
 function formatUserWithEmail(displayName: string | null | undefined, email: string): string {
   if (displayName?.trim()) {
@@ -78,11 +79,18 @@ export function AdminOrganiserInvitesPanel() {
   return (
     <section className="panel">
       <p className="my-bands-eyebrow">Organisers</p>
-      <h2>Invite organiser</h2>
-      <p className="workspace-section-intro">
-        Invite someone to join Bandie as an event organiser. Share the invite link with the email
-        address you enter — the same one-to-one token pattern as band member invitations.
-      </p>
+      <HeadingWithHelp
+        as="h2"
+        helpLabel="About organiser invites"
+        help={
+          <p>
+            Invite someone to join Bandie as an event organiser. Share the invite link with the email
+            address you enter — the same one-to-one token pattern as band member invitations.
+          </p>
+        }
+      >
+        Invite organiser
+      </HeadingWithHelp>
 
       <form className="auth-form workspace-invite-form" onSubmit={handleInvite}>
         {error ? <div className="auth-message auth-message-error">{error}</div> : null}

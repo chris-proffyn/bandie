@@ -26,6 +26,7 @@ import { BandOverviewTabBar, type BandOverviewTab } from '../../components/band/
 import { BandPartsPanel } from '../../components/band/BandPartsPanel';
 import { BandSongPartStoragePanel } from '../../components/band/BandSongPartStoragePanel';
 import { BandWorkspaceProfileView } from '../../components/band/BandWorkspaceProfileView';
+import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 import '../../styles/workspace.css';
 
 export function WorkspaceHomePage() {
@@ -279,11 +280,18 @@ export function WorkspaceHomePage() {
       <header className="band-overview-header">
         <div>
           <p className="my-bands-eyebrow">Band overview</p>
-          <h1>{profile.name}</h1>
-          <p className="my-bands-lead">
-            Manage members, lineup, and invitations — or edit your public band profile and leader
-            contact details.
-          </p>
+          <HeadingWithHelp
+            as="h1"
+            helpLabel="About band overview"
+            help={
+              <p>
+                Manage members, lineup, and invitations — or edit your public band profile and leader
+                contact details.
+              </p>
+            }
+          >
+            {profile.name}
+          </HeadingWithHelp>
         </div>
       </header>
 
@@ -362,7 +370,15 @@ export function WorkspaceHomePage() {
           {isLeader ? (
             <section className="workspace-section panel workspace-team-section">
               <div className="workspace-section-header">
-                <h2>Invitations</h2>
+                <HeadingWithHelp
+                  as="h2"
+                  helpLabel="About invitations"
+                  help={
+                    <p>Invite musicians by email and share the invite link directly.</p>
+                  }
+                >
+                  Invitations
+                </HeadingWithHelp>
               </div>
               <BandInvitationsPanel bandId={bandId} />
             </section>

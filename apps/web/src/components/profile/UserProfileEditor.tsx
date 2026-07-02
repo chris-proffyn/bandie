@@ -18,6 +18,7 @@ import {
 } from '@bandie/data';
 import { UserAvatarUploadField } from './UserAvatarUploadField';
 import { bandInitials } from '../../lib/profileHelpers';
+import { HeadingWithHelp } from '../ui/InfoHelp';
 
 type UserProfileEditorProps = {
   variant: 'self' | 'admin';
@@ -273,11 +274,18 @@ export function UserProfileEditor({
 
         {!isAdmin ? (
           <div className="profile-editor-section">
-            <h3>How you use Bandie</h3>
-            <p className="profile-section-intro">
-              Choose whether you use Bandie as a musician, an event organiser, or both. This
-              controls which workspace screens and options you see.
-            </p>
+            <HeadingWithHelp
+              as="h3"
+              helpLabel="About how you use Bandie"
+              help={
+                <p>
+                  Choose whether you use Bandie as a musician, an event organiser, or both. This
+                  controls which workspace screens and options you see.
+                </p>
+              }
+            >
+              How you use Bandie
+            </HeadingWithHelp>
             <div className="profile-editor-toggle">
               <input
                 id={`${fieldPrefix}-isPlayer`}
@@ -463,12 +471,19 @@ export function UserProfileEditor({
         {showPlayerSections ? (
           <>
         <div className="profile-editor-section">
-          <h3>Gear</h3>
-          <p className="profile-section-intro">
-            {isAdmin
-              ? 'What they play and bring to gigs — helps bandmates plan stage setup and backline.'
-              : 'What you play and bring to gigs — helps bandmates plan stage setup and backline.'}
-          </p>
+          <HeadingWithHelp
+            as="h3"
+            helpLabel="About gear"
+            help={
+              <p>
+                {isAdmin
+                  ? 'What they play and bring to gigs — helps bandmates plan stage setup and backline.'
+                  : 'What you play and bring to gigs — helps bandmates plan stage setup and backline.'}
+              </p>
+            }
+          >
+            Gear
+          </HeadingWithHelp>
           <div className="auth-field">
             <label htmlFor={`${fieldPrefix}-gearItems`}>Gear list (comma-separated)</label>
             <input
@@ -491,14 +506,21 @@ export function UserProfileEditor({
         </div>
 
         <div className="profile-editor-section">
-          <h3>Band invitations</h3>
-          <p className="profile-section-intro">
-            Controls whether this musician appears in the{' '}
-            <Link to="/app/players" className="profile-preview-link">
-              player directory
-            </Link>{' '}
-            and what types of invite they are open to.
-          </p>
+          <HeadingWithHelp
+            as="h3"
+            helpLabel="About band invitations"
+            help={
+              <p>
+                Controls whether this musician appears in the{' '}
+                <Link to="/app/players" className="profile-preview-link">
+                  player directory
+                </Link>{' '}
+                and what types of invite they are open to.
+              </p>
+            }
+          >
+            Band invitations
+          </HeadingWithHelp>
           <div className="profile-editor-toggle">
             <input
               id={`${fieldPrefix}-openToDeputyInvites`}

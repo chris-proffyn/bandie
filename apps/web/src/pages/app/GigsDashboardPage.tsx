@@ -11,6 +11,7 @@ import {
 } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
 import { SongsBandContextBar } from '../../components/songs/SongsBandContextBar';
+import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 import '../../styles/gigs.css';
 
 export function GigsDashboardPage() {
@@ -74,11 +75,18 @@ export function GigsDashboardPage() {
       <header className="gigs-header">
         <div>
           <p className="my-bands-eyebrow">Gig invitations</p>
-          <h1>Organiser invites and setlists</h1>
-          <p className="my-bands-lead">
-            Organisers create gigs and invite your band. Band leaders accept or reject invites and
-            assign a setlist from your library.
-          </p>
+          <HeadingWithHelp
+            as="h1"
+            helpLabel="About gig invitations"
+            help={
+              <p>
+                Organisers create gigs and invite your band. Band leaders accept or reject invites and
+                assign a setlist from your library.
+              </p>
+            }
+          >
+            Organiser invites and setlists
+          </HeadingWithHelp>
         </div>
         <div className="gigs-header-actions">
           <Link to={`/app/${bandId}/setlists`} className="directory-btn directory-btn-secondary">

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { BandieLogo } from '../brand/BandieLogo';
+import { HeadingWithHelp } from '../ui/InfoHelp';
 import {
   collectDirectoryGenres,
   computeDirectoryStats,
@@ -136,20 +137,23 @@ export function BandDirectoryView({
               ? 'Find bands to book'
               : 'Bandie directory for event organisers'}
         </div>
-        <h1>
+        <HeadingWithHelp
+          as="h1"
+          helpLabel="About band directory"
+          help={
+            <p>
+              {findGigContext
+                ? 'Search published bands, open profiles, and send gig invites with your contact and venue details.'
+                : 'Search local bands by genre, location, price and availability. Compare profiles and send booking enquiries from one place.'}
+            </p>
+          }
+        >
           {findGigContext
             ? findGigContext.gigTitle?.trim() || 'Band directory'
             : isWorkspace
               ? 'Band directory'
               : 'Find the right band for the right night.'}
-        </h1>
-        <p className={isWorkspace ? 'my-bands-lead' : 'directory-lead'}>
-          {findGigContext
-            ? 'Search published bands, open profiles, and send gig invites with your contact and venue details.'
-            : isWorkspace
-              ? 'Search local bands by genre, location, price and availability. Compare profiles and send booking enquiries from one place.'
-              : 'Search local bands by genre, location, price and availability. Compare profiles and send booking enquiries from one place.'}
-        </p>
+        </HeadingWithHelp>
         {findGigContext && directoryBackLink ? (
           <div className="workspace-directory-context-actions">{directoryBackLink}</div>
         ) : null}

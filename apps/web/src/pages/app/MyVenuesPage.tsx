@@ -10,6 +10,7 @@ import {
 } from '@bandie/data';
 import { OrganiserVenueCard } from '../../components/organiser/OrganiserVenueCard';
 import { OrganiserVenueForm } from '../../components/organiser/OrganiserVenueForm';
+import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 import '../../styles/workspace.css';
 
 export function MyVenuesPage() {
@@ -105,11 +106,18 @@ export function MyVenuesPage() {
       <header className="my-bands-header">
         <div>
           <p className="my-bands-eyebrow">Organiser workspace</p>
-          <h1>My venues</h1>
-          <p className="my-bands-lead">
-            Keep pubs, clubs and event spaces you manage in one place. Use these when booking bands
-            and planning gigs.
-          </p>
+          <HeadingWithHelp
+            as="h1"
+            helpLabel="About my venues"
+            help={
+              <p>
+                Keep pubs, clubs and event spaces you manage in one place. Use these when booking bands
+                and planning gigs.
+              </p>
+            }
+          >
+            My venues
+          </HeadingWithHelp>
         </div>
         {!showAddForm && !editingVenue ? (
           <div className="my-bands-header-actions">

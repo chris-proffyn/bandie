@@ -55,10 +55,6 @@ export function BandInvitationsPanel({ bandId }: BandInvitationsPanelProps) {
 
   return (
     <div className="band-invitations-panel">
-      <p className="workspace-section-intro">
-        Invite musicians by email and share the invite link directly.
-      </p>
-
       <form className="auth-form workspace-invite-form" onSubmit={handleInvite}>
         {error ? <div className="auth-message auth-message-error">{error}</div> : null}
         {inviteLink ? (

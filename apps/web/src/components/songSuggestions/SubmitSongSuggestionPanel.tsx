@@ -7,6 +7,7 @@ import {
   type SubmitSongSuggestionInput,
 } from '@bandie/data';
 import { trackSongSuggestionAdded } from '../../lib/analytics';
+import { InfoHelpButton } from '../ui/InfoHelp';
 
 function memberLabel(member: BandMemberWithProfile): string {
   return member.profile?.display_name?.trim() || member.profile?.preferred_instrument || member.user_id;
@@ -132,7 +133,14 @@ export function SubmitSongSuggestionPanel({
       <form className="auth-form" onSubmit={handleSubmit}>
         {isLeader && memberOptions.length > 0 ? (
           <div className="auth-field">
-            <label htmlFor="ss-suggested-by">Suggest on behalf of</label>
+            <div className="heading-with-help">
+              <label htmlFor="ss-suggested-by">Suggest on behalf of</label>
+              <InfoHelpButton label="About suggesting on behalf" title="Suggest on behalf of">
+                <p>
+                  The suggestion and automatic happy-to-play vote are attributed to the selected member.
+                </p>
+              </InfoHelpButton>
+            </div>
             <select
               id="ss-suggested-by"
               value={suggestedByUserId}
@@ -145,9 +153,6 @@ export function SubmitSongSuggestionPanel({
                 </option>
               ))}
             </select>
-            <p className="workspace-section-intro song-suggestion-on-behalf-note">
-              The suggestion and automatic happy-to-play vote are attributed to the selected member.
-            </p>
           </div>
         ) : null}
         <div className="song-suggestion-form-grid">

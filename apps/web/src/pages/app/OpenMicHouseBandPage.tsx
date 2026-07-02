@@ -12,6 +12,7 @@ import {
   type OpenMicHouseBandMember,
   type OpenMicPartTemplate,
 } from '@bandie/data';
+import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 import '../../styles/gigs.css';
 import '../../styles/workspace.css';
 import '../../styles/openMic.css';
@@ -87,10 +88,17 @@ export function OpenMicHouseBandPage() {
       <header className="gigs-header">
         <div>
           <p className="my-bands-eyebrow">House band & parts</p>
-          <h1>{eventTitle}</h1>
-          <p className="my-bands-lead">
-            Define standard parts for each song and assign house band members to their instruments.
-          </p>
+          <HeadingWithHelp
+            as="h1"
+            helpLabel="About house band and parts"
+            help={
+              <p>
+                Define standard parts for each song and assign house band members to their instruments.
+              </p>
+            }
+          >
+            {eventTitle}
+          </HeadingWithHelp>
         </div>
         <Link to={`/app/open-mic/${eventId}`} className="directory-btn directory-btn-secondary">
           Back to event
@@ -103,8 +111,15 @@ export function OpenMicHouseBandPage() {
       <section className="panel workspace-section">
         <header className="workspace-section-header">
           <div>
-            <h2>House band roster</h2>
-            <p className="workspace-section-intro">Members are auto-assigned when songs are added.</p>
+            <HeadingWithHelp
+              as="h2"
+              helpLabel="About house band roster"
+              help={
+                <p>Members are auto-assigned when songs are added.</p>
+              }
+            >
+              House band roster
+            </HeadingWithHelp>
           </div>
         </header>
         <form className="auth-form" onSubmit={handleAddMember}>
@@ -171,10 +186,17 @@ export function OpenMicHouseBandPage() {
       <section className="panel workspace-section">
         <header className="workspace-section-header">
           <div>
-            <h2>Standard parts</h2>
-            <p className="workspace-section-intro">
-              These parts are created on each new song. Disable per song if not needed (e.g. no keys).
-            </p>
+            <HeadingWithHelp
+              as="h2"
+              helpLabel="About standard parts"
+              help={
+                <p>
+                  These parts are created on each new song. Disable per song if not needed (e.g. no keys).
+                </p>
+              }
+            >
+              Standard parts
+            </HeadingWithHelp>
           </div>
         </header>
         <form className="auth-form" onSubmit={handleAddPart}>

@@ -40,6 +40,7 @@ import { SongSuggestionCard } from '../../components/songSuggestions/SongSuggest
 import { SongSuggestionRankingTable } from '../../components/songSuggestions/SongSuggestionRankingTable';
 import { SubmitSongSuggestionPanel } from '../../components/songSuggestions/SubmitSongSuggestionPanel';
 import { SongSuggestionGroupFormPanel } from '../../components/songSuggestions/SongSuggestionGroupFormPanel';
+import { HeadingWithHelp } from '../../components/ui/InfoHelp';
 import { useUpgradePrompt } from '../../hooks/useUpgradePrompt';
 import {
   trackSongSuggestionGroupConfirmed,
@@ -680,13 +681,20 @@ export function SongSuggestionGroupDetailPage() {
 
       {showConfirm ? (
         <section className="panel">
-          <h2>Confirm top songs</h2>
-          <p className="song-suggestion-panel-intro">
-            Select up to {group.target_song_count} songs (or override with a reason).
-            {inclusiveSelectionActive
-              ? ` ${SONG_SUGGESTION_INCLUSIVE_SELECTION_EXPLANATION}`
-              : ' Tied scores are highlighted.'}
-          </p>
+          <HeadingWithHelp
+            as="h2"
+            helpLabel="About confirming songs"
+            help={
+              <p>
+                Select up to {group.target_song_count} songs (or override with a reason).
+                {inclusiveSelectionActive
+                  ? ` ${SONG_SUGGESTION_INCLUSIVE_SELECTION_EXPLANATION}`
+                  : ' Tied scores are highlighted.'}
+              </p>
+            }
+          >
+            Confirm top songs
+          </HeadingWithHelp>
           <ul className="song-suggestion-confirm-list">
             {rankedActive.map((row, index) => {
               const next = rankedActive[index + 1];
