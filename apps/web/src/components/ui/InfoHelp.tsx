@@ -55,7 +55,7 @@ export function InfoHelpButton({ label, title, children, className }: InfoHelpBu
         ? createPortal(
             <div className="info-help-backdrop" role="presentation" onClick={() => setOpen(false)}>
               <div
-                className="info-help-dialog surface-light"
+                className="info-help-dialog"
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby={titleId}

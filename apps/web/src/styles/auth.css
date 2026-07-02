@@ -273,15 +273,17 @@
 }
 
 .app-header-feedback-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  min-height: 36px;
-  padding: 0.35rem 0.75rem;
+  width: 40px;
+  height: 40px;
+  padding: 0;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.05);
   color: #bbb6aa;
-  font-weight: 650;
-  font-size: 0.85rem;
   cursor: pointer;
 }
 
@@ -1037,11 +1039,32 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-top: 1.25rem;
+  margin-top: 0;
   padding: 1rem 1.1rem;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.player-profile-preview-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.player-profile-preview-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.65rem;
+}
+
+.player-profile-preview-title-row strong {
+  display: inline;
+  font-size: 1.15rem;
+}
+
+.player-profile-plan-pill {
+  flex-shrink: 0;
 }
 
 .player-profile-preview-avatar {
@@ -1067,6 +1090,10 @@
 .player-profile-preview strong {
   display: block;
   font-size: 1.15rem;
+}
+
+.player-profile-preview-title-row strong {
+  display: inline;
 }
 
 .player-profile-preview p {
@@ -1169,6 +1196,100 @@
   overflow-x: clip;
 }
 
+.user-profile-page-panel {
+  display: grid;
+  gap: 1rem;
+  max-width: 820px;
+}
+
+.user-profile-editor-form {
+  margin-top: 0;
+}
+
+.profile-collapsible-section {
+  padding: 0;
+  overflow: hidden;
+}
+
+.profile-collapsible-summary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.profile-collapsible-summary::-webkit-details-marker {
+  display: none;
+}
+
+.profile-collapsible-summary-text h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.15rem;
+  letter-spacing: -0.03em;
+}
+
+.profile-collapsible-summary-text p {
+  margin: 0;
+  color: #bbb6aa;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.profile-collapsible-summary-end {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.profile-collapsible-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.profile-collapsible-chevron {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6f3ea;
+  display: grid;
+  place-items: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.profile-collapsible-chevron::before {
+  content: '+';
+}
+
+.profile-collapsible-section[open] .profile-collapsible-chevron::before {
+  content: '−';
+}
+
+.profile-collapsible-body {
+  padding: 0 1.5rem 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.profile-collapsible-section[open] .profile-collapsible-body {
+  padding-top: 1.25rem;
+}
+
+.profile-collapsible-body .billing-panel {
+  margin: 0;
+}
+
+.profile-collapsible-body .profile-editor-section:first-child {
+  margin-top: 0;
+}
+
 @media (max-width: 900px) {
   .app-header-toolbar {
     flex-wrap: wrap;
@@ -1195,11 +1316,6 @@
     max-width: 10rem;
   }
 
-  .app-header-feedback-btn {
-    padding: 0.35rem 0.55rem;
-    font-size: 0.8rem;
-  }
-
   :is(.songs-header, .setlists-header, .gigs-header, .calendar-header) {
     flex-direction: column;
     align-items: stretch;
@@ -1214,6 +1330,24 @@
   .directory-header-actions,
   .my-bands-header-actions,
   .user-profile-page-header-actions,
+  .profile-collapsible-summary {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .profile-collapsible-summary-end {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .profile-collapsible-actions {
+    flex: 1;
+  }
+
+  .profile-collapsible-actions .auth-button {
+    width: 100%;
+  }
+
   .songs-side-card-header-actions,
   .band-parts-header-actions {
     width: 100%;

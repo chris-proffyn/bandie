@@ -17,8 +17,8 @@ import {
   type UserProfile,
 } from '@bandie/data';
 import { UserAvatarUploadField } from './UserAvatarUploadField';
-import { bandInitials } from '../../lib/profileHelpers';
 import { HeadingWithHelp } from '../ui/InfoHelp';
+import { PlayerProfilePreview } from './PlayerProfilePreview';
 
 type UserProfileEditorProps = {
   variant: 'self' | 'admin';
@@ -218,56 +218,25 @@ export function UserProfileEditor({
 
   return (
     <>
-      {showPlayerSections ? (
-        <aside className="player-profile-preview" aria-label="Profile preview">
-        <div className="player-profile-preview-avatar">
-          {profileImageUrl ? (
-            <img src={profileImageUrl} alt="" />
-          ) : (
-            <span>{bandInitials(previewName)}</span>
-          )}
-        </div>
-        <div>
-          <strong>{previewName}</strong>
-          <p>
-            {previewInstrument || 'Instrument not set'}
-            {location ? ` · ${location}` : ''}
-          </p>
-          {previewGear.length ? (
-            <p className="player-profile-preview-gear">
-              Gear: {previewGear.slice(0, 3).join(', ')}
-              {previewGear.length > 3 ? ` +${previewGear.length - 3} more` : ''}
-            </p>
-          ) : null}
-          {previewInviteLabels.length ? (
-            <p className="player-profile-preview-invites">{previewInviteLabels.join(' · ')}</p>
-          ) : null}
-        </div>
-      </aside>
-      ) : (
-        <aside className="player-profile-preview" aria-label="Profile preview">
-          <div className="player-profile-preview-avatar">
-            {profileImageUrl ? (
-              <img src={profileImageUrl} alt="" />
-            ) : (
-              <span>{bandInitials(previewName)}</span>
-            )}
-          </div>
-          <div>
-            <strong>{previewName}</strong>
-            <p>
-              Event organiser
-              {location ? ` · ${location}` : ''}
-            </p>
-          </div>
-        </aside>
-      )}
+      {isAdmin ? (
+        <PlayerProfilePreview
+          data={{
+            displayName: previewName,
+            profileImageUrl: profileImageUrl || null,
+            primaryLine: showPlayerSections
+              ? previewInstrument || 'Instrument not set'
+              : 'Event organiser',
+            location: location || null,
+            gearItems: previewGear,
+            inviteLabels: previewInviteLabels,
+          }}
+        />
+      ) : null}
 
       <form
         id={formId}
-        className="auth-form"
+        className="auth-form user-profile-editor-form"
         onSubmit={handleSubmit}
-        style={{ marginTop: '1.5rem' }}
       >
         {error ? <div className="auth-message auth-message-error">{error}</div> : null}
         {success ? <div className="auth-message auth-message-success">{success}</div> : null}

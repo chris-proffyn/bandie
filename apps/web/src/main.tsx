@@ -9,6 +9,7 @@ import './styles/brand.css';
 import './styles/entitlements.css';
 import './styles/calendar.css';
 import './styles/gigs.css';
+import './styles/infoHelp.css';
 import './styles/songSuggestions.css';
 import './styles/admin.css';
 import App from './App.tsx';

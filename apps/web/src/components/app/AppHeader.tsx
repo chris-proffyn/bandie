@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { getCommunicationSummary, listUserSubscriptions, WORKSPACE_MODE_LABELS } from '@bandie/data';
+import { getCommunicationSummary, WORKSPACE_MODE_LABELS } from '@bandie/data';
 import { useAuth } from '../../context/AuthContext';
 import { usePlayerWorkspaceAccess } from '../../hooks/usePlayerWorkspaceAccess';
 import { getAppNavMenuSections } from '../../lib/appNavigation';
 import { BANDIE_BRAND_NAME } from '../../lib/brand';
-import { resolveWorkspacePlanPill } from '../../lib/planPill';
 import { usePlatformAccessMode } from '../../hooks/usePlatformAccessMode';
 import { PlatformAccessModePill } from '../platform/PlatformAccessModePill';
 import { BandieLogo } from '../brand/BandieLogo';
@@ -15,6 +14,21 @@ import { FeedbackDialog } from './FeedbackDialog';
 type AppHeaderProps = {
   bandId?: string;
 };
+
+function MailIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M4 6h16v12H4V6zm2 2 8 5 8-5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 function MenuIcon({ open }: { open: boolean }) {
   if (open) {
@@ -45,7 +59,6 @@ export function AppHeader({ bandId }: AppHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
-  const [planPill, setPlanPill] = useState<ReturnType<typeof resolveWorkspacePlanPill> | null>(null);
   const platformAccessMode = usePlatformAccessMode();
 
   const navOptions = {
@@ -74,31 +87,6 @@ export function AppHeader({ bandId }: AppHeaderProps) {
       .catch(() => setNotificationCount(0));
   }, [session, workspaceMode, bandId, location.pathname]);
 
-  useEffect(() => {
-    if (!session) {
-      setPlanPill(null);
-      return;
-    }
-
-    listUserSubscriptions()
-      .then((subscriptions) => setPlanPill(resolveWorkspacePlanPill(subscriptions, workspaceMode)))
-      .catch(() =>
-        setPlanPill(resolveWorkspacePlanPill([], workspaceMode)),
-      );
-  }, [session, workspaceMode, location.pathname]);
-
-  const planPillTitle = useMemo(() => {
-    if (!planPill) {
-      return undefined;
-    }
-
-    if (planPill.planName) {
-      return `${planPill.planName} plan`;
-    }
-
-    return `${planPill.label} plan`;
-  }, [planPill]);
-
   function openFeedback() {
     setMenuOpen(false);
     setFeedbackOpen(true);
@@ -125,14 +113,6 @@ export function AppHeader({ bandId }: AppHeaderProps) {
           <div className="app-header-status">
             {adminModeActive ? <span className="app-admin-badge">Admin mode</span> : null}
             {platformAccessMode ? <PlatformAccessModePill status={platformAccessMode} /> : null}
-            {planPill ? (
-              <span
-                className={`app-plan-pill app-plan-pill-${planPill.tone}`}
-                title={planPillTitle}
-              >
-                {planPill.label}
-              </span>
-            ) : null}
           </div>
 
           <div className="app-header-identity">
@@ -140,9 +120,10 @@ export function AppHeader({ bandId }: AppHeaderProps) {
               <button
                 type="button"
                 className="app-header-feedback-btn"
+                aria-label="Send feedback"
                 onClick={openFeedback}
               >
-                Feedback
+                <MailIcon />
               </button>
             ) : null}
             <span className="app-header-display-name">{displayName}</span>

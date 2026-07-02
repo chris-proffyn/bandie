@@ -19,6 +19,7 @@ type BillingPanelProps = {
   showLeaderPlans: boolean;
   showOrganiserPlans: boolean;
   billingNotice?: string | null;
+  showHeading?: boolean;
 };
 
 function scopeTitle(scope: EntitlementPlanScope): string {
@@ -137,6 +138,7 @@ export function BillingPanel({
   showLeaderPlans,
   showOrganiserPlans,
   billingNotice,
+  showHeading = true,
 }: BillingPanelProps) {
   const [subscriptions, setSubscriptions] = useState<UserSubscriptionSummary[]>([]);
   const [leaderOffers, setLeaderOffers] = useState<PublicPlanOffer[]>([]);
@@ -205,18 +207,20 @@ export function BillingPanel({
 
   return (
     <section className="billing-panel surface-light">
-      <HeadingWithHelp
-        as="h2"
-        helpLabel="About billing and plans"
-        help={
-          <p>
-            Subscriptions apply to your account. Band features follow your player plan; organiser features
-            follow your organiser plan.
-          </p>
-        }
-      >
-        Billing & plans
-      </HeadingWithHelp>
+      {showHeading ? (
+        <HeadingWithHelp
+          as="h2"
+          helpLabel="About billing and plans"
+          help={
+            <p>
+              Subscriptions apply to your account. Band features follow your player plan; organiser features
+              follow your organiser plan.
+            </p>
+          }
+        >
+          Billing & plans
+        </HeadingWithHelp>
+      ) : null}
 
       {launchPromoActive && hasLaunchTrial && launchPromo?.endsAt ? (
         <p className="billing-notice billing-launch-promo-notice">
